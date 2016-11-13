@@ -229,11 +229,8 @@ This plugin has a `demo` project bundled with it. To give it a try without creat
 npm run setup
 ```
 
-Run `npm run demo.ios` or `npm run demo.ios` will run for the appropriate platform.
-Run `npm run ios-pod` to run `Podfile` under `demo` project
+ - Run `npm run demo.ios` or `npm run demo.ios` will run for the appropriate platform.
+ - Run `npm run ios-pod` to run `Podfile` under `demo` project
  
-
-
-![enter image description here](/demo/demo_example.png)
 
 ![demo printscreen](demo/demo_example.png?raw=true)
