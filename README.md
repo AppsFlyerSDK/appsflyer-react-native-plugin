@@ -221,19 +221,19 @@ Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID 
 
 
 
+##Demo
 
+This plugin has a `demo` project bundled with it. To give it a try without creating a fresh project, execute the following with the **plugin directory** as the **current working directory**:
 
-# DEPRICATED
-```javascript
-
-// iOS
-af.sendTrackingWithEvent(eventName, {key1: value1, key2: value2}, function(err, events) {
-    // events is {key1: value1, key2, value2}
-});
-
-// Android
-af.sendTrackingWithEvent(eventName);
+```sh
+npm run setup
 ```
 
+Run `npm run demo.ios` or `npm run demo.ios` will run for the appropriate platform.
+Run `npm run ios-pod` to run `Podfile` under `demo` project
+ 
 
-![enter image description here](./demo_example.png)
+
+![enter image description here](/demo/demo_example.png)
+
+![demo printscreen](demo/demo_example.png?raw=true)
