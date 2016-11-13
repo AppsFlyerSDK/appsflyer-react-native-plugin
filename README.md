@@ -6,6 +6,12 @@ This React Natie Library uses the AppsFlyer 4.6.0 library for both iOS and Andro
 
 [![npm version](https://badge.fury.io/js/react-native-appsflyer.svg)](https://badge.fury.io/js/react-native-appsflyer)
 
+
+## This plugin is built for
+
+- iOS AppsFlyerSDK **v4.5.9**
+- Android AppsFlyerSDK **v4.6.0**
+
 ## Installation
 
 `$ npm install react-native-appsflyer --save`
@@ -223,7 +229,7 @@ Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID 
 
 ##Demo
 
-This plugin has a `demo` project bundled with it. To give it a try without creating a fresh project, execute the following with the **plugin directory** as the **current working directory**:
+This plugin has a `demo` project bundled with it. To give it a try , clone this repo and from root a.e. `react-native-appsflyer` execute the following:
 
 ```sh
 npm run setup
