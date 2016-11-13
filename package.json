@@ -1,0 +1,23 @@
+{
+  "name": "react-native-appsflyer",
+  "version": "1.0.0",
+  "description": "React Native Appsflyer plugin",
+  "main": "index.js",
+  "scripts": {
+    "demo.ios": "cd demo; react-native run-ios",
+    "demo.android": "cd demo; react-native run-android",
+    "ios-pod": "cd demo/ios; pod install",
+    "preparedemo": "cd demo; npm uninstall react-native-appsflyer --save; npm install .. --save",
+    "setup": "cd demo; npm install; cd ..; npm run preparedemo;",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+ "author": "Appsflyer",
+ "license": "MIT License",
+ "homepage": "https://github.com/AppsFlyerSDK/react-native-appsflyer#readme",
+ "keywords": [
+    "react-native",
+    "react",
+    "native",
+    "appsflyer"
+  ]
+}

@@ -1,0 +1,6 @@
+platform :ios, '8.0'
+use_frameworks!
+
+target 'demo' do
+  pod 'AppsFlyerFramework', '~> 4.5.9'
+end
