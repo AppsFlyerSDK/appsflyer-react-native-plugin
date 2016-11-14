@@ -101,7 +101,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
                 return;
             }
 
-            isDebug = options.optBoolean("isDebug", true);
+            isDebug = options.optBoolean("isDebug", false);
 
             instance.setDebugLog(isDebug);
 
