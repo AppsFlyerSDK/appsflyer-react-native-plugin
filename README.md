@@ -19,7 +19,8 @@ This React Natie Library uses the AppsFlyer 4.6.0 library for both iOS and Andro
 ### iOS
 
 
-1. Install the `appsFlyerFramework` through `pod` . Don't use CocoaPods? please see their [DOCS](https://guides.cocoapods.org/using/getting-started.html) . 
+1. Add the `appsFlyerFramework` to `podfile` and run `pod install`.
+
 
 Example:
      
@@ -30,10 +31,14 @@ target 'demo' do
 end
 ```
 
+  Don't use CocoaPods? please see their [DOCS](https://guides.cocoapods.org/using/getting-started.html) . 
+
+
 2. Create *bridge* between your application and `appsFlyerFramework`:
   In XCode ➜ project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
   Go to `node_modules` ➜ `react-native-appsflyer` and add `RNAppsFlyer.xcodeproj`
    Build your project, It will generate `libRNAppsFlyer.a` file: 
+
     ![enter image description here](https://s26.postimg.org/ucnxv1jeh/react_native_api.png)
   
      
@@ -61,6 +66,7 @@ project(':react-native-appsflyer').projectDir = new File(rootProject.projectDir,
 ```
 
 Build project so you should get following dependency (see an Image): 
+
 ![enter image description here](https://s26.postimg.org/4ie559jeh/Screen_Shot_2016_11_07_at_5_02_00_PM.png)
 
 ##### **MainApplication.java**
@@ -112,7 +118,7 @@ initialize the SDK, returns `Object`.
 | -----------|---------|---------|------------------------|
 | `devKey`   |`string` |         |   [Appsflyer Dev key](https://support.appsflyer.com/hc/en-us/articles/207032126-AppsFlyer-SDK-Integration-Android)    |
 | `appId`    |`string` |        | [Apple Application ID](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS) (for iOS only) |
-| `isDebug`  |`boolean`| `true` | debug mode (optional)|
+| `isDebug`  |`boolean`| `false` | debug mode (optional)|
 
 *Example:*
 
@@ -145,7 +151,7 @@ to track ROI (Return on Investment) and LTV (Lifetime Value).
 
 | parameter   | type                        | description |
 | ----------- |-----------------------------|--------------|
-| `eventName` | `String`                    | custom event name, is presented in your dashboard.  See the Event list [HERE](https://github.com/AppsFlyerSDK/PhoneGap/blob/master/platform/ios/AppsFlyerTracker.h)  |
+| `eventName` | `String`                    | custom event name, is presented in your dashboard.  See the Event list [HERE](https://github.com/AppsFlyerSDK/react-native-appsflyer/blob/master/ios/AppsFlyerTracker.h)  |
 | `eventValue` | `Object`                    | event details |
 
 *Example:*
