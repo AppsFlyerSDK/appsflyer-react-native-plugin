@@ -24,7 +24,7 @@ RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
     
     NSString* devKey = nil;
     NSString* appId = nil;
-    BOOL isDebug = YES;
+    BOOL isDebug = NO;
 
     if (![initSdkOptions isKindOfClass:[NSNull class]]) {
 
