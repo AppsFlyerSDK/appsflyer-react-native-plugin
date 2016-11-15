@@ -25,7 +25,7 @@ repositories {
 dependencies {
     compile 'com.facebook.react:react-native:+'
     compile 'com.appsflyer:af-android-sdk:4.6.0'
-    compile 'com.google.android.gms:play-services-ads:9.6.1'
-    compile 'com.google.android.gms:play-services-identity:9.6.1'
+    compile 'com.google.android.gms:play-services-ads:+'
+    compile 'com.google.android.gms:play-services-identity:+'    
 }
   
