@@ -23,9 +23,10 @@ repositories {
 }
 
 dependencies {
-    compile 'com.facebook.react:react-native:+'
-    compile 'com.appsflyer:af-android-sdk:4.6.0'
-    compile 'com.google.android.gms:play-services-ads:+'
-    compile 'com.google.android.gms:play-services-identity:+'    
-}
-  
+    compile 'com.facebook.react:react-native:+'   
+    compile fileTree(include: ['*.jar'], dir: 'src/main/libs')
+    
+    // make sure you have these versions by updating your local Android SDK's (Android Support repo and Google repo)
+    compile 'com.google.android.gms:play-services-ads:9.6.+'
+    compile 'com.google.android.gms:play-services-identity:9.6.+'
+} 
