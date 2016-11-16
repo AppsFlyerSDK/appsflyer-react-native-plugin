@@ -29,7 +29,7 @@ export default class demo extends Component {
     };
 
 
-    this.initSdk         = this.initSdk.bind(this);
+    this.initSdk = this.initSdk.bind(this);
   }
 
 
