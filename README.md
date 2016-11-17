@@ -8,28 +8,29 @@ This React Natie Library uses the AppsFlyer 4.6.0 library for both iOS and Andro
 
 ## Table of content
 
-- [Supported Platforms](#supported-platforms)
+- [Supported Platforms](#this-plugin-is-built-for)
 - [Installation](#installation)
- - [iOS](#i-ios) 
- - [Android](#i-android)
+ - [iOS](#ios) 
+ - [Android](#android)
 - [API Methods](#api-methods) 
- - [initSdk](#init-sdk) 
- - [trackEvent](#trackEvent)
- - [onInstallConversionData](#onInstallConversionData)
- - [getAppsFlyerUID](#getAppsFlyerUID)
- - [trackLocation](#trackLocation)
+ - [initSdk](#appsflyerinitsdkoptions-callback-void) 
+ - [trackEvent](#appsflyertrackeventeventname-eventvalues-callback-void)
+ - [onInstallConversionData](#appsflyeroninstallconversiondatacallback-functionunregister)
+ - [getAppsFlyerUID](#appsflyergetappsflyeruidcallback-void)
+ - [trackLocation](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
+- [Demo](#demo) 
 
 
-## This plugin is built for {#supported-platforms}
+## This plugin is built for
 
 - iOS AppsFlyerSDK **v4.5.9**
 - Android AppsFlyerSDK **v4.6.0**
 
-## Installation {#installation}
+## Installation
 
 `$ npm install react-native-appsflyer --save`
 
-### iOS {#i-ios}
+### iOS
 
 
 1. Add the `appsFlyerFramework` to `podfile` and run `pod install`.
@@ -58,7 +59,7 @@ end
 
 3. Run your project (`Cmd+R`) or through CLI run: `react-native run-ios`
 
-### Android {#i-android}
+### Android
 
 ##### **android/app/build.gradle**
 1. Add the project to your dependencies
@@ -106,7 +107,7 @@ So `getPackages()` should look like:
 
 
 
-##API Methods {#api-methods}
+##API Methods
 
 ---
 
@@ -116,7 +117,8 @@ Call module by adding:
 
 ---
 
-#####**`appsFlyer.initSdk(options, callback): void`** {#init-sdk}
+
+#####**`appsFlyer.initSdk(options, callback): void`**
 
 initializes the SDK.
 
@@ -153,7 +155,7 @@ initializes the SDK.
 
 ---
 
-#####**`appsFlyer.trackEvent(eventName, eventValues, callback): void`** {#trackEvent}
+#####**`appsFlyer.trackEvent(eventName, eventValues, callback): void`**
 
 
 - These in-app events help you track how loyal users discover your app, and attribute them to specific 
@@ -190,7 +192,7 @@ to track ROI (Return on Investment) and LTV (Lifetime Value).
 
 ---
 
-#####**`appsFlyer.onInstallConversionData(callback): function:unregister `** {#onInstallConversionData}
+#####**`appsFlyer.onInstallConversionData(callback): function:unregister`** 
 
 Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking). 
  Read more: [Android](http://support.appsflyer.com/entries/69796693-Accessing-AppsFlyer-Attribution-Conversion-Data-from-the-SDK-Deferred-Deep-linking-), [iOS](http://support.appsflyer.com/entries/22904293-Testing-AppsFlyer-iOS-SDK-Integration-Before-Submitting-to-the-App-Store-)  
@@ -246,7 +248,7 @@ componentWillUnmount() {
 
 ---
 
-#####**`appsFlyer.getAppsFlyerUID(callback): void`**  {#getAppsFlyerUID}
+#####**`appsFlyer.getAppsFlyerUID(callback): void`**
 
 
 Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID used by AppsFlyer in Reports and APIs.
@@ -269,7 +271,7 @@ Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID 
 
 
 
-#####**`appsFlyer.trackLocation(longitude, latitude, callback(error, coords): void`** (**iOS only**) {#trackLocation}
+#####**`appsFlyer.trackLocation(longitude, latitude, callback(error, coords): void`** (**iOS only**)
 
 
 Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID used by AppsFlyer in Reports and APIs.
