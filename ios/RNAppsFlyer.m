@@ -1,7 +1,13 @@
+
+#import "RCTBridge.h"
+#import "RCTEventDispatcher.h"
+
 #import "AppsFlyerTracker.h"
 #import "RNAppsFlyer.h"
 
 @implementation RNAppsFlyer
+
+@synthesize bridge = _bridge;
 
 
 static NSString *const NO_DEVKEY_FOUND       = @"No 'devKey' found or its empty";
@@ -25,17 +31,23 @@ RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
     NSString* devKey = nil;
     NSString* appId = nil;
     BOOL isDebug = NO;
+    BOOL isConversionData = NO;
 
     if (![initSdkOptions isKindOfClass:[NSNull class]]) {
 
-        id value = nil;
+        id isDebugValue = nil;
+        id isConversionDataValue = nil;
         devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
         appId = (NSString*)[initSdkOptions objectForKey: afAppId];
 
-        value = [initSdkOptions objectForKey: afIsDebug];
-        if ([value isKindOfClass:[NSNumber class]]) {
+        isDebugValue = [initSdkOptions objectForKey: afIsDebug];
+        if ([isDebugValue isKindOfClass:[NSNumber class]]) {
             // isDebug is a boolean that will come through as an NSNumber
-            isDebug = [(NSNumber*)value boolValue];
+            isDebug = [(NSNumber*)isDebugValue boolValue];
+        }
+        isConversionDataValue = [initSdkOptions objectForKey: afConversionData];
+        if ([isConversionDataValue isKindOfClass:[NSNumber class]]) {
+            isConversionData = [(NSNumber*)isConversionDataValue boolValue];
         }
     }
 
@@ -54,9 +66,12 @@ RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
         errorCallback(error);
     }
     else{
+        if(isConversionData == YES){
+            [AppsFlyerTracker sharedTracker].delegate = self;
+        }
+        
         [AppsFlyerTracker sharedTracker].appleAppID = appId;
         [AppsFlyerTracker sharedTracker].appsFlyerDevKey = devKey;
-        // [AppsFlyerTracker sharedTracker].delegate = self;  // moved to 'pluginInitialize'
         [AppsFlyerTracker sharedTracker].isDebug = isDebug;
         [[AppsFlyerTracker sharedTracker] trackAppLaunch];
         
@@ -104,6 +119,86 @@ RCT_EXPORT_METHOD(trackLocation: (double)longitude latitude:(double)latitude cal
 
     NSArray *events = @[[NSNumber numberWithDouble:longitude], [NSNumber numberWithDouble:latitude]];
     callback(@[[NSNull null], events]);
+}
+
+
+-(void)onConversionDataReceived:(NSDictionary*) installData {
+    
+    NSDictionary* message = @{
+                              @"status": afSuccess,
+                              @"type": afOnInstallConversionDataLoaded,
+                              @"data": installData
+                              };
+    
+    [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
+  }
+
+
+-(void)onConversionDataRequestFailure:(NSError *) _errorMessage {
+    
+    NSDictionary* errorMessage = @{
+                                   @"status": afFailure,
+                                   @"type": afOnInstallConversionFailure,
+                                   @"data": _errorMessage
+                                   };
+    
+    [self performSelectorOnMainThread:@selector(handleCallback:) withObject:errorMessage waitUntilDone:NO];
+    }
+
+
+- (void) onAppOpenAttribution:(NSDictionary*) attributionData {
+    
+    NSDictionary* message = @{
+                                   @"status": afSuccess,
+                                   @"type": afOnAppOpenAttribution,
+                                   @"data": attributionData
+                                   };
+    
+    [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
+}
+
+- (void) onAppOpenAttributionFailure:(NSError *)_errorMessage {
+   
+    NSDictionary* errorMessage = @{
+                                   @"status": afFailure,
+                                   @"type": afOnAttributionFailure,
+                                   @"data": _errorMessage
+                                   };
+
+    [self performSelectorOnMainThread:@selector(handleCallback:) withObject:errorMessage waitUntilDone:NO];
+}
+
+
+-(void) handleCallback:(NSDictionary *) message{
+    NSError *error;
+    
+    NSData *jsonMessage = [NSJSONSerialization dataWithJSONObject:message
+                                                          options:0
+                                                            error:&error];
+    if (jsonMessage) {
+        NSString *jsonMessageStr = [[NSString alloc] initWithBytes:[jsonMessage bytes] length:[jsonMessage length] encoding:NSUTF8StringEncoding];
+        
+        NSString* status = (NSString*)[message objectForKey: @"status"];
+        
+        if([status isEqualToString:afSuccess]){
+           [self reportOnSuccess:jsonMessageStr];
+        }
+        else{
+            [self reportOnFailure:jsonMessageStr];
+        }
+        
+        NSLog(@"jsonMessageStr = %@",jsonMessageStr);
+    } else {
+        NSLog(@"%@",error);
+    }
+}
+
+-(void) reportOnFailure:(NSString *)errorMessage {
+    [self.bridge.eventDispatcher sendAppEventWithName:afOnInstallConversionData body:errorMessage];
+}
+
+-(void) reportOnSuccess:(NSString *)data {
+    [self.bridge.eventDispatcher sendAppEventWithName:afOnInstallConversionData body:data];
 }
 
 @end

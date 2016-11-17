@@ -4,33 +4,33 @@ package com.appsflyer.reactnative;
 
 import android.app.Application;
 
-import com.appsflyer.*;
 
-
+import com.appsflyer.AFInAppEventType;
+import com.appsflyer.AppsFlyerConversionListener;
+import com.appsflyer.AppsFlyerLib;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import android.content.Context;
 import android.util.Log;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 
 public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
 
     private ReactApplicationContext reactContext;
     private Application application;
-
-    final static String NO_DEVKEY_FOUND = "No 'devKey' found or its empty";
-    final static String SUCCESS = "Success";
-
-    final static String NO_EVENT_NAME_FOUND   = "No 'eventName' found or its empty";
-    final static String NO_EVENT_VALUES_FOUND = "No 'eventValues' found or Dictionary its empty";
-
 
     public RNAppsFlyerModule(ReactApplicationContext reactContext, Application application) {
         super(reactContext);
@@ -72,12 +72,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         return constants;
     }
 
-//    @ReactMethod OLD
-//    public void init(final String appId, final String key, Callback callback) {
-//        AppsFlyerLib.getInstance().startTracking(application, key);
-//        callback.invoke();
-//    }
-
     @ReactMethod
     public void initSdk(
             ReadableMap _options,
@@ -87,23 +81,25 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
 
         String devKey = null;
         boolean isDebug;
-        AppsFlyerLib instance = AppsFlyerLib.getInstance();
+        boolean isConversionData;
 
+        AppsFlyerLib instance = AppsFlyerLib.getInstance();
 
         try{
 
            JSONObject options = RNUtil.readableMapToJson(_options);
 
-            devKey = options.optString("devKey", "");
+            devKey = options.optString(afDevKey, "");
 
             if(devKey.trim().equals("")){
                 errorCallback.invoke( new Exception(NO_DEVKEY_FOUND).getMessage() );
                 return;
             }
 
-            isDebug = options.optBoolean("isDebug", false);
-
+            isDebug = options.optBoolean(afIsDebug, false);
             instance.setDebugLog(isDebug);
+
+            isConversionData = options.optBoolean(afConversionData, false);
 
             if(isDebug == true){ Log.d("AppsFlyer", "Starting Tracking");}
 
@@ -119,32 +115,72 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
             return;
         }
 
+        if(isConversionData == true){
+            registerConversionListener(instance);
+        }
+    }
+
+    private void registerConversionListener(AppsFlyerLib instance){
         instance.registerConversionListener(application.getApplicationContext(), new AppsFlyerConversionListener(){
 
             @Override
-            public void onAppOpenAttribution(Map<String, String> arg0) {
-                //@TODO callback to cordova
+            public void onAppOpenAttribution(Map<String, String> attributionData) {
+                handleSuccess(afOnAppOpenAttribution, attributionData);
             }
 
             @Override
             public void onAttributionFailure(String errorMessage) {
-                //@TODO callback to cordova
+                handleError(afOnAttributionFailure, errorMessage);
             }
 
             @Override
             public void onInstallConversionDataLoaded(Map<String, String> conversionData) {
-                final String json = new JSONObject(conversionData).toString();
-                //TODO: add support for react native
-
+                handleSuccess(afOnInstallConversionDataLoaded, conversionData);
             }
 
             @Override
-            public void onInstallConversionFailure(String arg0) {
-                //@TODO callback to react
+            public void onInstallConversionFailure(String errorMessage) {
+                handleError(afOnInstallConversionFailure, errorMessage);
+            }
+
+            private void handleSuccess(String eventType, Map<String, String> data){
+                JSONObject obj = new JSONObject();
+
+                try {
+                    obj.put("status", afSuccess);
+                    obj.put("type", eventType);
+                    obj.put("data",  new JSONObject(data));
+                    sendEvent(reactContext, afOnInstallConversionData, obj.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            private void handleError(String eventType, String errorMessage){
+                JSONObject obj = new JSONObject();
+
+                try {
+                    obj.put("status", afFailure);
+                    obj.put("type", eventType);
+                    obj.put("data", errorMessage);
+                    sendEvent(reactContext, afOnInstallConversionData, obj.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            private void sendEvent(ReactContext reactContext,
+                                   String eventName,
+                                   Object params) {
+                reactContext
+                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                        .emit(eventName, params);
             }
         });
 
+
     }
+
     private void trackAppLaunch(){
         Context c = application.getApplicationContext();
         AppsFlyerLib.getInstance().trackEvent(c, null, null);
@@ -163,7 +199,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
             errorCallback.invoke( new Exception(NO_EVENT_NAME_FOUND).getMessage() );
             return;
         }
-
 
         Map<String, Object> data = RNUtil.toMap(eventData);
 
