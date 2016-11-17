@@ -34,8 +34,21 @@ export default class AfBase extends Component {
             appsFlyerUID: "not called yet"
         };
 
+        this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+            (data) => {
+                console.log(data);
+                alert(JSON.stringify(data));
+            }
+        );
+
         this.trackEvent      = this.trackEvent.bind(this);
         this.getAppsFlyerUID = this.getAppsFlyerUID.bind(this);
+    }
+
+    componentWillUnmount() {
+        if(this.onInstallConversionDataCanceller){
+            this.onInstallConversionDataCanceller();
+        }
     }
 
 
@@ -82,7 +95,6 @@ export default class AfBase extends Component {
                         </View>
                         <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'stretch',  backgroundColor: 'skyblue'}}>
                             <Text style={styles.json_wrap}>
-                                {/*{this.state.trackEventResponse}*/}
                                 { JSON.stringify(this.state.trackEventResponse, null) }
                             </Text>
                         </View>

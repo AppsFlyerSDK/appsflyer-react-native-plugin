@@ -28,7 +28,6 @@ export default class demo extends Component {
       initSdkResponse: "not initialized yet"
     };
 
-
     this.initSdk = this.initSdk.bind(this);
   }
 

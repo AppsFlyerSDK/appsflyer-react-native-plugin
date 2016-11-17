@@ -5,7 +5,6 @@
  */
 import React, { Component } from 'react';
 
-
 import appsFlyer from 'react-native-appsflyer';
 
 import Button from 'react-native-button';
@@ -18,6 +17,8 @@ import {
     Text,
     View
 } from 'react-native';
+
+
 
 export default class demo extends Component {
 
@@ -32,9 +33,14 @@ export default class demo extends Component {
     };
 
 
+
+
+
     this.initSdk         = this.initSdk.bind(this);
     this.trackLocation   = this.trackLocation.bind(this);
   }
+
+
 
 
   initSdk(){
