@@ -196,12 +196,14 @@ to track ROI (Return on Investment) and LTV (Lifetime Value).
 
 Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking). 
  Read more: [Android](http://support.appsflyer.com/entries/69796693-Accessing-AppsFlyer-Attribution-Conversion-Data-from-the-SDK-Deferred-Deep-linking-), [iOS](http://support.appsflyer.com/entries/22904293-Testing-AppsFlyer-iOS-SDK-Integration-Before-Submitting-to-the-App-Store-)  
+
+
 | parameter   | type                        | description  |
 | ----------- |-----------------------------|--------------|
 | `callback`  | `function`                  |  returns [object](#callback-structure)            |
 
 
-##### callback structure:  {#callback-structure} 
+##### callback structure: 
 
 - `status`: `"success"`or `"failure"` if SDK returned error on `onInstallConversionData` event handler
 - `type`:

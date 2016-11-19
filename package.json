@@ -11,7 +11,11 @@
     "setup": "cd demo; npm install; cd ..; npm run preparedemo;",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Appsflyer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AppsFlyerSDK/react-native-appsflyer.git"
+  },
+  "author": "Appsflyer / Maxim Shoustin",
   "license": "MIT License",
   "homepage": "https://github.com/AppsFlyerSDK/react-native-appsflyer#readme",
   "keywords": [
@@ -19,5 +23,8 @@
     "react",
     "native",
     "appsflyer"
-  ]
+  ],
+  "bugs": {
+    "url": "https://github.com/AppsFlyerSDK/react-native-appsflyer/issues"
+  },
 }
