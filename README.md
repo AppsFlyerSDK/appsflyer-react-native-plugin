@@ -10,27 +10,30 @@ This React Natie Library uses the AppsFlyer 4.6.0 library for both iOS and Andro
 
 - [Supported Platforms](#this-plugin-is-built-for)
 - [Installation](#installation)
- - [iOS](#ios) 
- - [Android](#android)
+ - [iOS](#installation_ios) 
+ - [Android](#installation_android)
 - [API Methods](#api-methods) 
- - [initSdk](#appsflyerinitsdkoptions-callback-void) 
- - [trackEvent](#appsflyertrackeventeventname-eventvalues-callback-void)
+ - [initSdk](#initSdk) 
+ - [trackEvent](#trackEvent)
+ - [Track App Uninstalls](#track-app-uninstalls)
+     - [iOS](#track-app-uninstalls-ios) 
+     - [Android](##track-app-uninstalls-android)
  - [onInstallConversionData](#appsflyeroninstallconversiondatacallback-functionunregister)
  - [getAppsFlyerUID](#appsflyergetappsflyeruidcallback-void)
- - [trackLocation](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
+ - [trackLocation (ios only)](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
 - [Demo](#demo) 
 
 
-## This plugin is built for
+## <a id="this-plugin-is-built-for"> This plugin is built for
 
 - iOS AppsFlyerSDK **v4.5.9**
 - Android AppsFlyerSDK **v4.6.0**
 
-## Installation
+## <a id="installation"> Installation
 
 `$ npm install react-native-appsflyer --save`
 
-### iOS
+### <a id="installation_ios"> iOS
 
 
 1. Add the `appsFlyerFramework` to `podfile` and run `pod install`.
@@ -59,7 +62,7 @@ end
 
 3. Run your project (`Cmd+R`) or through CLI run: `react-native run-ios`
 
-### Android
+### <a id="installation_android"> Android
 
 ##### **android/app/build.gradle**
 1. Add the project to your dependencies
@@ -107,7 +110,7 @@ So `getPackages()` should look like:
 
 
 
-##API Methods
+## <a id="api-methods">  API Methods
 
 ---
 
@@ -118,7 +121,7 @@ Call module by adding:
 ---
 
 
-#####**`appsFlyer.initSdk(options, callback): void`**
+##### <a id="initSdk">  **`appsFlyer.initSdk(options, callback): void`**
 
 initializes the SDK.
 
@@ -155,7 +158,7 @@ initializes the SDK.
 
 ---
 
-#####**`appsFlyer.trackEvent(eventName, eventValues, callback): void`**
+#####<a id="trackEvent"> **`appsFlyer.trackEvent(eventName, eventValues, callback): void`**
 
 
 - These in-app events help you track how loyal users discover your app, and attribute them to specific 
@@ -191,6 +194,56 @@ to track ROI (Return on Investment) and LTV (Lifetime Value).
 ```
 
 ---
+
+### <a id="track-app-uninstalls"> Track App Uninstalls 
+
+#### <a id="track-app-uninstalls-ios"> iOS
+
+AppsFlyer enables you to track app uninstalls. To handle notifications it requires  to modify your `AppDelegate.m`. Use [didRegisterForRemoteNotificationsWithDeviceToken](https://developer.apple.com/reference/uikit/uiapplicationdelegate) to register to the uninstall feature. 
+
+*Example:*
+
+```objective-c
+- (void)application:(UIApplication ​*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *​)deviceToken {
+   // notify AppsFlyerTracker
+   [[AppsFlyerTracker sharedTracker] registerUninstall:deviceToken];
+}
+```
+
+Read more about Uninstall register: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS) 
+
+
+#### <a id="track-app-uninstalls-android"> Android
+
+ `setGCMProjectID(GCMProjectID): void`
+
+Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.  
+
+| parameter   | type                        | description |
+| ----------- |-----------------------------|--------------|
+| `GCMProjectID`   | `String`                      | |
+
+*Example:*
+
+```javascript
+
+ setGCMProjectID(){
+    const  gcmProjectId = "987186475229";
+    appsFlyer.setGCMProjectID(gcmProjectId,
+        (gcmProjectID) => {
+          //...
+        },
+        (error) => {
+          console.error(error);
+        })
+  }
+  
+```
+
+Read more about Android  Uninstall Tracking: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking) 
+
+---
+
 
 #####**`appsFlyer.onInstallConversionData(callback): function:unregister`** 
 
