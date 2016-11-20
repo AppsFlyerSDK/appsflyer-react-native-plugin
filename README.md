@@ -17,7 +17,7 @@ This React Natie Library uses the AppsFlyer 4.6.0 library for both iOS and Andro
  - [trackEvent](#trackEvent)
  - [Track App Uninstalls](#track-app-uninstalls)
      - [iOS](#track-app-uninstalls-ios) 
-     - [Android](##track-app-uninstalls-android)
+     - [Android](#track-app-uninstalls-android)
  - [onInstallConversionData](#appsflyeroninstallconversiondatacallback-functionunregister)
  - [getAppsFlyerUID](#appsflyergetappsflyeruidcallback-void)
  - [trackLocation (ios only)](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
