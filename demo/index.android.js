@@ -25,10 +25,12 @@ export default class demo extends Component {
     super(props);
 
      this.state = {
-      initSdkResponse: "not initialized yet"
+      initSdkResponse: "not initialized yet",
+      gcmProjectIDResponse: "not initialized yet"
     };
 
     this.initSdk = this.initSdk.bind(this);
+    this.setGCMProjectID = this.setGCMProjectID.bind(this);
   }
 
 
@@ -46,6 +48,19 @@ export default class demo extends Component {
         (result) => {
            this.setState( { ...this.state, initSdkResponse: result });
          },
+        (error) => {
+          console.error(error);
+        })
+  }
+
+  setGCMProjectID(){
+
+    const  gcmProjectId = "997186475229";
+
+    appsFlyer.setGCMProjectID(gcmProjectId,
+        (gcmProjectID) => {
+          this.setState( { ...this.state, gcmProjectIDResponse: gcmProjectID });
+        },
         (error) => {
           console.error(error);
         })
@@ -81,6 +96,22 @@ export default class demo extends Component {
             </View>
 
             <AfBase></AfBase>
+
+
+            <View style={styles.api_wrapper}>
+              <View style={{height: 60, width: 100, backgroundColor: 'powderblue'}}>
+                <Button
+                    style={styles.sdk_button}
+                    onPress={() => this.setGCMProjectID()}>
+                  setGCMProjectID
+                </Button>
+              </View>
+              <View style={{height: 60,  flex: 1, justifyContent: 'flex-start', alignItems: 'stretch',  backgroundColor: 'skyblue'}}>
+                <Text style={styles.json_wrap}>
+                  {this.state.gcmProjectIDResponse}
+                </Text>
+              </View>
+            </View>
 
           </View>
         </View>

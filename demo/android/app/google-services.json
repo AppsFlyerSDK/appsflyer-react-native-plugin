@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "997186475229",
+    "firebase_url": "https://appsflyerreactnative.firebaseio.com",
+    "project_id": "appsflyerreactnative",
+    "storage_bucket": "appsflyerreactnative.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:997186475229:android:cca35b83e2d75b1d",
+        "android_client_info": {
+          "package_name": "com.appsflyerreactnative"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "997186475229-ts2qlsele9s08o6h01gcr6nmre29224e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkNfsMz56j_8jcxI31hUzcbFDjxWCsWWc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
