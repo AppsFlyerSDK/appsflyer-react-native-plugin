@@ -16,7 +16,10 @@
     "url": "https://github.com/AppsFlyerSDK/react-native-appsflyer.git"
   },
   "author": "Appsflyer / Maxim Shoustin",
-  "license": "MIT License",
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/anarchicknight/react-native-appsflyer/blob/master/LICENSE"
+  },
   "homepage": "https://github.com/AppsFlyerSDK/react-native-appsflyer#readme",
   "keywords": [
     "react-native",
