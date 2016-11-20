@@ -229,4 +229,13 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         String appId = AppsFlyerLib.getInstance().getAppsFlyerUID(getReactApplicationContext());
         callback.invoke(null, appId);
     }
+
+    @ReactMethod
+    public void setGCMProjectID(final String gcmProjectId,
+                                Callback successCallback,
+                                Callback errorCallback) 
+    {
+        AppsFlyerLib.getInstance().setGCMProjectNumber(getReactApplicationContext(), gcmProjectId);
+        successCallback.invoke(SUCCESS);
+    }
 }

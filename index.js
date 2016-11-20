@@ -17,9 +17,14 @@ appsFlyer.initSdk = (options, successC, errorC) => {
     return RNAppsFlyer.initSdk(options, successC, errorC);
 };
 
+/**
+ * iOS only
+ */
 appsFlyer.trackLocation = (longitude, latitude, callback) => {
     return RNAppsFlyer.trackLocation(longitude, latitude, callback);
 };
+
+
 
 appsFlyer.trackEvent = (eventName, eventValues, successC, errorC) => {
     return RNAppsFlyer.trackEvent(eventName, eventValues, successC, errorC);
@@ -28,6 +33,17 @@ appsFlyer.trackEvent = (eventName, eventValues, successC, errorC) => {
 appsFlyer.getAppsFlyerUID = (callback) => {
     return RNAppsFlyer.getAppsFlyerUID(callback);
 };
+
+/**
+ * For Android only (Google API). iOS uses 'didRegisterForRemoteNotificationsWithDeviceToken' in AppDelegate.m 
+ */
+appsFlyer.setGCMProjectID = (gcmProjectId, successC, errorC) => {
+    return RNAppsFlyer.setGCMProjectID(gcmProjectId, successC, errorC);
+};
+
+
+
+
 
 /**
  * Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking)
