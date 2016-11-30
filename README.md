@@ -2,7 +2,7 @@
 <img src="https://www.appsflyer.com/wp-content/themes/ohav-child/images/logo.svg"  width="200">
 
 # react-native-appsflyer
-This React Natie Library uses the AppsFlyer 4.6.0 library for both iOS and Android
+This React Native Library uses the AppsFlyer 4.6.0 library for both iOS and Android
 
 [![npm version](https://badge.fury.io/js/react-native-appsflyer.svg)](https://badge.fury.io/js/react-native-appsflyer)
 
@@ -366,7 +366,7 @@ This plugin has a `demo` project bundled with it. To give it a try , clone this 
 npm run setup
 ```
 
- - Run `npm run demo.ios` or `npm run demo.ios` will run for the appropriate platform.
+ - Run `npm run demo.ios` or `npm run demo.android` will run for the appropriate platform.
  - Run `npm run ios-pod` to run `Podfile` under `demo` project
  
 
