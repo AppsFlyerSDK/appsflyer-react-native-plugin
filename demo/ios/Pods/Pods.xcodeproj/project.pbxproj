@@ -16,7 +16,7 @@
 		1CD2FC4789CD6409F11214401E806BC5 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		471FB89902972AC5243C9DDA6FD9D82E /* Pods-demo-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-demo-frameworks.sh"; sourceTree = "<group>"; };
 		4AFA2667B1D934921B4463642EC5B44F /* Pods-demo-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-demo-acknowledgements.plist"; sourceTree = "<group>"; };
-		7B4E6832DE7D10C1926CA6D185BDB3E5 /* AppsFlyerTracker.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AppsFlyerTracker.framework; sourceTree = "<group>"; };
+		4B957CE32225B562A7E5935357E93D16 /* AppsFlyerLib.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AppsFlyerLib.framework; sourceTree = "<group>"; };
 		8232625E1F4BE86F59BB5317EEFD481D /* Pods-demo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-demo.release.xcconfig"; sourceTree = "<group>"; };
 		86DEEE40B89A4A9A455C006171D413A5 /* Pods-demo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-demo.debug.xcconfig"; sourceTree = "<group>"; };
 		8FC0ADAC7A0694925AD35861177D0758 /* Pods-demo-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-demo-umbrella.h"; sourceTree = "<group>"; };
@@ -52,7 +52,7 @@
 		677D82CBC131C24B4D13C1D96CCD2DD6 /* AppsFlyerFramework */ = {
 			isa = PBXGroup;
 			children = (
-				8D5BD93A8D4C4272F8E4D82A84B5063C /* Frameworks */,
+				97ECE7DF11AEFC08A19251D09FB2338A /* Frameworks */,
 			);
 			name = AppsFlyerFramework;
 			path = AppsFlyerFramework;
@@ -103,10 +103,10 @@
 			name = "Targets Support Files";
 			sourceTree = "<group>";
 		};
-		8D5BD93A8D4C4272F8E4D82A84B5063C /* Frameworks */ = {
+		97ECE7DF11AEFC08A19251D09FB2338A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				7B4E6832DE7D10C1926CA6D185BDB3E5 /* AppsFlyerTracker.framework */,
+				4B957CE32225B562A7E5935357E93D16 /* AppsFlyerLib.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

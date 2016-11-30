@@ -10,7 +10,9 @@
     "react": "15.3.2",
     "react-native": "0.36.1",
     "react-native-appsflyer": "file:///Users/maxim/Appsflyer/projects/react-native-appsflyer",
-    "react-native-button": "^1.7.1"
+    "react-native-button": "^1.7.1",
+    "react-native-lock": "^0.4.0",
+    "react-native-popup": "^0.6.1"
   },
   "jest": {
     "preset": "jest-react-native"

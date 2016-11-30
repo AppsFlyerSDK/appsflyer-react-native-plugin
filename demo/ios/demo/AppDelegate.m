@@ -11,7 +11,7 @@
 
 #import "RCTBundleURLProvider.h"
 #import "RCTRootView.h"
-#import <AppsFlyerTracker/AppsFlyerTracker.h>
+#import <AppsFlyerLib/AppsFlyerTracker.h>
 
 
 @implementation AppDelegate

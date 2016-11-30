@@ -2,7 +2,7 @@
 //  AppsFlyerTracker.h
 //  AppsFlyerLib
 //
-//  AppsFlyer iOS SDK v4.5.9
+//  AppsFlyer iOS SDK v4.5.12
 //  Copyright (c) 2013 AppsFlyer Ltd. All rights reserved.
 //
 
@@ -32,6 +32,9 @@
 #define AFEventOpenedFromPushNotification @"af_opened_from_push_notification"
 #define AFEventLocation                 @"af_location_coordinates"
 #define AFEventOrderId                  @"af_order_id"
+#define AFEventCustomerSegment          @"af_customer_segment"
+
+
 
 // In app event parameter names
 #define AFEventParamLevel                  @"af_level"
@@ -174,7 +177,6 @@ typedef enum  {
  * is NO.
  */
 @property (nonatomic, setter = setUseUninstallSandbox:) BOOL useUninstallSandbox;
-
 
 /*
  * Use this to send the User's emails
