@@ -61,7 +61,7 @@ appsFlyer.setGCMProjectID = (gcmProjectId, successC, errorC) => {
  */
 appsFlyer.onInstallConversionData = (callback) => {
 
-    console.log("onInstallConversionData is called" );
+    //console.log("onInstallConversionData is called" );
 
         const listener = NativeAppEventEmitter.addListener('onInstallConversionData',
             (_data) => {
