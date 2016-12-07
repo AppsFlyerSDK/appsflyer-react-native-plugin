@@ -89,9 +89,9 @@ RCT_EXPORT_METHOD(trackEvent: (NSString *)eventName eventValues:(NSDictionary *)
     if (!eventName || [eventName isEqualToString:@""]) {
         error = [NSError errorWithDomain:NO_DEVKEY_FOUND code:2 userInfo:nil];
     }
-    else if (!eventValues || [eventValues count] == 0) {
-        error = [NSError errorWithDomain:NO_EVENT_VALUES_FOUND code:3 userInfo:nil];
-    }
+    // else if (!eventValues || [eventValues count] == 0) {
+    //     error = [NSError errorWithDomain:NO_EVENT_VALUES_FOUND code:3 userInfo:nil];
+    // }
     
     if(error != nil){
          errorCallback(error);

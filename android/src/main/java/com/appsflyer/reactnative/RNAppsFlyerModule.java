@@ -202,10 +202,14 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
 
         Map<String, Object> data = RNUtil.toMap(eventData);
 
-        if(data.size() == 0){
-            errorCallback.invoke( new Exception(NO_EVENT_VALUES_FOUND).getMessage() );
-            return;
+        if(data == null){ // in case of no values
+            data = new HashMap<>();
         }
+
+//        if(data.size() == 0){
+//            errorCallback.invoke( new Exception(NO_EVENT_VALUES_FOUND).getMessage() );
+//            return;
+//        }
 
         AppsFlyerLib.getInstance().trackEvent(getReactApplicationContext(), eventName, data);
 
