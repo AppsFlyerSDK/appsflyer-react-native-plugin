@@ -31,7 +31,8 @@ export default class AfBase extends Component {
 
         this.state = {
             trackEventResponse: {status: "NA"},
-            appsFlyerUID: "not called yet"
+            appsFlyerUID: "not called yet",
+            setCustomerUserIdResponse: "not called yet"
         };
 
         this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
@@ -41,8 +42,10 @@ export default class AfBase extends Component {
             }
         );
 
-        this.trackEvent      = this.trackEvent.bind(this);
-        this.getAppsFlyerUID = this.getAppsFlyerUID.bind(this);
+        this.trackEvent        = this.trackEvent.bind(this);
+        this.getAppsFlyerUID   = this.getAppsFlyerUID.bind(this);
+        this.setCustomerUserId = this.setCustomerUserId.bind(this);
+
     }
 
     componentWillUnmount() {
@@ -66,6 +69,15 @@ export default class AfBase extends Component {
             },
             (error) => {
                 console.error(error);
+            })
+    }
+
+
+    setCustomerUserId(){
+        const  userId = "some_user_id";
+        appsFlyer.setCustomerUserId(userId,
+            (response) => {
+                this.setState( { ...this.state, setCustomerUserIdResponse: response });
             })
     }
 
@@ -115,6 +127,22 @@ export default class AfBase extends Component {
                             </Text>
                         </View>
                     </View>
+
+                    <View style={styles.api_wrapper}>
+                        <View style={{height: 60, width: 100, backgroundColor: 'powderblue'}}>
+                            <Button
+                                style={styles.sdk_button_font_mini}
+                                onPress={() => this.setCustomerUserId()}>
+                                setCustomerUserId
+                            </Button>
+                        </View>
+                        <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'stretch',  backgroundColor: 'skyblue'}}>
+                            <Text style={styles.json_wrap}>
+                                { JSON.stringify(this.state.setCustomerUserIdResponse, null) }
+                            </Text>
+                        </View>
+                    </View>
+
                 </View>
 
 

@@ -113,6 +113,13 @@ RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback)
     callback(@[[NSNull null], uid]);
 }
 
+RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSenderBlock)callback)
+{
+    [[AppsFlyerTracker sharedTracker] setCustomerUserID:userId];
+    
+    callback(@[SUCCESS]);
+}
+
 RCT_EXPORT_METHOD(trackLocation: (double)longitude latitude:(double)latitude callback:(RCTResponseSenderBlock)callback)
 {
     [[AppsFlyerTracker sharedTracker] trackLocation:longitude latitude:latitude];
@@ -120,6 +127,8 @@ RCT_EXPORT_METHOD(trackLocation: (double)longitude latitude:(double)latitude cal
     NSArray *events = @[[NSNumber numberWithDouble:longitude], [NSNumber numberWithDouble:latitude]];
     callback(@[[NSNull null], events]);
 }
+
+
 
 
 -(void)onConversionDataReceived:(NSDictionary*) installData {

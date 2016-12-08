@@ -14,6 +14,7 @@ This React Native Library uses the AppsFlyer 4.6.0 library for both iOS and Andr
  - [Android](#installation_android)
 - [API Methods](#api-methods) 
  - [initSdk](#initSdk) 
+ - [setCustomerUserId](#setCustomerUserId)
  - [trackEvent](#trackEvent)
  - [Track App Uninstalls](#track-app-uninstalls)
      - [iOS](#track-app-uninstalls-ios) 
@@ -157,6 +158,32 @@ initializes the SDK.
 ```
 
 ---
+
+
+##### <a id="setCustomerUserId"> **`setCustomerUserId(customerUserId,callback): void`**
+
+
+Setting your own Custom ID enables you to cross-reference your own unique ID with AppsFlyer’s user ID and the other devices’ IDs. This ID is available in AppsFlyer CSV reports along with postbacks APIs for cross-referencing with you internal IDs.
+ 
+**Note:** The ID must be set during the first launch of the app at the SDK initialization. The best practice is to call this API during the `deviceready` event, where possible.
+
+
+| parameter   | type                        | description |
+| ----------- |-----------------------------|--------------|
+| `customerUserId`   | `String`                      | |
+
+*Example:*
+
+```javascript
+        const  userId = "some_user_id";
+        appsFlyer.setCustomerUserId(userId,
+            (response) => {
+                //..
+            })
+   
+```
+---
+
 
 #####<a id="trackEvent"> **`appsFlyer.trackEvent(eventName, eventValues, callback): void`**
 

@@ -41,7 +41,9 @@ appsFlyer.setGCMProjectID = (gcmProjectId, successC, errorC) => {
     return RNAppsFlyer.setGCMProjectID(gcmProjectId, successC, errorC);
 };
 
-
+appsFlyer.setCustomerUserId = (userId, successC,) => {
+    return RNAppsFlyer.setCustomerUserId(userId, successC);
+};
 
 
 
