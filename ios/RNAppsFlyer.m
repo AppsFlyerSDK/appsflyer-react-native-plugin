@@ -10,13 +10,11 @@
 @synthesize bridge = _bridge;
 
 
-static NSString *const NO_DEVKEY_FOUND       = @"No 'devKey' found or its empty";
-static NSString *const NO_APPID_FOUND        = @"No 'appId' found or its empty";
-
-static NSString *const NO_EVENT_NAME_FOUND   = @"No 'eventName' found or its empty";
-static NSString *const NO_EVENT_VALUES_FOUND = @"No 'eventValues' found or Dictionary its empty";
-
-static NSString *const SUCCESS         = @"Success";
+static NSString *const NO_DEVKEY_FOUND              = @"No 'devKey' found or its empty";
+static NSString *const NO_APPID_FOUND               = @"No 'appId' found or its empty";
+static NSString *const NO_EVENT_NAME_FOUND          = @"No 'eventName' found or its empty";
+static NSString *const NO_EMAILS_FOUND_OR_CORRUPTED = @"No 'emails' found, or list is corrupted";
+static NSString *const SUCCESS                      = @"Success";
 
 
 RCT_EXPORT_MODULE()
@@ -128,6 +126,51 @@ RCT_EXPORT_METHOD(trackLocation: (double)longitude latitude:(double)latitude cal
     callback(@[[NSNull null], events]);
 }
 
+
+
+RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
+                  successCallback :(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseErrorBlock)errorCallback)
+{
+    NSArray *emails = nil;
+    id emailsCryptTypeId = nil;
+    EmailCryptType emailsCryptType = EmailCryptTypeNone;
+    
+    if (![options isKindOfClass:[NSNull class]]) {
+        emails = (NSArray*)[options valueForKey: afEmails];
+        
+        emailsCryptTypeId = [options objectForKey: afEmailsCryptType];
+        if ([emailsCryptTypeId isKindOfClass:[NSNumber class]]) {
+            
+            int _t = [emailsCryptTypeId intValue];
+            
+            switch (_t) {
+                case EmailCryptTypeSHA1:
+                    emailsCryptType = EmailCryptTypeSHA1;
+                    break;
+                case EmailCryptTypeMD5:
+                    emailsCryptType = EmailCryptTypeMD5;
+                    break;
+                default:
+                    emailsCryptType = EmailCryptTypeNone;
+            }
+        }
+    }
+    
+    NSError* error = nil;
+    
+    if (!emails || [emails count] == 0) {
+        error = [NSError errorWithDomain:NO_EMAILS_FOUND_OR_CORRUPTED code:0 userInfo:nil];
+    }
+    
+    if(error != nil){
+        errorCallback(error);
+    }
+    else{
+        [[AppsFlyerTracker sharedTracker] setUserEmails:emails withCryptType:emailsCryptType];
+        successCallback(@[SUCCESS]);
+    }
+}
 
 
 

@@ -193,7 +193,7 @@ public class RNUtil {
                         jsonObject.put(key, readableMapToJson(readableMap.getMap(key)));
                         break;
                     case Array:
-                        jsonObject.put(key, readableMap.getArray(key));
+                        jsonObject.put(key, convertArrayToJson(readableMap.getArray(key)));
                     default:
                         // Do nothing and fail silently
                 }
@@ -203,6 +203,32 @@ public class RNUtil {
         }
 
         return jsonObject;
+    }
+
+    private static JSONArray convertArrayToJson(ReadableArray readableArray) throws JSONException {
+        JSONArray array = new JSONArray();
+        for (int i = 0; i < readableArray.size(); i++) {
+            switch (readableArray.getType(i)) {
+                case Null:
+                    break;
+                case Boolean:
+                    array.put(readableArray.getBoolean(i));
+                    break;
+                case Number:
+                    array.put(readableArray.getDouble(i));
+                    break;
+                case String:
+                    array.put(readableArray.getString(i));
+                    break;
+                case Map:
+                    array.put(readableMapToJson(readableArray.getMap(i)));
+                    break;
+                case Array:
+                    array.put(convertArrayToJson(readableArray.getArray(i)));
+                    break;
+            }
+        }
+        return array;
     }
 
     @Nullable

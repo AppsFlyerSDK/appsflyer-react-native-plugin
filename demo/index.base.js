@@ -31,6 +31,7 @@ export default class AfBase extends Component {
 
         this.state = {
             trackEventResponse: {status: "NA"},
+            setUserEmailsResponse: "not called yet",
             appsFlyerUID: "not called yet",
             setCustomerUserIdResponse: "not called yet"
         };
@@ -45,7 +46,7 @@ export default class AfBase extends Component {
         this.trackEvent        = this.trackEvent.bind(this);
         this.getAppsFlyerUID   = this.getAppsFlyerUID.bind(this);
         this.setCustomerUserId = this.setCustomerUserId.bind(this);
-
+        this.setUserEmails     = this.setUserEmails.bind(this);
     }
 
     componentWillUnmount() {
@@ -66,6 +67,22 @@ export default class AfBase extends Component {
         appsFlyer.trackEvent(eventName, eventValues,
             (result) => {
                 this.setState( { ...this.state, trackEventResponse: result });
+            },
+            (error) => {
+                console.error(error);
+            })
+    }
+
+    setUserEmails(){
+
+        const options = {
+            "emailsCryptType": 2,// NONE - 0 (default), SHA1 - 1, MD5 - 2
+            "emails":["max@gmail.com", "max2@gmail.com"]
+        };
+
+        appsFlyer.setUserEmails(options,
+            (response) => {
+                this.setState( { ...this.state, setUserEmailsResponse: response });
             },
             (error) => {
                 console.error(error);
@@ -139,6 +156,21 @@ export default class AfBase extends Component {
                         <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'stretch',  backgroundColor: 'skyblue'}}>
                             <Text style={styles.json_wrap}>
                                 { JSON.stringify(this.state.setCustomerUserIdResponse, null) }
+                            </Text>
+                        </View>
+                    </View>
+
+                    <View style={styles.api_wrapper}>
+                        <View style={{height: 60, width: 100, backgroundColor: 'powderblue'}}>
+                            <Button
+                                style={styles.sdk_button_font_mini}
+                                onPress={() => this.setUserEmails()}>
+                                setUserEmails
+                            </Button>
+                        </View>
+                        <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'stretch',  backgroundColor: 'skyblue'}}>
+                            <Text style={styles.json_wrap}>
+                                { JSON.stringify(this.state.setUserEmailsResponse, null) }
                             </Text>
                         </View>
                     </View>

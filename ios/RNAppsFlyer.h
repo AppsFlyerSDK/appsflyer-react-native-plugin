@@ -11,6 +11,9 @@
   #define afAppId                         @"appId"
   #define afIsDebug                       @"isDebug"
 
+  #define afEmailsCryptType               @"emailsCryptType"
+  #define afEmails                        @"emails"
+
 // Appsflyer native objects
   #define afConversionData                @"onInstallConversionDataListener"
   #define afOnInstallConversionData       @"onInstallConversionData"

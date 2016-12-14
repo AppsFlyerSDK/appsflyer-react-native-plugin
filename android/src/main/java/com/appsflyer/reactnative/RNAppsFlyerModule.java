@@ -8,6 +8,7 @@ import android.app.Application;
 import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
+import com.appsflyer.AppsFlyerProperties.EmailsCryptType;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -22,6 +23,7 @@ import java.util.Map;
 import android.content.Context;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -247,5 +249,45 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     public void setCustomerUserId(final String userId,Callback callback){
         AppsFlyerLib.getInstance().setCustomerUserId(userId);
         callback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void setUserEmails(ReadableMap _options,
+                              Callback successCallback,
+                              Callback errorCallback)
+    {
+
+        JSONObject options = RNUtil.readableMapToJson(_options);
+
+        int emailsCryptType = options.optInt(afEmailsCryptType, 0);
+        JSONArray emailsJSON = options.optJSONArray(afEmails);
+
+        if(emailsJSON.length() == 0){
+            errorCallback.invoke( new Exception(NO_EMAILS_FOUND_OR_CORRUPTED).getMessage() );
+            return;
+        }
+
+        EmailsCryptType type = EmailsCryptType.NONE; // default type
+
+        for(EmailsCryptType _type : EmailsCryptType.values()){
+          if(_type.getValue() == emailsCryptType){
+              type = _type;
+              break;
+          }
+        }
+
+        String[] emailsList = new String[emailsJSON.length()];
+        try {
+            for (int i = 0; i < emailsJSON.length(); i++) {
+                emailsList[i] = emailsJSON.getString(i);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            errorCallback.invoke( new Exception(NO_EMAILS_FOUND_OR_CORRUPTED).getMessage() );
+            return;
+        }
+
+        AppsFlyerLib.getInstance().setUserEmails(type, emailsList);
+        successCallback.invoke(SUCCESS);
     }
 }

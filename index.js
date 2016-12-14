@@ -30,6 +30,10 @@ appsFlyer.trackEvent = (eventName, eventValues, successC, errorC) => {
     return RNAppsFlyer.trackEvent(eventName, eventValues, successC, errorC);
 };
 
+appsFlyer.setUserEmails = (options, successC, errorC) => {
+    return RNAppsFlyer.setUserEmails(options, successC, errorC);
+};
+
 appsFlyer.getAppsFlyerUID = (callback) => {
     return RNAppsFlyer.getAppsFlyerUID(callback);
 };
