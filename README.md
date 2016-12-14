@@ -1,5 +1,5 @@
 
-<img src="https://www.appsflyer.com/wp-content/themes/ohav-child/images/logo.svg"  width="200">
+<img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="200">
 
 # react-native-appsflyer
 This React Native Library uses the AppsFlyer 4.6.0 library for both iOS and Android
@@ -15,6 +15,7 @@ This React Native Library uses the AppsFlyer 4.6.0 library for both iOS and Andr
 - [API Methods](#api-methods) 
  - [initSdk](#initSdk) 
  - [setCustomerUserId](#setCustomerUserId)
+ - [setUserEmails](#setUserEmails)  
  - [trackEvent](#trackEvent)
  - [Track App Uninstalls](#track-app-uninstalls)
      - [iOS](#track-app-uninstalls-ios) 
@@ -185,7 +186,7 @@ Setting your own Custom ID enables you to cross-reference your own unique ID wit
 ---
 
 
-#####<a id="trackEvent"> **`appsFlyer.trackEvent(eventName, eventValues, callback): void`**
+#####<a id="trackEvent"> **`appsFlyer.trackEvent(eventName, eventValues, errorC, successC): void`**
 
 
 - These in-app events help you track how loyal users discover your app, and attribute them to specific 
@@ -197,7 +198,7 @@ to track ROI (Return on Investment) and LTV (Lifetime Value).
 | parameter   | type                        | description |
 | ----------- |-----------------------------|--------------|
 | `eventName` | `String`                    | custom event name, is presented in your dashboard.  See the Event list [HERE](https://github.com/AppsFlyerSDK/react-native-appsflyer/blob/master/ios/AppsFlyerTracker.h)  |
-| `eventValue` | `Object`                    | event details |
+| `eventValues` | `Object`                    | event details (optional) |
 
 *Example:*
 
@@ -210,17 +211,21 @@ to track ROI (Return on Investment) and LTV (Lifetime Value).
       "af_revenue": "2"
   };
 
- appsFlyer.trackEvent(eventName, eventValues, (error, result) => {
-     if (error) {
-         console.error(error);
-     } else {
-         //...
-     }
+ appsFlyer.trackEvent(eventName, eventValues, errorC, successC) => {
+     (result) => {
+                //...
+            },
+      (error) => {
+          console.error(error);
+      }
  })
     
 ```
 
 ---
+
+
+
 
 ### <a id="track-app-uninstalls"> Track App Uninstalls 
 
@@ -383,6 +388,48 @@ Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID 
 
 ---
 
+#####<a id="setUserEmails"> **`appsFlyer.setUserEmails(options, errorC, successC): void`**
+
+AppsFlyer enables you to report one or more of the device’s associated email addresses. You must collect the email addresses and report it to AppsFlyer according to your required encryption method.
+More info you can find on [AppsFlyer-SDK-Integration-Android](https://support.appsflyer.com/hc/en-us/articles/207032126-AppsFlyer-SDK-Integration-Android) and [AppsFlyer-SDK-Integration-iOS](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS)
+
+
+| parameter   | type                        | description  |
+| ----------- |-----------------------------|--------------|
+| `options`   | `Object`                    |   `setUserEmails` configuration           |
+
+
+**`options`**
+
+| name       | type    | default | description            |
+| -----------|---------|---------|------------------------|
+| `emailsCryptType`   |`int` |    0     |   NONE - `0` (default), SHA1 - `1`, MD5 - `2`    |
+| `emails`    |`array` |        | comma separated list of emails |
+
+
+*Example:*
+
+```javascript
+
+  const options = {
+            "emailsCryptType": 2,
+            "emails":[
+                     "user1@gmail.com",
+                     "user2@gmail.com"
+                      ]
+        };
+
+        appsFlyer.setUserEmails(options,
+            (response) => {
+                this.setState( { ...this.state, setUserEmailsResponse: response });
+            },
+            (error) => {
+                console.error(error);
+            })
+    
+```
+
+---
 
 
 ##Demo

@@ -77,7 +77,7 @@ export default class AfBase extends Component {
 
         const options = {
             "emailsCryptType": 2,// NONE - 0 (default), SHA1 - 1, MD5 - 2
-            "emails":["max@gmail.com", "max2@gmail.com"]
+            "emails":["user1@gmail.com", "user2@gmail.com"]
         };
 
         appsFlyer.setUserEmails(options,
