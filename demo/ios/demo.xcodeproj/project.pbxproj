@@ -23,7 +23,7 @@
 		140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
-		94FDFF1F1DCF58A600078EF1 /* libRNAppsFlyer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 94FDFF1C1DCF543100078EF1 /* libRNAppsFlyer.a */; };
+		9464D9861E0463E800C7A03F /* libRNAppsFlyer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9464D9851E04639600C7A03F /* libRNAppsFlyer.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,6 +104,13 @@
 			remoteGlobalIDString = 58B5119B1A9E6C1200147676;
 			remoteInfo = RCTText;
 		};
+		9464D9841E04639600C7A03F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9464D9801E04639600C7A03F /* RNAppsFlyer.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNAppsFlyer;
+		};
 		94FDFEFC1DCF516000078EF1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 00C302BB1ABCB91800DB3ED1 /* RCTImage.xcodeproj */;
@@ -153,13 +160,6 @@
 			remoteGlobalIDString = 2D2A28131D9B038B00D4039D;
 			remoteInfo = "React-tvOS";
 		};
-		94FDFF1B1DCF543100078EF1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 94FDFF171DCF543100078EF1 /* RNAppsFlyer.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RNAppsFlyer;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -186,8 +186,8 @@
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		7953105C3E464E8BD5167A7A /* Pods-demo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-demo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-demo/Pods-demo.debug.xcconfig"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
+		9464D9801E04639600C7A03F /* RNAppsFlyer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNAppsFlyer.xcodeproj; path = "../node_modules/react-native-appsflyer/ios/RNAppsFlyer.xcodeproj"; sourceTree = "<group>"; };
 		9470015A1DE1CA1200045A2C /* demo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = demo.entitlements; path = demo/demo.entitlements; sourceTree = "<group>"; };
-		94FDFF171DCF543100078EF1 /* RNAppsFlyer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNAppsFlyer.xcodeproj; path = "../node_modules/react-native-appsflyer/ios/RNAppsFlyer.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -203,6 +203,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9464D9861E0463E800C7A03F /* libRNAppsFlyer.a in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
 				00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */,
@@ -213,7 +214,6 @@
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
-				94FDFF1F1DCF58A600078EF1 /* libRNAppsFlyer.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -342,7 +342,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				94FDFF171DCF543100078EF1 /* RNAppsFlyer.xcodeproj */,
+				9464D9801E04639600C7A03F /* RNAppsFlyer.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
 				00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */,
 				00C302B51ABCB90400DB3ED1 /* RCTGeolocation.xcodeproj */,
@@ -396,10 +396,10 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		94FDFF181DCF543100078EF1 /* Products */ = {
+		9464D9811E04639600C7A03F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				94FDFF1C1DCF543100078EF1 /* libRNAppsFlyer.a */,
+				9464D9851E04639600C7A03F /* libRNAppsFlyer.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -522,8 +522,8 @@
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
 				},
 				{
-					ProductGroup = 94FDFF181DCF543100078EF1 /* Products */;
-					ProjectRef = 94FDFF171DCF543100078EF1 /* RNAppsFlyer.xcodeproj */;
+					ProductGroup = 9464D9811E04639600C7A03F /* Products */;
+					ProjectRef = 9464D9801E04639600C7A03F /* RNAppsFlyer.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -605,6 +605,13 @@
 			remoteRef = 832341B41AAA6A8300B99B32 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		9464D9851E04639600C7A03F /* libRNAppsFlyer.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNAppsFlyer.a;
+			remoteRef = 9464D9841E04639600C7A03F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		94FDFEFD1DCF516000078EF1 /* libRCTImage-tvOS.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -652,13 +659,6 @@
 			fileType = archive.ar;
 			path = "libReact-tvOS.a";
 			remoteRef = 94FDFF151DCF516000078EF1 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		94FDFF1C1DCF543100078EF1 /* libRNAppsFlyer.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRNAppsFlyer.a;
-			remoteRef = 94FDFF1B1DCF543100078EF1 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */

@@ -54,10 +54,12 @@ export default class demo extends Component {
     appsFlyer.initSdk(options,
         (result) => {
           this.setState( { ...this.state, initSdkResponse: result });
-        },
-        (error) => {
-          console.error(error);
-        })
+        }
+        // ,
+        // (error) => {
+        //   console.error(error);
+        // }
+        )
   }
 
 

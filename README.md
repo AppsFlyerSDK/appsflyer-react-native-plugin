@@ -62,7 +62,8 @@ end
   
      
 
-3. Run your project (`Cmd+R`) or through CLI run: `react-native run-ios`
+3. In your project **build phase** ➜ **Link binary with libraries** ➜ add `libRNAppsFlyer.a`. 
+Run your project (`Cmd+R`) or through CLI run: `react-native run-ios`
 
 ### <a id="installation_android"> Android
 
