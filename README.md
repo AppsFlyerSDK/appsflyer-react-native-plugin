@@ -28,8 +28,8 @@ This React Native Library uses the AppsFlyer 4.6.0 library for both iOS and Andr
 
 ## <a id="this-plugin-is-built-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v4.5.12**
-- Android AppsFlyerSDK **v4.6.1**
+- iOS AppsFlyerSDK **v4.6.3**
+- Android AppsFlyerSDK **v4.6.5**
 
 ## <a id="installation"> Installation
 
@@ -150,13 +150,14 @@ initializes the SDK.
        isDebug: true
      };
 
-    appsFlyer.initSdk(options, (error, result) => {
-      if (error) {
-        console.error(error);
-      } else {
-       //..
-      }
-    })
+    appsFlyer.initSdk(options,
+        (result) => {
+      console.log(result)
+        },
+        (error) => {
+      console.error(error);
+        }
+    )
 ```
 
 ---

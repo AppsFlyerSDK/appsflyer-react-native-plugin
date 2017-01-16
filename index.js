@@ -11,7 +11,7 @@ const eventsMap = {};
 
 appsFlyer.initSdk = (options, successC, errorC) => {
 
-    console.log("initSdk: " + eventsMap['onInstallConversionData']);
+    // console.log("initSdk: " + eventsMap['onInstallConversionData']);
 
     options.onInstallConversionDataListener = (eventsMap['onInstallConversionData']) ? true: false;
     return RNAppsFlyer.initSdk(options, successC, errorC);
