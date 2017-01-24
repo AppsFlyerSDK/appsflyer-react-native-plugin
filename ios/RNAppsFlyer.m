@@ -1,6 +1,6 @@
 
-#import "RCTBridge.h"
-#import "RCTEventDispatcher.h"
+#import <React/RCTBridge.h>
+#import <React/RCTEventDispatcher.h>
 
 #import "AppsFlyerTracker.h"
 #import "RNAppsFlyer.h"
@@ -25,7 +25,7 @@ RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
                   errorCallback:(RCTResponseErrorBlock)errorCallback
                   )
 {
-    
+
     NSString* devKey = nil;
     NSString* appId = nil;
     BOOL isDebug = NO;
@@ -53,7 +53,7 @@ RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
 
     if (!devKey || [devKey isEqualToString:@""]) {
         error = [NSError errorWithDomain:NO_DEVKEY_FOUND code:0 userInfo:nil];
-        
+
     }
     else if (!appId || [appId isEqualToString:@""]) {
         error = [NSError errorWithDomain:NO_APPID_FOUND code:1 userInfo:nil];
@@ -67,12 +67,12 @@ RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
         if(isConversionData == YES){
             [AppsFlyerTracker sharedTracker].delegate = self;
         }
-        
+
         [AppsFlyerTracker sharedTracker].appleAppID = appId;
         [AppsFlyerTracker sharedTracker].appsFlyerDevKey = devKey;
         [AppsFlyerTracker sharedTracker].isDebug = isDebug;
         [[AppsFlyerTracker sharedTracker] trackAppLaunch];
-        
+
         successCallback(@[SUCCESS]);
                 }
 }
@@ -83,21 +83,21 @@ RCT_EXPORT_METHOD(trackEvent: (NSString *)eventName eventValues:(NSDictionary *)
                   errorCallback:(RCTResponseErrorBlock)errorCallback)
 {
     NSString* error = nil;
-    
+
     if (!eventName || [eventName isEqualToString:@""]) {
         error = [NSError errorWithDomain:NO_DEVKEY_FOUND code:2 userInfo:nil];
     }
     // else if (!eventValues || [eventValues count] == 0) {
     //     error = [NSError errorWithDomain:NO_EVENT_VALUES_FOUND code:3 userInfo:nil];
     // }
-    
+
     if(error != nil){
          errorCallback(error);
     }
     else{
-        
+
         [[AppsFlyerTracker sharedTracker] trackEvent:eventName withValues:eventValues];
-        
+
         //TODO wait callback from SDK
         successCallback(@[SUCCESS]);
      }
@@ -114,7 +114,7 @@ RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback)
 RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSenderBlock)callback)
 {
     [[AppsFlyerTracker sharedTracker] setCustomerUserID:userId];
-    
+
     callback(@[SUCCESS]);
 }
 
@@ -135,15 +135,15 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     NSArray *emails = nil;
     id emailsCryptTypeId = nil;
     EmailCryptType emailsCryptType = EmailCryptTypeNone;
-    
+
     if (![options isKindOfClass:[NSNull class]]) {
         emails = (NSArray*)[options valueForKey: afEmails];
-        
+
         emailsCryptTypeId = [options objectForKey: afEmailsCryptType];
         if ([emailsCryptTypeId isKindOfClass:[NSNumber class]]) {
-            
+
             int _t = [emailsCryptTypeId intValue];
-            
+
             switch (_t) {
                 case EmailCryptTypeSHA1:
                     emailsCryptType = EmailCryptTypeSHA1;
@@ -156,13 +156,13 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
             }
         }
     }
-    
+
     NSError* error = nil;
-    
+
     if (!emails || [emails count] == 0) {
         error = [NSError errorWithDomain:NO_EMAILS_FOUND_OR_CORRUPTED code:0 userInfo:nil];
     }
-    
+
     if(error != nil){
         errorCallback(error);
     }
@@ -175,42 +175,42 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 
 
 -(void)onConversionDataReceived:(NSDictionary*) installData {
-    
+
     NSDictionary* message = @{
                               @"status": afSuccess,
                               @"type": afOnInstallConversionDataLoaded,
                               @"data": installData
                               };
-    
+
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
   }
 
 
 -(void)onConversionDataRequestFailure:(NSError *) _errorMessage {
-    
+
     NSDictionary* errorMessage = @{
                                    @"status": afFailure,
                                    @"type": afOnInstallConversionFailure,
                                    @"data": _errorMessage
                                    };
-    
+
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:errorMessage waitUntilDone:NO];
     }
 
 
 - (void) onAppOpenAttribution:(NSDictionary*) attributionData {
-    
+
     NSDictionary* message = @{
                                    @"status": afSuccess,
                                    @"type": afOnAppOpenAttribution,
                                    @"data": attributionData
                                    };
-    
+
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
 }
 
 - (void) onAppOpenAttributionFailure:(NSError *)_errorMessage {
-   
+
     NSDictionary* errorMessage = @{
                                    @"status": afFailure,
                                    @"type": afOnAttributionFailure,
@@ -223,22 +223,22 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 
 -(void) handleCallback:(NSDictionary *) message{
     NSError *error;
-    
+
     NSData *jsonMessage = [NSJSONSerialization dataWithJSONObject:message
                                                           options:0
                                                             error:&error];
     if (jsonMessage) {
         NSString *jsonMessageStr = [[NSString alloc] initWithBytes:[jsonMessage bytes] length:[jsonMessage length] encoding:NSUTF8StringEncoding];
-        
+
         NSString* status = (NSString*)[message objectForKey: @"status"];
-        
+
         if([status isEqualToString:afSuccess]){
            [self reportOnSuccess:jsonMessageStr];
         }
         else{
             [self reportOnFailure:jsonMessageStr];
         }
-        
+
         NSLog(@"jsonMessageStr = %@",jsonMessageStr);
     } else {
         NSLog(@"%@",error);
