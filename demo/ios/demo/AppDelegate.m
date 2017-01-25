@@ -9,16 +9,10 @@
 
 #import "AppDelegate.h"
 
-#import "RCTBundleURLProvider.h"
-#import "RCTRootView.h"
-#import <AppsFlyerLib/AppsFlyerTracker.h>
-
+#import <React/RCTBundleURLProvider.h>
+#import <React/RCTRootView.h>
 
 @implementation AppDelegate
-
-
-
-
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -37,43 +31,7 @@
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
-  
-  /** start */
-  
-  // Register for Push Notitications
-  UIUserNotificationType userNotificationTypes = (UIUserNotificationTypeAlert |
-                                                  UIUserNotificationTypeBadge |
-                                                  UIUserNotificationTypeSound);
-  
-  UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:userNotificationTypes
-                                                                           categories:nil];
-  [application registerUserNotificationSettings:settings];
-  [application registerForRemoteNotifications];
-  
-  [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
-  application.applicationIconBadgeNumber = 0;
-  /** end */
-  
-  
   return YES;
 }
-
-
--(BOOL) application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-  
-  [[AppsFlyerTracker sharedTracker] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
-  return YES;
-}
-
-
-
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken{
-  [[AppsFlyerTracker sharedTracker] registerUninstall:deviceToken];
-}
-
-- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-  NSLog(@"Failed to get token, error: %@", error);
-}
-
 
 @end

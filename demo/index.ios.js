@@ -86,7 +86,7 @@ export default class demo extends Component {
           justifyContent: 'flex-start', // 'center'
           alignItems: 'stretch' //'flex-start' //'center'
         }}>
-          <View>
+
 
             <View style={styles.api_wrapper}>
               <View style={{height: 60, width: 100, backgroundColor: 'powderblue'}}>
@@ -122,8 +122,6 @@ export default class demo extends Component {
               </View>
 
             </View>
-
-          </View>
         </View>
 
 
@@ -155,6 +153,7 @@ const styles = StyleSheet.create({
   },
   api_wrapper:{
     height: 60,
+    maxHeight:60,
     flex: 1,
     flexDirection: 'row',
     borderStyle: 'solid',

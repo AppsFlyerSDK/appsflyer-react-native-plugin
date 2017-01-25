@@ -1,4 +1,4 @@
-package com.appsflyerreactnative;
+package com.demo;
 
 import com.facebook.react.ReactActivity;
 

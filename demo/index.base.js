@@ -112,7 +112,12 @@ export default class AfBase extends Component {
     render() {
 
         return (
-                <View>
+                <View style={{
+                    height:240,
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start', // 'center'
+                    alignItems: 'stretch' //'flex-start' //'center'
+                }}>
 
                     <View style={styles.api_wrapper}>
                         <View style={{height: 60, width: 100, backgroundColor: 'powderblue'}}>
@@ -204,6 +209,7 @@ const styles = StyleSheet.create({
     },
     api_wrapper:{
         height: 60,
+        minHeight:60,
         flex: 1,
         flexDirection: 'row',
         borderStyle: 'solid',
