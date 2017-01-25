@@ -65,6 +65,27 @@ end
 3. In your project **build phase** ➜ **Link binary with libraries** ➜ add `libRNAppsFlyer.a`. 
 Run your project (`Cmd+R`) or through CLI run: `react-native run-ios`
 
+#####**Breaking Changes for react-native >= 0.40.0:**
+
+In `RNAppsFlyer.h`:
+
+```obj-c
+#import <React/RCTBridgeModule.h>  //for react-native ver >= 0.40
+//#import "RCTBridgeModule.h"        for react-native ver < 0.40
+```
+
+In `RNAppsFlyer.m`:
+
+```obj-c
+// for react-native ver >= 0.40
+#import <React/RCTBridge.h>
+#import <React/RCTEventDispatcher.h>
+
+// for react-native ver < 0.40
+//#import "RCTBridge.h"
+//#import "RCTEventDispatcher.h"
+```
+
 ### <a id="installation_android"> Android
 
 ##### **android/app/build.gradle**
