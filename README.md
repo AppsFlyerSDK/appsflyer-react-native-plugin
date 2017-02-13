@@ -50,8 +50,8 @@ With CocoaPods, please see their [DOCS](https://guides.cocoapods.org/using/getti
 
 1. Add the react-native-appsflyer pod to your `Podfile`:
 
-        pod 'react-native-smooch',
-             :path => '../node_modules/react-native-smooch'
+        pod 'react-native-appsflyer',
+             :path => '../node_modules/react-native-appsflyer'
 
   This assumes your `Podfile` is located in `ios` directory.
 
