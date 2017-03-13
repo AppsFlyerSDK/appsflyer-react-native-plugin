@@ -2,7 +2,7 @@
 <img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="200">
 
 # react-native-appsflyer
-This React Native Library uses the AppsFlyer 4.6.0 library for both iOS and Android
+This React Native Library uses the AppsFlyer 4.7.1 library for both iOS and Android
 
 [![npm version](https://badge.fury.io/js/react-native-appsflyer.svg)](https://badge.fury.io/js/react-native-appsflyer)
 
@@ -28,8 +28,8 @@ This React Native Library uses the AppsFlyer 4.6.0 library for both iOS and Andr
 
 ## <a id="this-plugin-is-built-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v4.6.3**
-- Android AppsFlyerSDK **v4.6.5**
+- iOS AppsFlyerSDK **v4.7.1**
+- Android AppsFlyerSDK **v4.7.1**
 
 ## <a id="installation"> Installation
 
@@ -270,9 +270,10 @@ Read more about Uninstall register: [Appsflyer SDK support site](https://support
 
 #### <a id="track-app-uninstalls-android"> Android
 
- `setGCMProjectID(GCMProjectID): void`
+ ~~`setGCMProjectID(GCMProjectID): void`~~  
+  `enableUninstallTracking(GCMProjectID): void`
 
-Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.  
+Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.  (For Firebase its automatically retrieved from `google-services.json`)
 
 | parameter   | type                        | description |
 | ----------- |-----------------------------|--------------|
@@ -282,18 +283,33 @@ Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key 
 
 ```javascript
 
- setGCMProjectID(){
+ enableUninstallTracking(){
     const  gcmProjectId = "987186475229";
-    appsFlyer.setGCMProjectID(gcmProjectId,
+    appsFlyer.enableUninstallTracking(gcmProjectId,
         (gcmProjectID) => {
           //...
-        },
-        (error) => {
-          console.error(error);
         })
   }
+  ```
   
-```
+Alternatively if you have a GCM or Firebase token, you can supply it by using `updateServerUninstallToken` method:
+
+```javascript
+
+ updateServerUninstallToken(){
+
+    const  token = "xxxxxxxxxxxxx";
+
+    appsFlyer.updateServerUninstallToken(token,
+        (response) => {
+          this.setState( { ...this.state, tokenResponse: response });
+        })
+  }
+  ```
+  
+
+
+
 
 Read more about Android  Uninstall Tracking: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking) 
 
