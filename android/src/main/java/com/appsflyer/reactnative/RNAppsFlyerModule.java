@@ -237,12 +237,27 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     }
 
     @ReactMethod
+    @Deprecated
     public void setGCMProjectID(final String gcmProjectId,
                                 Callback successCallback,
                                 Callback errorCallback) 
     {
-        AppsFlyerLib.getInstance().setGCMProjectNumber(getReactApplicationContext(), gcmProjectId);
+        AppsFlyerLib.getInstance().setGCMProjectID(gcmProjectId);
         successCallback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void enableUninstallTracking(final String gcmProjectId,
+                                Callback successCallback)
+    {
+        AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectId);
+        successCallback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void updateServerUninstallToken(final String token,Callback callback){
+        AppsFlyerLib.getInstance().updateServerUninstallToken(getReactApplicationContext(), token);
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
@@ -250,6 +265,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         AppsFlyerLib.getInstance().setCustomerUserId(userId);
         callback.invoke(SUCCESS);
     }
+
 
     @ReactMethod
     public void setUserEmails(ReadableMap _options,

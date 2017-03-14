@@ -26,11 +26,13 @@ export default class demo extends Component {
 
      this.state = {
       initSdkResponse: "not initialized yet",
-      gcmProjectIDResponse: "not initialized yet"
+      gcmProjectIDResponse: "not called yet",
+      tokenResponse: "not called yet"
     };
 
-    this.initSdk = this.initSdk.bind(this);
-    this.setGCMProjectID = this.setGCMProjectID.bind(this);
+    this.initSdk                    = this.initSdk.bind(this);
+    this.enableUninstallTracking    = this.enableUninstallTracking.bind(this);
+    this.updateServerUninstallToken = this.updateServerUninstallToken.bind(this);
   }
 
 
@@ -53,16 +55,23 @@ export default class demo extends Component {
         })
   }
 
-  setGCMProjectID(){
+  enableUninstallTracking(){
 
     const  gcmProjectId = "997186475229";
 
-    appsFlyer.setGCMProjectID(gcmProjectId,
+    appsFlyer.enableUninstallTracking(gcmProjectId,
         (gcmProjectID) => {
           this.setState( { ...this.state, gcmProjectIDResponse: gcmProjectID });
-        },
-        (error) => {
-          console.error(error);
+        })
+  }
+
+  updateServerUninstallToken(){
+
+    const  token = "xxxxxxxxxxxxx";
+
+    appsFlyer.updateServerUninstallToken(token,
+        (response) => {
+          this.setState( { ...this.state, tokenResponse: response });
         })
   }
 
@@ -71,12 +80,12 @@ export default class demo extends Component {
     return (
         <View style={{
           flex: 1,
-          marginTop:40,
+          marginTop:10,
           flexDirection: 'column',
           justifyContent: 'flex-start', // 'center'
           alignItems: 'stretch' //'flex-start' //'center'
         }}>
-          <View>
+
 
             <View style={styles.api_wrapper}>
               <View style={{height: 60, width: 100, backgroundColor: 'powderblue'}}>
@@ -97,12 +106,11 @@ export default class demo extends Component {
 
             <AfBase></AfBase>
 
-
             <View style={styles.api_wrapper}>
               <View style={{height: 60, width: 100, backgroundColor: 'powderblue'}}>
                 <Button
                     style={styles.sdk_button}
-                    onPress={() => this.setGCMProjectID()}>
+                    onPress={() => this.enableUninstallTracking()}>
                   setGCMProjectID
                 </Button>
               </View>
@@ -113,7 +121,22 @@ export default class demo extends Component {
               </View>
             </View>
 
-          </View>
+            <View style={styles.api_wrapper}>
+              <View style={{height: 60, width: 100, backgroundColor: 'powderblue'}}>
+                <Button
+                    style={styles.sdk_button}
+                    onPress={() => this.updateServerUninstallToken()}>
+                  update Uninstall Token
+                </Button>
+              </View>
+              <View style={{height: 60,  flex: 1, justifyContent: 'flex-start', alignItems: 'stretch',  backgroundColor: 'skyblue'}}>
+                <Text style={styles.json_wrap}>
+                  {this.state.tokenResponse}
+                </Text>
+              </View>
+            </View>
+
+
         </View>
 
 
@@ -145,6 +168,7 @@ const styles = StyleSheet.create({
   },
   api_wrapper:{
     height: 60,
+    maxHeight:60,
     flex: 1,
     flexDirection: 'row',
     borderStyle: 'solid',

@@ -32,10 +32,6 @@ export default class demo extends Component {
       trackLocation: []
     };
 
-
-
-
-
     this.initSdk         = this.initSdk.bind(this);
     this.trackLocation   = this.trackLocation.bind(this);
   }
