@@ -271,13 +271,13 @@ Read more about Uninstall register: [Appsflyer SDK support site](https://support
 #### <a id="track-app-uninstalls-android"> Android
 
  ~~`setGCMProjectID(GCMProjectID): void`~~  
-  `enableUninstallTracking(GCMProjectID): void`
+  `enableUninstallTracking(GCMProjectNumber): void`
 
-Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.  (For Firebase its automatically retrieved from `google-services.json`)
+Set the GCM Project Number: AppsFlyer requires your Google Project Number to enable Uninstall Tracking.  (For Firebase it's automatically retrieved from `google-services.json`)
 
 | parameter   | type                        | description |
 | ----------- |-----------------------------|--------------|
-| `GCMProjectID`   | `String`                      | |
+| `GCMProjectNumber`   | `String`                      | |
 
 *Example:*
 
@@ -292,7 +292,7 @@ Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key 
   }
   ```
   
-Alternatively if you have a GCM or Firebase token, you can supply it by using `updateServerUninstallToken` method:
+Alternatively if you have a GCM or Firebase token, you can provide it by using `updateServerUninstallToken` method:
 
 ```javascript
 
