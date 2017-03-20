@@ -238,19 +238,19 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
 
     @ReactMethod
     @Deprecated
-    public void setGCMProjectID(final String gcmProjectId,
+    public void setGCMProjectNumber(final String gcmProjectNumber,
                                 Callback successCallback,
                                 Callback errorCallback) 
     {
-        AppsFlyerLib.getInstance().setGCMProjectID(gcmProjectId);
+        AppsFlyerLib.getInstance().setGCMProjectNumber(gcmProjectNumber);
         successCallback.invoke(SUCCESS);
     }
 
     @ReactMethod
-    public void enableUninstallTracking(final String gcmProjectId,
+    public void enableUninstallTracking(final String gcmProjectNumber,
                                 Callback successCallback)
     {
-        AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectId);
+        AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectNumber);
         successCallback.invoke(SUCCESS);
     }
 

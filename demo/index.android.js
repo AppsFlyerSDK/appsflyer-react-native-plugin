@@ -26,7 +26,7 @@ export default class demo extends Component {
 
      this.state = {
       initSdkResponse: "not initialized yet",
-      gcmProjectIDResponse: "not called yet",
+      gcmProjectNumberResponse: "not called yet",
       tokenResponse: "not called yet"
     };
 
@@ -57,11 +57,11 @@ export default class demo extends Component {
 
   enableUninstallTracking(){
 
-    const  gcmProjectId = "997186475229";
+    const  gcmProjectNumber = "997186475229";
 
-    appsFlyer.enableUninstallTracking(gcmProjectId,
+    appsFlyer.enableUninstallTracking(gcmProjectNumber,
         (gcmProjectID) => {
-          this.setState( { ...this.state, gcmProjectIDResponse: gcmProjectID });
+          this.setState( { ...this.state, gcmProjectNumberResponse: gcmProjectID });
         })
   }
 
@@ -116,7 +116,7 @@ export default class demo extends Component {
               </View>
               <View style={{height: 60,  flex: 1, justifyContent: 'flex-start', alignItems: 'stretch',  backgroundColor: 'skyblue'}}>
                 <Text style={styles.json_wrap}>
-                  {this.state.gcmProjectIDResponse}
+                  {this.state.gcmProjectNumberResponse}
                 </Text>
               </View>
             </View>

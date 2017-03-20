@@ -41,15 +41,15 @@ appsFlyer.getAppsFlyerUID = (callback) => {
 /**
 Deprecated
 */
-appsFlyer.setGCMProjectID = (gcmProjectId, successC, errorC) => {
-    return RNAppsFlyer.setGCMProjectID(gcmProjectId, successC, errorC);
+appsFlyer.setGCMProjectNumber = (gcmProjectNumber, successC, errorC) => {
+    return RNAppsFlyer.setGCMProjectNumber(gcmProjectNumber, successC, errorC);
 };
 
 /**
  * For Android only (GCM). iOS uses 'didRegisterForRemoteNotificationsWithDeviceToken' in AppDelegate.m 
  */
-appsFlyer.enableUninstallTracking = (gcmProjectId, successC) => {
-    return RNAppsFlyer.enableUninstallTracking(gcmProjectId, successC);
+appsFlyer.enableUninstallTracking = (gcmProjectNumber, successC) => {
+    return RNAppsFlyer.enableUninstallTracking(gcmProjectNumber, successC);
 };
 
 /**
