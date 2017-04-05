@@ -2,7 +2,7 @@
 <img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="200">
 
 # react-native-appsflyer
-This React Native Library uses the AppsFlyer 4.7.1 library for Android and 4.7.3 for iOS (latest releases)
+This React Native Library for AppsFlyer SDK
 
 [![npm version](https://badge.fury.io/js/react-native-appsflyer.svg)](https://badge.fury.io/js/react-native-appsflyer)
 
@@ -36,7 +36,7 @@ In order for us to provide optimal support, we would kindly ask you to submit an
 
 ## <a id="this-plugin-is-built-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v4.7.1**
+- iOS AppsFlyerSDK **v4.7.3**
 - Android AppsFlyerSDK **v4.7.1**
 
 ## <a id="installation"> Installation
