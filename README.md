@@ -6,6 +6,14 @@ This React Native Library uses the AppsFlyer 4.7.1 library for both iOS and Andr
 
 [![npm version](https://badge.fury.io/js/react-native-appsflyer.svg)](https://badge.fury.io/js/react-native-appsflyer)
 
+----------
+In order for us to provide optimal support, we would kindly ask you to submit any issues to support@appsflyer.com
+
+*When submitting an issue please specify your AppsFlyer sign-up (account) email , your app ID , production steps, logs, code snippets and any additional relevant information.*
+
+----------
+
+
 ## Table of content
 
 - [Supported Platforms](#this-plugin-is-built-for)
