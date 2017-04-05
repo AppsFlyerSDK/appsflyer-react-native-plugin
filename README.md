@@ -242,14 +242,13 @@ to track ROI (Return on Investment) and LTV (Lifetime Value).
       "af_revenue": "2"
   };
 
- appsFlyer.trackEvent(eventName, eventValues, errorC, successC) => {
+ appsFlyer.trackEvent(eventName, eventValues,
      (result) => {
                 //...
             },
       (error) => {
           console.error(error);
-      }
- })
+      })
     
 ```
 
