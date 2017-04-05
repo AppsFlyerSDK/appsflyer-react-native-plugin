@@ -196,7 +196,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     NSDictionary* errorMessage = @{
                                    @"status": afFailure,
                                    @"type": afOnInstallConversionFailure,
-                                   @"data": _errorMessage
+                                   @"data": _errorMessage.localizedDescription
                                    };
     
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:errorMessage waitUntilDone:NO];
@@ -219,7 +219,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     NSDictionary* errorMessage = @{
                                    @"status": afFailure,
                                    @"type": afOnAttributionFailure,
-                                   @"data": _errorMessage
+                                   @"data": _errorMessage.localizedDescription
                                    };
 
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:errorMessage waitUntilDone:NO];
@@ -229,24 +229,29 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 -(void) handleCallback:(NSDictionary *) message{
     NSError *error;
     
-    NSData *jsonMessage = [NSJSONSerialization dataWithJSONObject:message
-                                                          options:0
-                                                            error:&error];
-    if (jsonMessage) {
-        NSString *jsonMessageStr = [[NSString alloc] initWithBytes:[jsonMessage bytes] length:[jsonMessage length] encoding:NSUTF8StringEncoding];
-        
-        NSString* status = (NSString*)[message objectForKey: @"status"];
-        
-        if([status isEqualToString:afSuccess]){
-           [self reportOnSuccess:jsonMessageStr];
+    if ([NSJSONSerialization isValidJSONObject:message]) {
+        NSData *jsonMessage = [NSJSONSerialization dataWithJSONObject:message
+                                                              options:0
+                                                                error:&error];
+        if (jsonMessage) {
+            NSString *jsonMessageStr = [[NSString alloc] initWithBytes:[jsonMessage bytes] length:[jsonMessage length] encoding:NSUTF8StringEncoding];
+            
+            NSString* status = (NSString*)[message objectForKey: @"status"];
+            
+            if([status isEqualToString:afSuccess]){
+                [self reportOnSuccess:jsonMessageStr];
+            }
+            else{
+                [self reportOnFailure:jsonMessageStr];
+            }
+            
+            NSLog(@"jsonMessageStr = %@",jsonMessageStr);
+        } else {
+            NSLog(@"%@",error);
         }
-        else{
-            [self reportOnFailure:jsonMessageStr];
-        }
-        
-        NSLog(@"jsonMessageStr = %@",jsonMessageStr);
-    } else {
-        NSLog(@"%@",error);
+    }
+    else{
+        [self reportOnFailure:@"failed to parse Response"];
     }
 }
 
