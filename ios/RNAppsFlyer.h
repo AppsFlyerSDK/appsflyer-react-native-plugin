@@ -1,6 +1,6 @@
 
 #import <React/RCTBridgeModule.h>  //for react-native ver >= 0.40
-//#import "RCTBridgeModule.h"        for react-native ver < 0.40
+//#import "RCTBridgeModule.h"        //for react-native ver < 0.40
 
 @interface RNAppsFlyer : NSObject <RCTBridgeModule,AppsFlyerTrackerDelegate>
 

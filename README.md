@@ -73,13 +73,13 @@ end
 3. In your project **build phase** ➜ **Link binary with libraries** ➜ add `libRNAppsFlyer.a`. 
 Run your project (`Cmd+R`) or through CLI run: `react-native run-ios`
 
-#####**Breaking Changes for react-native >= 0.40.0:**
+##### **Breaking Changes for react-native >= 0.40.0:**
 
 In `RNAppsFlyer.h`:
 
 ```obj-c
 #import <React/RCTBridgeModule.h>  //for react-native ver >= 0.40
-//#import "RCTBridgeModule.h"        for react-native ver < 0.40
+//#import "RCTBridgeModule.h"        //for react-native ver < 0.40
 ```
 
 In `RNAppsFlyer.m`:
@@ -97,7 +97,7 @@ In `RNAppsFlyer.m`:
 ### <a id="installation_android"> Android
 
 ##### **android/app/build.gradle**
-1. Add the project to your dependencies
+Add the project to your dependencies
 ```gradle
 dependencies {
     ...
@@ -107,7 +107,7 @@ dependencies {
 
 ##### **android/settings.gradle**
 
-1. Add the project
+Add the project
 
 ```gradle
 include ':react-native-appsflyer'
@@ -173,27 +173,26 @@ initializes the SDK.
 *Example:*
 
 ```javascript
- let options = {
-       devKey:  'WdpTVAcYwmxsaQ4WeTspmh',
-       appId: "975313579",
-       isDebug: true
-     };
+const options = {
+  devKey: "WdpTVAcYwmxsaQ4WeTspmh",
+  appId: "975313579",
+  isDebug: true
+};
 
-    appsFlyer.initSdk(options,
-        (result) => {
-      console.log(result)
-        },
-        (error) => {
-      console.error(error);
-        }
-    )
+appsFlyer.initSdk(options,
+  (result) => {
+    console.log(result);
+  },
+  (error) => {
+    console.error(error);
+  }
+)
 ```
 
 ---
 
 
-##### <a id="setCustomerUserId"> **`setCustomerUserId(customerUserId,callback): void`**
-
+##### <a id="setCustomerUserId"> **`setCustomerUserId(customerUserId, callback): void`**
 
 Setting your own Custom ID enables you to cross-reference your own unique ID with AppsFlyer’s user ID and the other devices’ IDs. This ID is available in AppsFlyer CSV reports along with postbacks APIs for cross-referencing with you internal IDs.
  
@@ -207,17 +206,18 @@ Setting your own Custom ID enables you to cross-reference your own unique ID wit
 *Example:*
 
 ```javascript
-        const  userId = "some_user_id";
-        appsFlyer.setCustomerUserId(userId,
-            (response) => {
-                //..
-            })
-   
+const userId = "some_user_id";
+
+appsFlyer.setCustomerUserId(userId,
+  (response) => {
+    //..
+  }
+); 
 ```
 ---
 
 
-#####<a id="trackEvent"> **`appsFlyer.trackEvent(eventName, eventValues, errorC, successC): void`**
+##### <a id="trackEvent"> **`appsFlyer.trackEvent(eventName, eventValues, errorC, successC): void`**
 
 
 - These in-app events help you track how loyal users discover your app, and attribute them to specific 
@@ -234,21 +234,20 @@ to track ROI (Return on Investment) and LTV (Lifetime Value).
 *Example:*
 
 ```javascript
+const eventName = "af_add_to_cart";
+const eventValues = {
+  "af_content_id": "id123",
+  "af_currency":"USD",
+  "af_revenue": "2"
+};
 
- const eventName = "af_add_to_cart";
- const eventValues = {
-      "af_content_id": "id123",
-      "af_currency":"USD",
-      "af_revenue": "2"
-  };
-
- appsFlyer.trackEvent(eventName, eventValues, errorC, successC) => {
-     (result) => {
-                //...
-            },
-      (error) => {
-          console.error(error);
-      }
+appsFlyer.trackEvent(eventName, eventValues, errorC, successC) => {
+  (result) => {
+    //...
+  },
+  (error) => {
+    console.error(error);
+  }
  })
     
 ```
@@ -290,30 +289,30 @@ Set the GCM Project Number: AppsFlyer requires your Google Project Number to ena
 *Example:*
 
 ```javascript
+enableUninstallTracking() {
+  const gcmProjectId = "987186475229";
 
- enableUninstallTracking(){
-    const  gcmProjectId = "987186475229";
-    appsFlyer.enableUninstallTracking(gcmProjectId,
-        (gcmProjectID) => {
-          //...
-        })
-  }
-  ```
+  appsFlyer.enableUninstallTracking(gcmProjectId,
+    (gcmProjectID) => {
+      //...
+    }
+  );
+}
+```
   
 Alternatively if you have a GCM or Firebase token, you can provide it by using `updateServerUninstallToken` method:
 
 ```javascript
+updateServerUninstallToken() {
+  const token = "xxxxxxxxxxxxx";
 
- updateServerUninstallToken(){
-
-    const  token = "xxxxxxxxxxxxx";
-
-    appsFlyer.updateServerUninstallToken(token,
-        (response) => {
-          this.setState( { ...this.state, tokenResponse: response });
-        })
-  }
-  ```
+  appsFlyer.updateServerUninstallToken(token,
+    (response) => {
+      this.setState({ ...this.state, tokenResponse: response });
+    }
+  );
+}
+```
   
 
 
@@ -324,7 +323,7 @@ Read more about Android  Uninstall Tracking: [Appsflyer SDK support site](https:
 ---
 
 
-#####**`appsFlyer.onInstallConversionData(callback): function:unregister`** 
+##### **`appsFlyer.onInstallConversionData(callback): function:unregister`** 
 
 Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking). 
  Read more: [Android](http://support.appsflyer.com/entries/69796693-Accessing-AppsFlyer-Attribution-Conversion-Data-from-the-SDK-Deferred-Deep-linking-), [iOS](http://support.appsflyer.com/entries/22904293-Testing-AppsFlyer-iOS-SDK-Integration-Before-Submitting-to-the-App-Store-)  
@@ -361,10 +360,10 @@ Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplin
 
 ```javascript
 this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
-            (data) => {
-                console.log(data);               
-            }
-        );
+  (data) => {
+    console.log(data);
+  }
+);
 ```
 
 The `appsFlyer.onInstallConversionData` returns function to  unregister this event listener. Actually it calls `NativeAppEventEmitter.remove()`
@@ -373,16 +372,15 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
 
 ```javascript
 componentWillUnmount() {
-        if(this.onInstallConversionDataCanceller){
-            this.onInstallConversionDataCanceller();
-        }
-    }
-
+  if(this.onInstallConversionDataCanceller){
+    this.onInstallConversionDataCanceller();
+  }
+}
 ```
 
 ---
 
-#####**`appsFlyer.getAppsFlyerUID(callback): void`**
+##### **`appsFlyer.getAppsFlyerUID(callback): void`**
 
 
 Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID used by AppsFlyer in Reports and APIs.
@@ -392,20 +390,20 @@ Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID 
 *Example:*
 
 ```javascript
- appsFlyer.getAppsFlyerUID((error, appsFlyerUID) => {
-      if (error) {
-        console.error(error);
-      } else {
-        console.log("on getAppsFlyerUID: " + appsFlyerUID);
-      }
-    })
+appsFlyer.getAppsFlyerUID((error, appsFlyerUID) => {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log("on getAppsFlyerUID: " + appsFlyerUID);
+  }
+});
 ```
 
 ---
 
 
 
-#####**`appsFlyer.trackLocation(longitude, latitude, callback(error, coords): void`** (**iOS only**)
+##### **`appsFlyer.trackLocation(longitude, latitude, callback(error, coords): void`** (**iOS only**)
 
 
 Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID used by AppsFlyer in Reports and APIs.
@@ -419,23 +417,21 @@ Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID 
 *Example:*
 
 ```javascript
-
- const  latitude = -18.406655;
- const  longitude = 46.406250;
+const latitude = -18.406655;
+const longitude = 46.406250;
  
- appsFlyer.trackLocation(longitude, latitude, (error, coords) => {
-      if (error) {
-        console.error(error);
-      } else {
-        this.setState( { ...this.state, trackLocation: coords });
-      }
-    })
-})
+appsFlyer.trackLocation(longitude, latitude, (error, coords) => {
+  if (error) {
+    console.error(error);
+  } else {
+    this.setState({ ...this.state, trackLocation: coords });
+  }
+});
 ```
 
 ---
 
-#####<a id="setUserEmails"> **`appsFlyer.setUserEmails(options, errorC, successC): void`**
+##### <a id="setUserEmails"> **`appsFlyer.setUserEmails(options, errorC, successC): void`**
 
 AppsFlyer enables you to report one or more of the device’s associated email addresses. You must collect the email addresses and report it to AppsFlyer according to your required encryption method.
 More info you can find on [AppsFlyer-SDK-Integration-Android](https://support.appsflyer.com/hc/en-us/articles/207032126-AppsFlyer-SDK-Integration-Android) and [AppsFlyer-SDK-Integration-iOS](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS)
@@ -457,29 +453,29 @@ More info you can find on [AppsFlyer-SDK-Integration-Android](https://support.ap
 *Example:*
 
 ```javascript
+const options = {
+  "emailsCryptType": 2,
+  "emails": [
+    "user1@gmail.com",
+    "user2@gmail.com"
+  ]
+};
 
-  const options = {
-            "emailsCryptType": 2,
-            "emails":[
-                     "user1@gmail.com",
-                     "user2@gmail.com"
-                      ]
-        };
-
-        appsFlyer.setUserEmails(options,
-            (response) => {
-                this.setState( { ...this.state, setUserEmailsResponse: response });
-            },
-            (error) => {
-                console.error(error);
-            })
+appsFlyer.setUserEmails(options,
+  (response) => {
+    this.setState({ ...this.state, setUserEmailsResponse: response });
+  },
+  (error) => {
+    console.error(error);
+  }
+);
     
 ```
 
 ---
 
 
-##Demo
+## Demo
 
 This plugin has a `demo` project bundled with it. To give it a try , clone this repo and from root a.e. `react-native-appsflyer` execute the following:
 
