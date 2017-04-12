@@ -246,19 +246,19 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         successCallback.invoke(SUCCESS);
     }
 
-    @ReactMethod
-    public void enableUninstallTracking(final String gcmProjectNumber,
-                                Callback successCallback)
-    {
-        AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectNumber);
-        successCallback.invoke(SUCCESS);
-    }
-
-    @ReactMethod
-    public void updateServerUninstallToken(final String token,Callback callback){
-        AppsFlyerLib.getInstance().updateServerUninstallToken(getReactApplicationContext(), token);
-        callback.invoke(SUCCESS);
-    }
+//    @ReactMethod
+//    public void enableUninstallTracking(final String gcmProjectNumber,
+//                                Callback successCallback)
+//    {
+//        AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectNumber);
+//        successCallback.invoke(SUCCESS);
+//    }
+//
+//    @ReactMethod
+//    public void updateServerUninstallToken(final String token,Callback callback){
+//        AppsFlyerLib.getInstance().updateServerUninstallToken(getReactApplicationContext(), token);
+//        callback.invoke(SUCCESS);
+//    }
 
     @ReactMethod
     public void setCustomerUserId(final String userId,Callback callback){
