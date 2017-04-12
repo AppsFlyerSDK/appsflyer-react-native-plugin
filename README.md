@@ -37,7 +37,7 @@ In order for us to provide optimal support, we would kindly ask you to submit an
 ## <a id="this-plugin-is-built-for"> This plugin is built for
 
 - iOS AppsFlyerSDK **v4.7.3**
-- Android AppsFlyerSDK **v4.7.1**
+- Android AppsFlyerSDK **v4.6.7**
 
 ## <a id="installation"> Installation
 
@@ -277,46 +277,30 @@ Read more about Uninstall register: [Appsflyer SDK support site](https://support
 
 #### <a id="track-app-uninstalls-android"> Android
 
- ~~`setGCMProjectID(GCMProjectID): void`~~  
-  `enableUninstallTracking(GCMProjectNumber): void`
+ `setGCMProjectID(GCMProjectID): void`
 
-Set the GCM Project Number: AppsFlyer requires your Google Project Number to enable Uninstall Tracking.  (For Firebase it's automatically retrieved from `google-services.json`)
+Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.  
 
 | parameter   | type                        | description |
 | ----------- |-----------------------------|--------------|
-| `GCMProjectNumber`   | `String`                      | |
+| `GCMProjectID`   | `String`                      | |
 
 *Example:*
 
 ```javascript
-enableUninstallTracking() {
-  const gcmProjectId = "987186475229";
 
-  appsFlyer.enableUninstallTracking(gcmProjectId,
-    (gcmProjectID) => {
-      //...
-    }
-  );
-}
-```
+ setGCMProjectID(){
+    const  gcmProjectId = "987186475229";
+    appsFlyer.setGCMProjectID(gcmProjectId,
+        (gcmProjectID) => {
+          //...
+        },
+        (error) => {
+          console.error(error);
+        })
+  }
   
-Alternatively if you have a GCM or Firebase token, you can provide it by using `updateServerUninstallToken` method:
-
-```javascript
-updateServerUninstallToken() {
-  const token = "xxxxxxxxxxxxx";
-
-  appsFlyer.updateServerUninstallToken(token,
-    (response) => {
-      this.setState({ ...this.state, tokenResponse: response });
-    }
-  );
-}
 ```
-  
-
-
-
 
 Read more about Android  Uninstall Tracking: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking) 
 
