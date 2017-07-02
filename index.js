@@ -38,6 +38,10 @@ appsFlyer.getAppsFlyerUID = (callback) => {
     return RNAppsFlyer.getAppsFlyerUID(callback);
 };
 
+appsFlyer.sendDeepLinkData = (callback) => {
+    return RNAppsFlyer.sendDeepLinkData(callback);
+};
+
 /**
 Deprecated
 */

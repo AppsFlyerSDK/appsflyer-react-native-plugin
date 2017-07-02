@@ -31,6 +31,7 @@ In order for us to provide optimal support, we would kindly ask you to submit an
  - [onInstallConversionData](#appsflyeroninstallconversiondatacallback-functionunregister)
  - [getAppsFlyerUID](#appsflyergetappsflyeruidcallback-void)
  - [trackLocation (ios only)](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
+ - [sendDeepLinkData (Android only)](#senddeeplinkdata-android-only)
 - [Demo](#demo) 
 
 
@@ -277,7 +278,7 @@ Read more about Uninstall register: [Appsflyer SDK support site](https://support
 
 #### <a id="track-app-uninstalls-android"> Android
 
- `setGCMProjectID(GCMProjectID): void`
+ `enableUninstallTracking(GCMProjectID): void`
 
 Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.  
 
@@ -289,14 +290,11 @@ Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key 
 
 ```javascript
 
- setGCMProjectID(){
-    const  gcmProjectId = "987186475229";
-    appsFlyer.setGCMProjectID(gcmProjectId,
-        (gcmProjectID) => {
+ enableUninstallTracking(){
+    const  gcmProjectNum = "987186475229";
+    appsFlyer.enableUninstallTracking(gcmProjectNum,
+        (success) => {
           //...
-        },
-        (error) => {
-          console.error(error);
         })
   }
   
@@ -412,6 +410,28 @@ appsFlyer.trackLocation(longitude, latitude, (error, coords) => {
   }
 });
 ```
+
+---
+
+#### <a id="senddeeplinkdata-android-only"> **`appsFlyer.sendDeepLinkData(String url): void`**
+
+Report Deep Links for Re-Targeting Attribution (Android).
+This method should be called when an app is opened using a deep link.
+
+*Example:*
+```javascript
+componentDidMount() {
+  Linking.getInitialURL().then((url) => {
+    if (appsFlyer) {
+        appsFlyer.sendDeepLinkData(url); // Report Deep Link to AppsFlyer
+        // Additional Deep Link Logic Here ...
+      }
+  }).catch(err => console.error('An error occurred', err));
+}
+```
+
+More about Deep Links in React-Native: [React-Native Linking](https://facebook.github.io/react-native/docs/linking.html)
+More about Deep Links in Android: [Android Deep Linking , Adding Filters](https://developer.android.com/training/app-indexing/deep-linking.html#adding-filters)
 
 ---
 

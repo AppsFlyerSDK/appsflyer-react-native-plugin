@@ -16,7 +16,8 @@ import {
     AppRegistry,
     StyleSheet,
     Text,
-    View
+    View,
+    Linking
 } from 'react-native';
 
 export default class demo extends Component {
@@ -36,7 +37,14 @@ export default class demo extends Component {
   }
 
 
-
+   // Handle DeepLink URL
+  componentDidMount() {
+     Linking.getInitialURL().then((url) => {
+      if (appsFlyer) {
+        appsFlyer.sendDeepLinkData(url); // Report Deep Link to AppsFlyer
+      }
+  }).catch(err => console.error('An error occurred', err));
+  }
 
 
   initSdk(){
@@ -61,7 +69,7 @@ export default class demo extends Component {
 
     appsFlyer.enableUninstallTracking(gcmProjectNumber,
         (gcmProjectID) => {
-          this.setState( { ...this.state, gcmProjectNumberResponse: gcmProjectID });
+           this.setState( { ...this.state, gcmProjectNumberResponse: gcmProjectID });
         })
   }
 
