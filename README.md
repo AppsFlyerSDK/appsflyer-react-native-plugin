@@ -37,8 +37,8 @@ In order for us to provide optimal support, we would kindly ask you to submit an
 
 ## <a id="this-plugin-is-built-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v4.7.3**
-- Android AppsFlyerSDK **v4.6.7**
+- iOS AppsFlyerSDK **v4.7.11**
+- Android AppsFlyerSDK **v4.7.4**
 
 ## <a id="installation"> Installation
 
