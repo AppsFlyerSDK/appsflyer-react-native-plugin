@@ -218,7 +218,7 @@ appsFlyer.setCustomerUserId(userId,
 ---
 
 
-##### <a id="trackEvent"> **`appsFlyer.trackEvent(eventName, eventValues, errorC, successC): void`**
+##### <a id="trackEvent"> **`appsFlyer.trackEvent(eventName, eventValues, successC, errorC): void`**
 
 
 - These in-app events help you track how loyal users discover your app, and attribute them to specific 
@@ -242,7 +242,7 @@ const eventValues = {
   "af_revenue": "2"
 };
 
-appsFlyer.trackEvent(eventName, eventValues, errorC, successC) => {
+appsFlyer.trackEvent(eventName, eventValues, successC, errorC) => {
   (result) => {
     //...
   },
