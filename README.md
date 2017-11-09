@@ -2,14 +2,14 @@
 <img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="200">
 
 # react-native-appsflyer
-This React Native Library for AppsFlyer SDK
+The React Native Library for AppsFlyer SDK
 
 [![npm version](https://badge.fury.io/js/react-native-appsflyer.svg)](https://badge.fury.io/js/react-native-appsflyer)
 
 ----------
 In order for us to provide optimal support, we would kindly ask you to submit any issues to support@appsflyer.com
 
-*When submitting an issue please specify your AppsFlyer sign-up (account) email , your app ID , production steps, logs, code snippets and any additional relevant information.*
+*When submitting an issue please specify your AppsFlyer sign-up (account) email, your app ID, production steps, logs, code snippets and any additional relevant information.*
 
 ----------
 
@@ -59,7 +59,7 @@ target 'demo' do
 end
 ```
 
-  Don't use CocoaPods? please see their [DOCS](https://guides.cocoapods.org/using/getting-started.html) . 
+  Don't use CocoaPods? Please see their [DOCS](https://guides.cocoapods.org/using/getting-started.html).
 
 
 2. Create *bridge* between your application and `appsFlyerFramework`:
@@ -193,7 +193,7 @@ appsFlyer.initSdk(options,
 ---
 
 
-##### <a id="setCustomerUserId"> **`setCustomerUserId(customerUserId, callback): void`**
+##### <a id="setCustomerUserId"> **`appsFlyer.setCustomerUserId(customerUserId, callback): void`**
 
 Setting your own Custom ID enables you to cross-reference your own unique ID with AppsFlyer’s user ID and the other devices’ IDs. This ID is available in AppsFlyer CSV reports along with postbacks APIs for cross-referencing with you internal IDs.
  
@@ -267,6 +267,10 @@ AppsFlyer enables you to track app uninstalls. To handle notifications it requir
 *Example:*
 
 ```objective-c
+@import AppsFlyerLib;
+
+...
+
 - (void)application:(UIApplication ​*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *​)deviceToken {
    // notify AppsFlyerTracker
    [[AppsFlyerTracker sharedTracker] registerUninstall:deviceToken];
@@ -278,7 +282,7 @@ Read more about Uninstall register: [Appsflyer SDK support site](https://support
 
 #### <a id="track-app-uninstalls-android"> Android
 
- `enableUninstallTracking(GCMProjectID): void`
+ `appsFlyer.enableUninstallTracking(GCMProjectID): void` (**Android only**)
 
 Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.  
 
@@ -368,6 +372,10 @@ componentWillUnmount() {
 Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID used by AppsFlyer in Reports and APIs.
 
 
+| parameter   | type                        | description |
+| ----------- |-----------------------------|--------------|
+| `error` | `String`                    | Error callback - called on `getAppsFlyerUID` failure |
+| `appsFlyerUID` | `string`                    | The AppsFlyer Device ID |
 
 *Example:*
 
@@ -413,7 +421,7 @@ appsFlyer.trackLocation(longitude, latitude, (error, coords) => {
 
 ---
 
-#### <a id="senddeeplinkdata-android-only"> **`appsFlyer.sendDeepLinkData(String url): void`**
+##### <a id="senddeeplinkdata-android-only"> **`appsFlyer.sendDeepLinkData(String url): void`** (**Android only**)
 
 Report Deep Links for Re-Targeting Attribution (Android).
 This method should be called when an app is opened using a deep link.
