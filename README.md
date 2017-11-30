@@ -352,6 +352,19 @@ this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
 );
 ```
 
+Note that this only works when you have set the trackAppLaunch event in your AppDelegate.m
+
+```objective-c
+@import AppsFlyerLib;
+
+...
+
+- (void)applicationDidBecomeActive:(UIApplication *)application { 
+         // Track Installs, updates & sessions(app opens) (You must include this API to enable tracking) 
+         [[AppsFlyerTracker sharedTracker] trackAppLaunch]; 
+         // your other code here.... }
+```
+
 The `appsFlyer.onInstallConversionData` returns function to  unregister this event listener. Actually it calls `NativeAppEventEmitter.remove()`
 
 *Example:*
