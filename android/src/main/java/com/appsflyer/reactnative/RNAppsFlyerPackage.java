@@ -20,6 +20,11 @@ public class RNAppsFlyerPackage implements ReactPackage {
         this.application = application;
     }
 
+
+    public List<Class<? extends JavaScriptModule>> createJSModules() {
+      return Collections.emptyList();
+    }
+
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
       return Arrays.<NativeModule>asList(new RNAppsFlyerModule(reactContext, this.application));
