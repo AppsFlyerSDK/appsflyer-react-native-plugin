@@ -55,7 +55,7 @@ With CocoaPods, please see their [DOCS](https://guides.cocoapods.org/using/getti
 
   This assumes your `Podfile` is located in `ios` directory.
 
-  You must also have the React dependencies defined in the Podfile as described [here](http://facebook.github.io/react-native/releases/0.42/docs/troubleshooting.html#missing-libraries-for-react).
+  You must also have the React dependencies defined in the Podfile as described [here](https://facebook.github.io/react-native/docs/next/troubleshooting.html#missing-libraries-for-react).
 
 2. Run `pod install` (inside `ios` directory).
 
