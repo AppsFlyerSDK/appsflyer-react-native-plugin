@@ -18,8 +18,8 @@ In order for us to provide optimal support, we would kindly ask you to submit an
 
 - [Supported Platforms](#this-plugin-is-built-for)
 - [Installation](#installation)
- - [iOS](#installation_ios) 
- - [Android](#installation_android)
+     - [iOS](#installation_ios) 
+     - [Android](#installation_android)
 - [API Methods](#api-methods) 
  - [initSdk](#initSdk) 
  - [setCustomerUserId](#setCustomerUserId)
