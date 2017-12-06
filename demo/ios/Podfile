@@ -1,4 +1,5 @@
-use_frameworks!
+#use_frameworks!
 target 'demo' do
-  pod 'AppsFlyerFramework'
+  pod 'react-native-appsflyer',
+      :path => '../node_modules/react-native-appsflyer'
 end

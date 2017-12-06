@@ -37,8 +37,8 @@ In order for us to provide optimal support, we would kindly ask you to submit an
 
 ## <a id="this-plugin-is-built-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v4.7.11**
-- Android AppsFlyerSDK **v4.7.4**
+- iOS AppsFlyerSDK 
+- Android AppsFlyerSDK
 
 ## <a id="installation"> Installation
 
@@ -53,16 +53,19 @@ In order for us to provide optimal support, we would kindly ask you to submit an
 Example:
      
 ```
-use_frameworks!
-target 'demo' do
-  pod 'AppsFlyerFramework'
-end
+  pod 'react-native-appsflyer',
+      :path => '../node_modules/react-native-appsflyer'
 ```
 
-  Don't use CocoaPods? Please see their [DOCS](https://guides.cocoapods.org/using/getting-started.html).
+  This assumes your `Podfile` is located in `ios` directory.
 
+  You must also have the React dependencies defined in the Podfile as described [here](https://facebook.github.io/react-native/docs/next/troubleshooting.html#missing-libraries-for-react).
 
-2. Create *bridge* between your application and `appsFlyerFramework`:
+2. Run `pod install` (inside `ios` directory).
+
+### Manually:
+
+1. Create *bridge* between your application and `appsFlyerFramework`:
   In XCode ➜ project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
   Go to `node_modules` ➜ `react-native-appsflyer` and add `RNAppsFlyer.xcodeproj`
    Build your project, It will generate `libRNAppsFlyer.a` file: 
@@ -71,7 +74,7 @@ end
   
      
 
-3. In your project **build phase** ➜ **Link binary with libraries** ➜ add `libRNAppsFlyer.a`. 
+2. In your project **build phase** ➜ **Link binary with libraries** ➜ add `libRNAppsFlyer.a`. 
 Run your project (`Cmd+R`) or through CLI run: `react-native run-ios`
 
 ##### **Breaking Changes for react-native >= 0.40.0:**
