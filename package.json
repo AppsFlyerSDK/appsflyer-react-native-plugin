@@ -7,7 +7,7 @@
     "demo.ios": "cd demo; react-native run-ios",
     "demo.android": "cd demo; react-native run-android",
     "ios-pod": "cd demo/ios; pod install",
-    "lint": "eslint ./*.js",
+    "lint": "eslint ./*.js ./demo/*.js",
     "preparedemo": "cd demo; npm uninstall react-native-appsflyer --save; npm install .. --save",
     "setup": "cd demo; npm install; cd ..; npm run preparedemo;",
     "test": "echo \"Error: no test specified\" && exit 1"
