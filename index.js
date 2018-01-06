@@ -46,6 +46,8 @@ appsFlyer.sendDeepLinkData = (callback) => {
 Deprecated
 */
 appsFlyer.setGCMProjectNumber = (gcmProjectNumber, successC, errorC) => {
+    console.warn("The AppsFlyer setGCMProjectNumber method is deprecated");
+
     return RNAppsFlyer.setGCMProjectNumber(gcmProjectNumber, successC, errorC);
 };
 
