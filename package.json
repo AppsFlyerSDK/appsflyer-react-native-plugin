@@ -7,6 +7,7 @@
     "demo.ios": "cd demo; react-native run-ios",
     "demo.android": "cd demo; react-native run-android",
     "ios-pod": "cd demo/ios; pod install",
+    "lint": "eslint ./*.js",
     "preparedemo": "cd demo; npm uninstall react-native-appsflyer --save; npm install .. --save",
     "setup": "cd demo; npm install; cd ..; npm run preparedemo;",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -29,5 +30,13 @@
   ],
   "bugs": {
     "url": "https://github.com/AppsFlyerSDK/react-native-appsflyer/issues"
+  },
+  "devDependencies": {
+    "eslint": "^4.14.0",
+    "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1"
   }
 }
