@@ -90,7 +90,7 @@ export default class demo extends Component {
           </View>
         </View>
 
-        <AfBase></AfBase>
+        <AfBase />
 
         <View style={styles.api_wrapper}>
           <View style={{height: 60, width: 100, backgroundColor: 'powderblue'}}>
@@ -100,7 +100,7 @@ export default class demo extends Component {
                   TrackLocation
             </Button>
           </View>
-          <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'stretch', backgroundColor: 'skyblue'}}>
+          <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'stretch', backgroundColor: 'skyblue'}}>
             <Text style={styles.json_wrap}>
               { JSON.stringify(this.state.trackLocation, null) }
             </Text>

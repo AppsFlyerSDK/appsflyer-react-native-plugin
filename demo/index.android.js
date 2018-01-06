@@ -103,7 +103,7 @@ export default class demo extends Component {
           </View>
         </View>
 
-        <AfBase></AfBase>
+        <AfBase />
 
         <View style={styles.api_wrapper}>
           <View style={{height: 60, width: 100, backgroundColor: 'powderblue'}}>

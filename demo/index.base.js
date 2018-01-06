@@ -13,7 +13,6 @@ import appsFlyer from 'react-native-appsflyer'
 import Button from 'react-native-button'
 
 import {
-  AppRegistry,
   StyleSheet,
   Text,
   View
@@ -35,7 +34,7 @@ export default class AfBase extends Component {
     this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
       (data) => {
         console.log(data)
-        alert(JSON.stringify(data))
+        alert(JSON.stringify(data)) // eslint-disable-line no-undef
       }
     )
 
@@ -118,7 +117,7 @@ export default class AfBase extends Component {
                                 TrackEvent
             </Button>
           </View>
-          <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'stretch', backgroundColor: 'skyblue'}}>
+          <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'stretch', backgroundColor: 'skyblue'}}>
             <Text style={styles.json_wrap}>
               { JSON.stringify(this.state.trackEventResponse, null) }
             </Text>
@@ -134,7 +133,7 @@ export default class AfBase extends Component {
                                 getAppsFlyerUID
             </Button>
           </View>
-          <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'stretch', backgroundColor: 'skyblue'}}>
+          <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'stretch', backgroundColor: 'skyblue'}}>
             <Text style={styles.json_wrap}>
               { JSON.stringify(this.state.appsFlyerUID, null) }
             </Text>
@@ -149,7 +148,7 @@ export default class AfBase extends Component {
                                 setCustomerUserId
             </Button>
           </View>
-          <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'stretch', backgroundColor: 'skyblue'}}>
+          <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'stretch', backgroundColor: 'skyblue'}}>
             <Text style={styles.json_wrap}>
               { JSON.stringify(this.state.setCustomerUserIdResponse, null) }
             </Text>
@@ -164,7 +163,7 @@ export default class AfBase extends Component {
                                 setUserEmails
             </Button>
           </View>
-          <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'stretch', backgroundColor: 'skyblue'}}>
+          <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'stretch', backgroundColor: 'skyblue'}}>
             <Text style={styles.json_wrap}>
               { JSON.stringify(this.state.setUserEmailsResponse, null) }
             </Text>
