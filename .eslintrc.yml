@@ -1,1 +1,1 @@
-extends: standard
+extends: [standard, standard-react]
