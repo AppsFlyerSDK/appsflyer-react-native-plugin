@@ -66,7 +66,7 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
 
 
 
-appsFlyer.setCustomerUserId = (userId, successC,) => {
+appsFlyer.setCustomerUserId = (userId, successC) => {
     return RNAppsFlyer.setCustomerUserId(userId, successC);
 };
 
