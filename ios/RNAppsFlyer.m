@@ -9,6 +9,7 @@
 
 #import "AppsFlyerTracker.h"
 #import "RNAppsFlyer.h"
+#import "AppDelegate.h"
 
 @implementation RNAppsFlyer
 
@@ -80,6 +81,11 @@ RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
         
         successCallback(@[SUCCESS]);
                 }
+}
+
+RCT_EXPORT_METHOD(trackAppLaunch)
+{
+    [[AppsFlyerTracker sharedTracker] trackAppLaunch];
 }
 
 
@@ -261,6 +267,24 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 
 -(void) reportOnSuccess:(NSString *)data {
     [self.bridge.eventDispatcher sendAppEventWithName:afOnInstallConversionData body:data];
+}
+
+@end
+
+// Universal Links method ovrrides
+@interface AppDelegate (RNAppsFlyer)
+
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nullable))restorationHandler;
+
+@end
+
+// Universal Links Support - AppDelegate implementation:
+@implementation AppDelegate (RNAppsFlyer)
+
+- (BOOL) application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray *_Nullable))restorationHandler
+{
+  [[AppsFlyerTracker sharedTracker] continueUserActivity:userActivity restorationHandler:restorationHandler];
+  return YES;
 }
 
 @end

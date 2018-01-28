@@ -1,4 +1,5 @@
 
+
 <img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="200">
 
 # react-native-appsflyer
@@ -22,6 +23,7 @@ In order for us to provide optimal support, we would kindly ask you to submit an
      - [Android](#installation_android)
 - [API Methods](#api-methods) 
  - [initSdk](#initSdk) 
+ - [trackAppLaunch (iOS only)](#trackAppLaunch)
  - [setCustomerUserId](#setCustomerUserId)
  - [setUserEmails](#setUserEmails)  
  - [trackEvent](#trackEvent)
@@ -30,7 +32,7 @@ In order for us to provide optimal support, we would kindly ask you to submit an
      - [Android](#track-app-uninstalls-android)
  - [onInstallConversionData](#appsflyeroninstallconversiondatacallback-functionunregister)
  - [getAppsFlyerUID](#appsflyergetappsflyeruidcallback-void)
- - [trackLocation (ios only)](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
+ - [trackLocation (iOS only)](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
  - [sendDeepLinkData (Android only)](#senddeeplinkdata-android-only)
 - [Demo](#demo) 
 
@@ -65,17 +67,11 @@ Example:
 
 ### Manually:
 
-1. Create *bridge* between your application and `appsFlyerFramework`:
-  In XCode ➜ project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
-  Go to `node_modules` ➜ `react-native-appsflyer` and add `RNAppsFlyer.xcodeproj`
-   Build your project, It will generate `libRNAppsFlyer.a` file: 
+1. Download the Static Lib of the AppsFlyer iOS SDK from here:  https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS#2-quick-start
+2. Unzip and copy the contents of the Zip file into your project directory
+3. Copy RNAppsFlyer.h and RNAppsFlyer.m from `node_modules` ➜ `react-native-appsflyer` to your project directory
 
-    ![enter image description here](https://s26.postimg.org/ucnxv1jeh/react_native_api.png)
-  
-     
-
-2. In your project **build phase** ➜ **Link binary with libraries** ➜ add `libRNAppsFlyer.a`. 
-Run your project (`Cmd+R`) or through CLI run: `react-native run-ios`
+![enter image description here](https://s18.postimg.org/gqtlyuneh/Screen_Shot_2018-01-28_at_21.54.10.png)
 
 ##### **Breaking Changes for react-native >= 0.40.0:**
 
@@ -183,6 +179,10 @@ const options = {
   isDebug: true
 };
 
+if (Platform.OS === 'ios') {
+  options.appId = "0546492998";
+}
+
 appsFlyer.initSdk(options,
   (result) => {
     console.log(result);
@@ -195,6 +195,37 @@ appsFlyer.initSdk(options,
 
 ---
 
+##### <a id="trackAppLaunch">  **`appsFlyer.trackAppLaunch(): void`**
+Necessary for tracking sessions and deep link callbacks in iOS on background-to-foreground transitions.
+Should be used with the relevant [AppState](https://facebook.github.io/react-native/docs/appstate.html)  logic.
+
+*Example:*
+
+```javascript
+state = {
+  appState: AppState.currentState
+}
+
+componentDidMount() {
+  AppState.addEventListener('change', this._handleAppStateChange);
+}
+
+componentWillUnmount() {
+   AppState.removeEventListener('change', this._handleAppStateChange);
+}
+
+_handleAppStateChange = (nextAppState) => {
+  if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+      
+      if (Platform.OS === 'ios') {
+        appsFlyer.trackAppLaunch();
+      }
+  }
+  
+  this.setState({appState: nextAppState});
+}
+```
+---
 
 ##### <a id="setCustomerUserId"> **`appsFlyer.setCustomerUserId(customerUserId, callback): void`**
 
@@ -344,6 +375,7 @@ Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplin
 }
 ```
  
+ The code implementation fro the conversion listener must be made **prior to the initialisation** code of the SDK
 
 *Example:*
 
@@ -353,6 +385,8 @@ this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
     console.log(data);
   }
 );
+
+appsFlyer.initSdk(...);
 ```
 
 The `appsFlyer.onInstallConversionData` returns function to  unregister this event listener. Actually it calls `NativeAppEventEmitter.remove()`
@@ -360,10 +394,38 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
 *Example:*
 
 ```javascript
-componentWillUnmount() {
+_unmountAFListener() {
   if(this.onInstallConversionDataCanceller){
     this.onInstallConversionDataCanceller();
   }
+}
+
+state = {
+  appState: AppState.currentState
+}
+
+componentDidMount() {
+  AppState.addEventListener('change', this._handleAppStateChange);
+}
+
+componentWillUnmount() {
+   _unmountAFListener();
+   AppState.removeEventListener('change', this._handleAppStateChange);
+}
+
+_handleAppStateChange = (nextAppState) => {
+  if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+  
+      if (Platform.OS === 'ios') {
+        appsFlyer.trackAppLaunch();
+      }
+  }
+
+  if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
+    _unmountAFListener();
+  }
+  
+  this.setState({appState: nextAppState});
 }
 ```
 
@@ -503,3 +565,10 @@ npm run setup
  
 
 ![demo printscreen](demo/demo_example.png?raw=true)
+
+### Second Demo (demo2)
+
+Basic code implementation example of implementing the AppsFlyer React-Native plugin in the cross-platform `App.js` file:
+ 
+ - Run `npm run demo2.ios` or `npm run demo2.android` will run for the appropriate platform.
+ - Run `npm run ios-pod2` to run `Podfile` under `demo2` project

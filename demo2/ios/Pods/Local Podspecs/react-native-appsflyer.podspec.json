@@ -1,0 +1,29 @@
+{
+  "name": "react-native-appsflyer",
+  "version": "1.1.10",
+  "summary": "React Native Appsflyer plugin",
+  "requires_arc": true,
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/AppsFlyerSDK/react-native-appsflyer/blob/master/LICENSE"
+  },
+  "homepage": "https://github.com/AppsFlyerSDK/react-native-appsflyer#readme",
+  "authors": {
+    "name": "Appsflyer / Maxim Shoustin"
+  },
+  "source": {
+    "git": "git+https://github.com/AppsFlyerSDK/react-native-appsflyer.git"
+  },
+  "source_files": "ios/**/*.{h,m}",
+  "platforms": {
+    "ios": "8.0"
+  },
+  "dependencies": {
+    "React/Core": [
+
+    ],
+    "AppsFlyerFramework": [
+      "~> 4.8.1"
+    ]
+  }
+}

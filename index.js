@@ -20,11 +20,14 @@ appsFlyer.initSdk = (options, successC, errorC) => {
 /**
  * iOS only
  */
+
+appsFlyer.trackAppLaunch = () => {
+    return RNAppsFlyer.trackAppLaunch();
+}
+
 appsFlyer.trackLocation = (longitude, latitude, callback) => {
     return RNAppsFlyer.trackLocation(longitude, latitude, callback);
 };
-
-
 
 appsFlyer.trackEvent = (eventName, eventValues, successC, errorC) => {
     return RNAppsFlyer.trackEvent(eventName, eventValues, successC, errorC);
