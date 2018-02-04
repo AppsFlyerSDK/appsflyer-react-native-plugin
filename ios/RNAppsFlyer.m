@@ -9,7 +9,6 @@
 
 #import "AppsFlyerTracker.h"
 #import "RNAppsFlyer.h"
-#import "AppDelegate.h"
 
 @implementation RNAppsFlyer
 
