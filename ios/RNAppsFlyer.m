@@ -270,21 +270,3 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 }
 
 @end
-
-// Universal Links method ovrrides
-@interface AppDelegate (RNAppsFlyer)
-
-- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nullable))restorationHandler;
-
-@end
-
-// Universal Links Support - AppDelegate implementation:
-@implementation AppDelegate (RNAppsFlyer)
-
-- (BOOL) application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray *_Nullable))restorationHandler
-{
-  [[AppsFlyerTracker sharedTracker] continueUserActivity:userActivity restorationHandler:restorationHandler];
-  return YES;
-}
-
-@end

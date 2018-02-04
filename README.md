@@ -1,5 +1,6 @@
 
 
+
 <img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="200">
 
 # react-native-appsflyer
@@ -34,6 +35,7 @@ In order for us to provide optimal support, we would kindly ask you to submit an
  - [getAppsFlyerUID](#appsflyergetappsflyeruidcallback-void)
  - [trackLocation (iOS only)](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
  - [sendDeepLinkData (Android only)](#senddeeplinkdata-android-only)
+ - [iOS Deep Links - Universal Links and URL Schemes](#iosdeeplinks)
 - [Demo](#demo) 
 
 
@@ -549,6 +551,36 @@ appsFlyer.setUserEmails(options,
     
 ```
 
+---
+
+### <a id="iosdeeplinks"> iOS Deep Links - Universal Links and URL Schemes
+
+In order to track retargeting and use the onAppOpenAttribution callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file: 
+
+#### Universal Links (iOS 9 +)
+```
+- (BOOL) application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray *_Nullable))restorationHandler
+{
+  [[AppsFlyerTracker sharedTracker] continueUserActivity:userActivity restorationHandler:restorationHandler];
+  return YES;
+}
+```
+
+#### URL Schemes
+```
+    // Reports app open from deep link from apps which do not support Universal Links (Twitter) and for iOS8 and below
+    - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
+        [[AppsFlyerTracker sharedTracker] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
+        return YES;
+    }
+   
+    // Reports app open from URL Scheme deep link for iOS 10
+    - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
+    options:(NSDictionary *) options {
+        [[AppsFlyerTracker sharedTracker] handleOpenURL:url options:options];
+        return YES;
+    }
+```
 ---
 
 
