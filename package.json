@@ -8,6 +8,10 @@
     "demo.android": "cd demo; react-native run-android",
     "ios-pod": "cd demo/ios; pod install",
     "preparedemo": "cd demo; npm uninstall react-native-appsflyer --save; npm install .. --save",
+    "demo2.ios": "cd demo2; react-native run-ios",
+    "demo2.android": "cd demo2; react-native run-android",
+    "ios-pod2": "cd demo2/ios; pod install",
+    "preparedemo2": "cd demo2; npm uninstall react-native-appsflyer --save; npm install .. --save",
     "setup": "cd demo; npm install; cd ..; npm run preparedemo;",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
