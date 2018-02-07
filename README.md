@@ -20,28 +20,28 @@ In order for us to provide optimal support, we would kindly ask you to submit an
 
 - [Supported Platforms](#this-plugin-is-built-for)
 - [Installation](#installation)
-     - [iOS](#installation_ios) 
-     - [Android](#installation_android)
-- [API Methods](#api-methods) 
- - [initSdk](#initSdk) 
- - [trackAppLaunch (iOS only)](#trackAppLaunch)
- - [setCustomerUserId](#setCustomerUserId)
- - [setUserEmails](#setUserEmails)  
- - [trackEvent](#trackEvent)
- - [Track App Uninstalls](#track-app-uninstalls)
-     - [iOS](#track-app-uninstalls-ios) 
-     - [Android](#track-app-uninstalls-android)
- - [onInstallConversionData](#appsflyeroninstallconversiondatacallback-functionunregister)
- - [getAppsFlyerUID](#appsflyergetappsflyeruidcallback-void)
- - [trackLocation (iOS only)](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
- - [sendDeepLinkData (Android only)](#senddeeplinkdata-android-only)
- - [iOS Deep Links - Universal Links and URL Schemes](#iosdeeplinks)
-- [Demo](#demo) 
+- [iOS](#installation_ios)
+- [Android](#installation_android)
+- [API Methods](#api-methods)
+- [initSdk](#initSdk)
+- [trackAppLaunch (iOS only)](#trackAppLaunch)
+- [setCustomerUserId](#setCustomerUserId)
+- [setUserEmails](#setUserEmails)
+- [trackEvent](#trackEvent)
+- [Track App Uninstalls](#track-app-uninstalls)
+- [iOS](#track-app-uninstalls-ios)
+- [Android](#track-app-uninstalls-android)
+- [onInstallConversionData](#appsflyeroninstallconversiondatacallback-functionunregister)
+- [getAppsFlyerUID](#appsflyergetappsflyeruidcallback-void)
+- [trackLocation (iOS only)](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
+- [sendDeepLinkData (Android only)](#senddeeplinkdata-android-only)
+- [iOS Deep Links - Universal Links and URL Schemes](#iosdeeplinks)
+- [Demo](#demo)
 
 
 ## <a id="this-plugin-is-built-for"> This plugin is built for
 
-- iOS AppsFlyerSDK 
+- iOS AppsFlyerSDK
 - Android AppsFlyerSDK
 
 ## <a id="installation"> Installation
@@ -55,15 +55,15 @@ In order for us to provide optimal support, we would kindly ask you to submit an
 
 
 Example:
-     
+
 ```
-  pod 'react-native-appsflyer',
-      :path => '../node_modules/react-native-appsflyer'
+pod 'react-native-appsflyer',
+:path => '../node_modules/react-native-appsflyer'
 ```
 
-  This assumes your `Podfile` is located in `ios` directory.
+This assumes your `Podfile` is located in `ios` directory.
 
-  You must also have the React dependencies defined in the Podfile as described [here](https://facebook.github.io/react-native/docs/next/troubleshooting.html#missing-libraries-for-react).
+You must also have the React dependencies defined in the Podfile as described [here](https://facebook.github.io/react-native/docs/next/troubleshooting.html#missing-libraries-for-react).
 
 2. Run `pod install` (inside `ios` directory).
 
@@ -102,8 +102,8 @@ In `RNAppsFlyer.m`:
 Add the project to your dependencies
 ```gradle
 dependencies {
-    ...
-    compile project(':react-native-appsflyer')
+...
+compile project(':react-native-appsflyer')
 }
 ```
 
@@ -116,30 +116,30 @@ include ':react-native-appsflyer'
 project(':react-native-appsflyer').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-appsflyer/android')
 ```
 
-Build project so you should get following dependency (see an Image): 
+Build project so you should get following dependency (see an Image):
 
 ![enter image description here](https://s26.postimg.org/4ie559jeh/Screen_Shot_2016_11_07_at_5_02_00_PM.png)
 
 ##### **MainApplication.java**
 Add:
- 
 
- 1. `import com.appsflyer.reactnative.RNAppsFlyerPackage;`
- 
- 2.  In the `getPackages()` method register the module:
-  `new RNAppsFlyerPackage(MainApplication.this)`
+
+1. `import com.appsflyer.reactnative.RNAppsFlyerPackage;`
+
+2.  In the `getPackages()` method register the module:
+`new RNAppsFlyerPackage(MainApplication.this)`
 
 So `getPackages()` should look like:
 
 ```java
- @Override
-    protected List<ReactPackage> getPackages() {
-      return Arrays.<ReactPackage>asList(
-          new MainReactPackage(),
-          new RNAppsFlyerPackage(MainApplication.this),
-          //.....
-      );
-    }
+@Override
+protected List<ReactPackage> getPackages() {
+return Arrays.<ReactPackage>asList(
+new MainReactPackage(),
+new RNAppsFlyerPackage(MainApplication.this),
+//.....
+);
+}
 ```
 
 
@@ -148,7 +148,7 @@ So `getPackages()` should look like:
 
 ---
 
-Call module by adding: 
+Call module by adding:
 
 `import appsFlyer from 'react-native-appsflyer';`
 
@@ -176,22 +176,21 @@ initializes the SDK.
 
 ```javascript
 const options = {
-  devKey: "WdpTVAcYwmxsaQ4WeTspmh",
-  appId: "975313579",
-  isDebug: true
+devKey: "<AF_DEV_KEY>",
+isDebug: true
 };
 
 if (Platform.OS === 'ios') {
-  options.appId = "0546492998";
+options.appId = "123456789";
 }
 
 appsFlyer.initSdk(options,
-  (result) => {
-    console.log(result);
-  },
-  (error) => {
-    console.error(error);
-  }
+(result) => {
+console.log(result);
+},
+(error) => {
+console.error(error);
+}
 )
 ```
 
@@ -205,26 +204,35 @@ Should be used with the relevant [AppState](https://facebook.github.io/react-nat
 
 ```javascript
 state = {
-  appState: AppState.currentState
+appState: AppState.currentState
 }
 
 componentDidMount() {
-  AppState.addEventListener('change', this._handleAppStateChange);
+AppState.addEventListener('change', this._handleAppStateChange);
 }
 
 componentWillUnmount() {
-   AppState.removeEventListener('change', this._handleAppStateChange);
+if(this.onInstallConversionDataCanceller){
+this.onInstallConversionDataCanceller();
+}
+AppState.removeEventListener('change', this._handleAppStateChange);
 }
 
 _handleAppStateChange = (nextAppState) => {
-  if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-      
-      if (Platform.OS === 'ios') {
-        appsFlyer.trackAppLaunch();
-      }
-  }
-  
-  this.setState({appState: nextAppState});
+if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+
+if (Platform.OS === 'ios') {
+appsFlyer.trackAppLaunch();
+}
+}
+
+if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
+if(this.onInstallConversionDataCanceller){
+this.onInstallConversionDataCanceller();
+}
+}
+
+this.setState({appState: nextAppState});
 }
 ```
 ---
@@ -232,7 +240,7 @@ _handleAppStateChange = (nextAppState) => {
 ##### <a id="setCustomerUserId"> **`appsFlyer.setCustomerUserId(customerUserId, callback): void`**
 
 Setting your own Custom ID enables you to cross-reference your own unique ID with AppsFlyer’s user ID and the other devices’ IDs. This ID is available in AppsFlyer CSV reports along with postbacks APIs for cross-referencing with you internal IDs.
- 
+
 **Note:** The ID must be set during the first launch of the app at the SDK initialization. The best practice is to call this API during the `deviceready` event, where possible.
 
 
@@ -246,10 +254,10 @@ Setting your own Custom ID enables you to cross-reference your own unique ID wit
 const userId = "some_user_id";
 
 appsFlyer.setCustomerUserId(userId,
-  (response) => {
-    //..
-  }
-); 
+(response) => {
+//..
+}
+);
 ```
 ---
 
@@ -257,8 +265,8 @@ appsFlyer.setCustomerUserId(userId,
 ##### <a id="trackEvent"> **`appsFlyer.trackEvent(eventName, eventValues, successC, errorC): void`**
 
 
-- These in-app events help you track how loyal users discover your app, and attribute them to specific 
-campaigns/media-sources. Please take the time define the event/s you want to measure to allow you 
+- These in-app events help you track how loyal users discover your app, and attribute them to specific
+campaigns/media-sources. Please take the time define the event/s you want to measure to allow you
 to track ROI (Return on Investment) and LTV (Lifetime Value).
 - The `trackEvent` method allows you to send in-app events to AppsFlyer analytics. This method allows you to add events dynamically by adding them directly to the application code.
 
@@ -273,20 +281,20 @@ to track ROI (Return on Investment) and LTV (Lifetime Value).
 ```javascript
 const eventName = "af_add_to_cart";
 const eventValues = {
-  "af_content_id": "id123",
-  "af_currency":"USD",
-  "af_revenue": "2"
+"af_content_id": "id123",
+"af_currency":"USD",
+"af_revenue": "2"
 };
 
-appsFlyer.trackEvent(eventName, eventValues, successC, errorC) => {
-  (result) => {
-    //...
-  },
-  (error) => {
-    console.error(error);
-  }
- })
-    
+appsFlyer.trackEvent(eventName, eventValues,
+(result) => {
+console.log(result);
+},
+(error) => {
+console.error(error);
+}
+)
+
 ```
 
 ---
@@ -294,11 +302,11 @@ appsFlyer.trackEvent(eventName, eventValues, successC, errorC) => {
 
 
 
-### <a id="track-app-uninstalls"> Track App Uninstalls 
+### <a id="track-app-uninstalls"> Track App Uninstalls
 
 #### <a id="track-app-uninstalls-ios"> iOS
 
-AppsFlyer enables you to track app uninstalls. To handle notifications it requires  to modify your `AppDelegate.m`. Use [didRegisterForRemoteNotificationsWithDeviceToken](https://developer.apple.com/reference/uikit/uiapplicationdelegate) to register to the uninstall feature. 
+AppsFlyer enables you to track app uninstalls. To handle notifications it requires  to modify your `AppDelegate.m`. Use [didRegisterForRemoteNotificationsWithDeviceToken](https://developer.apple.com/reference/uikit/uiapplicationdelegate) to register to the uninstall feature.
 
 *Example:*
 
@@ -308,19 +316,19 @@ AppsFlyer enables you to track app uninstalls. To handle notifications it requir
 ...
 
 - (void)application:(UIApplication ​*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *​)deviceToken {
-   // notify AppsFlyerTracker
-   [[AppsFlyerTracker sharedTracker] registerUninstall:deviceToken];
+// notify AppsFlyerTracker
+[[AppsFlyerTracker sharedTracker] registerUninstall:deviceToken];
 }
 ```
 
-Read more about Uninstall register: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS) 
+Read more about Uninstall register: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS)
 
 
 #### <a id="track-app-uninstalls-android"> Android
 
- `appsFlyer.enableUninstallTracking(GCMProjectID): void` (**Android only**)
+`appsFlyer.enableUninstallTracking(GCMProjectID): void` (**Android only**)
 
-Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.  
+Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.
 
 | parameter   | type                        | description |
 | ----------- |-----------------------------|--------------|
@@ -330,25 +338,25 @@ Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key 
 
 ```javascript
 
- enableUninstallTracking(){
-    const  gcmProjectNum = "987186475229";
-    appsFlyer.enableUninstallTracking(gcmProjectNum,
-        (success) => {
-          //...
-        })
-  }
-  
+enableUninstallTracking(){
+const  gcmProjectNum = "987186475229";
+appsFlyer.enableUninstallTracking(gcmProjectNum,
+(success) => {
+//...
+})
+}
+
 ```
 
-Read more about Android  Uninstall Tracking: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking) 
+Read more about Android  Uninstall Tracking: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)
 
 ---
 
 
-##### **`appsFlyer.onInstallConversionData(callback): function:unregister`** 
+##### **`appsFlyer.onInstallConversionData(callback): function:unregister`**
 
-Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking). 
- Read more: [Android](http://support.appsflyer.com/entries/69796693-Accessing-AppsFlyer-Attribution-Conversion-Data-from-the-SDK-Deferred-Deep-linking-), [iOS](http://support.appsflyer.com/entries/22904293-Testing-AppsFlyer-iOS-SDK-Integration-Before-Submitting-to-the-App-Store-)  
+Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking).
+Read more: [Android](http://support.appsflyer.com/entries/69796693-Accessing-AppsFlyer-Attribution-Conversion-Data-from-the-SDK-Deferred-Deep-linking-), [iOS](http://support.appsflyer.com/entries/22904293-Testing-AppsFlyer-iOS-SDK-Integration-Before-Submitting-to-the-App-Store-)
 
 
 | parameter   | type                        | description  |
@@ -356,36 +364,36 @@ Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplin
 | `callback`  | `function`                  |  returns [object](#callback-structure)            |
 
 
-##### callback structure: 
+##### callback structure:
 
 - `status`: `"success"`or `"failure"` if SDK returned error on `onInstallConversionData` event handler
 - `type`:
- - `"onAppOpenAttribution"`  - returns deep linking data (non-organic)            
- - `"onInstallConversionDataLoaded"` - called on each launch
- - `"onAttributionFailure"`
- - `"onInstallConversionFailure"` 
+- `"onAppOpenAttribution"`  - returns deep linking data (non-organic)
+- `"onInstallConversionDataLoaded"` - called on each launch
+- `"onAttributionFailure"`
+- `"onInstallConversionFailure"`
 - `data`: some metadata,
- for example:
+for example:
 ```
 {
-  "status": "success",
-  "type": "onInstallConversionDataLoaded",
-  "data": {
-    "af_status": "Organic",
-    "af_message": "organic install"
-  }
+"status": "success",
+"type": "onInstallConversionDataLoaded",
+"data": {
+"af_status": "Organic",
+"af_message": "organic install"
+}
 }
 ```
- 
- The code implementation fro the conversion listener must be made **prior to the initialisation** code of the SDK
+
+The code implementation fro the conversion listener must be made **prior to the initialisation** code of the SDK
 
 *Example:*
 
 ```javascript
 this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
-  (data) => {
-    console.log(data);
-  }
+(data) => {
+console.log(data);
+}
 );
 
 appsFlyer.initSdk(...);
@@ -396,38 +404,36 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
 *Example:*
 
 ```javascript
-_unmountAFListener() {
-  if(this.onInstallConversionDataCanceller){
-    this.onInstallConversionDataCanceller();
-  }
-}
-
 state = {
-  appState: AppState.currentState
+appState: AppState.currentState
 }
 
 componentDidMount() {
-  AppState.addEventListener('change', this._handleAppStateChange);
+AppState.addEventListener('change', this._handleAppStateChange);
 }
 
 componentWillUnmount() {
-   _unmountAFListener();
-   AppState.removeEventListener('change', this._handleAppStateChange);
+if(this.onInstallConversionDataCanceller){
+this.onInstallConversionDataCanceller();
+}
+AppState.removeEventListener('change', this._handleAppStateChange);
 }
 
 _handleAppStateChange = (nextAppState) => {
-  if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-  
-      if (Platform.OS === 'ios') {
-        appsFlyer.trackAppLaunch();
-      }
-  }
+if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
 
-  if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
-    _unmountAFListener();
-  }
-  
-  this.setState({appState: nextAppState});
+if (Platform.OS === 'ios') {
+appsFlyer.trackAppLaunch();
+}
+}
+
+if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
+if(this.onInstallConversionDataCanceller){
+this.onInstallConversionDataCanceller();
+}
+}
+
+this.setState({appState: nextAppState});
 }
 ```
 
@@ -448,11 +454,11 @@ Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID 
 
 ```javascript
 appsFlyer.getAppsFlyerUID((error, appsFlyerUID) => {
-  if (error) {
-    console.error(error);
-  } else {
-    console.log("on getAppsFlyerUID: " + appsFlyerUID);
-  }
+if (error) {
+console.error(error);
+} else {
+console.log("on getAppsFlyerUID: " + appsFlyerUID);
+}
 });
 ```
 
@@ -476,13 +482,13 @@ Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID 
 ```javascript
 const latitude = -18.406655;
 const longitude = 46.406250;
- 
+
 appsFlyer.trackLocation(longitude, latitude, (error, coords) => {
-  if (error) {
-    console.error(error);
-  } else {
-    this.setState({ ...this.state, trackLocation: coords });
-  }
+if (error) {
+console.error(error);
+} else {
+this.setState({ ...this.state, trackLocation: coords });
+}
 });
 ```
 
@@ -496,12 +502,12 @@ This method should be called when an app is opened using a deep link.
 *Example:*
 ```javascript
 componentDidMount() {
-  Linking.getInitialURL().then((url) => {
-    if (appsFlyer) {
-        appsFlyer.sendDeepLinkData(url); // Report Deep Link to AppsFlyer
-        // Additional Deep Link Logic Here ...
-      }
-  }).catch(err => console.error('An error occurred', err));
+Linking.getInitialURL().then((url) => {
+if (appsFlyer) {
+appsFlyer.sendDeepLinkData(url); // Report Deep Link to AppsFlyer
+// Additional Deep Link Logic Here ...
+}
+}).catch(err => console.error('An error occurred', err));
 }
 ```
 
@@ -533,53 +539,53 @@ More info you can find on [AppsFlyer-SDK-Integration-Android](https://support.ap
 
 ```javascript
 const options = {
-  "emailsCryptType": 2,
-  "emails": [
-    "user1@gmail.com",
-    "user2@gmail.com"
-  ]
+"emailsCryptType": 2,
+"emails": [
+"user1@gmail.com",
+"user2@gmail.com"
+]
 };
 
 appsFlyer.setUserEmails(options,
-  (response) => {
-    this.setState({ ...this.state, setUserEmailsResponse: response });
-  },
-  (error) => {
-    console.error(error);
-  }
+(response) => {
+this.setState({ ...this.state, setUserEmailsResponse: response });
+},
+(error) => {
+console.error(error);
+}
 );
-    
+
 ```
 
 ---
 
 ### <a id="iosdeeplinks"> iOS Deep Links - Universal Links and URL Schemes
 
-In order to track retargeting and use the onAppOpenAttribution callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file: 
+In order to track retargeting and use the onAppOpenAttribution callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
 
 #### Universal Links (iOS 9 +)
 ```
 - (BOOL) application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray *_Nullable))restorationHandler
 {
-  [[AppsFlyerTracker sharedTracker] continueUserActivity:userActivity restorationHandler:restorationHandler];
-  return YES;
+[[AppsFlyerTracker sharedTracker] continueUserActivity:userActivity restorationHandler:restorationHandler];
+return YES;
 }
 ```
 
 #### URL Schemes
 ```
-    // Reports app open from deep link from apps which do not support Universal Links (Twitter) and for iOS8 and below
-    - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
-        [[AppsFlyerTracker sharedTracker] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
-        return YES;
-    }
-   
-    // Reports app open from URL Scheme deep link for iOS 10
-    - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
-    options:(NSDictionary *) options {
-        [[AppsFlyerTracker sharedTracker] handleOpenURL:url options:options];
-        return YES;
-    }
+// Reports app open from deep link from apps which do not support Universal Links (Twitter) and for iOS8 and below
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
+[[AppsFlyerTracker sharedTracker] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
+return YES;
+}
+
+// Reports app open from URL Scheme deep link for iOS 10
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
+options:(NSDictionary *) options {
+[[AppsFlyerTracker sharedTracker] handleOpenUrl:url options:options];
+return YES;
+}
 ```
 ---
 
@@ -592,15 +598,15 @@ This plugin has a `demo` project bundled with it. To give it a try , clone this 
 npm run setup
 ```
 
- - Run `npm run demo.ios` or `npm run demo.android` will run for the appropriate platform.
- - Run `npm run ios-pod` to run `Podfile` under `demo` project
- 
+- Run `npm run demo.ios` or `npm run demo.android` will run for the appropriate platform.
+- Run `npm run ios-pod` to run `Podfile` under `demo` project
+
 
 ![demo printscreen](demo/demo_example.png?raw=true)
 
 ### Second Demo (demo2)
 
 Basic code implementation example of implementing the AppsFlyer React-Native plugin in the cross-platform `App.js` file:
- 
- - Run `npm run demo2.ios` or `npm run demo2.android` will run for the appropriate platform.
- - Run `npm run ios-pod2` to run `Podfile` under `demo2` project
+
+- Run `npm run demo2.ios` or `npm run demo2.android` will run for the appropriate platform.
+- Run `npm run ios-pod2` to run `Podfile` under `demo2` project

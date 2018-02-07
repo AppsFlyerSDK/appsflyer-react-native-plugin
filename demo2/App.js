@@ -1,19 +1,50 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
+/*
+React-Native AppsFlyer Test App
 
+In order for us to provide optimal support,
+we would kindly ask you to submit any issues to support@appsflyer.com
+
+
+Please refer to : https://www.npmjs.com/package/react-native-appsflyer
+*/
+
+
+import appsFlyer from 'react-native-appsflyer';
 import React, { Component } from 'react';
 import {
   Platform,
   StyleSheet,
   Text,
   View,
-  AppState
+  AppState,
+  Button
 } from 'react-native';
 
-import appsFlyer from 'react-native-appsflyer';
+
+const options = {
+  devKey: "AF_DEV_KEY",
+  isDebug: true
+};
+
+if (Platform.OS === 'ios') {
+  options.appId = "123456789";
+}
+
+
+this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+     (data) => {
+       console.log(data);
+     }
+   );
+
+   appsFlyer.initSdk(options,
+     (result) => {
+       console.log(result);
+     },
+     (error) => {
+       console.error(error);
+     }
+   )
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' +
@@ -22,75 +53,67 @@ const instructions = Platform.select({
     'Shake or press menu button for dev menu',
 });
 
-let afOptions = {
-  devKey: "uAX9meXuM6aCsh3Zb4Q9KW",
-  isDebug: true,
-  onInstallConversionDataListener: true
-}; 
-
-if (Platform.OS === 'ios') {
-  afOptions.appId = "0546492998";
-}
-
 export default class App extends Component<{}> {
 
-    constructor(props) {
+  constructor(props){
     super(props);
-    
-    // Register Conversion Listener for Deferred / Regular Deep Link
-    this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
-      (data) => {
-        console.log(data);
-      }
-    );
 
-    // Initialize the SDK
-    appsFlyer.initSdk(afOptions,
-      (result) => {
-        console.log(result);
-      },
-      (error) => {
-        console.error(error);
-      }
-    )
-    }
-  
-  // AppState Listeners for iOS session tracking and ConversionListener unregistration
+  }
+
   state = {
     appState: AppState.currentState
-   }
+  }
 
   componentDidMount() {
     AppState.addEventListener('change', this._handleAppStateChange);
   }
 
   componentWillUnmount() {
-    AppState.removeEventListener('change', this._handleAppStateChange);
+    if(this.onInstallConversionDataCanceller){
+      this.onInstallConversionDataCanceller();
+    }
+     AppState.removeEventListener('change', this._handleAppStateChange);
   }
 
   _handleAppStateChange = (nextAppState) => {
-      if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-          console.log('App has come to the foreground!')
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
 
-          if (Platform.OS === 'ios') {
-            appsFlyer.trackAppLaunch();
-          }
-      }
-
-      if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
-        if(this.onInstallConversionDataCanceller){
-          this.onInstallConversionDataCanceller();
+        if (Platform.OS === 'ios') {
+          appsFlyer.trackAppLaunch();
         }
-      }
-      this.setState({appState: nextAppState});
     }
-  // }
+
+    if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
+      if(this.onInstallConversionDataCanceller){
+        this.onInstallConversionDataCanceller();
+      }
+    }
+
+    this.setState({appState: nextAppState});
+  }
+
+     TrackEventPressed() {
+      const eventName = "af_test_event";
+      const eventValues = {
+          "af_event_param0" : "biz",
+          "af_event_param1" : "buz",
+          "af_event_param2" : "bizbuz"
+      };
+      appsFlyer.trackEvent(eventName, eventValues,
+        (result) => {
+          console.log(result);
+        },
+        (error) => {
+          console.error(error);
+        }
+      )
+    }
 
   render() {
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
-          Welcome to React Native!
+          Welcome to the React Native AppsFlyer Test App!
         </Text>
         <Text style={styles.instructions}>
           To get started, edit App.js
@@ -98,6 +121,9 @@ export default class App extends Component<{}> {
         <Text style={styles.instructions}>
           {instructions}
         </Text>
+
+        <Text style = {styles.welcome}> Press to Track a AppsFlyer Event!  </Text>
+        <Button onPress={ this.TrackEventPressed } title="Track Event" color="#009688" />
       </View>
     );
   }
