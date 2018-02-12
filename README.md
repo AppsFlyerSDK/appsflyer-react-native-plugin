@@ -1,6 +1,7 @@
 
 
 
+
 <img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="200">
 
 # react-native-appsflyer
@@ -67,7 +68,7 @@ You must also have the React dependencies defined in the Podfile as described [h
 
 2. Run `pod install` (inside `ios` directory).
 
-### Manually:
+### Manual Integration (Integrating without Cocoapods):
 
 1. Download the Static Lib of the AppsFlyer iOS SDK from here:  https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS#2-quick-start
 2. Unzip and copy the contents of the Zip file into your project directory
