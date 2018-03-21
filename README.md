@@ -143,6 +143,18 @@ new RNAppsFlyerPackage(MainApplication.this),
 }
 ```
 
+##### **AndroidManifest.xml**
+
+Under the `application` node, add the following
+
+```xml
+<receiver android:name="com.appsflyer.SingleInstallBroadcastReceiver" android:exported="true">
+  <intent-filter>
+    <action android:name="com.android.vending.INSTALL_REFERRER" />
+  </intent-filter>
+</receiver>
+```
+
 
 
 ## <a id="api-methods">  API Methods
