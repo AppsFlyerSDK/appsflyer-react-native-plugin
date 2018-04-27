@@ -23,6 +23,6 @@ repositories {
 }
 
 dependencies {
-    compile 'com.facebook.react:react-native:+'   
-    compile fileTree(include: ['*.jar'], dir: 'src/main/libs')    
-} 
+    compile 'com.facebook.react:react-native:+'
+    compile 'com.appsflyer:af-android-sdk:4.8.9@aar'
+}
