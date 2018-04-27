@@ -108,6 +108,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
 
             if(isDebug == true){ Log.d("AppsFlyer", "Starting Tracking");}
 
+            instance.init(
+                    devKey,
+                    (isConversionData == true) ? registerConversionListener() : null,
+                    application.getApplicationContext());
+
             instance.startTracking(application, devKey);
 
             trackAppLaunch();
@@ -119,14 +124,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
             errorCallback.invoke(e.getMessage());
             return;
         }
-
-        if(isConversionData == true){
-            registerConversionListener(instance);
-        }
     }
 
-    private void registerConversionListener(AppsFlyerLib instance){
-        instance.registerConversionListener(application.getApplicationContext(), new AppsFlyerConversionListener(){
+    private AppsFlyerConversionListener registerConversionListener(){
+        return new AppsFlyerConversionListener(){
 
             @Override
             public void onAppOpenAttribution(Map<String, String> attributionData) {
@@ -181,9 +182,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
                         .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                         .emit(eventName, params);
             }
-        });
-
-
+        };
     }
 
     private void trackAppLaunch(){
