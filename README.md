@@ -29,6 +29,8 @@ In order for us to provide optimal support, we would kindly ask you to submit an
 - [setCustomerUserId](#setCustomerUserId)
 - [setUserEmails](#setUserEmails)
 - [trackEvent](#trackEvent)
+- [setCollectIMEI](#setCollectIMEI)(Android only)
+- [setCollectAndroidID](#setCollectAndroidID)(Android only)
 - [Track App Uninstalls](#track-app-uninstalls)
 - [iOS](#track-app-uninstalls-ios)
 - [Android](#track-app-uninstalls-android)
@@ -277,6 +279,44 @@ appsFlyer.setCustomerUserId(userId,
 }
 );
 ```
+---
+
+##### <a id="setCollectIMEI"> **`appsFlyer.setCollectIMEI = (isCollect, successCallback): void`**
+
+By default, IMEI and Android ID are not collected by the SDK if the OS version is higher than KitKat (4.4) and the device contains Google Play Services (on SDK versions 4.8.8 and below the specific app needed GPS). 
+
+| parameter   | type                        | description |
+| ----------- |-----------------------------|--------------|
+| `isCollect`   | `boolean`                      |opt-out of collection of IMEI |
+
+*Example:*
+
+```javascript
+appsFlyer.setCollectIMEI(false,
+        (result) => {
+           console.log("setCollectIMEI ...");
+         });
+```
+
+---
+
+##### <a id="setCollectAndroidID"> **`appsFlyer.setCollectAndroidID = (isCollect, successCallback): void`**
+
+By default, IMEI and Android ID are not collected by the SDK if the OS version is higher than KitKat (4.4) and the device contains Google Play Services (on SDK versions 4.8.8 and below the specific app needed GPS). 
+
+| parameter   | type                        | description |
+| ----------- |-----------------------------|--------------|
+| `isCollect`   | `boolean`                      | opt-out of collection of Android ID|
+
+*Example:*
+
+```javascript
+appsFlyer.setCollectAndroidID(false,
+        (result) => {
+           console.log("setCollectAndroidID ... ");
+         });
+```
+
 ---
 
 
