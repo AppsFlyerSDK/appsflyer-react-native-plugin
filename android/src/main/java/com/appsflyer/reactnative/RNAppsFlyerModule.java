@@ -278,6 +278,18 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         callback.invoke(SUCCESS);
     }
 
+    @ReactMethod
+    public void setCollectIMEI(boolean isCollect, Callback callback){
+        AppsFlyerLib.getInstance().setCollectIMEI(isCollect);
+        callback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void setCollectAndroidID(boolean isCollect, Callback callback){
+        AppsFlyerLib.getInstance().setCollectAndroidID(isCollect);
+        callback.invoke(SUCCESS);
+    }
+
 
     @ReactMethod
     public void setUserEmails(ReadableMap _options,

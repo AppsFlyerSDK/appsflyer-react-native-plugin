@@ -73,6 +73,13 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
     return RNAppsFlyer.setCustomerUserId(userId, successC);
 };
 
+appsFlyer.setCollectIMEI = (isCollect, successC) => {
+    return RNAppsFlyer.setCollectIMEI(isCollect, successC);
+};
+
+appsFlyer.setCollectAndroidID = (isCollect, successC) => {
+    return RNAppsFlyer.setCollectAndroidID(isCollect, successC);
+};
 
 
 /**

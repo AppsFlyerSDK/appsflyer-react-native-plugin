@@ -54,6 +54,18 @@ export default class demo extends Component {
       isDebug: true
     };
 
+   
+    appsFlyer.setCollectIMEI(false,
+        (result) => {
+           console.log("setCollectIMEI: " + false + " succeeded");
+         });
+
+    appsFlyer.setCollectAndroidID(false,
+        (result) => {
+           console.log("setCollectAndroidID: " + false + " succeeded");
+         });
+
+
     appsFlyer.initSdk(options,
         (result) => {
            this.setState( { ...this.state, initSdkResponse: result });
