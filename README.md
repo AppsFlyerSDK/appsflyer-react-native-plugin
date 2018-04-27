@@ -117,6 +117,23 @@ include ':react-native-appsflyer'
 project(':react-native-appsflyer').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-appsflyer/android')
 ```
 
+For Google Install referrer support:
+
+Open the `build.gradle` file for your application.
+Make sure that the repositories section includes a maven section with the "https://maven.google.com" endpoint. For example:
+
+```gradle
+allprojects {
+    repositories {
+        jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
+    }
+}
+```
+
+
 Build project so you should get following dependency (see an Image):
 
 ![enter image description here](https://s26.postimg.org/4ie559jeh/Screen_Shot_2016_11_07_at_5_02_00_PM.png)
