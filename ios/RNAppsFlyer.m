@@ -1,12 +1,4 @@
 
-// for react-native ver >= 0.40
-#import <React/RCTBridge.h>
-#import <React/RCTEventDispatcher.h>
-
-// for react-native ver < 0.40
-//#import "RCTBridge.h"
-//#import "RCTEventDispatcher.h"
-
 #import "AppsFlyerTracker.h"
 #import "RNAppsFlyer.h"
 

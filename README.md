@@ -21,24 +21,24 @@ In order for us to provide optimal support, we would kindly ask you to submit an
 
 - [Supported Platforms](#this-plugin-is-built-for)
 - [Installation](#installation)
-- [iOS](#installation_ios)
-- [Android](#installation_android)
+    - [iOS](#installation_ios)
+    - [Android](#installation_android)
 - [API Methods](#api-methods)
-- [initSdk](#initSdk)
-- [trackAppLaunch (iOS only)](#trackAppLaunch)
-- [setCustomerUserId](#setCustomerUserId)
-- [setUserEmails](#setUserEmails)
-- [trackEvent](#trackEvent)
-- [setCollectIMEI](#setCollectIMEI)(Android only)
-- [setCollectAndroidID](#setCollectAndroidID)(Android only)
-- [Track App Uninstalls](#track-app-uninstalls)
-- [iOS](#track-app-uninstalls-ios)
-- [Android](#track-app-uninstalls-android)
-- [onInstallConversionData](#appsflyeroninstallconversiondatacallback-functionunregister)
-- [getAppsFlyerUID](#appsflyergetappsflyeruidcallback-void)
-- [trackLocation (iOS only)](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
-- [sendDeepLinkData (Android only)](#senddeeplinkdata-android-only)
-- [iOS Deep Links - Universal Links and URL Schemes](#iosdeeplinks)
+    - [initSdk](#initSdk)
+    - [trackAppLaunch (iOS only)](#trackAppLaunch)
+    - [setCustomerUserId](#setCustomerUserId)
+    - [setUserEmails](#setUserEmails)
+    - [trackEvent](#trackEvent)
+    - [setCollectIMEI](#setCollectIMEI)(Android only)
+    - [setCollectAndroidID](#setCollectAndroidID)(Android only)
+    - [Track App Uninstalls](#track-app-uninstalls)
+    - [iOS](#track-app-uninstalls-ios)
+    - [Android](#track-app-uninstalls-android)
+    - [onInstallConversionData](#appsflyeroninstallconversiondatacallback-functionunregister)
+    - [getAppsFlyerUID](#appsflyergetappsflyeruidcallback-void)
+    - [trackLocation (iOS only)](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
+    - [sendDeepLinkData (Android only)](#senddeeplinkdata-android-only)
+    - [iOS Deep Links - Universal Links and URL Schemes](#iosdeeplinks)
 - [Demo](#demo)
 
 
@@ -78,26 +78,7 @@ You must also have the React dependencies defined in the Podfile as described [h
 
 ![enter image description here](https://s18.postimg.org/gqtlyuneh/Screen_Shot_2018-01-28_at_21.54.10.png)
 
-##### **Breaking Changes for react-native >= 0.40.0:**
 
-In `RNAppsFlyer.h`:
-
-```obj-c
-#import <React/RCTBridgeModule.h>  //for react-native ver >= 0.40
-//#import "RCTBridgeModule.h"        //for react-native ver < 0.40
-```
-
-In `RNAppsFlyer.m`:
-
-```obj-c
-// for react-native ver >= 0.40
-#import <React/RCTBridge.h>
-#import <React/RCTEventDispatcher.h>
-
-// for react-native ver < 0.40
-//#import "RCTBridge.h"
-//#import "RCTEventDispatcher.h"
-```
 
 ### <a id="installation_android"> Android
 

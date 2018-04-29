@@ -12,6 +12,5 @@ Pod::Spec.new do |s|
   s.source       = { :git => pkg["repository"]["url"] }
   s.source_files = 'ios/**/*.{h,m}'
   s.platform     = :ios, "8.0"
-  s.dependency 'React/Core'
-  s.dependency 'AppsFlyerFramework', '~> 4.8.1'
+  s.dependency 'AppsFlyerFramework', '~> 4.8.4'
 end
