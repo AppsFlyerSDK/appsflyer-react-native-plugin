@@ -13,4 +13,5 @@ Pod::Spec.new do |s|
   s.source_files = 'ios/**/*.{h,m}'
   s.platform     = :ios, "8.0"
   s.dependency 'AppsFlyerFramework', '~> 4.8.4'
+  s.dependency 'React'
 end
