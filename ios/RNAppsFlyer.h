@@ -9,7 +9,7 @@
 
 
 
-@interface RNAppsFlyer : NSObject <RCTBridgeModule,AppsFlyerTrackerDelegate>
+@interface RNAppsFlyer : NSObject <RCTBridgeModule>
 
 @end
 

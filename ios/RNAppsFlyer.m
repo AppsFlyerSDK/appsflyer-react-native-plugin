@@ -1,6 +1,9 @@
-
-#import "AppsFlyerTracker.h"
 #import "RNAppsFlyer.h"
+#import <AppsFlyerLib/AppsFlyerTracker.h>
+
+@interface RNAppsFlyer() <AppsFlyerTrackerDelegate>
+
+@end
 
 @implementation RNAppsFlyer
 
