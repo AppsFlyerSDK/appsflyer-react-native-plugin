@@ -74,7 +74,7 @@ You must also have the React dependencies defined in the Podfile as described [h
 
 1. Download the Static Lib of the AppsFlyer iOS SDK from here:  https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS#2-quick-start
 2. Unzip and copy the contents of the Zip file into your project directory
-3. Copy RNAppsFlyer.h and RNAppsFlyer.m from `node_modules` ➜ `react-native-appsflyer` to your project directory
+3. Run `react-native link react-native-appsflyer` from of the project root or copy RNAppsFlyer.h and RNAppsFlyer.m from `node_modules` ➜ `react-native-appsflyer` to your project directory
 
 ![enter image description here](https://s18.postimg.org/gqtlyuneh/Screen_Shot_2018-01-28_at_21.54.10.png)
 
@@ -83,6 +83,10 @@ You must also have the React dependencies defined in the Podfile as described [h
 ### <a id="installation_android"> Android
 
 ##### **android/app/build.gradle**
+
+
+Run `react-native link react-native-appsflyer` from of the project root or add manually:
+
 Add the project to your dependencies
 ```gradle
 dependencies {
@@ -100,7 +104,7 @@ include ':react-native-appsflyer'
 project(':react-native-appsflyer').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-appsflyer/android')
 ```
 
-For Google Install referrer support:
+AppsFlyer SDK uses Google Install referrer. 
 
 Open the `build.gradle` file for your application.
 Make sure that the repositories section includes a maven section with the "https://maven.google.com" endpoint. For example:
@@ -108,9 +112,14 @@ Make sure that the repositories section includes a maven section with the "https
 ```gradle
 allprojects {
     repositories {
+        mavenLocal()
         jcenter()
         maven {
             url "https://maven.google.com"
+        }
+        maven {
+            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+            url "$rootDir/../node_modules/react-native/android"
         }
     }
 }
@@ -133,14 +142,15 @@ Add:
 So `getPackages()` should look like:
 
 ```java
-@Override
-protected List<ReactPackage> getPackages() {
-return Arrays.<ReactPackage>asList(
-new MainReactPackage(),
-new RNAppsFlyerPackage(MainApplication.this),
-//.....
-);
-}
+    @Override
+    protected List<ReactPackage> getPackages() {
+      return Arrays.<ReactPackage>asList(
+            new MainReactPackage(),
+            //...
+            new RNAppsFlyerPackage(MainApplication.this)
+            //...
+      );
+    }
 ```
 
 

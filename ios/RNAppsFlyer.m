@@ -1,5 +1,11 @@
 #import "RNAppsFlyer.h"
+
+#if __has_include(<AppsFlyerLib/AppsFlyerTracker.h>) // from Pod
 #import <AppsFlyerLib/AppsFlyerTracker.h>
+#else
+#import "AppsFlyerTracker.h"
+#endif
+
 
 @interface RNAppsFlyer() <AppsFlyerTrackerDelegate>
 
