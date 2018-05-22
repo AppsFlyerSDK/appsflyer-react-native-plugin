@@ -29,6 +29,7 @@ In order for us to provide optimal support, we would kindly ask you to submit an
     - [setCustomerUserId](#setCustomerUserId)
     - [setUserEmails](#setUserEmails)
     - [trackEvent](#trackEvent)
+    - [stopTracking](#stopTracking)
     - [setCollectIMEI](#setCollectIMEI)(Android only)
     - [setCollectAndroidID](#setCollectAndroidID)(Android only)
     - [Track App Uninstalls](#track-app-uninstalls)
@@ -270,6 +271,26 @@ appsFlyer.setCustomerUserId(userId,
 }
 );
 ```
+
+---
+
+##### <a id="stopTracking"> **`appsFlyer.stopTracking = (isStopTracking, successCallback): void`**
+
+The `stopTracking` API for opting out users as part of the GDPR compliance.
+
+| parameter   | type                        | description |
+| ----------- |-----------------------------|--------------|
+| `isStopTracking`   | `boolean`                      |opt-out of launch and track in-app-event |
+
+*Example:*
+
+```javascript
+appsFlyer.stopTracking(true,
+        (result) => {
+           console.log("stopTracking ...");
+         });
+```
+
 ---
 
 ##### <a id="setCollectIMEI"> **`appsFlyer.setCollectIMEI = (isCollect, successCallback): void`**

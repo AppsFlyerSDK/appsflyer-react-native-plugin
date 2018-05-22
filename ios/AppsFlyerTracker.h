@@ -2,7 +2,7 @@
 //  AppsFlyerTracker.h
 //  AppsFlyerLib
 //
-//  AppsFlyer iOS SDK 4.8.1 (602)
+//  AppsFlyer iOS SDK 4.8.4 (636)
 //  Copyright (c) 2013 AppsFlyer Ltd. All rights reserved.
 //
 
@@ -38,8 +38,8 @@
 #define AFEventCustomerSegment          @"af_customer_segment"
 
 
-
 // In app event parameter names
+#define AFEventParamContent                @"af_content"
 #define AFEventParamAchievenmentId         @"af_achievement_id"
 #define AFEventParamLevel                  @"af_level"
 #define AFEventParamScore                  @"af_score"
@@ -149,15 +149,7 @@ typedef enum  {
 
 @end
 
-@interface AppsFlyerTracker : NSObject {
-
-    BOOL _isDebug;
-    BOOL permitAggregateiAdData;
-    BOOL _useReceiptValidationSandbox;
-    BOOL _useUninstallSandbox;
-    EmailCryptType emailCryptType;
-    NSArray *userEmails;
-}
+@interface AppsFlyerTracker : NSObject
 
 +(AppsFlyerTracker*) sharedTracker;
 
@@ -180,10 +172,6 @@ typedef enum  {
  */
 @property (nonatomic, strong) NSString *currencyCode;
 
-
-/* AppsFlyer's SDK send the data to AppsFlyer's servers over HTTPS. You can set the isHTTPS property to NO in order to use regular HTTP. */
-//@property BOOL isHTTPS;
-
 /* 
  * AppsFLyer SDK collect Apple's advertisingIdentifier if the AdSupport framework included in the SDK.
  * You can disable this behavior by setting the following property to YES.
@@ -197,8 +185,8 @@ typedef enum  {
 @property (nonatomic, setter = setIsDebug:) BOOL isDebug;
 
 
-/*
- * Set this flag to NO, to not collect the device name.
+/*!
+ *  Set this flag to `YES`, to collect the current device name. Default value is `NO`
  */
 @property (nonatomic, setter = setShouldCollectDeviceName:) BOOL shouldCollectDeviceName;
 
@@ -293,12 +281,12 @@ typedef enum  {
 /*
  * In case you want to track deep linking, call this method from your delegate's openURL method.
  */
-- (void) handleOpenURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication __attribute__((deprecated));
+- (void) handleOpenURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication;
 
 /*
  * In case you want to track deep linking, call this method from your delegate's openURL method with refferer.
  */
-- (void) handleOpenURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication withAnnotation:(id) annotation __attribute__((deprecated));
+- (void) handleOpenURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication withAnnotation:(id) annotation;
 
 
 - (void) handleOpenUrl:(NSURL *) url options:(NSDictionary *)options;
@@ -325,11 +313,6 @@ typedef enum  {
 
 - (void) remoteDebuggingCallWithData:(NSString *) data;
 
-//- (void) crossPromotionViewed:(NSString*) appID campaign:(NSString*) campaign;
-//- (void) openAppStoreForAppID:(NSString*) appID campaign:(NSString*)
-//campaign paramters:(NSDictionary*) parameters
-//               viewController: (UIViewController*) viewController;
-
 /*!
  *  @brief This property accepts a string value representing the host name for all enpoints.
  *  @warning To use `default` SDK endpoint – set value to `nil`.
@@ -348,5 +331,10 @@ typedef enum  {
  *  Default value is 5 seconds.
  */
 @property (atomic) NSUInteger minTimeBetweenSessions;
-    
+
+/*!
+ *  WARNING! This will disable all requests from AppsFlyer SDK
+ */
+@property (atomic) BOOL isStopTracking;
+
 @end

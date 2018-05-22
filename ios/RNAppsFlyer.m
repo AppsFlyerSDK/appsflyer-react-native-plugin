@@ -128,6 +128,13 @@ RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSen
     
     callback(@[SUCCESS]);
 }
+    
+RCT_EXPORT_METHOD(stopTracking: (BOOL)isStopTracking callback:(RCTResponseSenderBlock)callback)
+{
+    [AppsFlyerTracker sharedTracker].isStopTracking  = isStopTracking;
+    
+    callback(@[SUCCESS]);
+}
 
 RCT_EXPORT_METHOD(trackLocation: (double)longitude latitude:(double)latitude callback:(RCTResponseSenderBlock)callback)
 {

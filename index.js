@@ -67,10 +67,15 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
 };
 
 
-
-
 appsFlyer.setCustomerUserId = (userId, successC) => {
     return RNAppsFlyer.setCustomerUserId(userId, successC);
+};
+
+/**
+*GDPR
+*/
+appsFlyer.stopTracking = (isStopTracking, successC) => {
+    return RNAppsFlyer.stopTracking(isStopTracking, successC);
 };
 
 appsFlyer.setCollectIMEI = (isCollect, successC) => {

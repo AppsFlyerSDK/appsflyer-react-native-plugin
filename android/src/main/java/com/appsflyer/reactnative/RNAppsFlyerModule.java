@@ -290,6 +290,12 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         callback.invoke(SUCCESS);
     }
 
+    @ReactMethod
+    public void stopTracking(boolean isCollect, Callback callback){
+        AppsFlyerLib.getInstance().stopTracking(isCollect, getReactApplicationContext());
+        callback.invoke(SUCCESS);
+    }
+
 
     @ReactMethod
     public void setUserEmails(ReadableMap _options,
