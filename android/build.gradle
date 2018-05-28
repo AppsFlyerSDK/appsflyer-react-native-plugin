@@ -26,6 +26,6 @@ repositories {
 dependencies {
     compile 'com.facebook.react:react-native:+'
     compile 'com.android.installreferrer:installreferrer:1.0'
-    compile 'com.appsflyer:af-android-sdk:4.8.10@aar'
+    compile 'com.appsflyer:af-android-sdk:4.8.12@aar'
     
 }
