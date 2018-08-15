@@ -105,6 +105,17 @@ include ':react-native-appsflyer'
 project(':react-native-appsflyer').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-appsflyer/android')
 ```
 
+If you need to override sdk version, add custom configuration to your root gradle, for example:
+
+```gradle
+ext {
+    minSdkVersion = 16
+    targetSdkVersion = 25
+    compileSdkVersion = 25
+    buildToolsVersion = '25.0.3'
+}
+```
+
 
 
 Build project so you should get following dependency (see an Image):
