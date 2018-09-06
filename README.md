@@ -117,6 +117,27 @@ ext {
 ```
 
 
+AppsFlyer SDK uses Google Install referrer.
+
+Open the `build.gradle` file for your application.
+Make sure that the repositories section includes a maven section with the "https://maven.google.com" endpoint. For example:
+
+```gradle
+allprojects {
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
+        maven {
+            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+            url "$rootDir/../node_modules/react-native/android"
+        }
+    }
+}
+```
+
 
 Build project so you should get following dependency (see an Image):
 
@@ -286,7 +307,7 @@ appsFlyer.stopTracking(true,
 
 ##### <a id="setCollectIMEI"> **`appsFlyer.setCollectIMEI = (isCollect, successCallback): void`**
 
-By default, IMEI and Android ID are not collected by the SDK if the OS version is higher than KitKat (4.4) and the device contains Google Play Services (on SDK versions 4.8.8 and below the specific app needed GPS). 
+By default, IMEI and Android ID are not collected by the SDK if the OS version is higher than KitKat (4.4) and the device contains Google Play Services (on SDK versions 4.8.8 and below the specific app needed GPS).
 
 | parameter   | type                        | description |
 | ----------- |-----------------------------|--------------|
@@ -305,7 +326,7 @@ appsFlyer.setCollectIMEI(false,
 
 ##### <a id="setCollectAndroidID"> **`appsFlyer.setCollectAndroidID = (isCollect, successCallback): void`**
 
-By default, IMEI and Android ID are not collected by the SDK if the OS version is higher than KitKat (4.4) and the device contains Google Play Services (on SDK versions 4.8.8 and below the specific app needed GPS). 
+By default, IMEI and Android ID are not collected by the SDK if the OS version is higher than KitKat (4.4) and the device contains Google Play Services (on SDK versions 4.8.8 and below the specific app needed GPS).
 
 | parameter   | type                        | description |
 | ----------- |-----------------------------|--------------|
