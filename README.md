@@ -387,13 +387,14 @@ Read more about Uninstall register: [Appsflyer SDK support site](https://support
 
 #### <a id="track-app-uninstalls-android"> Android
 
-`appsFlyer.enableUninstallTracking(GCMProjectID): void` (**Android only**)
+`appsFlyer.enableUninstallTracking(GCMProjectID, callback): void` (**Android only**)
 
 Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.
 
-| parameter   | type                        | description |
-| ----------- |-----------------------------|--------------|
-| `GCMProjectID`   | `String`                      | |
+| parameter     | type                        | description  |
+| --------------|-----------------------------|--------------|
+| `GCMProjectID`| `String`                    |              |
+| `callback`    | `(successString) => void`   |     Required at the moment, inject a string as parameter upon hook registration success.         |
 
 *Example:*
 
