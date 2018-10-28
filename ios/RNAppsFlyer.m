@@ -1,14 +1,15 @@
-
-// for react-native ver >= 0.40
-#import <React/RCTBridge.h>
-#import <React/RCTEventDispatcher.h>
-
-// for react-native ver < 0.40
-//#import "RCTBridge.h"
-//#import "RCTEventDispatcher.h"
-
-#import "AppsFlyerTracker.h"
 #import "RNAppsFlyer.h"
+
+#if __has_include(<AppsFlyerLib/AppsFlyerTracker.h>) // from Pod
+#import <AppsFlyerLib/AppsFlyerTracker.h>
+#else
+#import "AppsFlyerTracker.h"
+#endif
+
+
+@interface RNAppsFlyer() <AppsFlyerTrackerDelegate>
+
+@end
 
 @implementation RNAppsFlyer
 
@@ -82,6 +83,11 @@ RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
                 }
 }
 
+RCT_EXPORT_METHOD(trackAppLaunch)
+{
+    [[AppsFlyerTracker sharedTracker] trackAppLaunch];
+}
+
 
 RCT_EXPORT_METHOD(trackEvent: (NSString *)eventName eventValues:(NSDictionary *)eventValues
                   successCallback :(RCTResponseSenderBlock)successCallback
@@ -119,6 +125,13 @@ RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback)
 RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSenderBlock)callback)
 {
     [[AppsFlyerTracker sharedTracker] setCustomerUserID:userId];
+    
+    callback(@[SUCCESS]);
+}
+    
+RCT_EXPORT_METHOD(stopTracking: (BOOL)isStopTracking callback:(RCTResponseSenderBlock)callback)
+{
+    [AppsFlyerTracker sharedTracker].isStopTracking  = isStopTracking;
     
     callback(@[SUCCESS]);
 }

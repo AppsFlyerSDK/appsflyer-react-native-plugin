@@ -49,3 +49,4 @@ android/keystores/debug.keystore
 
 
 demo/node_modules/
+package-lock.json

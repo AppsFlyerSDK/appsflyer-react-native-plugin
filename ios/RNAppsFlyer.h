@@ -1,8 +1,15 @@
 
-#import <React/RCTBridgeModule.h>  //for react-native ver >= 0.40
-//#import "RCTBridgeModule.h"        for react-native ver < 0.40
+#if __has_include(<React/RCTBridgeModule.h>) //ver >= 0.40
+#import <React/RCTBridgeModule.h>
+#import <React/RCTEventDispatcher.h>
+#else //ver < 0.40
+#import "RCTBridgeModule.h"
+#import "RCTEventDispatcher.h"
+#endif
 
-@interface RNAppsFlyer : NSObject <RCTBridgeModule,AppsFlyerTrackerDelegate>
+
+
+@interface RNAppsFlyer : NSObject <RCTBridgeModule>
 
 @end
 

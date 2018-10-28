@@ -20,11 +20,14 @@ appsFlyer.initSdk = (options, successC, errorC) => {
 /**
  * iOS only
  */
+
+appsFlyer.trackAppLaunch = () => {
+    return RNAppsFlyer.trackAppLaunch();
+}
+
 appsFlyer.trackLocation = (longitude, latitude, callback) => {
     return RNAppsFlyer.trackLocation(longitude, latitude, callback);
 };
-
-
 
 appsFlyer.trackEvent = (eventName, eventValues, successC, errorC) => {
     return RNAppsFlyer.trackEvent(eventName, eventValues, successC, errorC);
@@ -36,6 +39,10 @@ appsFlyer.setUserEmails = (options, successC, errorC) => {
 
 appsFlyer.getAppsFlyerUID = (callback) => {
     return RNAppsFlyer.getAppsFlyerUID(callback);
+};
+
+appsFlyer.sendDeepLinkData = (callback) => {
+    return RNAppsFlyer.sendDeepLinkData(callback);
 };
 
 /**
@@ -60,12 +67,24 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
 };
 
 
-
-
-appsFlyer.setCustomerUserId = (userId, successC,) => {
+appsFlyer.setCustomerUserId = (userId, successC) => {
     return RNAppsFlyer.setCustomerUserId(userId, successC);
 };
 
+/**
+*GDPR
+*/
+appsFlyer.stopTracking = (isStopTracking, successC) => {
+    return RNAppsFlyer.stopTracking(isStopTracking, successC);
+};
+
+appsFlyer.setCollectIMEI = (isCollect, successC) => {
+    return RNAppsFlyer.setCollectIMEI(isCollect, successC);
+};
+
+appsFlyer.setCollectAndroidID = (isCollect, successC) => {
+    return RNAppsFlyer.setCollectAndroidID(isCollect, successC);
+};
 
 
 /**

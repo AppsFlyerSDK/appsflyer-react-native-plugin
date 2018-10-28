@@ -22,6 +22,9 @@ import java.util.Map;
 
 import android.content.Context;
 import android.util.Log;
+import android.content.Intent;
+import android.net.Uri;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -105,6 +108,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
 
             if(isDebug == true){ Log.d("AppsFlyer", "Starting Tracking");}
 
+            instance.init(
+                    devKey,
+                    (isConversionData == true) ? registerConversionListener() : null,
+                    application.getApplicationContext());
+
             instance.startTracking(application, devKey);
 
             trackAppLaunch();
@@ -116,14 +124,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
             errorCallback.invoke(e.getMessage());
             return;
         }
-
-        if(isConversionData == true){
-            registerConversionListener(instance);
-        }
     }
 
-    private void registerConversionListener(AppsFlyerLib instance){
-        instance.registerConversionListener(application.getApplicationContext(), new AppsFlyerConversionListener(){
+    private AppsFlyerConversionListener registerConversionListener(){
+        return new AppsFlyerConversionListener(){
 
             @Override
             public void onAppOpenAttribution(Map<String, String> attributionData) {
@@ -178,9 +182,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
                         .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                         .emit(eventName, params);
             }
-        });
-
-
+        };
     }
 
     private void trackAppLaunch(){
@@ -223,6 +225,16 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         }
     }
 
+    @ReactMethod
+    public void sendDeepLinkData(String url) {
+        if (url != null) {
+            Intent intent =  getCurrentActivity().getIntent();
+            Uri uri = Uri.parse(url);
+            intent.setData(uri);
+            AppsFlyerLib.getInstance().sendDeepLinkData(this.getCurrentActivity());
+        }
+    }
+
 
     @Deprecated
     @ReactMethod
@@ -246,23 +258,41 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         successCallback.invoke(SUCCESS);
     }
 
-    @ReactMethod
-    public void enableUninstallTracking(final String gcmProjectNumber,
-                                Callback successCallback)
-    {
-        AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectNumber);
-        successCallback.invoke(SUCCESS);
-    }
+   @ReactMethod
+   public void enableUninstallTracking(final String gcmProjectNumber,
+                               Callback successCallback)
+   {
+       AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectNumber);
+       successCallback.invoke(SUCCESS);
+   }
 
-    @ReactMethod
-    public void updateServerUninstallToken(final String token,Callback callback){
-        AppsFlyerLib.getInstance().updateServerUninstallToken(getReactApplicationContext(), token);
-        callback.invoke(SUCCESS);
-    }
+   @ReactMethod
+   public void updateServerUninstallToken(final String token,Callback callback){
+       AppsFlyerLib.getInstance().updateServerUninstallToken(getReactApplicationContext(), token);
+       callback.invoke(SUCCESS);
+   }
 
     @ReactMethod
     public void setCustomerUserId(final String userId,Callback callback){
         AppsFlyerLib.getInstance().setCustomerUserId(userId);
+        callback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void setCollectIMEI(boolean isCollect, Callback callback){
+        AppsFlyerLib.getInstance().setCollectIMEI(isCollect);
+        callback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void setCollectAndroidID(boolean isCollect, Callback callback){
+        AppsFlyerLib.getInstance().setCollectAndroidID(isCollect);
+        callback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void stopTracking(boolean isCollect, Callback callback){
+        AppsFlyerLib.getInstance().stopTracking(isCollect, getReactApplicationContext());
         callback.invoke(SUCCESS);
     }
 

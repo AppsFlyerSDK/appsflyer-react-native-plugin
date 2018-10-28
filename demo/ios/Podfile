@@ -1,4 +1,0 @@
-use_frameworks!
-target 'demo' do
-  pod 'AppsFlyerFramework'
-end
