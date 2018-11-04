@@ -231,6 +231,32 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         AppsFlyerLib.getInstance().trackEvent(c, null, null);
     }
 
+//    @ReactMethod
+//    public void trackEvent(
+//            final String eventName, ReadableMap eventData,
+//            Promise promise)
+//    {
+//        try {
+//
+//            if(eventName.trim().equals("")){
+//                Exception e = new Exception(NO_EVENT_NAME_FOUND);
+//                promise.reject( e.getMessage(), e);
+//            }
+//
+//            Map<String, Object> data = RNUtil.toMap(eventData);
+//
+//            if(data == null){ // in case of no values
+//                data = new HashMap<>();
+//            }
+//
+//            AppsFlyerLib.getInstance().trackEvent(getReactApplicationContext(), eventName, data);
+//
+//            //TODO: callback should come from SDK
+//            promise.resolve(SUCCESS);
+//        } catch (Exception e) {
+//            promise.reject(e.getMessage(),e);
+//        }
+//    }
 
     @ReactMethod
     public void trackEvent(

@@ -43,9 +43,31 @@ appsFlyer.trackLocation = (longitude, latitude, callback) => {
     return RNAppsFlyer.trackLocation(longitude, latitude, callback);
 };
 
-appsFlyer.trackEvent = (eventName, eventValues, successC, errorC) => {
+//trackEvent
+
+function trackEventCallback(eventName, eventValues, successC, errorC){
+    console.log("trackEventCallback");
+    console.log("eventName: ", eventName);
+    console.log("eventValues: ", eventValues);
+    console.log("successC: ", successC);
+    console.log("errorC: ", errorC);
     return RNAppsFlyer.trackEvent(eventName, eventValues, successC, errorC);
 };
+
+function trackEventPromise(eventName, eventValues) : Promise<string>{
+    console.log("trackEventPromise");
+    return RNAppsFlyer.trackEvent(eventName, eventValues);
+}
+
+function trackEvent(eventName, eventValues, success, error) : Promise<string>{
+    if(success && error){
+        trackEventCallback(eventName, eventValues, success, error);
+    }else if(!success){
+        return trackEventPromise(eventName, eventValues);
+    }
+}
+
+appsFlyer.trackEvent = trackEvent;
 
 appsFlyer.setUserEmails = (options, successC, errorC) => {
     return RNAppsFlyer.setUserEmails(options, successC, errorC);
