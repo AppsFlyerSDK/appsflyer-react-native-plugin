@@ -4,7 +4,7 @@ package com.appsflyer.reactnative;
 
 import android.app.Application;
 
-
+import com.facebook.react.bridge.Promise;
 import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
@@ -75,6 +75,47 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         constants.put("TUTORIAL_COMPLETION", AFInAppEventType.TUTORIAL_COMPLETION);
         constants.put("UPDATE", AFInAppEventType.UPDATE);
         return constants;
+    }
+
+    @ReactMethod
+    public void initSdk(
+            ReadableMap _options,
+            Promise promise
+    ) {
+        String devKey = null;
+        boolean isDebug;
+        boolean isConversionData;
+
+        AppsFlyerLib instance = AppsFlyerLib.getInstance();
+
+        try{
+            JSONObject options = RNUtil.readableMapToJson(_options);
+            devKey = options.optString(afDevKey, "");
+
+            if(devKey.trim().equals("")){
+                promise.reject( new Exception(NO_DEVKEY_FOUND).getMessage() );
+            }
+
+            isDebug = options.optBoolean(afIsDebug, false);
+            instance.setDebugLog(isDebug);
+
+            isConversionData = options.optBoolean(afConversionData, false);
+
+            if(isDebug == true){ Log.d("AppsFlyer", "Starting Tracking");}
+
+            instance.init(
+                    devKey,
+                    (isConversionData == true) ? registerConversionListener() : null,
+                    application.getApplicationContext());
+
+            instance.startTracking(application, devKey);
+
+            trackAppLaunch();
+
+            promise.resolve("SUCCESS");
+        }catch (Exception e){
+            promise.reject("Error: ",e);
+        }
     }
 
     @ReactMethod
@@ -252,7 +293,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     @Deprecated
     public void setGCMProjectNumber(final String gcmProjectNumber,
                                 Callback successCallback,
-                                Callback errorCallback) 
+                                Callback errorCallback)
     {
         AppsFlyerLib.getInstance().setGCMProjectNumber(gcmProjectNumber);
         successCallback.invoke(SUCCESS);

@@ -8,14 +8,28 @@ const appsFlyer = {};
 
 const eventsMap = {};
 
-
-appsFlyer.initSdk = (options, successC, errorC) => {
-
-    // console.log("initSdk: " + eventsMap['onInstallConversionData']);
-
-    options.onInstallConversionDataListener = (eventsMap['onInstallConversionData']) ? true: false;
+function initSdkCallback(options, successC, errorC){
+    console.log("callbackFunc");
+    options.onInstallConversionDataListener = (eventsMap['onInstallConversionData']) ? true : false;
     return RNAppsFlyer.initSdk(options, successC, errorC);
-};
+}
+
+function initSdkPromise(options) : Promise<string>{
+    console.log("promiseFunc");
+    return RNAppsFlyer.initSdk(options);
+}
+
+function initSdk(options, success, error) : Promise<string>{
+    if(success && error){
+        //initSdk is a callback function
+        initSdkCallback(options, success, error);
+    }else if(!success){
+        //initSdk is a promise function
+        return initSdkPromise(options);
+    }
+}
+
+appsFlyer.initSdk = initSdk;
 
 /**
  * iOS only
@@ -23,7 +37,7 @@ appsFlyer.initSdk = (options, successC, errorC) => {
 
 appsFlyer.trackAppLaunch = () => {
     return RNAppsFlyer.trackAppLaunch();
-}
+};
 
 appsFlyer.trackLocation = (longitude, latitude, callback) => {
     return RNAppsFlyer.trackLocation(longitude, latitude, callback);
