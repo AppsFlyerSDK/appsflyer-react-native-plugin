@@ -85,51 +85,23 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
             Callback errorCallback
             ) {
 
-        String devKey = null;
-        boolean isDebug;
-        boolean isConversionData;
-
-        AppsFlyerLib instance = AppsFlyerLib.getInstance();
-
         try{
-
-           JSONObject options = RNUtil.readableMapToJson(_options);
-
-            devKey = options.optString(afDevKey, "");
-
-            if(devKey.trim().equals("")){
-                errorCallback.invoke( new Exception(NO_DEVKEY_FOUND).getMessage() );
-                return;
+            final String errorReason = initSDKInternal(_options);
+            if(errorReason == null){
+                //TODO: callback should come from SDK
+                successCallback.invoke(SUCCESS);
             }
-
-            isDebug = options.optBoolean(afIsDebug, false);
-            instance.setDebugLog(isDebug);
-
-            isConversionData = options.optBoolean(afConversionData, false);
-
-            if(isDebug == true){ Log.d("AppsFlyer", "Starting Tracking");}
-
-            instance.init(
-                    devKey,
-                    (isConversionData == true) ? registerConversionListener() : null,
-                    application.getApplicationContext());
-
-            instance.startTracking(application, devKey);
-
-            trackAppLaunch();
-
-            //TODO: callback should come from SDK
-            successCallback.invoke(SUCCESS);
+            else{
+                errorCallback.invoke( new Exception(errorReason).getMessage() );
+            }
         }
         catch (Exception e){
             errorCallback.invoke(e.getMessage());
-            return;
         }
     }
 
 
-    @ReactMethod
-    public void initSdkWithPromise(ReadableMap _options, Promise promise) {
+    private String initSDKInternal(ReadableMap _options){
 
         String devKey;
         boolean isDebug;
@@ -137,35 +109,47 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
 
         AppsFlyerLib instance = AppsFlyerLib.getInstance();
 
+
+        JSONObject options = RNUtil.readableMapToJson(_options);
+
+        devKey = options.optString(afDevKey, "");
+
+        if (devKey.trim().equals("")) {
+            return NO_DEVKEY_FOUND;
+        }
+
+        isDebug = options.optBoolean(afIsDebug, false);
+        instance.setDebugLog(isDebug);
+
+        isConversionData = options.optBoolean(afConversionData, false);
+
+        if (isDebug == true) {
+            Log.d("AppsFlyer", "Starting Tracking");
+        }
+
+        instance.init(
+                devKey,
+                (isConversionData == true) ? registerConversionListener() : null,
+                application.getApplicationContext());
+
+        instance.startTracking(application, devKey);
+
+        trackAppLaunch();
+
+        return null;
+    }
+
+    @ReactMethod
+    public void initSdkWithPromise(ReadableMap _options, Promise promise) {
         try{
-
-            JSONObject options = RNUtil.readableMapToJson(_options);
-
-            devKey = options.optString(afDevKey, "");
-
-            if(devKey.trim().equals("")){
-                promise.reject(NO_DEVKEY_FOUND, new Exception(NO_DEVKEY_FOUND).getMessage());
-                return;
+            final String errorReason = initSDKInternal(_options);
+            if(errorReason == null){
+                //TODO: callback should come from SDK
+                promise.resolve(SUCCESS);
             }
-
-            isDebug = options.optBoolean(afIsDebug, false);
-            instance.setDebugLog(isDebug);
-
-            isConversionData = options.optBoolean(afConversionData, false);
-
-            if(isDebug == true){ Log.d("AppsFlyer", "Starting Tracking");}
-
-            instance.init(
-                    devKey,
-                    (isConversionData == true) ? registerConversionListener() : null,
-                    application.getApplicationContext());
-
-            instance.startTracking(application, devKey);
-
-            trackAppLaunch();
-
-            //TODO: callback should come from SDK
-            promise.resolve(SUCCESS);
+            else{
+                promise.reject(errorReason, new Exception(errorReason).getMessage());
+            }
         }
         catch (Exception e){
             promise.reject(UNKNOWN_ERROR, e);
