@@ -16,6 +16,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.bridge.Promise;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -126,6 +127,51 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         }
     }
 
+
+    @ReactMethod
+    public void initSdkWithPromise(ReadableMap _options, Promise promise) {
+
+        String devKey;
+        boolean isDebug;
+        boolean isConversionData;
+
+        AppsFlyerLib instance = AppsFlyerLib.getInstance();
+
+        try{
+
+            JSONObject options = RNUtil.readableMapToJson(_options);
+
+            devKey = options.optString(afDevKey, "");
+
+            if(devKey.trim().equals("")){
+                promise.reject(NO_DEVKEY_FOUND, new Exception(NO_DEVKEY_FOUND).getMessage());
+                return;
+            }
+
+            isDebug = options.optBoolean(afIsDebug, false);
+            instance.setDebugLog(isDebug);
+
+            isConversionData = options.optBoolean(afConversionData, false);
+
+            if(isDebug == true){ Log.d("AppsFlyer", "Starting Tracking");}
+
+            instance.init(
+                    devKey,
+                    (isConversionData == true) ? registerConversionListener() : null,
+                    application.getApplicationContext());
+
+            instance.startTracking(application, devKey);
+
+            trackAppLaunch();
+
+            //TODO: callback should come from SDK
+            promise.resolve(SUCCESS);
+        }
+        catch (Exception e){
+            promise.reject(UNKNOWN_ERROR, e);
+        }
+    }
+
     private AppsFlyerConversionListener registerConversionListener(){
         return new AppsFlyerConversionListener(){
 
@@ -210,11 +256,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
             data = new HashMap<>();
         }
 
-//        if(data.size() == 0){
-//            errorCallback.invoke( new Exception(NO_EVENT_VALUES_FOUND).getMessage() );
-//            return;
-//        }
-
         AppsFlyerLib.getInstance().trackEvent(getReactApplicationContext(), eventName, data);
 
             //TODO: callback should come from SDK
@@ -224,6 +265,35 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
             return;
         }
     }
+
+    @ReactMethod
+    public void trackEventWithPromise(
+            final String eventName, ReadableMap eventData, Promise promise)
+    {
+        try {
+
+            if(eventName.trim().equals("")){
+                promise.reject(NO_EVENT_NAME_FOUND, new Exception(NO_EVENT_NAME_FOUND).getMessage() );
+                return;
+            }
+
+            Map<String, Object> data = RNUtil.toMap(eventData);
+
+            if(data == null){ // in case of no values
+                data = new HashMap<>();
+            }
+
+            AppsFlyerLib.getInstance().trackEvent(getReactApplicationContext(), eventName, data);
+
+            //TODO: callback should come from SDK
+            promise.resolve(SUCCESS);
+        } catch (Exception e) {
+            promise.reject(UNKNOWN_ERROR, e );
+            return;
+        }
+    }
+
+
 
     @ReactMethod
     public void sendDeepLinkData(String url) {
