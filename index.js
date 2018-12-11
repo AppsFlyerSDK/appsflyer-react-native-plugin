@@ -9,13 +9,50 @@ const appsFlyer = {};
 const eventsMap = {};
 
 
-appsFlyer.initSdk = (options, successC, errorC) => {
 
-    // console.log("initSdk: " + eventsMap['onInstallConversionData']);
-
-    options.onInstallConversionDataListener = (eventsMap['onInstallConversionData']) ? true: false;
+function initSdkCallback(options, successC, errorC){
     return RNAppsFlyer.initSdk(options, successC, errorC);
-};
+}
+
+function initSdkPromise(options) : Promise<string>{
+    return RNAppsFlyer.initSdkWithPromise(options);
+}
+
+function initSdk(options, success, error) : Promise<string>{
+
+    options.onInstallConversionDataListener = (eventsMap['onInstallConversionData']) ? true : false;
+
+    if(success && error){
+        //initSdk is a callback function
+        initSdkCallback(options, success, error);
+    }else if(!success){
+        //initSdk is a promise function
+        return initSdkPromise(options);
+    }
+}
+appsFlyer.initSdk = initSdk;
+
+
+function trackEventCallback(eventName, eventValues, successC, errorC){
+    return RNAppsFlyer.trackEvent(eventName, eventValues, successC, errorC);
+}
+
+function trackEventPromise(eventName, eventValues) : Promise<string>{
+    return RNAppsFlyer.trackEventWithPromise(eventName, eventValues);
+}
+
+
+function trackEvent(eventName, eventValues, success, error) : Promise<string>{
+    if(success && error){
+        //initSdk is a callback function
+        trackEventCallback(options, success, error);
+    }else if(!success){
+        //initSdk is a promise function
+        return trackEventPromise(eventName, eventValues);
+    }
+}
+
+appsFlyer.trackEvent = trackEvent;
 
 /**
  * iOS only
@@ -27,10 +64,6 @@ appsFlyer.trackAppLaunch = () => {
 
 appsFlyer.trackLocation = (longitude, latitude, callback) => {
     return RNAppsFlyer.trackLocation(longitude, latitude, callback);
-};
-
-appsFlyer.trackEvent = (eventName, eventValues, successC, errorC) => {
-    return RNAppsFlyer.trackEvent(eventName, eventValues, successC, errorC);
 };
 
 appsFlyer.setUserEmails = (options, successC, errorC) => {
