@@ -125,7 +125,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
     
     
     if(error != nil){
-       reject(error.code, error.domain, error);
+       reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
     }
     else{
         if(isConversionData == YES){
@@ -178,7 +178,7 @@ RCT_EXPORT_METHOD(trackEventWithPromise: (NSString *)eventName eventValues:(NSDi
 {
     if (!eventName || [eventName isEqualToString:@""]) {
         NSError *error = [NSError errorWithDomain:NO_EVENT_NAME_FOUND code:2 userInfo:nil];
-        reject(2, NO_EVENT_NAME_FOUND, error);
+        reject(@"2", NO_EVENT_NAME_FOUND, error);
     }
         
     [[AppsFlyerTracker sharedTracker] trackEvent:eventName withValues:eventValues];
