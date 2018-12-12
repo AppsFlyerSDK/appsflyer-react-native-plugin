@@ -86,7 +86,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
             ) {
 
         try{
-            final String errorReason = initSDKInternal(_options);
+            final String errorReason = callSdkInternal(_options);
             if(errorReason == null){
                 //TODO: callback should come from SDK
                 successCallback.invoke(SUCCESS);
@@ -101,7 +101,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     }
 
 
-    private String initSDKInternal(ReadableMap _options){
+    private String callSdkInternal(ReadableMap _options){
 
         String devKey;
         boolean isDebug;
@@ -142,7 +142,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     @ReactMethod
     public void initSdkWithPromise(ReadableMap _options, Promise promise) {
         try{
-            final String errorReason = initSDKInternal(_options);
+            final String errorReason = callSdkInternal(_options);
             if(errorReason == null){
                 //TODO: callback should come from SDK
                 promise.resolve(SUCCESS);
@@ -221,17 +221,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     }
 
 
-    @ReactMethod
-    public void trackEvent(
-            final String eventName, ReadableMap eventData,
-            Callback successCallback,
-            Callback errorCallback)
-    {
-        try {
+    private String trackEventInternal(final String eventName, ReadableMap eventData){
 
         if(eventName.trim().equals("")){
-            errorCallback.invoke( new Exception(NO_EVENT_NAME_FOUND).getMessage() );
-            return;
+            return NO_EVENT_NAME_FOUND;
         }
 
         Map<String, Object> data = RNUtil.toMap(eventData);
@@ -242,8 +235,25 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
 
         AppsFlyerLib.getInstance().trackEvent(getReactApplicationContext(), eventName, data);
 
-            //TODO: callback should come from SDK
-            successCallback.invoke(SUCCESS);
+        return "";
+    }
+
+    @ReactMethod
+    public void trackEvent(
+            final String eventName, ReadableMap eventData,
+            Callback successCallback,
+            Callback errorCallback)
+    {
+        try {
+            final String errorReason = trackEventInternal(eventName, eventData);
+
+            if(errorReason != null){
+                errorCallback.invoke( new Exception(errorReason).getMessage() );
+            }
+            else{
+                //TODO: callback should come from SDK
+                successCallback.invoke(SUCCESS);
+            }
         } catch (Exception e) {
             errorCallback.invoke(e.getMessage());
             return;
@@ -255,22 +265,15 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
             final String eventName, ReadableMap eventData, Promise promise)
     {
         try {
+            final String errorReason = trackEventInternal(eventName, eventData);
 
-            if(eventName.trim().equals("")){
-                promise.reject(NO_EVENT_NAME_FOUND, new Exception(NO_EVENT_NAME_FOUND).getMessage() );
-                return;
+            if(errorReason != null){
+                promise.reject(errorReason, new Exception(errorReason).getMessage() );
             }
-
-            Map<String, Object> data = RNUtil.toMap(eventData);
-
-            if(data == null){ // in case of no values
-                data = new HashMap<>();
+            else{
+                //TODO: callback should come from SDK
+                promise.resolve(SUCCESS);
             }
-
-            AppsFlyerLib.getInstance().trackEvent(getReactApplicationContext(), eventName, data);
-
-            //TODO: callback should come from SDK
-            promise.resolve(SUCCESS);
         } catch (Exception e) {
             promise.reject(UNKNOWN_ERROR, e );
             return;
