@@ -69,39 +69,32 @@ RCT_EXPORT_METHOD(trackEvent: (NSString *)eventName eventValues:(NSDictionary *)
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback)
 {
-    NSError* error = nil;
+    NSError *error = [self trackEventInternal:eventName eventValues:eventValues];
     
-    if (!eventName || [eventName isEqualToString:@""]) {
-        error = [NSError errorWithDomain:NO_DEVKEY_FOUND code:2 userInfo:nil];
-    }
-    
-    
-    if(error != nil){
-         errorCallback(error);
+    if(error){
+        errorCallback(error);
     }
     else{
-        
-        [[AppsFlyerTracker sharedTracker] trackEvent:eventName withValues:eventValues];
-        
         //TODO wait callback from SDK
         successCallback(@[SUCCESS]);
-     }
     }
+}
 
 
 RCT_EXPORT_METHOD(trackEventWithPromise: (NSString *)eventName eventValues:(NSDictionary *)eventValues
                   trackEventWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-    if (!eventName || [eventName isEqualToString:@""]) {
-        NSError *error = [NSError errorWithDomain:NO_EVENT_NAME_FOUND code:2 userInfo:nil];
-        reject(@"2", NO_EVENT_NAME_FOUND, error);
-    }
-        
-    [[AppsFlyerTracker sharedTracker] trackEvent:eventName withValues:eventValues];
     
-    //TODO wait callback from SDK
-    resolve(@[SUCCESS]);
+    NSError *error = [self trackEventInternal:eventName eventValues:eventValues];
+    
+    if(error){
+        reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
+    }
+    else{
+         //TODO wait callback from SDK
+        resolve(@[SUCCESS]);
+    }
 }
 
 
@@ -230,6 +223,17 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         
         return nil;
     }
+}
+
+-(NSError *) trackEventInternal: (NSString *)eventName eventValues:(NSDictionary *)eventValues {
+    
+    if (!eventName || [eventName isEqualToString:@""]) {
+        NSError *error = [NSError errorWithDomain:NO_EVENT_NAME_FOUND code:2 userInfo:nil];
+        return error;
+    }
+    
+    [[AppsFlyerTracker sharedTracker] trackEvent:eventName withValues:eventValues];
+    return nil;
 }
 
 -(void)onConversionDataReceived:(NSDictionary*) installData {
