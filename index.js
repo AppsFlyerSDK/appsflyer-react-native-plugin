@@ -44,10 +44,10 @@ function trackEventPromise(eventName, eventValues) : Promise<string>{
 
 function trackEvent(eventName, eventValues, success, error) : Promise<string>{
     if(success && error){
-        //initSdk is a callback function
-        trackEventCallback(options, success, error);
+        //trackEvent is a callback function
+        trackEventCallback(eventName, eventValues, success, error);
     }else if(!success){
-        //initSdk is a promise function
+        //trackEvent is a promise function
         return trackEventPromise(eventName, eventValues);
     }
 }
