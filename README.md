@@ -197,6 +197,15 @@ console.error(error);
 )
 ```
 
+*With Promise:*
+
+```javascript
+try {
+     var result = await appsFlyer.initSdk(options);     
+     } catch (error) {
+    }
+```
+
 ---
 
 ##### <a id="trackAppLaunch">  **`appsFlyer.trackAppLaunch(): void`**
@@ -357,6 +366,15 @@ console.error(error);
 )
 
 ```
+*With Promise:*
+
+```javascript
+try {
+     var result = await appsFlyer.trackEvent(eventName, eventValues);     
+     } catch (error) {
+    }
+```
+
 
 ---
 

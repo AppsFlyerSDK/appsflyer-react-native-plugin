@@ -32,56 +32,32 @@ RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
                   )
 {
     
-    NSString* devKey = nil;
-    NSString* appId = nil;
-    BOOL isDebug = NO;
-    BOOL isConversionData = NO;
-
-    if (![initSdkOptions isKindOfClass:[NSNull class]]) {
-
-        id isDebugValue = nil;
-        id isConversionDataValue = nil;
-        devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
-        appId = (NSString*)[initSdkOptions objectForKey: afAppId];
-
-        isDebugValue = [initSdkOptions objectForKey: afIsDebug];
-        if ([isDebugValue isKindOfClass:[NSNumber class]]) {
-            // isDebug is a boolean that will come through as an NSNumber
-            isDebug = [(NSNumber*)isDebugValue boolValue];
-        }
-        isConversionDataValue = [initSdkOptions objectForKey: afConversionData];
-        if ([isConversionDataValue isKindOfClass:[NSNumber class]]) {
-            isConversionData = [(NSNumber*)isConversionDataValue boolValue];
-        }
-    }
-
-    NSError* error = nil;
-
-    if (!devKey || [devKey isEqualToString:@""]) {
-        error = [NSError errorWithDomain:NO_DEVKEY_FOUND code:0 userInfo:nil];
-        
-    }
-    else if (!appId || [appId isEqualToString:@""]) {
-        error = [NSError errorWithDomain:NO_APPID_FOUND code:1 userInfo:nil];
-    }
-
-
-    if(error != nil){
+    NSError *error = [self callSdkInternal:initSdkOptions];
+    
+    if(error){
         errorCallback(error);
     }
     else{
-        if(isConversionData == YES){
-            [AppsFlyerTracker sharedTracker].delegate = self;
-        }
-        
-        [AppsFlyerTracker sharedTracker].appleAppID = appId;
-        [AppsFlyerTracker sharedTracker].appsFlyerDevKey = devKey;
-        [AppsFlyerTracker sharedTracker].isDebug = isDebug;
-        [[AppsFlyerTracker sharedTracker] trackAppLaunch];
-        
         successCallback(@[SUCCESS]);
-                }
+    }
 }
+
+
+RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
+                  initSdkWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject
+                  )
+{
+    NSError *error = [self callSdkInternal:initSdkOptions];
+    
+    if(error){
+        reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
+    }
+    else{
+       resolve(@[SUCCESS]);
+    }
+}
+
 
 RCT_EXPORT_METHOD(trackAppLaunch)
 {
@@ -93,27 +69,33 @@ RCT_EXPORT_METHOD(trackEvent: (NSString *)eventName eventValues:(NSDictionary *)
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback)
 {
-    NSString* error = nil;
+    NSError *error = [self trackEventInternal:eventName eventValues:eventValues];
     
-    if (!eventName || [eventName isEqualToString:@""]) {
-        error = [NSError errorWithDomain:NO_DEVKEY_FOUND code:2 userInfo:nil];
-    }
-    // else if (!eventValues || [eventValues count] == 0) {
-    //     error = [NSError errorWithDomain:NO_EVENT_VALUES_FOUND code:3 userInfo:nil];
-    // }
-    
-    if(error != nil){
-         errorCallback(error);
+    if(error){
+        errorCallback(error);
     }
     else{
-        
-        [[AppsFlyerTracker sharedTracker] trackEvent:eventName withValues:eventValues];
-        
         //TODO wait callback from SDK
         successCallback(@[SUCCESS]);
-     }
     }
+}
 
+
+RCT_EXPORT_METHOD(trackEventWithPromise: (NSString *)eventName eventValues:(NSDictionary *)eventValues
+                  trackEventWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    
+    NSError *error = [self trackEventInternal:eventName eventValues:eventValues];
+    
+    if(error){
+        reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
+    }
+    else{
+         //TODO wait callback from SDK
+        resolve(@[SUCCESS]);
+    }
+}
 
 
 RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback)
@@ -190,7 +172,69 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     }
 }
 
+ -(NSError *) callSdkInternal:(NSDictionary*)initSdkOptions {
+    
+    NSString* devKey = nil;
+    NSString* appId = nil;
+    BOOL isDebug = NO;
+    BOOL isConversionData = NO;
+    
+    if (![initSdkOptions isKindOfClass:[NSNull class]]) {
+        
+        id isDebugValue = nil;
+        id isConversionDataValue = nil;
+        devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
+        appId = (NSString*)[initSdkOptions objectForKey: afAppId];
+        
+        isDebugValue = [initSdkOptions objectForKey: afIsDebug];
+        if ([isDebugValue isKindOfClass:[NSNumber class]]) {
+            // isDebug is a boolean that will come through as an NSNumber
+            isDebug = [(NSNumber*)isDebugValue boolValue];
+        }
+        isConversionDataValue = [initSdkOptions objectForKey: afConversionData];
+        if ([isConversionDataValue isKindOfClass:[NSNumber class]]) {
+            isConversionData = [(NSNumber*)isConversionDataValue boolValue];
+        }
+    }
+    
+    NSError* error = nil;
+    
+    if (!devKey || [devKey isEqualToString:@""]) {
+        error = [NSError errorWithDomain:NO_DEVKEY_FOUND code:0 userInfo:nil];
+        
+    }
+    else if (!appId || [appId isEqualToString:@""]) {
+        error = [NSError errorWithDomain:NO_APPID_FOUND code:1 userInfo:nil];
+    }
+    
+    
+    if(error != nil){
+        return error;
+    }
+    else{
+        if(isConversionData == YES){
+            [AppsFlyerTracker sharedTracker].delegate = self;
+        }
+        
+        [AppsFlyerTracker sharedTracker].appleAppID = appId;
+        [AppsFlyerTracker sharedTracker].appsFlyerDevKey = devKey;
+        [AppsFlyerTracker sharedTracker].isDebug = isDebug;
+        [[AppsFlyerTracker sharedTracker] trackAppLaunch];
+        
+        return nil;
+    }
+}
 
+-(NSError *) trackEventInternal: (NSString *)eventName eventValues:(NSDictionary *)eventValues {
+    
+    if (!eventName || [eventName isEqualToString:@""]) {
+        NSError *error = [NSError errorWithDomain:NO_EVENT_NAME_FOUND code:2 userInfo:nil];
+        return error;
+    }
+    
+    [[AppsFlyerTracker sharedTracker] trackEvent:eventName withValues:eventValues];
+    return nil;
+}
 
 -(void)onConversionDataReceived:(NSDictionary*) installData {
     
