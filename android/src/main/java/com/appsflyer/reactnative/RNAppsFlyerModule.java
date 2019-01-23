@@ -235,7 +235,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
 
         AppsFlyerLib.getInstance().trackEvent(getReactApplicationContext(), eventName, data);
 
-        return "";
+        return null;
     }
 
     @ReactMethod
