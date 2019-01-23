@@ -38,10 +38,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     private ReactApplicationContext reactContext;
     private Application application;
 
-    public RNAppsFlyerModule(ReactApplicationContext reactContext, Application application) {
+    public RNAppsFlyerModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
-        this.application = application;
+        this.application = (Application)reactContext.getApplicationContext();
     }
 
     @Override

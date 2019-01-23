@@ -129,7 +129,7 @@ Add:
 1. `import com.appsflyer.reactnative.RNAppsFlyerPackage;`
 
 2.  In the `getPackages()` method register the module:
-`new RNAppsFlyerPackage(MainApplication.this)`
+`new RNAppsFlyerPackage()`
 
 So `getPackages()` should look like:
 
@@ -139,7 +139,7 @@ So `getPackages()` should look like:
       return Arrays.<ReactPackage>asList(
             new MainReactPackage(),
             //...
-            new RNAppsFlyerPackage(MainApplication.this)
+            new RNAppsFlyerPackage()
             //...
       );
     }
