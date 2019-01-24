@@ -50,3 +50,9 @@ android/keystores/debug.keystore
 
 demo/node_modules/
 package-lock.json
+
+android/\.project
+
+examples/demo/android/\.project
+
+examples/DemoPod2/android/\.project
