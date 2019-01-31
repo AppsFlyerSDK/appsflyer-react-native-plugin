@@ -7,8 +7,11 @@ import android.app.Application;
 
 import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
+import com.appsflyer.CreateOneLinkHttpTask;
 import com.appsflyer.AppsFlyerLib;
 import com.appsflyer.AppsFlyerProperties.EmailsCryptType;
+import com.appsflyer.share.ShareInviteHelper;
+import com.appsflyer.share.LinkGenerator;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -284,6 +287,37 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         }
     }
 
+       @ReactMethod
+    public void createShareLink(
+            final String referrerName,  ReadableMap data,  String channel,
+            final Callback successCallback,
+            final Callback errorCallback)
+    {
+
+            Map<String, String> eventData = RNUtil.stringifyMap(data.toHashMap());
+
+            LinkGenerator linkGenerator = ShareInviteHelper.generateInviteUrl(this.application.getApplicationContext());
+            linkGenerator.setReferrerName(referrerName);
+            linkGenerator.setChannel(channel);
+            linkGenerator.addParameters(eventData);
+
+            CreateOneLinkHttpTask.ResponseListener listener = new CreateOneLinkHttpTask.ResponseListener() {
+                @Override
+                public void onResponse(final String oneLinkUrl) {
+                successCallback.invoke(oneLinkUrl);
+
+                }
+
+                @Override
+                public void onResponseError(final String error) {
+                    errorCallback.invoke(error);
+
+                }
+            };
+
+            linkGenerator.generateLink(this.application.getApplicationContext(), listener);
+
+    }
 
 
     @ReactMethod

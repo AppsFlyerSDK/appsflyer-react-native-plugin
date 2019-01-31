@@ -59,6 +59,18 @@ public class RNUtil {
         return result;
     }
 
+      /**
+     * Converts Map<String, Object> to a Map<String, String><>
+     *
+     * @param map The Readable Map to parse
+     * @return a Java Map<String, String> to be used in memory
+     */
+
+    public static Map<String, String> stringifyMap(Map<String, Object> map) {
+        Map<String, String> stringifiedMap = (Map<String, String>) (Object) map;
+    return stringifiedMap;
+}
+
     /**
      * Attempts to pull the ReadableMap's attribute out as the proper type
      * @param readableMap The Facebook ReadableMap to parse
