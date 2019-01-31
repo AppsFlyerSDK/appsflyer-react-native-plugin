@@ -104,7 +104,8 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     }
 
 
-        private String callSdkInternal(ReadableMap _options){
+    private String callSdkInternal(ReadableMap _options){
+
 
         String devKey;
         String oneLinkId;
@@ -113,10 +114,13 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         boolean isConversionData;
 
         AppsFlyerLib instance = AppsFlyerLib.getInstance();
+
+
         JSONObject options = RNUtil.readableMapToJson(_options);
 
         devKey = options.optString(afDevKey, "");
         oneLinkId = options.optString(afOneLinkId, "");
+
 
         if (devKey.trim().equals("")) {
             return NO_DEVKEY_FOUND;
@@ -141,6 +145,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         }
 
         instance.startTracking(application, devKey);
+
         trackAppLaunch();
 
         return null;
@@ -245,7 +250,43 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         return null;
     }
 
+
     @ReactMethod
+    public void createShareLink(
+            final String referrerName,  ReadableMap data,  String channel,
+            final Callback successCallback,
+            final Callback errorCallback)
+    {
+
+            Map<String, String> eventData = RNUtil.stringifyMap(data.toHashMap());
+
+            LinkGenerator linkGenerator = ShareInviteHelper.generateInviteUrl(this.application.getApplicationContext());
+            linkGenerator.setReferrerName(referrerName);
+            linkGenerator.setChannel(channel);
+            linkGenerator.addParameters(eventData);
+
+            CreateOneLinkHttpTask.ResponseListener listener = new CreateOneLinkHttpTask.ResponseListener() {
+                @Override
+                public void onResponse(final String oneLinkUrl) {
+                successCallback.invoke(oneLinkUrl);
+
+                }
+
+                @Override
+                public void onResponseError(final String error) {
+                    errorCallback.invoke(error);
+
+                }
+            };
+
+            linkGenerator.generateLink(this.application.getApplicationContext(), listener);
+
+    }
+
+
+
+
+       @ReactMethod
     public void trackEvent(
             final String eventName, ReadableMap eventData,
             Callback successCallback,
@@ -287,36 +328,12 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         }
     }
 
-       @ReactMethod
-    public void createShareLink(
-            final String referrerName,  ReadableMap data,  String channel,
-            final Callback successCallback,
-            final Callback errorCallback)
+   @ReactMethod
+    public void trackInvite(
+            final String channel, ReadableMap data)
     {
-
-            Map<String, String> eventData = RNUtil.stringifyMap(data.toHashMap());
-
-            LinkGenerator linkGenerator = ShareInviteHelper.generateInviteUrl(this.application.getApplicationContext());
-            linkGenerator.setReferrerName(referrerName);
-            linkGenerator.setChannel(channel);
-            linkGenerator.addParameters(eventData);
-
-            CreateOneLinkHttpTask.ResponseListener listener = new CreateOneLinkHttpTask.ResponseListener() {
-                @Override
-                public void onResponse(final String oneLinkUrl) {
-                successCallback.invoke(oneLinkUrl);
-
-                }
-
-                @Override
-                public void onResponseError(final String error) {
-                    errorCallback.invoke(error);
-
-                }
-            };
-
-            linkGenerator.generateLink(this.application.getApplicationContext(), listener);
-
+          Map<String, String> eventData = RNUtil.stringifyMap(data.toHashMap());
+          ShareInviteHelper.trackInvite(this.application.getApplicationContext(), channel, eventData);
     }
 
 
@@ -402,6 +419,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
 
         int emailsCryptType = options.optInt(afEmailsCryptType, 0);
         JSONArray emailsJSON = options.optJSONArray(afEmails);
+
 
         if(emailsJSON.length() == 0){
             errorCallback.invoke( new Exception(NO_EMAILS_FOUND_OR_CORRUPTED).getMessage() );

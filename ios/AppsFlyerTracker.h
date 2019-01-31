@@ -12,7 +12,6 @@
 #import "AppsFlyerLinkGenerator.h"
 
 
-
 // In app event names constants
 #define AFEventLevelAchieved            @"af_level_achieved"
 #define AFEventAddPaymentInfo           @"af_add_payment_info"
@@ -113,9 +112,9 @@
 #define AFEventParamHotelScore              @"af_hotel_score"
 #define AFEventParamPurchaseCurrency        @"af_purchase_currency"
 
-#define AFEventParamPreferredStarRatings    @"af_preferred_star_ratings"	//array of int (basically a tupple (min,max) but we'll use array of int and instruct the developer to use two values)
+#define AFEventParamPreferredStarRatings    @"af_preferred_star_ratings"    //array of int (basically a tupple (min,max) but we'll use array of int and instruct the developer to use two values)
 
-#define AFEventParamPreferredPriceRange     @"af_preferred_price_range"	//array of int (basically a tupple (min,max) but we'll use array of int and instruct the developer to use two values)
+#define AFEventParamPreferredPriceRange     @"af_preferred_price_range"    //array of int (basically a tupple (min,max) but we'll use array of int and instruct the developer to use two values)
 #define AFEventParamPreferredNeighborhoods  @"af_preferred_neighborhoods" //array of string
 #define AFEventParamPreferredNumStops       @"af_preferred_num_stops"
 
@@ -167,23 +166,26 @@ typedef enum  {
 /* Use this property to set your app's Apple ID (taken from the app's page on iTunes Connect) */
 @property (nonatomic, strong, setter=setAppleAppID:) NSString *appleAppID;
 
-/* 
+/*
  * In case of in app purchase events, you can set the currency code your user has purchased with.
  * The currency code is a 3 letter code according to ISO standards. Example: "USD"
  */
 @property (nonatomic, strong) NSString *currencyCode;
 
-/* 
+/*
  * AppsFLyer SDK collect Apple's advertisingIdentifier if the AdSupport framework included in the SDK.
  * You can disable this behavior by setting the following property to YES.
  */
 @property BOOL disableAppleAdSupportTracking;
 
-/* 
- * Prints our messages to the log. This property should only be used in DEBUG mode. The default value 
+/*
+ * Prints our messages to the log. This property should only be used in DEBUG mode. The default value
  * is NO.
  */
 @property (nonatomic, setter = setIsDebug:) BOOL isDebug;
+
+
+
 
 
 /*!
@@ -236,6 +238,9 @@ typedef enum  {
 /* Track application launch*/
 - (void) trackAppLaunch;
 
+
+
+
 /*
  * Use this method to track events in your app like purchases or user actions.
  * Example :
@@ -244,10 +249,18 @@ typedef enum  {
 - (void) trackEvent:(NSString*)eventName withValue:(NSString*)value __attribute__((deprecated));
 
 /*
- * Use this method to track an events with mulitple values. See AppsFlyer's documentation for details. 
+ * Use this method to track an events with mulitple values. See AppsFlyer's documentation for details.
  *
  */
 - (void) trackEvent:(NSString *)eventName withValues:(NSDictionary*)values;
+
+/*
+ * Use this method to track the sender's invites. See AppsFlyer's documentation for details.
+ *
+ */
+
+- (void) trackInvite: channel:(NSString *)channel withData:(NSDictionary *)data);
+
 
 /*
  * Use this method to create a custom share link. See AppsFlyer's documentation for details.
@@ -255,8 +268,9 @@ typedef enum  {
  */
 -(void) createShareLink:(NSString *)referrerName data:(NSDictionary *)data withChannel:(NSString *)channel;
 
+
 /*
- * To track in app purchases you can call this method from the completeTransaction: method on 
+ * To track in app purchases you can call this method from the completeTransaction: method on
  * your SKPaymentTransactionObserver.
  */
 - (void) validateAndTrackInAppPurchase:(NSString *)productIdentifier
@@ -270,8 +284,8 @@ typedef enum  {
 
 
 /*
-* To Track location for geo-fencing.
-*/
+ * To Track location for geo-fencing.
+ */
 - (void) trackLocation:(double) longitude latitude:(double) latitude;
 
 /*
@@ -279,7 +293,7 @@ typedef enum  {
  */
 - (NSString *) getAppsFlyerUID;
 
-/* 
+/*
  * In case you want to use AppsFlyer tracking data in your app you can use the following method set a
  * delegate with callback buttons for the tracking data. See AppsFlyerTrackerDelegate above.
  */
@@ -297,7 +311,7 @@ typedef enum  {
 
 
 - (void) handleOpenUrl:(NSURL *) url options:(NSDictionary *)options;
-/* 
+/*
  * For Universal links iOS 9
  */
 
@@ -306,14 +320,14 @@ typedef enum  {
 - (void) handlePushNotification:(NSDictionary *) pushPayload;
 
 
-/* 
-  Register uninstall - you should register for remote notification and provide Appsflyer the push device token.
-*/
+/*
+ Register uninstall - you should register for remote notification and provide Appsflyer the push device token.
+ */
 - (void) registerUninstall:(NSData *) deviceToken;
 
 /*
  Get SDK version.
-*/
+ */
 - (NSString *) getSDKVersion;
 
 

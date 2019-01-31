@@ -50,6 +50,10 @@ function trackEvent(eventName, eventValues, success, error): Promise<string> {
 
 appsFlyer.trackEvent = trackEvent;
 
+appsFlyer.trackInvite = (channel, data) => {
+  return RNAppsFlyer.trackLocation(channel, data);
+};
+
 appsFlyer.createShareLink = (referrerName, data, channel, successC, errorC) => {
   return RNAppsFlyer.createShareLink(
     referrerName,

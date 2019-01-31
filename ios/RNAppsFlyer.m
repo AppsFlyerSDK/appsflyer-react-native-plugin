@@ -233,6 +233,12 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     }
 }
 
+RCT_EXPORT_METHOD(trackInvite: channel:(NSString *)channel withData:(NSDictionary *)data)
+{
+    [AppsFlyerShareInviteHelper trackInvite:channel parameters:data];
+}
+
+
 RCT_EXPORT_METHOD(createShareLink:(NSString *)referrerName data:(NSDictionary *)data withChannel:(NSString *)channel  successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback)
 {
