@@ -172,10 +172,12 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     }
 }
 
- -(NSError *) callSdkInternal:(NSDictionary*)initSdkOptions {
+-(NSError *) callSdkInternal:(NSDictionary*)initSdkOptions {
     
     NSString* devKey = nil;
     NSString* appId = nil;
+    NSString* oneLinkId = nil;
+    
     BOOL isDebug = NO;
     BOOL isConversionData = NO;
     
@@ -185,6 +187,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         id isConversionDataValue = nil;
         devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
         appId = (NSString*)[initSdkOptions objectForKey: afAppId];
+        oneLinkId = (NSString*)[initSdkOptions objectForKey: afOneLinkId];
         
         isDebugValue = [initSdkOptions objectForKey: afIsDebug];
         if ([isDebugValue isKindOfClass:[NSNumber class]]) {
@@ -218,13 +221,17 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         
         [AppsFlyerTracker sharedTracker].appleAppID = appId;
         [AppsFlyerTracker sharedTracker].appsFlyerDevKey = devKey;
+        
+        if (oneLinkId && ![oneLinkId isEqualToString:@""]){
+            [AppsFlyerTracker sharedTracker].appInviteOneLinkID = oneLinkId;
+        }
+        
         [AppsFlyerTracker sharedTracker].isDebug = isDebug;
         [[AppsFlyerTracker sharedTracker] trackAppLaunch];
         
         return nil;
     }
 }
-
 -(NSError *) trackEventInternal: (NSString *)eventName eventValues:(NSDictionary *)eventValues {
     
     if (!eventName || [eventName isEqualToString:@""]) {

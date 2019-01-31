@@ -17,6 +17,7 @@
   // Appsflyer JS objects
   #define afDevKey                        @"devKey"
   #define afAppId                         @"appId"
+  #define afOneLinkId                     @"oneLinkId"
   #define afIsDebug                       @"isDebug"
 
   #define afEmailsCryptType               @"emailsCryptType"

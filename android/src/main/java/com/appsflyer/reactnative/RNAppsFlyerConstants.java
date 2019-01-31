@@ -15,6 +15,7 @@ public class RNAppsFlyerConstants {
 
     final static String  afIsDebug  = "isDebug";
     final static String  afDevKey  = "devKey";
+    final static String  afOneLinkId  = "oneLinkId";
     final static String  afEmailsCryptType  = "emailsCryptType";
     final static String  afEmails  = "emails";
 

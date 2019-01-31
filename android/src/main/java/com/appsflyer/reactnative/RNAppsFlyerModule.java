@@ -101,18 +101,19 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     }
 
 
-    private String callSdkInternal(ReadableMap _options){
+        private String callSdkInternal(ReadableMap _options){
 
         String devKey;
+        String oneLinkId;
+
         boolean isDebug;
         boolean isConversionData;
 
         AppsFlyerLib instance = AppsFlyerLib.getInstance();
-
-
         JSONObject options = RNUtil.readableMapToJson(_options);
 
         devKey = options.optString(afDevKey, "");
+        oneLinkId = options.optString(afOneLinkId, "");
 
         if (devKey.trim().equals("")) {
             return NO_DEVKEY_FOUND;
@@ -132,8 +133,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
                 (isConversionData == true) ? registerConversionListener() : null,
                 application.getApplicationContext());
 
-        instance.startTracking(application, devKey);
+        if (!oneLinkId.trim().equals("")) {
+            instance.setAppInviteOneLink(oneLinkId);
+        }
 
+        instance.startTracking(application, devKey);
         trackAppLaunch();
 
         return null;
