@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "AppsFlyerCrossPromotionHelper.h"
 #import "AppsFlyerShareInviteHelper.h"
+#import "AppsFlyerLinkGenerator.h"
 
 
 
@@ -247,6 +248,12 @@ typedef enum  {
  *
  */
 - (void) trackEvent:(NSString *)eventName withValues:(NSDictionary*)values;
+
+/*
+ * Use this method to create a custom share link. See AppsFlyer's documentation for details.
+ *
+ */
+-(void) createShareLink:(NSString *)referrerName data:(NSDictionary *)data withChannel:(NSString *)channel;
 
 /*
  * To track in app purchases you can call this method from the completeTransaction: method on 

@@ -232,6 +232,20 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         return nil;
     }
 }
+
+RCT_EXPORT_METHOD(createShareLink:(NSString *)referrerName data:(NSDictionary *)data withChannel:(NSString *)channel  successCallback :(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseErrorBlock)errorCallback)
+{
+    [AppsFlyerShareInviteHelper generateInviteUrlWithLinkGenerator:^AppsFlyerLinkGenerator * _Nonnull(AppsFlyerLinkGenerator * _Nonnull generator) {
+        [generator setChannel:channel];
+        [generator setReferrerName:referrerName];
+        [generator addParameters: data];
+        return generator;
+    } completionHandler:^(NSURL * _Nullable url) {
+        successCallback(@[[url absoluteString]]);
+    }];
+}
+
 -(NSError *) trackEventInternal: (NSString *)eventName eventValues:(NSDictionary *)eventValues {
     
     if (!eventName || [eventName isEqualToString:@""]) {
