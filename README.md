@@ -216,35 +216,37 @@ Should be used with the relevant [AppState](https://facebook.github.io/react-nat
 
 ```javascript
 state = {
-appState: AppState.currentState
+  appState: AppState.currentState
 }
 
-componentDidMount() {
-AppState.addEventListener('change', this._handleAppStateChange);
+componentDidMount()
+{
+  AppState.addEventListener('change', this._handleAppStateChange);
 }
 
-componentWillUnmount() {
-if(this.onInstallConversionDataCanceller){
-this.onInstallConversionDataCanceller();
-}
-AppState.removeEventListener('change', this._handleAppStateChange);
-}
-
-_handleAppStateChange = (nextAppState) => {
-if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-
-if (Platform.OS === 'ios') {
-appsFlyer.trackAppLaunch();
-}
+componentWillUnmount()
+{
+  if (this.onInstallConversionDataCanceller) {
+    this.onInstallConversionDataCanceller();
+  }
+  AppState.removeEventListener('change', this._handleAppStateChange);
 }
 
-if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
-if(this.onInstallConversionDataCanceller){
-this.onInstallConversionDataCanceller();
-}
-}
+_handleAppStateChange = (nextAppState) =>{
+  if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
 
-this.setState({appState: nextAppState});
+    if (Platform.OS === 'ios') {
+      appsFlyer.trackAppLaunch();
+    }
+  }
+
+  if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
+    if (this.onInstallConversionDataCanceller) {
+      this.onInstallConversionDataCanceller();
+    }
+  }
+
+  this.setState({appState: nextAppState});
 }
 ```
 ---
