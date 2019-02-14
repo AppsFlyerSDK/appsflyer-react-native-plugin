@@ -20,7 +20,7 @@ function initSdk(options, success, error): Promise<string> {
     ? true
     : false;
 
-console.log(JSON.stringify(options));
+  //console.log(JSON.stringify(options));
 
   if (success && error) {
     //initSdk is a callback function
@@ -131,7 +131,7 @@ appsFlyer.setCollectAndroidID = (isCollect, successC) => {
  * @returns {remove: function - unregister listener}
  */
 appsFlyer.onInstallConversionData = callback => {
-  console.log("onInstallConversionData is called" );
+  //console.log("onInstallConversionData is called" );
 
   const listener = NativeAppEventEmitter.addListener(
     "onInstallConversionData",
@@ -149,8 +149,7 @@ appsFlyer.onInstallConversionData = callback => {
     }
   );
 
-   eventsMap["onInstallConversionData"] = listener;
-  console.log("FESS 2 :: " + (eventsMap["onInstallConversionData"])? "y" : "n");
+   eventsMap["onInstallConversionData"] = listener;  
 
   // unregister listener (suppose should be called from componentWillUnmount() )
   return function remove() {
@@ -160,7 +159,7 @@ appsFlyer.onInstallConversionData = callback => {
 
 appsFlyer.onAppOpenAttribution = callback => {
 
-  console.log("onAppOpenAttribution is called" );
+  //console.log("onAppOpenAttribution is called" );
 
   const listener = NativeAppEventEmitter.addListener(
     "onAppOpenAttribution",
@@ -178,8 +177,7 @@ appsFlyer.onAppOpenAttribution = callback => {
 
   
   eventsMap["onAppOpenAttribution"] = listener;
-  console.log("FESS 5 :: " + (eventsMap["onAppOpenAttribution"])? "y" : "n");  
-
+  
   // unregister listener (suppose should be called from componentWillUnmount() )
   return function remove() {
     listener.remove();
