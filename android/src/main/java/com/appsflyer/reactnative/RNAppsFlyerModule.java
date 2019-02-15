@@ -1,7 +1,6 @@
 package com.appsflyer.reactnative;
 
 
-import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +8,6 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.appsflyer.AFInAppEventType;
-import com.appsflyer.AFLogger;
 import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
 import com.appsflyer.AppsFlyerProperties.EmailsCryptType;
@@ -142,7 +140,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                 devKey,
                 (isConversionData == true) ? registerConversionListener() : null,
                 application.getApplicationContext());
-
 
 
         Intent intent = this.getCurrentActivity().getIntent();
