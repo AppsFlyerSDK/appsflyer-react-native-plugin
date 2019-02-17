@@ -28,7 +28,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.facebook.react:react-native:+'
-    compile 'com.android.installreferrer:installreferrer:1.0'
-    compile 'com.appsflyer:af-android-sdk:4.8.18@aar'
+    implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
+    implementation "com.android.installreferrer:installreferrer:1.0"
+    implementation "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '4.8.20')}"    
 }

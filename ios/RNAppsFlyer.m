@@ -294,12 +294,13 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
             NSString *jsonMessageStr = [[NSString alloc] initWithBytes:[jsonMessage bytes] length:[jsonMessage length] encoding:NSUTF8StringEncoding];
             
             NSString* status = (NSString*)[message objectForKey: @"status"];
+            NSString* type = (NSString*)[message objectForKey: @"type"];
             
             if([status isEqualToString:afSuccess]){
-                [self reportOnSuccess:jsonMessageStr];
+                [self reportOnSuccess:jsonMessageStr type:type];
             }
             else{
-                [self reportOnFailure:jsonMessageStr];
+                [self reportOnFailure:jsonMessageStr type:type];
             }
             
             NSLog(@"jsonMessageStr = %@",jsonMessageStr);
@@ -308,16 +309,23 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         }
     }
     else{
-        [self reportOnFailure:@"failed to parse Response"];
+        NSLog(@"failed to parse Response");
     }
 }
 
--(void) reportOnFailure:(NSString *)errorMessage {
-    [self.bridge.eventDispatcher sendAppEventWithName:afOnInstallConversionData body:errorMessage];
+-(void) reportOnFailure:(NSString *)errorMessage type:(NSString*) type{
+    [self.bridge.eventDispatcher sendAppEventWithName:type body:errorMessage];
 }
 
--(void) reportOnSuccess:(NSString *)data {
-    [self.bridge.eventDispatcher sendAppEventWithName:afOnInstallConversionData body:data];
+-(void) reportOnSuccess:(NSString *)data type:(NSString*) type {
+//    [self.bridge.eventDispatcher sendAppEventWithName:type body:data];
+    
+    if([type isEqualToString:afOnInstallConversionDataLoaded]){
+        [self.bridge.eventDispatcher sendAppEventWithName:afOnInstallConversionData body:data];
+    }
+    else{
+        [self.bridge.eventDispatcher sendAppEventWithName:afOnAppOpenAttribution body:data];
+    }
 }
 
 @end

@@ -1,39 +1,51 @@
-
 package com.appsflyer.reactnative;
 
 
 import android.app.Application;
-
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
 
 import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
 import com.appsflyer.AppsFlyerProperties.EmailsCryptType;
+import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.facebook.react.bridge.Promise;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import android.content.Context;
-import android.util.Log;
-import android.content.Intent;
-import android.net.Uri;
-
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.NO_DEVKEY_FOUND;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.NO_EMAILS_FOUND_OR_CORRUPTED;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.NO_EVENT_NAME_FOUND;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.SUCCESS;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.UNKNOWN_ERROR;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afConversionData;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afDevKey;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afEmails;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afEmailsCryptType;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afFailure;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afIsDebug;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnAppOpenAttribution;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnAttributionFailure;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnInstallConversionData;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnInstallConversionDataLoaded;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnInstallConversionFailure;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afSuccess;
+
+public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     private ReactApplicationContext reactContext;
     private Application application;
@@ -41,7 +53,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     public RNAppsFlyerModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
-        this.application = (Application)reactContext.getApplicationContext();
+        this.application = (Application) reactContext.getApplicationContext();
     }
 
     @Override
@@ -83,32 +95,29 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
             ReadableMap _options,
             Callback successCallback,
             Callback errorCallback
-            ) {
+    ) {
 
-        try{
+        try {
             final String errorReason = callSdkInternal(_options);
-            if(errorReason == null){
+            if (errorReason == null) {
                 //TODO: callback should come from SDK
                 successCallback.invoke(SUCCESS);
+            } else {
+                errorCallback.invoke(new Exception(errorReason).getMessage());
             }
-            else{
-                errorCallback.invoke( new Exception(errorReason).getMessage() );
-            }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             errorCallback.invoke(e.getMessage());
         }
     }
 
 
-    private String callSdkInternal(ReadableMap _options){
+    private String callSdkInternal(ReadableMap _options) {
 
         String devKey;
         boolean isDebug;
         boolean isConversionData;
 
         AppsFlyerLib instance = AppsFlyerLib.getInstance();
-
 
         JSONObject options = RNUtil.readableMapToJson(_options);
 
@@ -132,32 +141,37 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
                 (isConversionData == true) ? registerConversionListener() : null,
                 application.getApplicationContext());
 
-        instance.startTracking(application, devKey);
+
+        Intent intent = this.getCurrentActivity().getIntent();
+        //Generally we already do this validation into the SDK, anyways, we want to show it to clients
+        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
+            AppsFlyerLib.getInstance().setPluginDeepLinkData(intent);
+        }
 
         trackAppLaunch();
+        instance.startTracking(application, devKey);
+
 
         return null;
     }
 
     @ReactMethod
     public void initSdkWithPromise(ReadableMap _options, Promise promise) {
-        try{
+        try {
             final String errorReason = callSdkInternal(_options);
-            if(errorReason == null){
+            if (errorReason == null) {
                 //TODO: callback should come from SDK
                 promise.resolve(SUCCESS);
-            }
-            else{
+            } else {
                 promise.reject(errorReason, new Exception(errorReason).getMessage());
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             promise.reject(UNKNOWN_ERROR, e);
         }
     }
 
-    private AppsFlyerConversionListener registerConversionListener(){
-        return new AppsFlyerConversionListener(){
+    private AppsFlyerConversionListener registerConversionListener() {
+        return new AppsFlyerConversionListener() {
 
             @Override
             public void onAppOpenAttribution(Map<String, String> attributionData) {
@@ -179,20 +193,24 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
                 handleError(afOnInstallConversionFailure, errorMessage);
             }
 
-            private void handleSuccess(String eventType, Map<String, String> data){
+            private void handleSuccess(String eventType, Map<String, String> data) {
                 JSONObject obj = new JSONObject();
 
                 try {
                     obj.put("status", afSuccess);
                     obj.put("type", eventType);
-                    obj.put("data",  new JSONObject(data));
-                    sendEvent(reactContext, afOnInstallConversionData, obj.toString());
+                    obj.put("data", new JSONObject(data));
+                    if (eventType.equals(afOnInstallConversionDataLoaded)) {
+                        sendEvent(reactContext, afOnInstallConversionData, obj.toString());
+                    } else if (eventType.equals(afOnAppOpenAttribution)) {
+                        sendEvent(reactContext, afOnAppOpenAttribution, obj.toString());
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
 
-            private void handleError(String eventType, String errorMessage){
+            private void handleError(String eventType, String errorMessage) {
                 JSONObject obj = new JSONObject();
 
                 try {
@@ -215,25 +233,25 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
         };
     }
 
-    private void trackAppLaunch(){
+    private void trackAppLaunch() {
         Context c = application.getApplicationContext();
         AppsFlyerLib.getInstance().trackEvent(c, null, null);
     }
 
 
-    private String trackEventInternal(final String eventName, ReadableMap eventData){
+    private String trackEventInternal(final String eventName, ReadableMap eventData) {
 
-        if(eventName.trim().equals("")){
+        if (eventName.trim().equals("")) {
             return NO_EVENT_NAME_FOUND;
         }
 
         Map<String, Object> data = RNUtil.toMap(eventData);
 
-        if(data == null){ // in case of no values
+        if (data == null) { // in case of no values
             data = new HashMap<>();
         }
 
-        AppsFlyerLib.getInstance().trackEvent(getReactApplicationContext(), eventName, data);
+        AppsFlyerLib.getInstance().trackEvent(getCurrentActivity().getBaseContext(), eventName, data);
 
         return null;
     }
@@ -242,15 +260,13 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     public void trackEvent(
             final String eventName, ReadableMap eventData,
             Callback successCallback,
-            Callback errorCallback)
-    {
+            Callback errorCallback) {
         try {
             final String errorReason = trackEventInternal(eventName, eventData);
 
-            if(errorReason != null){
-                errorCallback.invoke( new Exception(errorReason).getMessage() );
-            }
-            else{
+            if (errorReason != null) {
+                errorCallback.invoke(new Exception(errorReason).getMessage());
+            } else {
                 //TODO: callback should come from SDK
                 successCallback.invoke(SUCCESS);
             }
@@ -262,36 +278,32 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
 
     @ReactMethod
     public void trackEventWithPromise(
-            final String eventName, ReadableMap eventData, Promise promise)
-    {
+            final String eventName, ReadableMap eventData, Promise promise) {
         try {
             final String errorReason = trackEventInternal(eventName, eventData);
 
-            if(errorReason != null){
-                promise.reject(errorReason, new Exception(errorReason).getMessage() );
-            }
-            else{
+            if (errorReason != null) {
+                promise.reject(errorReason, new Exception(errorReason).getMessage());
+            } else {
                 //TODO: callback should come from SDK
                 promise.resolve(SUCCESS);
             }
         } catch (Exception e) {
-            promise.reject(UNKNOWN_ERROR, e );
+            promise.reject(UNKNOWN_ERROR, e);
             return;
         }
     }
 
-
-
+    @Deprecated
     @ReactMethod
     public void sendDeepLinkData(String url) {
         if (url != null) {
-            Intent intent =  getCurrentActivity().getIntent();
+            Intent intent = getCurrentActivity().getIntent();
             Uri uri = Uri.parse(url);
             intent.setData(uri);
             AppsFlyerLib.getInstance().sendDeepLinkData(this.getCurrentActivity());
         }
     }
-
 
     @Deprecated
     @ReactMethod
@@ -308,47 +320,45 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     @ReactMethod
     @Deprecated
     public void setGCMProjectNumber(final String gcmProjectNumber,
-                                Callback successCallback,
-                                Callback errorCallback) 
-    {
+                                    Callback successCallback,
+                                    Callback errorCallback) {
         AppsFlyerLib.getInstance().setGCMProjectNumber(gcmProjectNumber);
         successCallback.invoke(SUCCESS);
     }
 
-   @ReactMethod
-   public void enableUninstallTracking(final String gcmProjectNumber,
-                               Callback successCallback)
-   {
-       AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectNumber);
-       successCallback.invoke(SUCCESS);
-   }
-
-   @ReactMethod
-   public void updateServerUninstallToken(final String token,Callback callback){
-       AppsFlyerLib.getInstance().updateServerUninstallToken(getReactApplicationContext(), token);
-       callback.invoke(SUCCESS);
-   }
+    @ReactMethod
+    public void enableUninstallTracking(final String gcmProjectNumber,
+                                        Callback successCallback) {
+        AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectNumber);
+        successCallback.invoke(SUCCESS);
+    }
 
     @ReactMethod
-    public void setCustomerUserId(final String userId,Callback callback){
+    public void updateServerUninstallToken(final String token, Callback callback) {
+        AppsFlyerLib.getInstance().updateServerUninstallToken(getReactApplicationContext(), token);
+        callback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void setCustomerUserId(final String userId, Callback callback) {
         AppsFlyerLib.getInstance().setCustomerUserId(userId);
         callback.invoke(SUCCESS);
     }
 
     @ReactMethod
-    public void setCollectIMEI(boolean isCollect, Callback callback){
+    public void setCollectIMEI(boolean isCollect, Callback callback) {
         AppsFlyerLib.getInstance().setCollectIMEI(isCollect);
         callback.invoke(SUCCESS);
     }
 
     @ReactMethod
-    public void setCollectAndroidID(boolean isCollect, Callback callback){
+    public void setCollectAndroidID(boolean isCollect, Callback callback) {
         AppsFlyerLib.getInstance().setCollectAndroidID(isCollect);
         callback.invoke(SUCCESS);
     }
 
     @ReactMethod
-    public void stopTracking(boolean isCollect, Callback callback){
+    public void stopTracking(boolean isCollect, Callback callback) {
         AppsFlyerLib.getInstance().stopTracking(isCollect, getReactApplicationContext());
         callback.invoke(SUCCESS);
     }
@@ -357,26 +367,25 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
     @ReactMethod
     public void setUserEmails(ReadableMap _options,
                               Callback successCallback,
-                              Callback errorCallback)
-    {
+                              Callback errorCallback) {
 
         JSONObject options = RNUtil.readableMapToJson(_options);
 
         int emailsCryptType = options.optInt(afEmailsCryptType, 0);
         JSONArray emailsJSON = options.optJSONArray(afEmails);
 
-        if(emailsJSON.length() == 0){
-            errorCallback.invoke( new Exception(NO_EMAILS_FOUND_OR_CORRUPTED).getMessage() );
+        if (emailsJSON.length() == 0) {
+            errorCallback.invoke(new Exception(NO_EMAILS_FOUND_OR_CORRUPTED).getMessage());
             return;
         }
 
         EmailsCryptType type = EmailsCryptType.NONE; // default type
 
-        for(EmailsCryptType _type : EmailsCryptType.values()){
-          if(_type.getValue() == emailsCryptType){
-              type = _type;
-              break;
-          }
+        for (EmailsCryptType _type : EmailsCryptType.values()) {
+            if (_type.getValue() == emailsCryptType) {
+                type = _type;
+                break;
+            }
         }
 
         String[] emailsList = new String[emailsJSON.length()];
@@ -386,7 +395,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule  {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            errorCallback.invoke( new Exception(NO_EMAILS_FOUND_OR_CORRUPTED).getMessage() );
+            errorCallback.invoke(new Exception(NO_EMAILS_FOUND_OR_CORRUPTED).getMessage());
             return;
         }
 
