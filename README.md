@@ -225,27 +225,17 @@ componentDidMount()
 }
 
 componentWillUnmount()
-{
-  if (this.onInstallConversionDataCanceller) {
-    this.onInstallConversionDataCanceller();
-  }
+{  
   AppState.removeEventListener('change', this._handleAppStateChange);
 }
 
 _handleAppStateChange = (nextAppState) =>{
   if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-
     if (Platform.OS === 'ios') {
       appsFlyer.trackAppLaunch();
     }
   }
-
-  if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
-    if (this.onInstallConversionDataCanceller) {
-      this.onInstallConversionDataCanceller();
-    }
-  }
-
+ 
   this.setState({appState: nextAppState});
 }
 ```
@@ -455,30 +445,55 @@ Read more: [Android](http://support.appsflyer.com/entries/69796693-Accessing-App
 - `"onAttributionFailure"`
 - `"onInstallConversionFailure"`
 - `data`: some metadata,
-for example:
+
+Example of `onInstallConversionDataLoaded`:
 ```
 {
-"status": "success",
-"type": "onInstallConversionDataLoaded",
-"data": {
-"af_status": "Organic",
-"af_message": "organic install"
+    "status": "success",
+    "type": "onInstallConversionDataLoaded",
+    "data": {
+        "af_status": "Organic",
+        "af_message": "organic install"
+    }
 }
-}
+
 ```
 
-The code implementation fro the conversion listener must be made **prior to the initialisation** code of the SDK
+Example of `onAppOpenAttribution`:
+```
+{
+    "status": "success",
+    "type": "onInstallConversionDataLoaded",
+    "data": {
+        "af_sub1": "some custom data",
+        "link": "https://rndemotest.onelink.me/7y5s/f78c46d5",
+        "c": 'my campaign',
+        "pid": "my media source" }
+        }
+}
+
+```
+
+The code implementation fro the conversion listener must be made **prior to the initialization** code of the SDK
 
 *Example:*
 
 ```javascript
 this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
-(data) => {
-console.log(data);
-}
-);
+      data => {
+        console.log(data);        
+      }
+    );
 
-appsFlyer.initSdk(...);
+    this.onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution(
+      data => {
+        console.log(data);        
+      }
+    );
+
+
+appsFlyer.initSdk(/*...*/);
+//...
 ```
 
 The `appsFlyer.onInstallConversionData` returns function to  unregister this event listener. Actually it calls `NativeAppEventEmitter.remove()`
@@ -487,36 +502,32 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
 
 ```javascript
 state = {
-appState: AppState.currentState
+  appState: AppState.currentState
 }
 
 componentDidMount() {
-AppState.addEventListener('change', this._handleAppStateChange);
+    AppState.addEventListener('change', this._handleAppStateChange);
 }
 
 componentWillUnmount() {
-if(this.onInstallConversionDataCanceller){
-this.onInstallConversionDataCanceller();
-}
-AppState.removeEventListener('change', this._handleAppStateChange);
+  AppState.removeEventListener('change', this._handleAppStateChange);
 }
 
 _handleAppStateChange = (nextAppState) => {
-if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+    
+    if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
+         if(this.onInstallConversionDataCanceller){
+           this.onInstallConversionDataCanceller();
+           console.log("unregister onInstallConversionDataCanceller");
+         } 
+         if(this.onAppOpenAttributionCanceller){
+           this.onAppOpenAttributionCanceller();
+           console.log("unregister onAppOpenAttributionCanceller");
+         }  
+    }
 
-if (Platform.OS === 'ios') {
-appsFlyer.trackAppLaunch();
-}
-}
-
-if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
-if(this.onInstallConversionDataCanceller){
-this.onInstallConversionDataCanceller();
-}
-}
-
-this.setState({appState: nextAppState});
-}
+    this.setState({appState: nextAppState});
+  }
 ```
 
 ---
