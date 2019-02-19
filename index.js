@@ -55,7 +55,6 @@ appsFlyer.trackEvent = trackEvent;
 /**
  * iOS only
  */
-
 appsFlyer.trackAppLaunch = () => {
   return RNAppsFlyer.trackAppLaunch();
 };
@@ -66,6 +65,10 @@ appsFlyer.trackLocation = (longitude, latitude, callback) => {
 
 appsFlyer.setUserEmails = (options, successC, errorC) => {
   return RNAppsFlyer.setUserEmails(options, successC, errorC);
+};
+
+appsFlyer.setAdditionalData = (additionalData, successC) => {
+  return RNAppsFlyer.setAdditionalData(additionalData, successC);
 };
 
 appsFlyer.getAppsFlyerUID = callback => {
