@@ -27,6 +27,7 @@ In order for us to provide optimal support, we would kindly ask you to submit an
     - [initSdk](#initSdk)
     - [trackAppLaunch (iOS only)](#trackAppLaunch)
     - [setCustomerUserId](#setCustomerUserId)
+    - [setAdditionalData](#setAdditionalData)
     - [setUserEmails](#setUserEmails)
     - [trackEvent](#trackEvent)
     - [stopTracking](#stopTracking)
@@ -606,6 +607,34 @@ appsFlyer.sendDeepLinkData(url); // Report Deep Link to AppsFlyer
 
 More about Deep Links in React-Native: [React-Native Linking](https://facebook.github.io/react-native/docs/linking.html)
 More about Deep Links in Android: [Android Deep Linking , Adding Filters](https://developer.android.com/training/app-indexing/deep-linking.html#adding-filters)
+
+
+---
+
+##### <a id="setAdditionalData"> **`appsFlyer.setAdditionalData(customDataMap, callback): void`**
+
+The `setAdditionalData` API is required to integrate on the SDK level with several external partner platforms, including Segment, Adobe and Urban Airship. Use this API only if the integration article of the platform specifically states setAdditionalData API is needed.
+
+
+| parameter   | type                        | description  |
+| ----------- |-----------------------------|--------------|
+| `customDataMap`   | `Object`                    |   `setUserEmails` configuration           
+
+
+*Example:*
+
+```javascript
+appsFlyer.setAdditionalData(
+    {
+      val1: "data1",
+      val2: false,
+      val3: 23
+    },
+    (result) => {
+       //... SUCCESS
+    });
+
+```
 
 ---
 
