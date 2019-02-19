@@ -236,6 +236,18 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     return nil;
 }
 
+
+
+
+RCT_EXPORT_METHOD(setAdditionalData: (NSDictionary *)additionalData callback:(RCTResponseSenderBlock)callback)
+{
+    [[AppsFlyerTracker sharedTracker] setAdditionalData:additionalData];
+    
+    callback(@[SUCCESS]);
+}
+
+
+
 -(void)onConversionDataReceived:(NSDictionary*) installData {
     
     NSDictionary* message = @{

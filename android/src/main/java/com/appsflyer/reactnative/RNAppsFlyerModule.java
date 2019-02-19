@@ -363,6 +363,22 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         callback.invoke(SUCCESS);
     }
 
+    @ReactMethod
+    public void setAdditionalData(ReadableMap additionalData, Callback callback) {
+
+        Map<String, Object> data = RNUtil.toMap(additionalData);
+
+        if (data == null) { // in case of no values
+            data = new HashMap<>();
+        }
+
+        HashMap<String, Object> copyData = new HashMap<>(data);
+        AppsFlyerLib.getInstance().setAdditionalData(copyData);
+        callback.invoke(SUCCESS);
+    }
+
+
+
 
     @ReactMethod
     public void setUserEmails(ReadableMap _options,
