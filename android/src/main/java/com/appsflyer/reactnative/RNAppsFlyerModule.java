@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
-
+import com.appsflyer.*;
 import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
@@ -44,6 +44,7 @@ import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnInstallConversi
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnInstallConversionDataLoaded;
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnInstallConversionFailure;
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.afSuccess;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 
 public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
@@ -417,5 +418,82 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
         AppsFlyerLib.getInstance().setUserEmails(type, emailsList);
         successCallback.invoke(SUCCESS);
+    }
+
+   @ReactMethod
+    public void setAppInviteOneLinkID(final String oneLinkID, Callback callback) {
+      if (oneLinkID == null || oneLinkID.length() == 0) {
+				return;
+			}
+      AppsFlyerLib.getInstance().setAppInviteOneLink(oneLinkID);
+      callback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void generateInviteLink(ReadableMap args, Callback successCallback, Callback errorCallback) {
+
+      String channel = null;
+      String campaign = null;
+      String referrerName = null;
+      String referrerImageUrl = null;
+      String customerID = null;
+      String baseDeepLink = null;
+
+      JSONObject options = RNUtil.readableMapToJson(args);
+      
+      channel = options.optString(INVITE_CHANNEL, "");
+      campaign = options.optString(INVITE_CAMPAIGN, "");
+      referrerName = options.optString(INVITE_REFERRER, "");
+      referrerImageUrl = options.optString(INVITE_IMAGEURL, "");
+      customerID = options.optString(INVITE_CUSTOMERID, "");
+      baseDeepLink = options.optString(INVITE_DEEPLINK, "");
+
+			LinkGenerator linkGenerator = ShareInviteHelper.generateInviteUrl(getReactApplicationContext());
+
+      if (channel != null && channel != ""){
+          linkGenerator.setChannel(channel);
+      }
+      if (campaign != null && campaign != ""){
+          linkGenerator.setCampaign(campaign);
+      }
+      if (referrerName != null && referrerName != ""){
+          linkGenerator.setReferrerName(referrerName);
+      }
+      if (referrerImageUrl != null && referrerImageUrl != ""){
+          linkGenerator.setReferrerImageURL(referrerImageUrl);
+      }
+      if (customerID != null && customerID != ""){
+          linkGenerator.setReferrerCustomerId(customerID);
+      }
+      if (baseDeepLink != null && baseDeepLink != ""){
+          linkGenerator.setBaseDeeplink(baseDeepLink);
+      }
+
+       CreateOneLinkHttpTask.ResponseListener listener = new CreateOneLinkHttpTask.ResponseListener() {
+        @Override
+        public void onResponse(final String oneLinkUrl) {
+          //successCallback.invoke(oneLinkUrl);
+        }
+
+        @Override
+        public void onResponseError(final String error) {
+           // errorCallback.invoke(error);
+        }
+    };
+
+      linkGenerator.generateLink(getReactApplicationContext(), listener);
+
+    }
+
+    @ReactMethod
+    public void trackCrossPromotionImpression(final String appId, final String campaign) {
+      if(appId != "" && campaign != "") {
+        CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(),appId,campaign);
+      }
+    }
+
+    @ReactMethod
+    public void trackAndOpenStore(boolean appId, Callback campaign, Callback params) {
+      // TODO 
     }
 }
