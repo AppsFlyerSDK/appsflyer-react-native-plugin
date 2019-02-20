@@ -2,6 +2,7 @@
 
 
 
+
 <img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="200">
 
 # react-native-appsflyer
@@ -557,19 +558,15 @@ console.log("on getAppsFlyerUID: " + appsFlyerUID);
 ```
 
 ---
-
-
-
 ##### **`appsFlyer.trackLocation(longitude, latitude, callback(error, coords): void`** (**iOS only**)
-
-
-Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID used by AppsFlyer in Reports and APIs.
+Track the location (lat,long) of the device / user.
 
 
 | parameter   | type                        | description |
 | ----------- |-----------------------------|--------------|
-| `error` | `String`                    | Error callback - called on `getAppsFlyerUID` failure |
-| `appsFlyerUID` | `string`                    | The AppsFlyer Device ID |
+| `longitude` | `float`                    |Longitude|
+| `latitude` | `float`                    | Latitude |
+|`callback`| `Object` |Success / Error Callbacks |
 
 *Example:*
 
