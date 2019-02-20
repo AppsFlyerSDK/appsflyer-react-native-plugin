@@ -464,7 +464,7 @@ Example of `onAppOpenAttribution`:
 ```
 {
     "status": "success",
-    "type": "onInstallConversionDataLoaded",
+    "type": "onAppOpenAttribution",
     "data": {
         "af_sub1": "some custom data",
         "link": "https://rndemotest.onelink.me/7y5s/f78c46d5",
