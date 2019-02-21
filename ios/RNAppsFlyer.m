@@ -247,6 +247,45 @@ RCT_EXPORT_METHOD(setAdditionalData: (NSDictionary *)additionalData callback:(RC
 }
 
 
+/* USER INVITES API */
+
+/**
+Added in version x.x.x
+*/
+RCT_EXPORT_METHOD(setAppInviteOneLinkID: (NSString *)oneLinkID)
+{
+
+    [AppsFlyerTracker sharedTracker].appInviteOneLinkID = oneLinkID;
+}
+
+//ReadableMap args, Callback successCallback, Callback errorCallback
+RCT_EXPORT_METHOD(generateInviteLink: (NSString *)oneLinkID)
+{
+
+    NSString *channel = nil;
+    NSString *campaign = nil;
+    NSString *referrerName = nil;
+    NSString *referrerImageUrl = nil;
+    NSString *customerID = nil;
+    NSString *baseDeepLink = nil;
+
+    [AppsFlyerTracker sharedTracker].appInviteOneLinkID = oneLinkID;
+}
+//final String appId, final String campaign
+RCT_EXPORT_METHOD(trackCrossPromotionImpression: (NSString *)appId (NSString *)campaign)
+{
+
+
+}
+//final String appId, final String campaign, ReadableMap params
+RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)oneLinkID)
+{
+    if ([oneLinkID count] == 0) {
+        return;
+    }
+
+    [AppsFlyerTracker sharedTracker].appInviteOneLinkID = oneLinkID;
+}
 
 -(void)onConversionDataReceived:(NSDictionary*) installData {
     

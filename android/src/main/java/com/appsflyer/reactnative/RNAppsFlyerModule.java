@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+
 import com.appsflyer.*;
 import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
@@ -379,8 +380,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
 
-
-
     @ReactMethod
     public void setUserEmails(ReadableMap _options,
                               Callback successCallback,
@@ -420,80 +419,91 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         successCallback.invoke(SUCCESS);
     }
 
-   @ReactMethod
+    @ReactMethod
     public void setAppInviteOneLinkID(final String oneLinkID, Callback callback) {
-      if (oneLinkID == null || oneLinkID.length() == 0) {
-				return;
-			}
-      AppsFlyerLib.getInstance().setAppInviteOneLink(oneLinkID);
-      callback.invoke(SUCCESS);
+        if (oneLinkID == null || oneLinkID.length() == 0) {
+            return;
+        }
+        AppsFlyerLib.getInstance().setAppInviteOneLink(oneLinkID);
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void generateInviteLink(ReadableMap args, Callback successCallback, Callback errorCallback) {
 
-      String channel = null;
-      String campaign = null;
-      String referrerName = null;
-      String referrerImageUrl = null;
-      String customerID = null;
-      String baseDeepLink = null;
+        String channel = null;
+        String campaign = null;
+        String referrerName = null;
+        String referrerImageUrl = null;
+        String customerID = null;
+        String baseDeepLink = null;
 
-      JSONObject options = RNUtil.readableMapToJson(args);
-      
-      channel = options.optString(INVITE_CHANNEL, "");
-      campaign = options.optString(INVITE_CAMPAIGN, "");
-      referrerName = options.optString(INVITE_REFERRER, "");
-      referrerImageUrl = options.optString(INVITE_IMAGEURL, "");
-      customerID = options.optString(INVITE_CUSTOMERID, "");
-      baseDeepLink = options.optString(INVITE_DEEPLINK, "");
+        JSONObject options = RNUtil.readableMapToJson(args);
 
-			LinkGenerator linkGenerator = ShareInviteHelper.generateInviteUrl(getReactApplicationContext());
+        channel = options.optString(INVITE_CHANNEL, "");
+        campaign = options.optString(INVITE_CAMPAIGN, "");
+        referrerName = options.optString(INVITE_REFERRER, "");
+        referrerImageUrl = options.optString(INVITE_IMAGEURL, "");
+        customerID = options.optString(INVITE_CUSTOMERID, "");
+        baseDeepLink = options.optString(INVITE_DEEPLINK, "");
 
-      if (channel != null && channel != ""){
-          linkGenerator.setChannel(channel);
-      }
-      if (campaign != null && campaign != ""){
-          linkGenerator.setCampaign(campaign);
-      }
-      if (referrerName != null && referrerName != ""){
-          linkGenerator.setReferrerName(referrerName);
-      }
-      if (referrerImageUrl != null && referrerImageUrl != ""){
-          linkGenerator.setReferrerImageURL(referrerImageUrl);
-      }
-      if (customerID != null && customerID != ""){
-          linkGenerator.setReferrerCustomerId(customerID);
-      }
-      if (baseDeepLink != null && baseDeepLink != ""){
-          linkGenerator.setBaseDeeplink(baseDeepLink);
-      }
+        LinkGenerator linkGenerator = ShareInviteHelper.generateInviteUrl(getReactApplicationContext());
 
-       CreateOneLinkHttpTask.ResponseListener listener = new CreateOneLinkHttpTask.ResponseListener() {
-        @Override
-        public void onResponse(final String oneLinkUrl) {
-          //successCallback.invoke(oneLinkUrl);
+        if (channel != null && channel != "") {
+            linkGenerator.setChannel(channel);
+        }
+        if (campaign != null && campaign != "") {
+            linkGenerator.setCampaign(campaign);
+        }
+        if (referrerName != null && referrerName != "") {
+            linkGenerator.setReferrerName(referrerName);
+        }
+        if (referrerImageUrl != null && referrerImageUrl != "") {
+            linkGenerator.setReferrerImageURL(referrerImageUrl);
+        }
+        if (customerID != null && customerID != "") {
+            linkGenerator.setReferrerCustomerId(customerID);
+        }
+        if (baseDeepLink != null && baseDeepLink != "") {
+            linkGenerator.setBaseDeeplink(baseDeepLink);
         }
 
-        @Override
-        public void onResponseError(final String error) {
-           // errorCallback.invoke(error);
-        }
-    };
+        CreateOneLinkHttpTask.ResponseListener listener = new CreateOneLinkHttpTask.ResponseListener() {
+            @Override
+            public void onResponse(final String oneLinkUrl) {
+                successCallback.invoke(oneLinkUrl);
+            }
 
-      linkGenerator.generateLink(getReactApplicationContext(), listener);
+            @Override
+            public void onResponseError(final String error) {
+                errorCallback.invoke(error);
+            }
+        };
+
+        linkGenerator.generateLink(getReactApplicationContext(), listener);
 
     }
 
     @ReactMethod
     public void trackCrossPromotionImpression(final String appId, final String campaign) {
-      if(appId != "" && campaign != "") {
-        CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(),appId,campaign);
-      }
+        if (appId != "" && campaign != "") {
+            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
+        }
     }
 
     @ReactMethod
-    public void trackAndOpenStore(boolean appId, Callback campaign, Callback params) {
-      // TODO 
+    public void trackAndOpenStore(final String appId, final String campaign, ReadableMap params) {
+
+        if (appId == null || appId == "") {
+            return;
+        }
+
+        try {
+            Map<String, Object> data = RNUtil.toMap(params);
+        } catch (Exception e) {
+
+        }
+
+        CrossPromotionHelper.trackAndOpenStore(getReactApplicationContext(), appId, campaign, data);
     }
 }
