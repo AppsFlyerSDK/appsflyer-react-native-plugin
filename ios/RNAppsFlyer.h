@@ -31,3 +31,14 @@
   #define afOnAppOpenAttribution          @"onAppOpenAttribution"
   #define afOnInstallConversionFailure    @"onInstallConversionFailure"
   #define afOnInstallConversionDataLoaded @"onInstallConversionDataLoaded"
+
+// User Invites, Cross Promotion
+#define afCpAppID                       @"crossPromotedAppId"
+#define afUiChannel                     @"channel"
+#define afUiCampaign                    @"campaign"
+#define afUiRefName                     @"referrerName"
+#define afUiImageUrl                    @"referrerImageUrl"
+#define afUiCustomerID                  @"customerID"
+#define afUiBaseDeepLink                @"baseDeepLink"
+
+

@@ -246,45 +246,99 @@ RCT_EXPORT_METHOD(setAdditionalData: (NSDictionary *)additionalData callback:(RC
     callback(@[SUCCESS]);
 }
 
+//USER INVITES
 
-/* USER INVITES API */
-
-/**
-Added in version x.x.x
-*/
-RCT_EXPORT_METHOD(setAppInviteOneLinkID: (NSString *)oneLinkID)
+RCT_EXPORT_METHOD(setAppInviteOneLinkID: (NSString *)oneLinkID callback:(RCTResponseSenderBlock)callback)
 {
-
     [AppsFlyerTracker sharedTracker].appInviteOneLinkID = oneLinkID;
+    callback(@[SUCCESS]);
 }
 
-//ReadableMap args, Callback successCallback, Callback errorCallback
-RCT_EXPORT_METHOD(generateInviteLink: (NSString *)oneLinkID)
-{
 
+RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
+                  successCallback:(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseSenderBlock)errorCallback)
+{
+    
     NSString *channel = nil;
     NSString *campaign = nil;
     NSString *referrerName = nil;
     NSString *referrerImageUrl = nil;
     NSString *customerID = nil;
     NSString *baseDeepLink = nil;
-
-    [AppsFlyerTracker sharedTracker].appInviteOneLinkID = oneLinkID;
-}
-//final String appId, final String campaign
-RCT_EXPORT_METHOD(trackCrossPromotionImpression: (NSString *)appId (NSString *)campaign)
-{
-
-
-}
-//final String appId, final String campaign, ReadableMap params
-RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)oneLinkID)
-{
-    if ([oneLinkID count] == 0) {
-        return;
+    
+    if (![inviteLinkOptions isKindOfClass:[NSNull class]]) {
+        
+        channel = (NSString*)[inviteLinkOptions objectForKey: afUiChannel];
+        campaign = (NSString*)[inviteLinkOptions objectForKey: afUiCampaign];
+        referrerName = (NSString*)[inviteLinkOptions objectForKey: afUiRefName];
+        referrerImageUrl = (NSString*)[inviteLinkOptions objectForKey: afUiImageUrl];
+        customerID = (NSString*)[inviteLinkOptions objectForKey: afUiCustomerID];
+        baseDeepLink = (NSString*)[inviteLinkOptions objectForKey: afUiBaseDeepLink];
+        
+        [AppsFlyerShareInviteHelper generateInviteUrlWithLinkGenerator:^AppsFlyerLinkGenerator * _Nonnull(AppsFlyerLinkGenerator * _Nonnull generator) {
+            
+            if (channel != nil && ![channel isEqualToString:@""]) {
+                [generator setChannel:channel];
+            }
+            if (campaign != nil && ![campaign isEqualToString:@""]) {
+                [generator setCampaign:campaign];
+            }
+            if (referrerName != nil && ![referrerName isEqualToString:@""]) {
+                [generator setReferrerName:referrerName];
+            }
+            if (referrerImageUrl != nil && ![referrerImageUrl isEqualToString:@""]) {
+                [generator setReferrerImageURL:referrerImageUrl];
+            }
+            if (customerID != nil && ![customerID isEqualToString:@""]) {
+                [generator setReferrerCustomerId:customerID];
+            }
+            if (baseDeepLink != nil && ![baseDeepLink isEqualToString:@""]) {
+                [generator setDeeplinkPath:baseDeepLink];
+            }
+            
+            return generator;
+        } completionHandler:^(NSURL * _Nullable url) {
+            
+            NSString * resultURL = url.absoluteString;
+            if(resultURL != nil){
+                successCallback(@[resultURL]);
+            }
+        }];
     }
+    
+}
 
-    [AppsFlyerTracker sharedTracker].appInviteOneLinkID = oneLinkID;
+//CROSS PROMOTION
+RCT_EXPORT_METHOD(trackCrossPromotionImpression: (NSString *)appId campaign:(NSString *)campaign)
+{
+    if (appId != nil && ![appId isEqualToString:@""]) {
+        [AppsFlyerCrossPromotionHelper trackCrossPromoteImpression:appId campaign:campaign];
+    }
+}
+
+RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)appID
+                  campaign:(NSString *)campaign
+                  customParams:(NSDictionary *)customParams)
+{
+    
+    if (appID != nil && ![appID isEqualToString:@""]) {
+        [AppsFlyerShareInviteHelper generateInviteUrlWithLinkGenerator:^AppsFlyerLinkGenerator * _Nonnull(AppsFlyerLinkGenerator * _Nonnull generator) {
+            if (campaign != nil && ![campaign isEqualToString:@""]) {
+                [generator setCampaign:campaign];
+            }
+            if (![customParams isKindOfClass:[NSNull class]]) {
+                [generator addParameters:customParams];
+            }
+            
+            return generator;
+        } completionHandler: ^(NSURL * _Nullable url) {
+            NSString *appLink = url.absoluteString;
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:appLink] options:@{} completionHandler:^(BOOL success) {
+                
+            }];
+        }];
+    }
 }
 
 -(void)onConversionDataReceived:(NSDictionary*) installData {
