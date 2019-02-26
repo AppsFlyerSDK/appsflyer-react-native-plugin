@@ -12,6 +12,9 @@ import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
 import com.appsflyer.AppsFlyerProperties.EmailsCryptType;
+import com.appsflyer.share.CrossPromotionHelper;
+import com.appsflyer.share.LinkGenerator;
+import com.appsflyer.share.ShareInviteHelper;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -28,23 +31,6 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.NO_DEVKEY_FOUND;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.NO_EMAILS_FOUND_OR_CORRUPTED;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.NO_EVENT_NAME_FOUND;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.SUCCESS;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.UNKNOWN_ERROR;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afConversionData;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afDevKey;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afEmails;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afEmailsCryptType;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afFailure;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afIsDebug;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnAppOpenAttribution;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnAttributionFailure;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnInstallConversionData;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnInstallConversionDataLoaded;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnInstallConversionFailure;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afSuccess;
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 
 public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
@@ -419,6 +405,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         successCallback.invoke(SUCCESS);
     }
 
+
     @ReactMethod
     public void setAppInviteOneLinkID(final String oneLinkID, Callback callback) {
         if (oneLinkID == null || oneLinkID.length() == 0) {
@@ -429,7 +416,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void generateInviteLink(ReadableMap args, Callback successCallback, Callback errorCallback) {
+    public void generateInviteLink(ReadableMap args, final Callback successCallback, final Callback errorCallback) {
 
         String channel = null;
         String campaign = null;
@@ -498,8 +485,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             return;
         }
 
+        Map<String, String> data = null;
+
         try {
-            Map<String, Object> data = RNUtil.toMap(params);
+            Map<String, Object> temp = RNUtil.toMap(params);
+            data = (Map) temp;
         } catch (Exception e) {
 
         }
