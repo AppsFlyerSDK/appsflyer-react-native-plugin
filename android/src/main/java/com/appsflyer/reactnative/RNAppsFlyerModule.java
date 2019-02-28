@@ -7,10 +7,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
+import com.appsflyer.*;
 import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
 import com.appsflyer.AppsFlyerProperties.EmailsCryptType;
+import com.appsflyer.share.CrossPromotionHelper;
+import com.appsflyer.share.LinkGenerator;
+import com.appsflyer.share.ShareInviteHelper;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -27,23 +31,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.NO_DEVKEY_FOUND;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.NO_EMAILS_FOUND_OR_CORRUPTED;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.NO_EVENT_NAME_FOUND;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.SUCCESS;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.UNKNOWN_ERROR;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afConversionData;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afDevKey;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afEmails;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afEmailsCryptType;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afFailure;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afIsDebug;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnAppOpenAttribution;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnAttributionFailure;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnInstallConversionData;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnInstallConversionDataLoaded;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnInstallConversionFailure;
-import static com.appsflyer.reactnative.RNAppsFlyerConstants.afSuccess;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 
 public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
@@ -378,8 +366,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
 
-
-
     @ReactMethod
     public void setUserEmails(ReadableMap _options,
                               Callback successCallback,
@@ -417,5 +403,97 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
         AppsFlyerLib.getInstance().setUserEmails(type, emailsList);
         successCallback.invoke(SUCCESS);
+    }
+
+
+    @ReactMethod
+    public void setAppInviteOneLinkID(final String oneLinkID, Callback callback) {
+        if (oneLinkID == null || oneLinkID.length() == 0) {
+            return;
+        }
+        AppsFlyerLib.getInstance().setAppInviteOneLink(oneLinkID);
+        callback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void generateInviteLink(ReadableMap args, final Callback successCallback, final Callback errorCallback) {
+
+        String channel = null;
+        String campaign = null;
+        String referrerName = null;
+        String referrerImageUrl = null;
+        String customerID = null;
+        String baseDeepLink = null;
+
+        JSONObject options = RNUtil.readableMapToJson(args);
+
+        channel = options.optString(INVITE_CHANNEL, "");
+        campaign = options.optString(INVITE_CAMPAIGN, "");
+        referrerName = options.optString(INVITE_REFERRER, "");
+        referrerImageUrl = options.optString(INVITE_IMAGEURL, "");
+        customerID = options.optString(INVITE_CUSTOMERID, "");
+        baseDeepLink = options.optString(INVITE_DEEPLINK, "");
+
+        LinkGenerator linkGenerator = ShareInviteHelper.generateInviteUrl(getReactApplicationContext());
+
+        if (channel != null && channel != "") {
+            linkGenerator.setChannel(channel);
+        }
+        if (campaign != null && campaign != "") {
+            linkGenerator.setCampaign(campaign);
+        }
+        if (referrerName != null && referrerName != "") {
+            linkGenerator.setReferrerName(referrerName);
+        }
+        if (referrerImageUrl != null && referrerImageUrl != "") {
+            linkGenerator.setReferrerImageURL(referrerImageUrl);
+        }
+        if (customerID != null && customerID != "") {
+            linkGenerator.setReferrerCustomerId(customerID);
+        }
+        if (baseDeepLink != null && baseDeepLink != "") {
+            linkGenerator.setBaseDeeplink(baseDeepLink);
+        }
+
+        CreateOneLinkHttpTask.ResponseListener listener = new CreateOneLinkHttpTask.ResponseListener() {
+            @Override
+            public void onResponse(final String oneLinkUrl) {
+                successCallback.invoke(oneLinkUrl);
+            }
+
+            @Override
+            public void onResponseError(final String error) {
+                errorCallback.invoke(error);
+            }
+        };
+
+        linkGenerator.generateLink(getReactApplicationContext(), listener);
+
+    }
+
+    @ReactMethod
+    public void trackCrossPromotionImpression(final String appId, final String campaign) {
+        if (appId != "" && campaign != "") {
+            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
+        }
+    }
+
+    @ReactMethod
+    public void trackAndOpenStore(final String appId, final String campaign, ReadableMap params) {
+
+        if (appId == null || appId == "") {
+            return;
+        }
+
+        Map<String, String> data = null;
+
+        try {
+            Map<String, Object> temp = RNUtil.toMap(params);
+            data = (Map) temp;
+        } catch (Exception e) {
+
+        }
+
+        CrossPromotionHelper.trackAndOpenStore(getReactApplicationContext(), appId, campaign, data);
     }
 }

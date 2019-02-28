@@ -119,6 +119,24 @@ appsFlyer.setCollectAndroidID = (isCollect, successC) => {
   return RNAppsFlyer.setCollectAndroidID(isCollect, successC);
 };
 
+appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
+  return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, successC);
+};
+
+appsFlyer.generateInviteLink = (args, successC, errorC) => {
+  return RNAppsFlyer.generateInviteLink(args, successC, errorC);
+};
+
+appsFlyer.trackCrossPromotionImpression = (appId, campaign) => {
+  return RNAppsFlyer.trackCrossPromotionImpression(appId, campaign);
+};
+
+appsFlyer.trackAndOpenStore = (appId, campaign, params) => {
+  return RNAppsFlyer.trackAndOpenStore(appId, campaign, params);
+};
+
+
+
 /**
  * Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking)
  * @param callback: contains fields:

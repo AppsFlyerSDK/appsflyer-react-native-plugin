@@ -27,5 +27,14 @@ public class RNAppsFlyerConstants {
     final static String afOnAppOpenAttribution = "onAppOpenAttribution";
     final static String afOnInstallConversionFailure = "onInstallConversionFailure";
     final static String afOnInstallConversionDataLoaded = "onInstallConversionDataLoaded";
+
+    final static String INVITE_FAIL = "Could not create invite link";
+    final static String INVITE_CHANNEL = "channel";
+    final static String INVITE_CAMPAIGN = "campaign";
+    final static String INVITE_REFERRER = "referrerName";
+    final static String INVITE_IMAGEURL = "referreImageURL";
+    final static String INVITE_CUSTOMERID = "customerID";
+    final static String INVITE_DEEPLINK = "baseDeepLink";
+    final static String PROMOTE_ID = "promotedAppId";
 }
 
