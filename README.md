@@ -40,6 +40,10 @@ In order for us to provide optimal support, we would kindly ask you to submit an
     - [getAppsFlyerUID](#appsflyergetappsflyeruidcallback-void)
     - [trackLocation (iOS only)](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
     - [sendDeepLinkData (Android only)](#senddeeplinkdata-android-only)
+    - [setAppInviteOneLinkID](#setAppInviteOneLinkID)
+    - [generateInviteLink](#generateInviteLink)
+    - [trackCrossPromotionImpression](#trackCrossPromotionImpression)
+    - [trackAndOpenStore](#trackAndOpenStore)
     - [iOS Deep Links - Universal Links and URL Schemes](#iosdeeplinks)
 - [Demo](#demo)
 
@@ -678,8 +682,107 @@ console.error(error);
 );
 
 ```
+---
+
+##### <a id="setAppInviteOneLinkID"> **`appsFlyer.setAppInviteOneLinkID(oneLinkID, successC): void`** 
+Set AppsFlyer’s OneLink ID. Setting a valid OneLink ID will result in shortened User Invite links, when one is generated. The OneLink ID can be obtained on the AppsFlyer Dashboard.
+
+*Example:*
+
+```javascript
+
+appsFlyer.setAppInviteOneLinkID("oneLinkID" , (success)=>{console.log(success)});
+
+```
+
+| parameter   | type                        | description |
+| ----------- |-----------------------------|--------------|
+| `OneLinkID` | `String`                    | OneLink ID |
+| `callback` | `function` | returns [object](#callback-structure) |
 
 ---
+##### <a id="generateInviteLink"> **`appsFlyer.generateInviteLink(args, successC, errorC): void`** 
+Allowing your existing users to invite their friends and contacts as new users to your app can be a key growth factor for your app. AppsFlyer allows you to track and attribute new installs originating from user invites within your app.
+
+*Example:*
+
+```javascript
+
+var inviteOptions {
+  channel: 'gmail',
+  campaign: 'myCampaign',
+  customerID: '1234',
+  userParams {
+    myParam: 'newUser',
+    anotherParam: 'fromWeb',
+    amount: 1
+  }
+};
+
+var onInviteLinkSuccess = function(link) {
+  console.log(link); // Handle Generated Link Here
+}
+
+function onInviteLinkError(err) {
+  console.log(err);
+}
+
+appsFlyer.generateInviteLink(inviteOptions, onInviteLinkSuccess, onInviteLinkError);
+
+```
+| parameter   | type                        | description |
+| ----------- |-----------------------------|--------------|
+| `inviteOptions` | `Object`                    |Parameters for Invite link  |
+| `onInviteLinkSuccess` | `() => void`                | Success callback (generated link) |
+| `onInviteLinkError` | `() => void`                | Error callback |
+
+A complete list of supported parameters is available <a href="https://support.appsflyer.com/hc/en-us/articles/115004480866-User-Invite-Tracking">here</a>.
+Custom parameters can be passed using a `userParams{}` nested object, as in the example above.
+
+---
+
+##### <a id="trackCrossPromotionImpression"> **`appsFlyer.trackCrossPromotionImpression("appID", "campaign"): void`**  (Cross Promotion)
+
+Use this call to track an impression use the following API call. Make sure to use the promoted App ID as it appears within the AppsFlyer dashboard.
+
+*Example:*
+```javascript
+appsFlyer.trackCrossPromotionImpression("com.myandroid.app", "myCampaign");
+```
+
+| parameter   | type                        | description |
+| ----------- |-----------------------------|--------------|
+| `appID` | `String`                    | Promoted Application ID |
+| `campaign` | `String`                    | Promoted Campaign |
+
+For more details about Cross-Promotion tracking please see <a href="https://support.appsflyer.com/hc/en-us/articles/115004481946-Cross-Promotion-Tracking">here</a>.
+
+---
+
+##### <a id="trackAndOpenStore"> **`appsFlyer.trackAndOpenStore("appID","campaign", options): void`**  (Cross Promotion)
+
+Use this call to track the click and launch the app store's app page (via Browser)
+
+*Example:*
+```javascript
+var crossPromOptions {
+  customerID: '1234',
+  myCustomParameter: 'newUser'
+};
+
+appsFlyer.trackAndOpenStore('com.myandroid.app', 'myCampaign', crossPromOptions);
+```
+
+| parameter   | type                        | description |
+| ----------- |-----------------------------|--------------|
+| `appID` | `String`                    | Promoted Application ID |
+| `campaign` | `String`                    | Promoted Campaign |
+| `options` | `Object`                    | Additional Parameters to track |
+
+For more details about Cross-Promotion tracking please see <a href="https://support.appsflyer.com/hc/en-us/articles/115004481946-Cross-Promotion-Tracking">here</a>.
+
+---  
+
 
 ### <a id="iosdeeplinks"> iOS Deep Links - Universal Links and URL Schemes
 
