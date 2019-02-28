@@ -1,5 +1,17 @@
 # Versions
 
+## 1.4.2
+
+Added User Invite Tracking 
+Added Cross-Promotion Tracking
+
+Changes and fixes: 
+
+ - added `setAppInviteOneLinkID` API
+ - added `generateInviteLink` API
+ - added `trackCrossPromotionImpression` API
+ - added `trackAndOpenStore` API
+
 ## 1.4.1
 
 Android AppsFlyer SDK 4.8.20
