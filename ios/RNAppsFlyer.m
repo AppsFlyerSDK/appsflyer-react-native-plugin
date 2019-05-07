@@ -260,6 +260,8 @@ RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
                   errorCallback:(RCTResponseSenderBlock)errorCallback)
 {
     
+    NSDictionary* customParams = (NSDictionary*)[inviteLinkOptions objectForKey: @"userParams"];
+    
     NSString *channel = nil;
     NSString *campaign = nil;
     NSString *referrerName = nil;
@@ -295,6 +297,9 @@ RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
             }
             if (baseDeepLink != nil && ![baseDeepLink isEqualToString:@""]) {
                 [generator setDeeplinkPath:baseDeepLink];
+            }
+            if (![customParams isKindOfClass:[NSNull class]]) {
+                [generator addParameters:customParams];
             }
             
             return generator;
