@@ -30,6 +30,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
 
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 
@@ -425,6 +426,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         String customerID = null;
         String baseDeepLink = null;
 
+        LinkGenerator linkGenerator = ShareInviteHelper.generateInviteUrl(getReactApplicationContext());
+
+        try {
+
         JSONObject options = RNUtil.readableMapToJson(args);
 
         channel = options.optString(INVITE_CHANNEL, "");
@@ -433,8 +438,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         referrerImageUrl = options.optString(INVITE_IMAGEURL, "");
         customerID = options.optString(INVITE_CUSTOMERID, "");
         baseDeepLink = options.optString(INVITE_DEEPLINK, "");
-
-        LinkGenerator linkGenerator = ShareInviteHelper.generateInviteUrl(getReactApplicationContext());
 
         if (channel != null && channel != "") {
             linkGenerator.setChannel(channel);
@@ -453,6 +456,23 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         }
         if (baseDeepLink != null && baseDeepLink != "") {
             linkGenerator.setBaseDeeplink(baseDeepLink);
+        }
+
+        if (options.length() > 1 && !options.get("userParams").equals("")) {
+
+            JSONObject jsonCustomValues = options.getJSONObject("userParams");
+
+            Iterator<?> keys = jsonCustomValues.keys();
+
+            while( keys.hasNext() ) {
+                String key = (String)keys.next();
+                Object keyvalue = jsonCustomValues.get(key);
+                linkGenerator.addParameter(key, keyvalue.toString());
+            }
+        }
+
+        } catch (JSONException e){
+
         }
 
         CreateOneLinkHttpTask.ResponseListener listener = new CreateOneLinkHttpTask.ResponseListener() {
