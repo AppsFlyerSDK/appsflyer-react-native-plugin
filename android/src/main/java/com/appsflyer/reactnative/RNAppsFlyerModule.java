@@ -2,6 +2,7 @@ package com.appsflyer.reactnative;
 
 
 import android.app.Application;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -130,8 +131,13 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                 (isConversionData == true) ? registerConversionListener() : null,
                 application.getApplicationContext());
 
+        Intent intent = null;
+        Activity currentActivity = getCurrentActivity();
 
-        Intent intent = this.getCurrentActivity().getIntent();
+        if (currentActivity != null) {
+            intent = currentActivity.getIntent();
+        }
+
         //Generally we already do this validation into the SDK, anyways, we want to show it to clients
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             AppsFlyerLib.getInstance().setPluginDeepLinkData(intent);
@@ -240,7 +246,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             data = new HashMap<>();
         }
 
-        AppsFlyerLib.getInstance().trackEvent(getCurrentActivity().getBaseContext(), eventName, data);
+        Activity currentActivity = getCurrentActivity();
+
+        if (currentActivity != null) {
+            AppsFlyerLib.getInstance().trackEvent(currentActivity.getBaseContext(), eventName, data);
+        }
 
         return null;
     }
@@ -287,10 +297,16 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void sendDeepLinkData(String url) {
         if (url != null) {
-            Intent intent = getCurrentActivity().getIntent();
-            Uri uri = Uri.parse(url);
-            intent.setData(uri);
-            AppsFlyerLib.getInstance().sendDeepLinkData(this.getCurrentActivity());
+
+            Intent intent = null;
+            Activity currentActivity = getCurrentActivity();
+
+            if (currentActivity != null) {
+                intent = currentActivity.getIntent();
+                Uri uri = Uri.parse(url);
+                intent.setData(uri);
+                AppsFlyerLib.getInstance().sendDeepLinkData(this.getCurrentActivity());
+            }
         }
     }
 
