@@ -13,7 +13,7 @@ The React Native Library for AppsFlyer SDK
 ----------
 In order for us to provide optimal support, we would kindly ask you to submit any issues to support@appsflyer.com
 
-*When submitting an issue please specify your AppsFlyer sign-up (account) email, your app ID, production steps, logs, code snippets and any additional relevant information.*
+*When submitting an issue please specify your AppsFlyer sign-up (account) email, your app ID, reproduction steps, logs, code snippets and any additional relevant information.*
 
 ----------
 
