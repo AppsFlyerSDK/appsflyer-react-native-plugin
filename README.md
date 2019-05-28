@@ -1,834 +1,118 @@
 
+<img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="450">
 
+# React Native AppsFlyer plugin for Android and iOS. 
 
+🛠 In order for us to provide optimal support, we would kindly ask you to submit any issues to support@appsflyer.com
 
+*When submitting an issue please specify your AppsFlyer sign-up (account) email , your app ID , production steps, logs, code snippets and any additional relevant information.*
 
-<img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="200">
-
-# react-native-appsflyer
-The React Native Library for AppsFlyer SDK
-
-[![npm version](https://badge.fury.io/js/react-native-appsflyer.svg)](https://badge.fury.io/js/react-native-appsflyer)
-
-----------
-In order for us to provide optimal support, we would kindly ask you to submit any issues to support@appsflyer.com
-
-*When submitting an issue please specify your AppsFlyer sign-up (account) email, your app ID, reproduction steps, logs, code snippets and any additional relevant information.*
-
-----------
+[![npm version](https://badge.fury.io/js/react-native-appsflyer.svg)](https://badge.fury.io/js/react-native-appsflyer) 
 
 
 ## Table of content
 
-- [Supported Platforms](#this-plugin-is-built-for)
+- [SDK versions](#plugin-build-for)
 - [Installation](#installation)
-    - [iOS](#installation_ios)
-    - [Android](#installation_android)
-- [API Methods](#api-methods)
-    - [initSdk](#initSdk)
-    - [trackAppLaunch (iOS only)](#trackAppLaunch)
-    - [setCustomerUserId](#setCustomerUserId)
-    - [setAdditionalData](#setAdditionalData)
-    - [setUserEmails](#setUserEmails)
-    - [trackEvent](#trackEvent)
-    - [stopTracking](#stopTracking)
-    - [setCollectIMEI](#setCollectIMEI)(Android only)
-    - [setCollectAndroidID](#setCollectAndroidID)(Android only)
-    - [Track App Uninstalls](#track-app-uninstalls)
-    - [iOS](#track-app-uninstalls-ios)
-    - [Android](#track-app-uninstalls-android)
-    - [onInstallConversionData](#appsflyeroninstallconversiondatacallback-functionunregister)
-    - [getAppsFlyerUID](#appsflyergetappsflyeruidcallback-void)
-    - [trackLocation (iOS only)](#appsflyertracklocationlongitude-latitude-callbackerror-coords-void-ios-only)
-    - [sendDeepLinkData (Android only)](#senddeeplinkdata-android-only)
-    - [setAppInviteOneLinkID](#setAppInviteOneLinkID)
-    - [generateInviteLink](#generateInviteLink)
-    - [trackCrossPromotionImpression](#trackCrossPromotionImpression)
-    - [trackAndOpenStore](#trackAndOpenStore)
-    - [iOS Deep Links - Universal Links and URL Schemes](#iosdeeplinks)
-- [Demo](#demo)
+- [Guides](#guides)
+- [API](#api) 
+- [Demo](#demo)  
 
 
-## <a id="this-plugin-is-built-for"> This plugin is built for
+### <a id="plugin-build-for"> This plugin is built for
 
-- iOS AppsFlyerSDK
-- Android AppsFlyerSDK
+- iOS AppsFlyerSDK **v4.8.12**
+- Android AppsFlyerSDK **v4.8.20** 
 
-## <a id="installation"> Installation
 
-`$ npm install react-native-appsflyer --save`
+## <a id="installation">📲Installation
+
+```
+$ npm install react-native-appsflyer --save
+```
+
+Then run:
+```
+$ react-native link react-native-appsflyer
+```
 
 ### <a id="installation_ios"> iOS
 
+#### With Cocoapods
 
-1. Add the `appsFlyerFramework` to `podfile` and run `pod install`.
-
-
-Example:
+Add the `appsFlyerFramework` to `podfile` and run `pod install`.
 
 ```
 pod 'react-native-appsflyer',
 :path => '../node_modules/react-native-appsflyer'
 ```
 
-This assumes your `Podfile` is located in `ios` directory.
+Note that You must also have the React dependencies defined in the Podfile as described [here](https://facebook.github.io/react-native/docs/next/troubleshooting.html#missing-libraries-for-react).
 
-You must also have the React dependencies defined in the Podfile as described [here](https://facebook.github.io/react-native/docs/next/troubleshooting.html#missing-libraries-for-react).
+Check out the [sample pod file](./Docs/Installation.md) for a working example.
 
-2. Run `pod install` (inside `ios` directory).
 
-### Manual Integration (Integrating without Cocoapods):
+#### Without Cocoapods
 
-1. Download the Static Lib of the AppsFlyer iOS SDK from here:  https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS#2-quick-start
-2. Unzip and copy the contents of the Zip file into your project directory
-3. Run `react-native link react-native-appsflyer` from of the project root or copy RNAppsFlyer.h and RNAppsFlyer.m from `node_modules` ➜ `react-native-appsflyer` to your project directory
+1. Download the Static Lib of the AppsFlyer iOS SDK from [here](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS#2-quick-start).
+2. Unzip and copy the contents of the Zip file into your project directory.
+3. Copy RNAppsFlyer.h and RNAppsFlyer.m from `node_modules` ➜ `react-native-appsflyer` to your project directory.
 
-![enter image description here](https://s18.postimg.org/gqtlyuneh/Screen_Shot_2018-01-28_at_21.54.10.png)
+For more info check out the Installation guide [here](./Docs/Installation.md).
 
-
-
-### <a id="installation_android"> Android
-
-##### **android/app/build.gradle**
-
-
-Run `react-native link react-native-appsflyer` from of the project root or add manually:
-
-Add the project to your dependencies
-```gradle
-dependencies {
-...
-compile project(':react-native-appsflyer')
-}
-```
-
-##### **android/settings.gradle**
-
-Add the project
-
-```gradle
-include ':react-native-appsflyer'
-project(':react-native-appsflyer').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-appsflyer/android')
-```
-
-If you need to override sdk version, add custom configuration to your root gradle, for example:
-
-```gradle
-ext {
-    minSdkVersion = 16
-    targetSdkVersion = 25
-    compileSdkVersion = 25
-    buildToolsVersion = '25.0.3'
-}
-```
-
-
-
-Build project so you should get following dependency (see an Image):
-
-![enter image description here](https://s26.postimg.org/4ie559jeh/Screen_Shot_2016_11_07_at_5_02_00_PM.png)
-
-##### **MainApplication.java**
-Add:
-
-
-1. `import com.appsflyer.reactnative.RNAppsFlyerPackage;`
-
-2.  In the `getPackages()` method register the module:
-`new RNAppsFlyerPackage()`
-
-So `getPackages()` should look like:
-
-```java
-    @Override
-    protected List<ReactPackage> getPackages() {
-      return Arrays.<ReactPackage>asList(
-            new MainReactPackage(),
-            //...
-            new RNAppsFlyerPackage()
-            //...
-      );
-    }
-```
-
-
-
-## <a id="api-methods">  API Methods
-
----
-
-Call module by adding:
-
-`import appsFlyer from 'react-native-appsflyer';`
-
----
-
-
-##### <a id="initSdk">  **`appsFlyer.initSdk(options, callback): void`**
-
-initializes the SDK.
-
-| parameter   | type                        | description  |
-| ----------- |-----------------------------|--------------|
-| `options`   | `Object`                    |   SDK configuration           |
-
-
-**`options`**
-
-| name       | type    | default | description            |
-| -----------|---------|---------|------------------------|
-| `devKey`   |`string` |         |   [Appsflyer Dev key](https://support.appsflyer.com/hc/en-us/articles/207032126-AppsFlyer-SDK-Integration-Android)    |
-| `appId`    |`string` |        | [Apple Application ID](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS) (for iOS only) |
-| `isDebug`  |`boolean`| `false` | debug mode (optional)|
-
-*Example:*
-
-```javascript
-const options = {
-devKey: "<AF_DEV_KEY>",
-isDebug: true
-};
-
-if (Platform.OS === 'ios') {
-options.appId = "123456789";
-}
-
-appsFlyer.initSdk(options,
-(result) => {
-console.log(result);
-},
-(error) => {
-console.error(error);
-}
-)
-```
-
-*With Promise:*
-
-```javascript
-try {
-     var result = await appsFlyer.initSdk(options);     
-     } catch (error) {
-    }
-```
-
----
-
-##### <a id="trackAppLaunch">  **`appsFlyer.trackAppLaunch(): void`**
-Necessary for tracking sessions and deep link callbacks in iOS on background-to-foreground transitions.
-Should be used with the relevant [AppState](https://facebook.github.io/react-native/docs/appstate.html)  logic.
-
-*Example:*
-
-```javascript
-state = {
-  appState: AppState.currentState
-}
-
-componentDidMount()
-{
-  AppState.addEventListener('change', this._handleAppStateChange);
-}
-
-componentWillUnmount()
-{  
-  AppState.removeEventListener('change', this._handleAppStateChange);
-}
-
-_handleAppStateChange = (nextAppState) =>{
-  if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-    if (Platform.OS === 'ios') {
-      appsFlyer.trackAppLaunch();
-    }
-  }
- 
-  this.setState({appState: nextAppState});
-}
-```
----
-
-##### <a id="setCustomerUserId"> **`appsFlyer.setCustomerUserId(customerUserId, callback): void`**
-
-Setting your own Custom ID enables you to cross-reference your own unique ID with AppsFlyer’s user ID and the other devices’ IDs. This ID is available in AppsFlyer CSV reports along with postbacks APIs for cross-referencing with you internal IDs.
-
-**Note:** The ID must be set during the first launch of the app at the SDK initialization. The best practice is to call this API during the `deviceready` event, where possible.
-
-
-| parameter   | type                        | description |
-| ----------- |-----------------------------|--------------|
-| `customerUserId`   | `String`                      | |
-
-*Example:*
-
-```javascript
-const userId = "some_user_id";
-
-appsFlyer.setCustomerUserId(userId,
-(response) => {
-//..
-}
-);
-```
-
----
-
-##### <a id="stopTracking"> **`appsFlyer.stopTracking = (isStopTracking, successCallback): void`**
-
-The `stopTracking` API for opting out users as part of the GDPR compliance.
-
-| parameter   | type                        | description |
-| ----------- |-----------------------------|--------------|
-| `isStopTracking`   | `boolean`                      |opt-out of launch and track in-app-event |
-
-*Example:*
-
-```javascript
-appsFlyer.stopTracking(true,
-        (result) => {
-           console.log("stopTracking ...");
-         });
-```
-
----
-
-##### <a id="setCollectIMEI"> **`appsFlyer.setCollectIMEI = (isCollect, successCallback): void`**
-
-By default, IMEI and Android ID are not collected by the SDK if the OS version is higher than KitKat (4.4) and the device contains Google Play Services (on SDK versions 4.8.8 and below the specific app needed GPS). 
-
-| parameter   | type                        | description |
-| ----------- |-----------------------------|--------------|
-| `isCollect`   | `boolean`                      |opt-out of collection of IMEI |
-
-*Example:*
-
-```javascript
-appsFlyer.setCollectIMEI(false,
-        (result) => {
-           console.log("setCollectIMEI ...");
-         });
-```
-
----
-
-##### <a id="setCollectAndroidID"> **`appsFlyer.setCollectAndroidID = (isCollect, successCallback): void`**
-
-By default, IMEI and Android ID are not collected by the SDK if the OS version is higher than KitKat (4.4) and the device contains Google Play Services (on SDK versions 4.8.8 and below the specific app needed GPS). 
-
-| parameter   | type                        | description |
-| ----------- |-----------------------------|--------------|
-| `isCollect`   | `boolean`                      | opt-out of collection of Android ID|
-
-*Example:*
-
-```javascript
-appsFlyer.setCollectAndroidID(false,
-        (result) => {
-           console.log("setCollectAndroidID ... ");
-         });
-```
-
----
-
-
-##### <a id="trackEvent"> **`appsFlyer.trackEvent(eventName, eventValues, successC, errorC): void`**
-
-
-- These in-app events help you track how loyal users discover your app, and attribute them to specific
-campaigns/media-sources. Please take the time define the event/s you want to measure to allow you
-to track ROI (Return on Investment) and LTV (Lifetime Value).
-- The `trackEvent` method allows you to send in-app events to AppsFlyer analytics. This method allows you to add events dynamically by adding them directly to the application code.
-
-
-| parameter   | type                        | description |
-| ----------- |-----------------------------|--------------|
-| `eventName` | `String`                    | custom event name, is presented in your dashboard.  See the Event list [HERE](https://github.com/AppsFlyerSDK/react-native-appsflyer/blob/master/ios/AppsFlyerTracker.h)  |
-| `eventValues` | `Object`                    | event details (optional) |
-
-*Example:*
-
-```javascript
-const eventName = "af_add_to_cart";
-const eventValues = {
-"af_content_id": "id123",
-"af_currency":"USD",
-"af_revenue": "2"
-};
-
-appsFlyer.trackEvent(eventName, eventValues,
-(result) => {
-console.log(result);
-},
-(error) => {
-console.error(error);
-}
-)
-
-```
-*With Promise:*
-
-```javascript
-try {
-     var result = await appsFlyer.trackEvent(eventName, eventValues);     
-     } catch (error) {
-    }
-```
-
-
----
-
-
-
-
-### <a id="track-app-uninstalls"> Track App Uninstalls
-
-#### <a id="track-app-uninstalls-ios"> iOS
-
-AppsFlyer enables you to track app uninstalls. To handle notifications it requires  to modify your `AppDelegate.m`. Use [didRegisterForRemoteNotificationsWithDeviceToken](https://developer.apple.com/reference/uikit/uiapplicationdelegate) to register to the uninstall feature.
-
-*Example:*
-
-```objective-c
-@import AppsFlyerLib;
-
-...
-
-- (void)application:(UIApplication ​*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *​)deviceToken {
-// notify AppsFlyerTracker
-[[AppsFlyerTracker sharedTracker] registerUninstall:deviceToken];
-}
-```
-
-Read more about Uninstall register: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS)
-
-
-#### <a id="track-app-uninstalls-android"> Android
-
-`appsFlyer.enableUninstallTracking(GCMProjectID, callback): void` (**Android only**)
-
-Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.
-
-| parameter     | type                        | description  |
-| --------------|-----------------------------|--------------|
-| `GCMProjectID`| `String`                    |              |
-| `callback`    | `(successString) => void`   |     Required at the moment, inject a string as parameter upon hook registration success.         |
-
-*Example:*
-
-```javascript
-
-enableUninstallTracking(){
-const  gcmProjectNum = "987186475229";
-appsFlyer.enableUninstallTracking(gcmProjectNum,
-(success) => {
-//...
-})
-}
-
-```
-
-Read more about Android  Uninstall Tracking: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)
-
----
-
-
-##### **`appsFlyer.onInstallConversionData(callback): function:unregister`**
-
-Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking).
-Read more: [Android](http://support.appsflyer.com/entries/69796693-Accessing-AppsFlyer-Attribution-Conversion-Data-from-the-SDK-Deferred-Deep-linking-), [iOS](http://support.appsflyer.com/entries/22904293-Testing-AppsFlyer-iOS-SDK-Integration-Before-Submitting-to-the-App-Store-)
-
-
-| parameter   | type                        | description  |
-| ----------- |-----------------------------|--------------|
-| `callback`  | `function`                  |  returns [object](#callback-structure)            |
-
-
-##### callback structure:
-
-- `status`: `"success"`or `"failure"` if SDK returned error on `onInstallConversionData` event handler
-- `type`:
-- `"onAppOpenAttribution"`  - returns deep linking data (non-organic)
-- `"onInstallConversionDataLoaded"` - called on each launch
-- `"onAttributionFailure"`
-- `"onInstallConversionFailure"`
-- `data`: some metadata,
-
-Example of `onInstallConversionDataLoaded`:
-```
-{
-    "status": "success",
-    "type": "onInstallConversionDataLoaded",
-    "data": {
-        "af_status": "Organic",
-        "af_message": "organic install"
-    }
-}
-
-```
-
-Example of `onAppOpenAttribution`:
-```
-{
-    "status": "success",
-    "type": "onAppOpenAttribution",
-    "data": {
-        "af_sub1": "some custom data",
-        "link": "https://rndemotest.onelink.me/7y5s/f78c46d5",
-        "c": 'my campaign',
-        "pid": "my media source" }
-        }
-}
-
-```
-
-The code implementation fro the conversion listener must be made **prior to the initialization** code of the SDK
-
-*Example:*
-
-```javascript
-this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
-      data => {
-        console.log(data);        
-      }
-    );
-
-    this.onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution(
-      data => {
-        console.log(data);        
-      }
-    );
-
-
-appsFlyer.initSdk(/*...*/);
-//...
-```
-
-The `appsFlyer.onInstallConversionData` returns function to  unregister this event listener. Actually it calls `NativeAppEventEmitter.remove()`
-
-*Example:*
-
-```javascript
-state = {
-  appState: AppState.currentState
-}
-
-componentDidMount() {
-    AppState.addEventListener('change', this._handleAppStateChange);
-}
-
-componentWillUnmount() {
-  AppState.removeEventListener('change', this._handleAppStateChange);
-}
-
-_handleAppStateChange = (nextAppState) => {
+### <a id="installation_ios"> Android
     
-    if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
-         if(this.onInstallConversionDataCanceller){
-           this.onInstallConversionDataCanceller();
-           console.log("unregister onInstallConversionDataCanceller");
-         } 
-         if(this.onAppOpenAttributionCanceller){
-           this.onAppOpenAttributionCanceller();
-           console.log("unregister onAppOpenAttributionCanceller");
-         }  
-    }
-
-    this.setState({appState: nextAppState});
-  }
-```
-
----
-
-##### **`appsFlyer.getAppsFlyerUID(callback): void`**
+Running `react-native link react-native-appsflyer` will complete the Android integration.
 
 
-Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID used by AppsFlyer in Reports and APIs.
+For the manual integration steps, check out the Installation guide [here](./Docs/Installation.md).
+
+## <a id="setup"> 🚀 Setup
+
+####  Set your App_ID (iOS only), Dev_Key and enable AppsFlyer to detect installations, sessions (app opens) and updates.  
+> This is the minimum requirement to start tracking your app installs and is already implemented in this plugin. You **MUST** modify this call and provide:  
+ **devKey** - Your application devKey provided by AppsFlyer.<br>
+**appId**  - ***For iOS only.*** Your iTunes Application ID.
 
 
-| parameter   | type                        | description |
-| ----------- |-----------------------------|--------------|
-| `error` | `String`                    | Error callback - called on `getAppsFlyerUID` failure |
-| `appsFlyerUID` | `string`                    | The AppsFlyer Device ID |
+Add the following lines to your code to be able to initialize tracking with your own AppsFlyer dev key:
 
-*Example:*
 
 ```javascript
-appsFlyer.getAppsFlyerUID((error, appsFlyerUID) => {
-if (error) {
-console.error(error);
-} else {
-console.log("on getAppsFlyerUID: " + appsFlyerUID);
-}
-});
-```
+import React, {Component} from 'react';
+import {Platform, StyleSheet, Text, View} from 'react-native';
+import appsFlyer from 'react-native-appsflyer';
 
----
-##### **`appsFlyer.trackLocation(longitude, latitude, callback(error, coords): void`** (**iOS only**)
-Track the location (lat,long) of the device / user.
-
-
-| parameter   | type                        | description |
-| ----------- |-----------------------------|--------------|
-| `longitude` | `float`                    |Longitude|
-| `latitude` | `float`                    | Latitude |
-|`callback`| `Object` |Success / Error Callbacks |
-
-*Example:*
-
-```javascript
-const latitude = -18.406655;
-const longitude = 46.406250;
-
-appsFlyer.trackLocation(longitude, latitude, (error, coords) => {
-if (error) {
-console.error(error);
-} else {
-this.setState({ ...this.state, trackLocation: coords });
-}
-});
-```
-
----
-
-##### <a id="senddeeplinkdata-android-only"> **`appsFlyer.sendDeepLinkData(String url): void`** (**Android only**)
-
-Report Deep Links for Re-Targeting Attribution (Android).
-This method should be called when an app is opened using a deep link.
-
-*Example:*
-```javascript
-componentDidMount() {
-Linking.getInitialURL().then((url) => {
-if (appsFlyer) {
-appsFlyer.sendDeepLinkData(url); // Report Deep Link to AppsFlyer
-// Additional Deep Link Logic Here ...
-}
-}).catch(err => console.error('An error occurred', err));
-}
-```
-
-More about Deep Links in React-Native: [React-Native Linking](https://facebook.github.io/react-native/docs/linking.html)
-More about Deep Links in Android: [Android Deep Linking , Adding Filters](https://developer.android.com/training/app-indexing/deep-linking.html#adding-filters)
-
-
----
-
-##### <a id="setAdditionalData"> **`appsFlyer.setAdditionalData(customDataMap, callback): void`**
-
-The `setAdditionalData` API is required to integrate on the SDK level with several external partner platforms, including Segment, Adobe and Urban Airship. Use this API only if the integration article of the platform specifically states setAdditionalData API is needed.
-
-
-| parameter   | type                        | description  |
-| ----------- |-----------------------------|--------------|
-| `customDataMap`   | `Object`                    |   `setUserEmails` configuration           
-
-
-*Example:*
-
-```javascript
-appsFlyer.setAdditionalData(
-    {
-      val1: "data1",
-      val2: false,
-      val3: 23
-    },
-    (result) => {
-       //... SUCCESS
-    });
-
-```
-
----
-
-##### <a id="setUserEmails"> **`appsFlyer.setUserEmails(options, errorC, successC): void`**
-
-AppsFlyer enables you to report one or more of the device’s associated email addresses. You must collect the email addresses and report it to AppsFlyer according to your required encryption method.
-More info you can find on [AppsFlyer-SDK-Integration-Android](https://support.appsflyer.com/hc/en-us/articles/207032126-AppsFlyer-SDK-Integration-Android) and [AppsFlyer-SDK-Integration-iOS](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS)
-
-
-| parameter   | type                        | description  |
-| ----------- |-----------------------------|--------------|
-| `options`   | `Object`                    |   `setUserEmails` configuration           |
-
-
-**`options`**
-
-| name       | type    | default | description            |
-| -----------|---------|---------|------------------------|
-| `emailsCryptType`   |`int` |    0     |   NONE - `0` (default), SHA1 - `1`, MD5 - `2`    |
-| `emails`    |`array` |        | comma separated list of emails |
-
-
-*Example:*
-
-```javascript
-const options = {
-"emailsCryptType": 2,
-"emails": [
-"user1@gmail.com",
-"user2@gmail.com"
-]
-};
-
-appsFlyer.setUserEmails(options,
-(response) => {
-this.setState({ ...this.state, setUserEmailsResponse: response });
+appsFlyer.initSdk({
+  devKey: 'K2**********99',
+  isDebug: false,
+  appId: '41*****44'
 },
-(error) => {
-console.error(error);
-}
-);
-
-```
----
-
-##### <a id="setAppInviteOneLinkID"> **`appsFlyer.setAppInviteOneLinkID(oneLinkID, successC): void`** 
-Set AppsFlyer’s OneLink ID. Setting a valid OneLink ID will result in shortened User Invite links, when one is generated. The OneLink ID can be obtained on the AppsFlyer Dashboard.
-
-*Example:*
-
-```javascript
-
-appsFlyer.setAppInviteOneLinkID("oneLinkID" , (success)=>{console.log(success)});
-
-```
-
-| parameter   | type                        | description |
-| ----------- |-----------------------------|--------------|
-| `OneLinkID` | `String`                    | OneLink ID |
-| `callback` | `function` | returns [object](#callback-structure) |
-
----
-##### <a id="generateInviteLink"> **`appsFlyer.generateInviteLink(args, successC, errorC): void`** 
-Allowing your existing users to invite their friends and contacts as new users to your app can be a key growth factor for your app. AppsFlyer allows you to track and attribute new installs originating from user invites within your app.
-
-*Example:*
-
-```javascript
-
-var inviteOptions {
-  channel: 'gmail',
-  campaign: 'myCampaign',
-  customerID: '1234',
-  userParams {
-    myParam: 'newUser',
-    anotherParam: 'fromWeb',
-    amount: 1
+  (result) => {
+    console.log(result);
+  },
+  (error) => {
+    console.error(error);
   }
-};
-
-var onInviteLinkSuccess = function(link) {
-  console.log(link); // Handle Generated Link Here
-}
-
-function onInviteLinkError(err) {
-  console.log(err);
-}
-
-appsFlyer.generateInviteLink(inviteOptions, onInviteLinkSuccess, onInviteLinkError);
-
-```
-| parameter   | type                        | description |
-| ----------- |-----------------------------|--------------|
-| `inviteOptions` | `Object`                    |Parameters for Invite link  |
-| `onInviteLinkSuccess` | `() => void`                | Success callback (generated link) |
-| `onInviteLinkError` | `() => void`                | Error callback |
-
-A complete list of supported parameters is available <a href="https://support.appsflyer.com/hc/en-us/articles/115004480866-User-Invite-Tracking">here</a>.
-Custom parameters can be passed using a `userParams{}` nested object, as in the example above.
-
----
-
-##### <a id="trackCrossPromotionImpression"> **`appsFlyer.trackCrossPromotionImpression("appID", "campaign"): void`**  (Cross Promotion)
-
-Use this call to track an impression use the following API call. Make sure to use the promoted App ID as it appears within the AppsFlyer dashboard.
-
-*Example:*
-```javascript
-appsFlyer.trackCrossPromotionImpression("com.myandroid.app", "myCampaign");
+)
 ```
 
-| parameter   | type                        | description |
-| ----------- |-----------------------------|--------------|
-| `appID` | `String`                    | Promoted Application ID |
-| `campaign` | `String`                    | Promoted Campaign |
+**Important** - For iOS another step is required for tracking. AppState logic is required to track Background-to-foreground transitions. Check out the [relevant guide](./Docs/API.md#--appsflyertrackapplaunch-void) to see how this manidtory step is impelemented.
 
-For more details about Cross-Promotion tracking please see <a href="https://support.appsflyer.com/hc/en-us/articles/115004481946-Cross-Promotion-Tracking">here</a>.
+ ## <a id="guides"> 📖 Guides
 
----
-
-##### <a id="trackAndOpenStore"> **`appsFlyer.trackAndOpenStore("appID","campaign", options): void`**  (Cross Promotion)
-
-Use this call to track the click and launch the app store's app page (via Browser)
-
-*Example:*
-```javascript
-var crossPromOptions {
-  customerID: '1234',
-  myCustomParameter: 'newUser'
-};
-
-appsFlyer.trackAndOpenStore('com.myandroid.app', 'myCampaign', crossPromOptions);
-```
-
-| parameter   | type                        | description |
-| ----------- |-----------------------------|--------------|
-| `appID` | `String`                    | Promoted Application ID |
-| `campaign` | `String`                    | Promoted Campaign |
-| `options` | `Object`                    | Additional Parameters to track |
-
-For more details about Cross-Promotion tracking please see <a href="https://support.appsflyer.com/hc/en-us/articles/115004481946-Cross-Promotion-Tracking">here</a>.
-
----  
+Great installation and setup guides can be viewed [here](/Docs/Guides.md).
+- [init SDK Guide](/Docs/Guides.md#init-sdk)
+- [Deeplinking Guide](/Docs/Guides.md#deeplinking)
+- [Uninstall Guide](/Docs/Guides.md#uninstall)
 
 
-### <a id="iosdeeplinks"> iOS Deep Links - Universal Links and URL Schemes
 
-In order to track retargeting and use the onAppOpenAttribution callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
-
-#### Universal Links (iOS 9 +)
-```
-- (BOOL) application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray *_Nullable))restorationHandler
-{
-[[AppsFlyerTracker sharedTracker] continueUserActivity:userActivity restorationHandler:restorationHandler];
-return YES;
-}
-```
-
-#### URL Schemes
-```
-// Reports app open from deep link from apps which do not support Universal Links (Twitter) and for iOS8 and below
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
-[[AppsFlyerTracker sharedTracker] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
-return YES;
-}
-
-// Reports app open from URL Scheme deep link for iOS 10
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
-options:(NSDictionary *) options {
-[[AppsFlyerTracker sharedTracker] handleOpenUrl:url options:options];
-return YES;
-}
-```
----
+## <a id="api"> 📑 API
+  
+See the full [API](/Docs/API.md) available for this plugin.
 
 
-## Demo
-
-This plugin has a `demo` project bundled with it. To give it a try , clone this repo and from root a.e. `react-native-appsflyer` execute the following:
-
-```sh
-npm run setup
-```
-
-- Run `npm run demo.ios` or `npm run demo.android` will run for the appropriate platform.
-- Run `npm run ios-pod` to run `Podfile` under `demo` project
-
-
-![demo printscreen](demo/demo_example.png?raw=true)
-
-### Second Demo (demo2)
-
-Basic code implementation example of implementing the AppsFlyer React-Native plugin in the cross-platform `App.js` file:
-
-- Run `npm run demo2.ios` or `npm run demo2.android` will run for the appropriate platform.
-- Run `npm run ios-pod2` to run `Podfile` under `demo2` project
+## <a id="demo"> 📱 Demo
+  
+  Check out the demo for this project [here](Docs/Guides.md#demo).
