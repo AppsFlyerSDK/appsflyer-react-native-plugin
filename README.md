@@ -407,7 +407,7 @@ AppsFlyer can only measure Uninstalls when you have set up Firebase in your appl
 
 #### Firebase token is only used by AppsFlyer
 
-If a developer integrates FCM for the sole purpose of measurement uninstalls with AppsFlyer, they can make use of the appsFlyer.FirebaseMessagingServiceListener service, included in our SDK.
+If a developer integrates FCM for the sole purpose of measurement uninstalls with AppsFlyer, they can make use of the appsFlyer.FirebaseInstanceIdListener service, included in our SDK.
 
 This is done by adding the service to the AndroidManifest.xml:
 
@@ -419,7 +419,7 @@ This is done by adding the service to the AndroidManifest.xml:
 </service>
 ```
 
-The appsflyer.FirebaseMessagingServiceListener extends Firebase's FirebaseMessagingService class, which is used in order to receive Firebase's Device Token.
+The appsflyer.FirebaseInstanceIdListener extends Firebase's FirebaseInstanceIdService class, which is used in order to receive Firebase's Device Token.
 
 #### Firebase token is used by other means
 
