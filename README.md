@@ -403,30 +403,65 @@ Read more about Uninstall register: [Appsflyer SDK support site](https://support
 
 #### <a id="track-app-uninstalls-android"> Android
 
-`appsFlyer.enableUninstallTracking(GCMProjectID, callback): void` (**Android only**)
+AppsFlyer can only measure Uninstalls when you have set up Firebase in your application.
 
-Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.
+#### Firebase token is only used by AppsFlyer
 
-| parameter     | type                        | description  |
-| --------------|-----------------------------|--------------|
-| `GCMProjectID`| `String`                    |              |
-| `callback`    | `(successString) => void`   |     Required at the moment, inject a string as parameter upon hook registration success.         |
+If a developer integrates FCM for the sole purpose of measurement uninstalls with AppsFlyer, they can make use of the appsFlyer.FirebaseMessagingServiceListener service, included in our SDK.
 
-*Example:*
+This is done by adding the service to the AndroidManifest.xml:
 
-```javascript
+```
+<service android:name="com.appsflyer.FirebaseInstanceIdListener">
+    <intent-filter>
+        <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+    </intent-filter>
+</service>
+```
 
-enableUninstallTracking(){
-const  gcmProjectNum = "987186475229";
-appsFlyer.enableUninstallTracking(gcmProjectNum,
-(success) => {
-//...
-})
+The appsflyer.FirebaseMessagingServiceListener extends Firebase's FirebaseMessagingService class, which is used in order to receive Firebase's Device Token.
+
+#### Firebase token is used by other means
+
+If a developer intends to use FCM with more than one platform / SDK, they would need to implement a logic that collects the Device Token and passes it to all relevant platforms. This is done by extending a new instance of the FirebaseMessagingService (similar to the service the AppsFlyer SDK extends):
+
+```
+import com.appsflyer.AppsFlyerLib;
+import com.google.firebase.messaging.FirebaseMessagingService;
+
+public class MyNewFirebaseManager extends FirebaseMessagingService {
+
+    @Override
+    public void onNewToken(String s) {
+        super.onNewToken(s);
+
+        // Sending new token to AppsFlyer
+       	       AppsFlyerLib.getInstance().updateServerUninstallToken(getApplicationContext(), s);
+
+        // the rest of the code that makes use of the token goes in this method as well
+    }
 }
 
 ```
 
-Read more about Android  Uninstall Tracking: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)
+That service should be added to AndroidManifest.xml in order to function: If the application was using FCM before integrating the AppsFlyer SDK, most chances are that this service has already been extended and the developer would just need to add the following line to the onNewToken() method:
+
+```
+AppsFlyerLib.getInstance().updateServerUninstallToken(getApplicationContext(), refreshedToken); 
+```
+
+Please also make sure you have added the relevant service to the AndroidManifest.xml:
+
+```
+<service
+    android:name=".MyNewFirebaseManager">
+    <intent-filter>
+        <action android:name="com.google.firebase.MESSAGING_EVENT" />
+    </intent-filter>
+</service>
+```
+
+Read more about Android  Uninstall Measurement: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)
 
 ---
 
