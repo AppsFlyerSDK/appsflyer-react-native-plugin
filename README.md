@@ -1,8 +1,3 @@
-
-
-
-
-
 <img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="200">
 
 # react-native-appsflyer
@@ -83,9 +78,7 @@ You must also have the React dependencies defined in the Podfile as described [h
 2. Unzip and copy the contents of the Zip file into your project directory
 3. Run `react-native link react-native-appsflyer` from of the project root or copy RNAppsFlyer.h and RNAppsFlyer.m from `node_modules` ➜ `react-native-appsflyer` to your project directory
 
-![enter image description here](https://s18.postimg.org/gqtlyuneh/Screen_Shot_2018-01-28_at_21.54.10.png)
-
-
+![enter image description here](screen_shots/Screen-Shot-2018-01-28-at-21-54-10.png?raw=true)
 
 ### <a id="installation_android"> Android
 
@@ -126,7 +119,7 @@ ext {
 
 Build project so you should get following dependency (see an Image):
 
-![enter image description here](https://s26.postimg.org/4ie559jeh/Screen_Shot_2016_11_07_at_5_02_00_PM.png)
+![enter image description here](screen_shots/Screen-Shot-2016-11-07-at-5-02-00-PM.png?raw=true)
 
 ##### **MainApplication.java**
 Add:
@@ -824,7 +817,7 @@ npm run setup
 - Run `npm run ios-pod` to run `Podfile` under `demo` project
 
 
-![demo printscreen](demo/demo_example.png?raw=true)
+![demo printscreen](examples/demo/demo_example.png?raw=true)
 
 ### Second Demo (demo2)
 
