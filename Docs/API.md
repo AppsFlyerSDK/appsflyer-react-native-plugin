@@ -15,7 +15,7 @@ Te list of available methods for this plugin is described below.
 | [`setCollectAndroidID`](#setCollectAndroidID) | `(Boolean isCollect, function successCallback)`  | Collect Android Id for the SDK|
 | [`trackEvent`](#trackEvent) | `(String eventName, Object eventValues, function successC, function errorC)` | Track rich in-app events |
 | [`track-app-uninstalls`](#track-app-uninstalls) |  | Track app uninstalls|
-| [`track-app-uninstalls-android`](#track-app-uninstalls-android) | `(String GCMProjectID, (successString) => void) callback callbak)`  |  Track app uninstalls for android|
+| [`updateServerUninstallToken`](#updateServerUninstallToken) | `(String token, Callback callback)` | Pass Firebase device token for uninstall measurement on Android|
 | [`senddeeplinkdata-android-only`](#senddeeplinkdata-android-only) | `(String url)`  | Report Deep Links for Re-Targeting Attribution (Android)|
 | [`onInstallConversionData`](#onInstallConversionData) | `(function callback)`  | Conversion Data from the SDK |
 | [`getAppsFlyerUID`](#getAppsFlyerUID) | `(String error, String appsFlyerUID)` | Get AppsFlyer’s proprietary Device ID |
@@ -246,7 +246,7 @@ try {
 
 
 
-### <a id="track-app-uninstalls"> Track App Uninstalls
+### <a id="track-app-uninstalls"> Uninstall Measurement
 
 #### <a id="track-app-uninstalls-ios"> iOS
 
@@ -268,28 +268,25 @@ AppsFlyer enables you to track app uninstalls. To handle notifications it requir
 Read more about Uninstall register: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS)
 
 
-#### <a id="track-app-uninstalls-android"> Android
+#### <a id="updateServerUninstallToken"> Android
 
-`appsFlyer.enableUninstallTracking(GCMProjectID, callback): void` (**Android only**)
+`appsFlyer.updateServerUninstallToken(token, callback): void` (**Android only**)
 
-Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.
+Updates Firebase device token so it can be sent to AppsFlyer
 
 | parameter     | type                        | description  |
 | --------------|-----------------------------|--------------|
-| `GCMProjectID`| `String`                    |              |
+| `token`       | `String`                    |              |
 | `callback`    | `(successString) => void`   |     Required at the moment, inject a string as parameter upon hook registration success.         |
 
 *Example:*
 
 ```javascript
 
-enableUninstallTracking(){
-const  gcmProjectNum = "987186475229";
-appsFlyer.enableUninstallTracking(gcmProjectNum,
+appsFlyer.updateServerUninstallToken(newFirebaseToken,
 (success) => {
-//...
+ //...
 })
-}
 
 ```
 
