@@ -26,7 +26,8 @@ Te list of available methods for this plugin is described below.
 | [`setAppInviteOneLinkID`](#setAppInviteOneLinkID) | `(String OneLinkIDfunction, function callback` | Set AppsFlyer’s OneLink ID |
 | [`generateInviteLink`](#generateInviteLink) | `(Object args, function success, function error)` | Invite new user from the app and track the new install |
 | [`trackCrossPromotionImpression`](#trackCrossPromotionImpression) | `(String appId, String campaign)` | Track cross promotion impression |
-| [`trackAndOpenStore`](#trackAndOpenStore) | `(String appId, String campaign, Object options)` | Launch the app store's app page (via Browser) | |
+| [`trackAndOpenStore`](#trackAndOpenStore) | `(String appId, String campaign, Object options)` | Launch the app store's app page (via Browser) | 
+| [`setCurrencyCode`](#setCurrencyCode) | `(String currencyCode)` | set the Currency Code for purchases | |
 
 
 
@@ -643,4 +644,23 @@ appsFlyer.trackAndOpenStore('com.myandroid.app', 'myCampaign', crossPromOptions)
 For more details about Cross-Promotion tracking please see <a href="https://support.appsflyer.com/hc/en-us/articles/115004481946-Cross-Promotion-Tracking">here</a>.
 
 ---  
+
+##### <a id="setCurrencyCode"> **`appsFlyer.setCurrencyCode(currencyCode): void`** 
+
+Setting user local currency code for in-app purchases.
+The currency code should be a 3 character ISO 4217 code. (default is USD).
+You can set the currency code for all events by calling this method.
+
+*Example:*
+```javascript
+appsFlyer.setCurrencyCode(currencyCode);
+```
+
+| parameter   | type                        | description |
+| ----------- |-----------------------------|--------------|
+| `currencyCode` | `String`                 | currencyCode |
+
+---  
+
+
 
