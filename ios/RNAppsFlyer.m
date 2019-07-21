@@ -254,6 +254,10 @@ RCT_EXPORT_METHOD(setAppInviteOneLinkID: (NSString *)oneLinkID callback:(RCTResp
     callback(@[SUCCESS]);
 }
 
+RCT_EXPORT_METHOD(setCurrencyCode: (NSString *)currencyCode 
+{
+    [[AppsFlyerTracker sharedTracker].currencyCode = currencyCode;
+}
 
 RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
                   successCallback:(RCTResponseSenderBlock)successCallback

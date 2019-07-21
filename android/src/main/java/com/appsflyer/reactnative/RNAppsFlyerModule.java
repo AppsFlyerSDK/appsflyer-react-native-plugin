@@ -433,6 +433,14 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void setCurrencyCode(final String currencyCode) {
+        if (currencyCode == null || currencyCode.length() == 0) {
+            return;
+        }
+        AppsFlyerLib.getInstance().setCurrencyCode(currencyCode);
+    }
+
+    @ReactMethod
     public void generateInviteLink(ReadableMap args, final Callback successCallback, final Callback errorCallback) {
 
         String channel = null;
