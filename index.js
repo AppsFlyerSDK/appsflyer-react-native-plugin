@@ -135,8 +135,8 @@ appsFlyer.trackAndOpenStore = (appId, campaign, params) => {
   return RNAppsFlyer.trackAndOpenStore(appId, campaign, params);
 };
 
-appsFlyer.setCurrencyCode = (currencyCode) => {
-  return RNAppsFlyer.setCurrencyCode(currencyCode);
+appsFlyer.setCurrencyCode = (currencyCode, successC) => {
+  return RNAppsFlyer.setCurrencyCode(currencyCode, successC);
 };
 
 
