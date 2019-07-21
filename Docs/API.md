@@ -570,26 +570,24 @@ Allowing your existing users to invite their friends and contacts as new users t
 
 ```javascript
 
-var inviteOptions {
-  channel: 'gmail',
-  campaign: 'myCampaign',
-  customerID: '1234',
-  userParams {
-    myParam: 'newUser',
-    anotherParam: 'fromWeb',
-    amount: 1
-  }
-};
-
-var onInviteLinkSuccess = function(link) {
-  console.log(link); // Handle Generated Link Here
-}
-
-function onInviteLinkError(err) {
-  console.log(err);
-}
-
-appsFlyer.generateInviteLink(inviteOptions, onInviteLinkSuccess, onInviteLinkError);
+appsFlyer.generateInviteLink(
+ {
+   channel: 'gmail',
+   campaign: 'myCampaign',
+   customerID: '1234',
+   userParams: {
+     myParam: 'newUser',
+     anotherParam: 'fromWeb',
+     amount: 1,
+   },
+ },
+ (link) => {
+   console.log(link);
+ },
+ (err) => {
+   console.log(err);
+ }
+);
 
 ```
 | parameter   | type                        | description |
