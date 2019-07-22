@@ -83,18 +83,19 @@ import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View} from 'react-native';
 import appsFlyer from 'react-native-appsflyer';
 
-appsFlyer.initSdk({
-  devKey: 'K2**********99',
-  isDebug: false,
-  appId: '41*****44'
-},
+appsFlyer.initSdk(
+  {
+    devKey: 'K2***********99',
+    isDebug: false,
+    appId: '41*****44',
+  },
   (result) => {
     console.log(result);
   },
   (error) => {
     console.error(error);
   }
-)
+);
 ```
 
 **Important** - For iOS another step is required for tracking. AppState logic is required to track Background-to-foreground transitions. Check out the [relevant guide](./Docs/API.md#--appsflyertrackapplaunch-void) to see how this manidtory step is impelemented.

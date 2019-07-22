@@ -26,7 +26,8 @@ Te list of available methods for this plugin is described below.
 | [`setAppInviteOneLinkID`](#setAppInviteOneLinkID) | `(String OneLinkIDfunction, function callback` | Set AppsFlyer’s OneLink ID |
 | [`generateInviteLink`](#generateInviteLink) | `(Object args, function success, function error)` | Invite new user from the app and track the new install |
 | [`trackCrossPromotionImpression`](#trackCrossPromotionImpression) | `(String appId, String campaign)` | Track cross promotion impression |
-| [`trackAndOpenStore`](#trackAndOpenStore) | `(String appId, String campaign, Object options)` | Launch the app store's app page (via Browser) | |
+| [`trackAndOpenStore`](#trackAndOpenStore) | `(String appId, String campaign, Object options)` | Launch the app store's app page (via Browser) | 
+| [`setCurrencyCode`](#setCurrencyCode) | `(String currencyCode, function callback)` | set the Currency Code for purchases | |
 
 
 
@@ -569,26 +570,24 @@ Allowing your existing users to invite their friends and contacts as new users t
 
 ```javascript
 
-var inviteOptions {
-  channel: 'gmail',
-  campaign: 'myCampaign',
-  customerID: '1234',
-  userParams {
-    myParam: 'newUser',
-    anotherParam: 'fromWeb',
-    amount: 1
-  }
-};
-
-var onInviteLinkSuccess = function(link) {
-  console.log(link); // Handle Generated Link Here
-}
-
-function onInviteLinkError(err) {
-  console.log(err);
-}
-
-appsFlyer.generateInviteLink(inviteOptions, onInviteLinkSuccess, onInviteLinkError);
+appsFlyer.generateInviteLink(
+ {
+   channel: 'gmail',
+   campaign: 'myCampaign',
+   customerID: '1234',
+   userParams: {
+     myParam: 'newUser',
+     anotherParam: 'fromWeb',
+     amount: 1,
+   },
+ },
+ (link) => {
+   console.log(link);
+ },
+ (err) => {
+   console.log(err);
+ }
+);
 
 ```
 | parameter   | type                        | description |
@@ -643,4 +642,23 @@ appsFlyer.trackAndOpenStore('com.myandroid.app', 'myCampaign', crossPromOptions)
 For more details about Cross-Promotion tracking please see <a href="https://support.appsflyer.com/hc/en-us/articles/115004481946-Cross-Promotion-Tracking">here</a>.
 
 ---  
+
+##### <a id="setCurrencyCode"> **`appsFlyer.setCurrencyCode(currencyCode, callback): void`** 
+
+Setting user local currency code for in-app purchases.
+The currency code should be a 3 character ISO 4217 code. (default is USD).
+You can set the currency code for all events by calling this method.
+
+*Example:*
+```javascript
+appsFlyer.setCurrencyCode(currencyCode, ()=>{});
+```
+
+| parameter   | type                        | description |
+| ----------- |-----------------------------|--------------|
+| `currencyCode` | `String`                 | currencyCode |
+
+---  
+
+
 
