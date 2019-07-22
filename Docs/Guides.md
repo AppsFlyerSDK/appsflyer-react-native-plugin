@@ -196,19 +196,16 @@ Read more about Uninstall register: [Appsflyer SDK support site](https://support
 #### <a id="track-app-uninstalls-android"> Android
 
 
-Set the GCM API key. AppsFlyer requires a Google Project Number and GCM API Key to enable uninstall tracking.
+Updates Firebase device token so it can be sent to AppsFlyer
 
 *Example:*
 
 ```javascript
 
-enableUninstallTracking(){
-const  gcmProjectNum = "987186475229";
-appsFlyer.enableUninstallTracking(gcmProjectNum,
+appsFlyer.updateServerUninstallToken(newFirebaseToken,
 (success) => {
-//...
+  //...
 })
-}
 
 ```
 
