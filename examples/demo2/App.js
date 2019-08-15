@@ -24,7 +24,6 @@ appsFlyer.initSdk(
   }
 );
 
-appsFlyer.setCollectAndroidID(false, ()=>{});
 
 function trackEvent(eventName, eventValues) {
   appsFlyer.trackEvent(

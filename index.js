@@ -116,6 +116,7 @@ appsFlyer.setGCMProjectNumber = (gcmProjectNumber, successC, errorC) => {
  * For Android only (GCM). iOS uses 'didRegisterForRemoteNotificationsWithDeviceToken' in AppDelegate.m
  * 
  */
+
 appsFlyer.enableUninstallTracking = (gcmProjectNumber, successC) => {
   return RNAppsFlyer.enableUninstallTracking(gcmProjectNumber, successC);
 };
@@ -135,7 +136,7 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
  * Setting your own customer ID enables you to cross-reference your own unique ID with AppsFlyer’s unique ID and the other devices’ IDs.
  * This ID is available in AppsFlyer CSV reports along with Postback APIs for cross-referencing with your internal IDs.
  * 
- * @param userId Customer ID for client.
+ * @param {string} userId Customer ID for client.
  * @callback successC success callback function.
  */
 appsFlyer.setCustomerUserId = (userId, successC) => {
@@ -147,7 +148,7 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
  * In some extreme cases you might want to shut down all SDK activity due to legal and privacy compliance.
  * This can be achieved with the stopTracking API.
  * 
- * @param isStopTracking boolean should SDK be stopped.
+ * @param {boolean} isStopTracking boolean should SDK be stopped.
  * @callback successC success callback function.
  */
 appsFlyer.stopTracking = (isStopTracking, successC) => {
@@ -159,7 +160,7 @@ appsFlyer.stopTracking = (isStopTracking, successC) => {
  * If the app does NOT contain Google Play Services, device IMEI is collected by the SDK.
  * However, apps with Google play services should avoid IMEI collection as this is in violation of the Google Play policy.
  * 
- * @param isCollect boolean, false to opt out.
+ * @param {boolean} isCollect boolean, false to opt out.
  * @callback successC success callback function.
  * @platform android
  */
@@ -172,7 +173,7 @@ appsFlyer.setCollectIMEI = (isCollect, successC) => {
  * If the app does NOT contain Google Play Services, Android ID is collected by the SDK.
  * However, apps with Google play services should avoid Android ID collection as this is in violation of the Google Play policy.
  * 
- * @param isCollect boolean, false to opt out.
+ * @param {boolean} isCollect boolean, false to opt out.
  * @callback successC success callback function.
  * @platform android
  */
@@ -184,7 +185,7 @@ appsFlyer.setCollectAndroidID = (isCollect, successC) => {
  * Set the OneLink ID that should be used for User-Invite-API.
  * The link that is generated for the user invite will use this OneLink as the base link.
  * 
- * @param oneLinkID OneLink ID obtained from the AppsFlyer Dashboard.
+ * @param {string} oneLinkID OneLink ID obtained from the AppsFlyer Dashboard.
  * @callback successC success callback function.
  */
 appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
@@ -195,7 +196,7 @@ appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
  * The LinkGenerator class builds the invite URL according to various setter methods which allow passing on additional information on the click.
  * @see https://support.appsflyer.com/hc/en-us/articles/115004480866-User-invite-attribution-
  * 
- * @param parameters parameters Dictionary.
+ * @param parameters Dictionary.
  * @callback success success callback function.
  * @callback error error callback function.
  */
@@ -229,11 +230,8 @@ appsFlyer.trackAndOpenStore = (appId, campaign, params) => {
  * Setting user local currency code for in-app purchases.
  * The currency code should be a 3 character ISO 4217 code. (default is USD).
  * You can set the currency code for all events by calling the following method.
- * @platform android
- * @param tt dasedeawq`ddd`
- * @param dim Name of dimension as defined when calling `set`.
- * @returns Value for the dimension.
- * @see https://facebook.github.io/react-native/docs/dimensions.html#content
+ * @param currencyCode 
+ * @param successC success callback function.
  */
 appsFlyer.setCurrencyCode = (currencyCode, successC) => {
   return RNAppsFlyer.setCurrencyCode(currencyCode, successC);
