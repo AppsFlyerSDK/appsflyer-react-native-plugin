@@ -1,6 +1,7 @@
 
 #if __has_include(<React/RCTBridgeModule.h>) //ver >= 0.40
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 #import <React/RCTEventDispatcher.h>
 #else //ver < 0.40
 #import "RCTBridgeModule.h"
@@ -9,10 +10,15 @@
 
 
 
-@interface RNAppsFlyer : NSObject <RCTBridgeModule>
+@interface RNAppsFlyer : RCTEventEmitter <RCTBridgeModule>
 
 @end
 
+static NSString *const NO_DEVKEY_FOUND              = @"No 'devKey' found or its empty";
+static NSString *const NO_APPID_FOUND               = @"No 'appId' found or its empty";
+static NSString *const NO_EVENT_NAME_FOUND          = @"No 'eventName' found or its empty";
+static NSString *const NO_EMAILS_FOUND_OR_CORRUPTED = @"No 'emails' found, or list is corrupted";
+static NSString *const SUCCESS                      = @"Success";
 
   // Appsflyer JS objects
   #define afDevKey                        @"devKey"

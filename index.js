@@ -1,11 +1,10 @@
-import { NativeModules } from "react-native";
-import { NativeAppEventEmitter } from "react-native";
+import { NativeEventEmitter, NativeModules } from "react-native";
 
-const { RNAppsFlyer } = NativeModules;
+const { RNAppsFlyer }        = NativeModules;
+const appsFlyer              = {};
+const eventsMap              = {};
+const appsFlyerEventEmitter  = new NativeEventEmitter(RNAppsFlyer);
 
-const appsFlyer = {};
-
-const eventsMap = {};
 
 function initSdkCallback(options, successC, errorC) {
   return RNAppsFlyer.initSdk(options, successC, errorC);
@@ -19,8 +18,6 @@ function initSdk(options, success, error): Promise<string> {
   options.onInstallConversionDataListener = eventsMap["onInstallConversionData"]
     ? true
     : false;
-
-  //console.log(JSON.stringify(options));
 
   if (success && error) {
     //initSdk is a callback function
@@ -256,8 +253,8 @@ appsFlyer.setCurrencyCode = (currencyCode, successC) => {
 appsFlyer.onInstallConversionData = callback => {
   //console.log("onInstallConversionData is called" );
 
-  const listener = NativeAppEventEmitter.addListener(
-    "onInstallConversionData",
+  const listener = appsFlyerEventEmitter.addListener(
+    "onInstallConversionDataLoaded",
     _data => {
       if (callback && typeof callback === typeof Function) {
         try {
@@ -284,7 +281,7 @@ appsFlyer.onAppOpenAttribution = callback => {
 
   //console.log("onAppOpenAttribution is called" );
 
-  const listener = NativeAppEventEmitter.addListener(
+  const listener = appsFlyerEventEmitter.addListener(
     "onAppOpenAttribution",
     _data => {
       if (callback && typeof callback === typeof Function) {

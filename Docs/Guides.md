@@ -134,6 +134,12 @@ _handleAppStateChange = (nextAppState) => {
          }  
     }
 
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+      if (Platform.OS === 'ios') {
+        appsFlyer.trackAppLaunch();
+      }
+    }
+
     this.setState({appState: nextAppState});
   }
 ```
