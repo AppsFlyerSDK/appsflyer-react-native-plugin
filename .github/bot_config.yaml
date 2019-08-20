@@ -1,0 +1,7 @@
+# Configuration for AppsFlyerBot
+# aging issues:
+enableClosingAgingIssue: true
+enableLabelingAgingIssue: true
+
+#After how long the bot should consider an issue as obsolete (in days)
+agingTime: 180
