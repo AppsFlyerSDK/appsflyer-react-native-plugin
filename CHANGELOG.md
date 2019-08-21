@@ -1,5 +1,28 @@
 # Versions
 
+## 1.4.5
+
+Updated Android AppsFlyer SDK to 4.10.2
+Updated iOS AppsFlyer SDK to 4.10.3
+
+Changes and fixes: 
+
+ - replaced NativeAppEventEmitter with NativeEventEmitter  - https://github.com/AppsFlyerSDK/react-native-appsflyer/issues/105
+
+## 1.4.4
+
+Changes and fixes: 
+
+ - added setCurrencyCode API
+ - fixed is_first_launch issue
+
+## 1.4.3
+
+Changes and fixes: 
+
+ - fixed getCurrentActivity - https://github.com/AppsFlyerSDK/react-native-appsflyer/issues/82
+ - fixed generateInviteLink - https://github.com/AppsFlyerSDK/react-native-appsflyer/issues/78
+
 ## 1.4.2
 
 Added User Invite Tracking 
