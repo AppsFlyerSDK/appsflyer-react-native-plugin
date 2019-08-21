@@ -15,22 +15,11 @@
 
 @synthesize bridge = _bridge;
 
-
-static NSString *const NO_DEVKEY_FOUND              = @"No 'devKey' found or its empty";
-static NSString *const NO_APPID_FOUND               = @"No 'appId' found or its empty";
-static NSString *const NO_EVENT_NAME_FOUND          = @"No 'eventName' found or its empty";
-static NSString *const NO_EMAILS_FOUND_OR_CORRUPTED = @"No 'emails' found, or list is corrupted";
-static NSString *const SUCCESS                      = @"Success";
-
-
 RCT_EXPORT_MODULE()
-
 
 RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
                   successCallback :(RCTResponseSenderBlock)successCallback
-                  errorCallback:(RCTResponseErrorBlock)errorCallback
-                  )
-{
+                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
     
     NSError *error = [self callSdkInternal:initSdkOptions];
     
@@ -45,46 +34,36 @@ RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
 
 RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
                   initSdkWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject
-                  )
-{
+                  rejecter:(RCTPromiseRejectBlock)reject) {
     NSError *error = [self callSdkInternal:initSdkOptions];
     
-    if(error){
+    if(error) {
         reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
-    }
-    else{
+    } else {
        resolve(@[SUCCESS]);
     }
 }
 
-
-RCT_EXPORT_METHOD(trackAppLaunch)
-{
+RCT_EXPORT_METHOD(trackAppLaunch) {
     [[AppsFlyerTracker sharedTracker] trackAppLaunch];
 }
 
-
 RCT_EXPORT_METHOD(trackEvent: (NSString *)eventName eventValues:(NSDictionary *)eventValues
                   successCallback :(RCTResponseSenderBlock)successCallback
-                  errorCallback:(RCTResponseErrorBlock)errorCallback)
-{
+                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
     NSError *error = [self trackEventInternal:eventName eventValues:eventValues];
     
-    if(error){
+    if(error) {
         errorCallback(error);
-    }
-    else{
+    } else {
         //TODO wait callback from SDK
         successCallback(@[SUCCESS]);
     }
 }
 
-
 RCT_EXPORT_METHOD(trackEventWithPromise: (NSString *)eventName eventValues:(NSDictionary *)eventValues
                   trackEventWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
-{
+                  rejecter:(RCTPromiseRejectBlock)reject) {
     
     NSError *error = [self trackEventInternal:eventName eventValues:eventValues];
     
@@ -97,41 +76,30 @@ RCT_EXPORT_METHOD(trackEventWithPromise: (NSString *)eventName eventValues:(NSDi
     }
 }
 
-
-RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback)
-{
+RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback) {
     NSString *uid = [[AppsFlyerTracker sharedTracker] getAppsFlyerUID];
     callback(@[[NSNull null], uid]);
 }
 
-RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSenderBlock)callback)
-{
+RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerTracker sharedTracker] setCustomerUserID:userId];
-    
     callback(@[SUCCESS]);
 }
     
-RCT_EXPORT_METHOD(stopTracking: (BOOL)isStopTracking callback:(RCTResponseSenderBlock)callback)
-{
+RCT_EXPORT_METHOD(stopTracking: (BOOL)isStopTracking callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerTracker sharedTracker].isStopTracking  = isStopTracking;
-    
     callback(@[SUCCESS]);
 }
 
-RCT_EXPORT_METHOD(trackLocation: (double)longitude latitude:(double)latitude callback:(RCTResponseSenderBlock)callback)
-{
+RCT_EXPORT_METHOD(trackLocation: (double)longitude latitude:(double)latitude callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerTracker sharedTracker] trackLocation:longitude latitude:latitude];
-
     NSArray *events = @[[NSNumber numberWithDouble:longitude], [NSNumber numberWithDouble:latitude]];
     callback(@[[NSNull null], events]);
 }
 
-
-
 RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
                   successCallback :(RCTResponseSenderBlock)successCallback
-                  errorCallback:(RCTResponseErrorBlock)errorCallback)
-{
+                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
     NSArray *emails = nil;
     id emailsCryptTypeId = nil;
     EmailCryptType emailsCryptType = EmailCryptTypeNone;
@@ -236,73 +204,41 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     return nil;
 }
 
-
-
-
-RCT_EXPORT_METHOD(setAdditionalData: (NSDictionary *)additionalData callback:(RCTResponseSenderBlock)callback)
-{
+RCT_EXPORT_METHOD(setAdditionalData: (NSDictionary *)additionalData callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerTracker sharedTracker] setAdditionalData:additionalData];
-    
     callback(@[SUCCESS]);
 }
 
 //USER INVITES
 
-RCT_EXPORT_METHOD(setAppInviteOneLinkID: (NSString *)oneLinkID callback:(RCTResponseSenderBlock)callback)
-{
+RCT_EXPORT_METHOD(setAppInviteOneLinkID: (NSString *)oneLinkID callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerTracker sharedTracker].appInviteOneLinkID = oneLinkID;
     callback(@[SUCCESS]);
 }
 
-RCT_EXPORT_METHOD(setCurrencyCode: (NSString *)currencyCode callback:(RCTResponseSenderBlock)callback)
-{
+RCT_EXPORT_METHOD(setCurrencyCode: (NSString *)currencyCode callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerTracker sharedTracker] setCurrencyCode:currencyCode];
     callback(@[SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
                   successCallback:(RCTResponseSenderBlock)successCallback
-                  errorCallback:(RCTResponseSenderBlock)errorCallback)
-{
+                  errorCallback:(RCTResponseSenderBlock)errorCallback) {
     
     NSDictionary* customParams = (NSDictionary*)[inviteLinkOptions objectForKey: @"userParams"];
     
-    NSString *channel = nil;
-    NSString *campaign = nil;
-    NSString *referrerName = nil;
-    NSString *referrerImageUrl = nil;
-    NSString *customerID = nil;
-    NSString *baseDeepLink = nil;
-    
     if (![inviteLinkOptions isKindOfClass:[NSNull class]]) {
-        
-        channel = (NSString*)[inviteLinkOptions objectForKey: afUiChannel];
-        campaign = (NSString*)[inviteLinkOptions objectForKey: afUiCampaign];
-        referrerName = (NSString*)[inviteLinkOptions objectForKey: afUiRefName];
-        referrerImageUrl = (NSString*)[inviteLinkOptions objectForKey: afUiImageUrl];
-        customerID = (NSString*)[inviteLinkOptions objectForKey: afUiCustomerID];
-        baseDeepLink = (NSString*)[inviteLinkOptions objectForKey: afUiBaseDeepLink];
         
         [AppsFlyerShareInviteHelper generateInviteUrlWithLinkGenerator:^AppsFlyerLinkGenerator * _Nonnull(AppsFlyerLinkGenerator * _Nonnull generator) {
             
-            if (channel != nil && ![channel isEqualToString:@""]) {
-                [generator setChannel:channel];
-            }
-            if (campaign != nil && ![campaign isEqualToString:@""]) {
-                [generator setCampaign:campaign];
-            }
-            if (referrerName != nil && ![referrerName isEqualToString:@""]) {
-                [generator setReferrerName:referrerName];
-            }
-            if (referrerImageUrl != nil && ![referrerImageUrl isEqualToString:@""]) {
-                [generator setReferrerImageURL:referrerImageUrl];
-            }
-            if (customerID != nil && ![customerID isEqualToString:@""]) {
-                [generator setReferrerCustomerId:customerID];
-            }
-            if (baseDeepLink != nil && ![baseDeepLink isEqualToString:@""]) {
-                [generator setDeeplinkPath:baseDeepLink];
-            }
+            [generator setChannel:[inviteLinkOptions objectForKey: @"channel"]];
+            [generator setReferrerCustomerId:[inviteLinkOptions objectForKey: @"customerID"]];
+            [generator setCampaign:[inviteLinkOptions objectForKey: @"campaign"]];
+            [generator setReferrerName:[inviteLinkOptions objectForKey: @"referrerName"]];
+            [generator setReferrerImageURL:[inviteLinkOptions objectForKey: @"referrerImageUrl"]];
+            [generator setDeeplinkPath:[inviteLinkOptions objectForKey: @"deeplinkPath"]];
+            [generator setBaseDeeplink:[inviteLinkOptions objectForKey: @"baseDeeplink"]];
+            
             if (![customParams isKindOfClass:[NSNull class]]) {
                 [generator addParameters:customParams];
             }
@@ -320,8 +256,7 @@ RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
 }
 
 //CROSS PROMOTION
-RCT_EXPORT_METHOD(trackCrossPromotionImpression: (NSString *)appId campaign:(NSString *)campaign)
-{
+RCT_EXPORT_METHOD(trackCrossPromotionImpression: (NSString *)appId campaign:(NSString *)campaign) {
     if (appId != nil && ![appId isEqualToString:@""]) {
         [AppsFlyerCrossPromotionHelper trackCrossPromoteImpression:appId campaign:campaign];
     }
@@ -329,8 +264,7 @@ RCT_EXPORT_METHOD(trackCrossPromotionImpression: (NSString *)appId campaign:(NSS
 
 RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)appID
                   campaign:(NSString *)campaign
-                  customParams:(NSDictionary *)customParams)
-{
+                  customParams:(NSDictionary *)customParams) {
     
     if (appID != nil && ![appID isEqualToString:@""]) {
         [AppsFlyerShareInviteHelper generateInviteUrlWithLinkGenerator:^AppsFlyerLinkGenerator * _Nonnull(AppsFlyerLinkGenerator * _Nonnull generator) {
@@ -360,7 +294,8 @@ RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)appID
                               };
     
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
-  }
+    
+}
 
 
 -(void)onConversionDataRequestFailure:(NSError *) _errorMessage {
@@ -372,7 +307,8 @@ RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)appID
                                    };
     
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:errorMessage waitUntilDone:NO];
-    }
+    
+}
 
 
 - (void) onAppOpenAttribution:(NSDictionary*) attributionData {
@@ -398,7 +334,7 @@ RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)appID
 }
 
 
--(void) handleCallback:(NSDictionary *) message{
+-(void) handleCallback:(NSDictionary *) message {
     NSError *error;
     
     if ([NSJSONSerialization isValidJSONObject:message]) {
@@ -428,18 +364,19 @@ RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)appID
     }
 }
 
--(void) reportOnFailure:(NSString *)errorMessage type:(NSString*) type{
-    [self.bridge.eventDispatcher sendAppEventWithName:type body:errorMessage];
+- (NSArray<NSString *> *)supportedEvents {
+    return @[afOnAttributionFailure,afOnAppOpenAttribution,afOnInstallConversionFailure, afOnInstallConversionDataLoaded];
+}
+
+-(void) reportOnFailure:(NSString *)errorMessage type:(NSString*) type {
+    [self sendEventWithName:type body:errorMessage];
 }
 
 -(void) reportOnSuccess:(NSString *)data type:(NSString*) type {
-//    [self.bridge.eventDispatcher sendAppEventWithName:type body:data];
-    
     if([type isEqualToString:afOnInstallConversionDataLoaded]){
-        [self.bridge.eventDispatcher sendAppEventWithName:afOnInstallConversionData body:data];
-    }
-    else{
-        [self.bridge.eventDispatcher sendAppEventWithName:afOnAppOpenAttribution body:data];
+        [self sendEventWithName:type body:data];
+    } else {
+        [self sendEventWithName:type body:data];
     }
 }
 

@@ -2,7 +2,7 @@
 //  AppsFlyerTracker.h
 //  AppsFlyerLib
 //
-//  AppsFlyer iOS SDK v4.8.12
+//  AppsFlyer iOS SDK 4.10.3 (840)
 //  Copyright (c) 2019 AppsFlyer Ltd. All rights reserved.
 //
 
@@ -158,7 +158,7 @@ typedef enum  {
  `installData` contains information about install.
  Organic/non-organic, etc.
  */
-- (void)onConversionDataReceived:(NSDictionary*)installData;
+- (void)onConversionDataReceived:(NSDictionary *)installData;
 
 /**
  Any errors that occurred during the conversion request.
@@ -168,12 +168,13 @@ typedef enum  {
 /**
  `attributionData` contains information about OneLink, deeplink.
  */
-- (void)onAppOpenAttribution:(NSDictionary*)attributionData;
+- (void)onAppOpenAttribution:(NSDictionary *)attributionData;
 
 /**
  Any errors that occurred during the attribution request.
  */
 - (void)onAppOpenAttributionFailure:(NSError *)error;
+
 @end
 
 /**
@@ -200,24 +201,24 @@ typedef enum  {
  In case you use your own user ID in your app, you can set this property to that ID.
  Enables you to cross-reference your own unique ID with AppsFlyer’s unique ID and the other devices’ IDs
  */
-@property (nonatomic, strong, setter = setCustomerUserID:) NSString *customerUserID;
+@property(nonatomic, strong, setter = setCustomerUserID:) NSString * customerUserID;
 
 /**
  In case you use custom data and you want to receive it in the raw reports.
  
  @see [Setting additional custom data](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS#setting-additional-custom-data) for more information.
  */
-@property (nonatomic, strong, setter = setAdditionalData:) NSDictionary *customData;
+@property(nonatomic, strong, setter = setAdditionalData:) NSDictionary * customData;
 
 /**
  Use this property to set your AppsFlyer's dev key
  */
-@property (nonatomic, strong, setter = setAppsFlyerDevKey:) NSString *appsFlyerDevKey;
+@property(nonatomic, strong, setter = setAppsFlyerDevKey:) NSString * appsFlyerDevKey;
 
 /**
  Use this property to set your app's Apple ID(taken from the app's page on iTunes Connect)
  */
-@property (nonatomic, strong, setter = setAppleAppID:) NSString *appleAppID;
+@property(nonatomic, strong, setter = setAppleAppID:) NSString * appleAppID;
 
 /**
  In case of in app purchase events, you can set the currency code your user has purchased with.
@@ -235,59 +236,103 @@ typedef enum  {
  AppsFlyerTracker.shared().currencyCode = "USD"
  </pre>
  */
-@property (nonatomic, strong) NSString *currencyCode;
+@property(nonatomic, strong) NSString *currencyCode;
 
 /**
  AppsFlyer SDK collect Apple's `advertisingIdentifier` if the `AdSupport.framework` included in the SDK.
  You can disable this behavior by setting the following property to YES
  */
-@property BOOL disableAppleAdSupportTracking;
+@property(atomic) BOOL disableAppleAdSupportTracking;
 
 /**
  Prints SDK messages to the console log. This property should only be used in `DEBUG` mode.
  The default value is `NO`
  */
-@property (nonatomic, setter = setIsDebug:) BOOL isDebug;
+@property(nonatomic, setter = setIsDebug:) BOOL isDebug;
 
 /**
  Set this flag to `YES`, to collect the current device name(e.g. "My iPhone"). Default value is `NO`
  */
-@property (nonatomic, setter = setShouldCollectDeviceName:) BOOL shouldCollectDeviceName;
+@property(nonatomic, setter = setShouldCollectDeviceName:) BOOL shouldCollectDeviceName;
 
 /**
  Set your `OneLink ID` from OneLink configuration. Used in User Invites to generate a OneLink.
  */
-@property (nonatomic, setter = setAppInviteOneLink:) NSString* appInviteOneLinkID;
+@property(nonatomic, strong, setter = setAppInviteOneLink:) NSString * appInviteOneLinkID;
 
 /**
  Opt-out tracking for specific user
  */
-@property BOOL deviceTrackingDisabled;
+@property(atomic) BOOL deviceTrackingDisabled;
 
 /**
  Opt-out tracking for Apple Search Ads attributions
  */
-@property BOOL disableIAdTracking;
+@property(atomic) BOOL disableIAdTracking;
 
 /**
  AppsFlyer delegate. See `AppsFlyerTrackerDelegate`
  */
-@property (weak, nonatomic) id<AppsFlyerTrackerDelegate> delegate;
+@property(weak, nonatomic) id<AppsFlyerTrackerDelegate> delegate;
 
 /**
  In app purchase receipt validation Apple environment(production or sandbox). The default value is NO
  */
-@property (nonatomic, setter = setUseReceiptValidationSandbox:) BOOL useReceiptValidationSandbox;
+@property(nonatomic, setter = setUseReceiptValidationSandbox:) BOOL useReceiptValidationSandbox;
 
 /**
  Set this flag to test uninstall on Apple environment(production or sandbox). The default value is NO
  */
-@property (nonatomic, setter = setUseUninstallSandbox:) BOOL useUninstallSandbox;
+@property(nonatomic, setter = setUseUninstallSandbox:) BOOL useUninstallSandbox;
 
 /**
  Advertising Id(exposed for RemoteDebug)
  */
-@property (nonatomic, strong) NSString *advertiserId;
+@property(nonatomic, strong) NSString *advertiserId;
+
+/**
+ For advertisers who wrap OneLink within another Universal Link.
+ An advertiser will be able to deeplink from a OneLink wrapped within another Universal Link and also track this retargeting conversion.
+ 
+ Objective-C:
+ 
+ <pre>
+ [[AppsFlyerTracker sharedTracker] setResolveDeepLinkURLs:@[@"domain.com", @"subdomain.domain.com"]];
+ </pre>
+ */
+@property(nonatomic) NSArray<NSString *> *resolveDeepLinkURLs;
+
+/**
+ For advertisers who use vanity OneLinks.
+ 
+ Objective-C:
+ 
+ <pre>
+ [[AppsFlyerTracker sharedTracker] oneLinkCustomDomains:@[@"domain.com", @"subdomain.domain.com"]];
+ </pre>
+ */
+@property(nonatomic) NSArray<NSString *> *oneLinkCustomDomains;
+
+/**
+ Enable the collection of Facebook Deferred AppLinks
+ Requires Facebook SDK and Facebook app on target/client device.
+ This API must be invoked prior to initializing the AppsFlyer SDK in order to function properly.
+ 
+ Objective-C:
+ 
+ <pre>
+ [[AppsFlyerTracker sharedTracker] enableFacebookDeferredApplinksWithClass:[FBSDKAppLinkUtility class]]
+ </pre>
+ 
+ Swift:
+ 
+ <pre>
+ AppsFlyerTracker.shared().enableFacebookDeferredApplinks(with: FBSDKAppLinkUtility.self)
+ </pre>
+ 
+ @param facebookAppLinkUtilityClass requeries method call `[FBSDKAppLinkUtility class]` as param.
+ */
+- (void)enableFacebookDeferredApplinksWithClass:(Class)facebookAppLinkUtilityClass;
 
 /**
  Use this to send the user's emails
@@ -303,6 +348,8 @@ typedef enum  {
  */
 - (void)trackAppLaunch;
 
+- (void)trackAppLaunchWithCompletionHandler:(void (^)(NSDictionary<NSString *, id> *dictionary, NSError *error))completionHandler;
+
 /**
  Use this method to track events in your app like purchases or user actions
  
@@ -314,7 +361,7 @@ typedef enum  {
  </pre>
  
  */
-- (void)trackEvent:(NSString*)eventName withValue:(NSString*)value __attribute__((deprecated));
+- (void)trackEvent:(NSString *)eventName withValue:(NSString *)value __attribute__((deprecated));
 
 /**
  Use this method to track an events with mulitple values. See AppsFlyer's documentation for details.
@@ -342,7 +389,12 @@ typedef enum  {
  @param eventName Contains name of event that could be provided from predefined constants in `AppsFlyerTracker.h`
  @param values Contains dictionary of values for handling by backend
  */
-- (void)trackEvent:(NSString *)eventName withValues:(NSDictionary*)values;
+- (void)trackEvent:(NSString *)eventName withValues:(NSDictionary *)values;
+
+- (void)trackEventWithEventName:(NSString *)eventName
+                    eventValues:(NSDictionary<NSString * , id> * )eventValues
+              completionHandler:(void (^)(NSDictionary<NSString *, id> *dictionary, NSError *error))completionHandler
+NS_SWIFT_NAME(trackEvent(name:values:completionHandler:));
 
 /**
  To track and validate in app purchases you can call this method from the completeTransaction: method on
@@ -356,13 +408,13 @@ typedef enum  {
  @param successBlock The success callback
  @param failedBlock The failure callback
  */
-- (void) validateAndTrackInAppPurchase:(NSString *)productIdentifier
+- (void)validateAndTrackInAppPurchase:(NSString *)productIdentifier
                                  price:(NSString *)price
                               currency:(NSString *)currency
                          transactionId:(NSString *)tranactionId
                   additionalParameters:(NSDictionary *)params
                                success:(void (^)(NSDictionary *response))successBlock
-                               failure:(void (^)(NSError *error, id reponse)) failedBlock NS_AVAILABLE(10_7, 7_0);
+                               failure:(void (^)(NSError *error, id reponse))failedBlock NS_AVAILABLE(10_7, 7_0);
 
 /**
  To Track location for geo-fencing. Does the same as code below.
@@ -488,7 +540,7 @@ typedef enum  {
  AppsFlyerTracker.shared().host = "example.com"
  </pre>
  */
-@property (nonatomic, strong) NSString *host;
+@property(nonatomic, strong) NSString *host;
 
 - (void)setHost:(NSString *)host DEPRECATED_MSG_ATTRIBUTE("Use -[AppsFlyerTracker setHost:withHostPrefix:] instead");
 
@@ -501,19 +553,19 @@ typedef enum  {
  * This property accepts a string value representing the prefix host name for all endpoints.
  * for example "test" prefix with default host name will have the address "host.appsflyer.com"
  */
-@property (nonatomic, strong, readonly) NSString *hostPrefix;
+@property(nonatomic, strong, readonly) NSString *hostPrefix;
 
 /**
  This property is responsible for timeout between sessions in seconds.
  Default value is 5 seconds.
  */
-@property (atomic) NSUInteger minTimeBetweenSessions;
+@property(atomic) NSUInteger minTimeBetweenSessions;
 
 /**
  API to shut down all SDK activities.
  
  @warning This will disable all requests from AppsFlyer SDK.
  */
-@property (atomic) BOOL isStopTracking;
+@property(atomic) BOOL isStopTracking;
 
 @end

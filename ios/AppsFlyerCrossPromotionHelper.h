@@ -11,6 +11,7 @@
 
 
 NS_ASSUME_NONNULL_BEGIN
+
 /**
  AppsFlyer allows you to track and attribute installs originating
  from cross promotion campaigns of your existing apps.
@@ -25,8 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
  @param appID Promoted App ID
  @param campaign A campaign name
  */
-+ (void)trackCrossPromoteImpression:(nonnull NSString*)appID
-                           campaign:(nullable NSString*)campaign;
++ (void)trackCrossPromoteImpression:(nonnull NSString *)appID
+                           campaign:(nullable NSString *)campaign;
 
 /**
  iOS allows you to utilize the StoreKit component to open
@@ -38,10 +39,11 @@ NS_ASSUME_NONNULL_BEGIN
  @param parameters Additional params like `@{@"af_sub1": @"val", @"custom_param": @"val2" }`
  @param openStoreBlock Contains promoted `clickURL`
  */
-+ (void)trackAndOpenStore:(nonnull NSString*)appID
++ (void)trackAndOpenStore:(nonnull NSString *)appID
                  campaign:(nullable NSString *)campaign
-                paramters:(nullable NSDictionary*)parameters
-                openStore:(void (^)(NSURLSession *urlSession,NSURL *clickURL))openStoreBlock;
+                paramters:(nullable NSDictionary *)parameters
+                openStore:(void (^)(NSURLSession *urlSession, NSURL *clickURL))openStoreBlock;
+
 @end
 
 NS_ASSUME_NONNULL_END
