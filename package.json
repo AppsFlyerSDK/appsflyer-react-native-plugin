@@ -8,9 +8,12 @@
     "demo.android": "cd examples/demo; react-native run-android",
     "ios-pod": "cd examples/demo/ios; pod install",
     "preparedemo": "cd examples/demo; npm uninstall react-native-appsflyer --save; npm install .. --save",
+    "demo2.ios": "cd examples/DemoPod2; react-native run-ios",
+    "demo2.android": "cd examples/DemoPod2; react-native run-android",
+    "ios-pod2": "cd examples/DemoPod2/ios; pod install",
+    "preparedemo2": "cd examples/DemoPod2; npm uninstall react-native-appsflyer --save; npm install .. --save",
     "setup": "cd examples/demo; npm install; cd ..; npm run preparedemo;",
-    "preparedemo2" : "cd examples/demo2; rm -rf node_modules; rm -rf yarn.lock; yarn",
-    "demo2.android" : "cd examples/demo2; react-native run-android;"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",

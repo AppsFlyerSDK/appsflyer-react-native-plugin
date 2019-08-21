@@ -20,31 +20,31 @@
 
 ```javascript
 const options = {
-devKey: "<AF_DEV_KEY>",
-isDebug: true
+  devKey: '<AF_DEV_KEY>',
+  isDebug: true,
 };
 
 if (Platform.OS === 'ios') {
-options.appId = "123456789";
+  options.appId = '123456789';
 }
 
-appsFlyer.initSdk(options,
-(result) => {
-console.log(result);
-},
-(error) => {
-console.error(error);
-}
-)
+appsFlyer.initSdk(
+  options,
+  (result) => {
+    console.log(result);
+  },
+  (error) => {
+    console.error(error);
+  }
+);
 ```
 
 *With Promise:*
 
 ```javascript
 try {
-     var result = await appsFlyer.initSdk(options);     
-     } catch (error) {
-    }
+  var result = await appsFlyer.initSdk(options);
+} catch (error) {}
 ```
 ### <a id="deeplinking"> Deep linking
 
@@ -57,29 +57,27 @@ Read more: [Android](http://support.appsflyer.com/entries/69796693-Accessing-App
 Example of `onInstallConversionDataLoaded`:
 ```
 {
-    "status": "success",
-    "type": "onInstallConversionDataLoaded",
-    "data": {
-        "af_status": "Organic",
-        "af_message": "organic install"
-    }
+  status: 'success',
+  type: 'onInstallConversionDataLoaded',
+  data: {
+    af_status: 'Organic',
+    af_message: 'organic install',
+  },
 }
-
 ```
 
 Example of `onAppOpenAttribution`:
 ```
 {
-    "status": "success",
-    "type": "onAppOpenAttribution",
-    "data": {
-        "af_sub1": "some custom data",
-        "link": "https://rndemotest.onelink.me/7y5s/f78c46d5",
-        "c": 'my campaign',
-        "pid": "my media source" }
-        }
+  status: 'success',
+  type: 'onAppOpenAttribution',
+  data: {
+    af_sub1: 'some custom data',
+    link: 'https://rndemotest.onelink.me/7y5s/f78c46d5',
+    c: 'my campaign',
+    pid: 'my media source',
+  },
 }
-
 ```
 
 The code implementation fro the conversion listener must be made **prior to the initialization** code of the SDK
@@ -87,18 +85,13 @@ The code implementation fro the conversion listener must be made **prior to the 
 *Example:*
 
 ```javascript
-this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
-      data => {
-        console.log(data);        
-      }
-    );
+this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData((data) => {
+    console.log(data);
+});
 
-    this.onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution(
-      data => {
-        console.log(data);        
-      }
-    );
-
+this.onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((data) => {
+  console.log(data);
+});
 
 appsFlyer.initSdk(/*...*/);
 //...
@@ -109,29 +102,28 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
 *Example:*
 
 ```javascript
-state = {
-  appState: AppState.currentState
-}
+  state = {
+    appState: AppState.currentState,
+  };
 
-componentDidMount() {
+  componentDidMount() {
     AppState.addEventListener('change', this._handleAppStateChange);
-}
+  }
 
-componentWillUnmount() {
-  AppState.removeEventListener('change', this._handleAppStateChange);
-}
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this._handleAppStateChange);
+  }
 
-_handleAppStateChange = (nextAppState) => {
-    
+  _handleAppStateChange = (nextAppState) => {
     if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
-         if(this.onInstallConversionDataCanceller){
-           this.onInstallConversionDataCanceller();
-           console.log("unregister onInstallConversionDataCanceller");
-         } 
-         if(this.onAppOpenAttributionCanceller){
-           this.onAppOpenAttributionCanceller();
-           console.log("unregister onAppOpenAttributionCanceller");
-         }  
+      if (this.onInstallConversionDataCanceller) {
+        this.onInstallConversionDataCanceller();
+        console.log('unregister onInstallConversionDataCanceller');
+      }
+      if (this.onAppOpenAttributionCanceller) {
+        this.onAppOpenAttributionCanceller();
+        console.log('unregister onAppOpenAttributionCanceller');
+      }
     }
 
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
@@ -141,7 +133,7 @@ _handleAppStateChange = (nextAppState) => {
     }
 
     this.setState({appState: nextAppState});
-  }
+  };
 ```
 
 
@@ -151,16 +143,15 @@ _handleAppStateChange = (nextAppState) => {
 In order to track retargeting and use the onAppOpenAttribution callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
 
 #### Universal Links (iOS 9 +)
-```
-- (BOOL) application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray *_Nullable))restorationHandler
-{
-[[AppsFlyerTracker sharedTracker] continueUserActivity:userActivity restorationHandler:restorationHandler];
-return YES;
+```objectivec
+- (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
+  [[AppsFlyerTracker sharedTracker] continueUserActivity:userActivity restorationHandler:restorationHandler];
+  return YES;
 }
 ```
 
 #### URL Schemes
-```
+```objectivec
 // Reports app open from deep link from apps which do not support Universal Links (Twitter) and for iOS8 and below
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
 [[AppsFlyerTracker sharedTracker] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
@@ -207,12 +198,9 @@ Updates Firebase device token so it can be sent to AppsFlyer
 *Example:*
 
 ```javascript
-
-appsFlyer.updateServerUninstallToken(newFirebaseToken,
-(success) => {
+appsFlyer.updateServerUninstallToken(newFirebaseToken, (success) => {
   //...
-})
-
+});
 ```
 
 Read more about Android  Uninstall Tracking: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)

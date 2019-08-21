@@ -53,31 +53,31 @@ initializes the SDK.
 
 ```javascript
 const options = {
-devKey: "<AF_DEV_KEY>",
-isDebug: true
+  devKey: '<AF_DEV_KEY>',
+  isDebug: true,
 };
 
 if (Platform.OS === 'ios') {
-options.appId = "123456789";
+  options.appId = '123456789';
 }
 
-appsFlyer.initSdk(options,
-(result) => {
-console.log(result);
-},
-(error) => {
-console.error(error);
-}
-)
+appsFlyer.initSdk(
+  options,
+  (result) => {
+    console.log(result);
+  },
+  (error) => {
+    console.error(error);
+  }
+);
 ```
 
 *With Promise:*
 
 ```javascript
 try {
-     var result = await appsFlyer.initSdk(options);     
-     } catch (error) {
-    }
+  var result = await appsFlyer.initSdk(options);
+} catch (error) {}
 ```
 
 ---
@@ -90,28 +90,31 @@ Should be used with the relevant [AppState](https://facebook.github.io/react-nat
 
 ```javascript
 state = {
-  appState: AppState.currentState
-}
+  appState: AppState.currentState,
+};
 
-componentDidMount()
+componentDidMount();
 {
   AppState.addEventListener('change', this._handleAppStateChange);
 }
 
-componentWillUnmount()
-{  
+componentWillUnmount();
+{
   AppState.removeEventListener('change', this._handleAppStateChange);
 }
 
-_handleAppStateChange = (nextAppState) =>{
-  if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+_handleAppStateChange = (nextAppState) => {
+  if (
+    this.state.appState.match(/inactive|background/) &&
+    nextAppState === 'active'
+  ) {
     if (Platform.OS === 'ios') {
       appsFlyer.trackAppLaunch();
     }
   }
- 
+
   this.setState({appState: nextAppState});
-}
+};
 ```
 ---
 
@@ -129,13 +132,11 @@ Setting your own Custom ID enables you to cross-reference your own unique ID wit
 *Example:*
 
 ```javascript
-const userId = "some_user_id";
+const userId = 'some_user_id';
 
-appsFlyer.setCustomerUserId(userId,
-(response) => {
-//..
-}
-);
+appsFlyer.setCustomerUserId(userId, (response) => {
+  //..
+});
 ```
 
 ---
@@ -151,10 +152,9 @@ The `stopTracking` API for opting out users as part of the GDPR compliance.
 *Example:*
 
 ```javascript
-appsFlyer.stopTracking(true,
-        (result) => {
-           console.log("stopTracking ...");
-         });
+appsFlyer.stopTracking(true, (result) => {
+  console.log('stopTracking ...');
+});
 ```
 
 ---
@@ -170,10 +170,9 @@ By default, IMEI and Android ID are not collected by the SDK if the OS version i
 *Example:*
 
 ```javascript
-appsFlyer.setCollectIMEI(false,
-        (result) => {
-           console.log("setCollectIMEI ...");
-         });
+appsFlyer.setCollectIMEI(false, (result) => {
+  console.log('setCollectIMEI ...');
+});
 ```
 
 ---
@@ -189,10 +188,9 @@ By default, IMEI and Android ID are not collected by the SDK if the OS version i
 *Example:*
 
 ```javascript
-appsFlyer.setCollectAndroidID(false,
-        (result) => {
-           console.log("setCollectAndroidID ... ");
-         });
+appsFlyer.setCollectAndroidID(false, (result) => {
+  console.log('setCollectAndroidID ... ');
+});
 ```
 
 ---
@@ -215,30 +213,31 @@ to track ROI (Return on Investment) and LTV (Lifetime Value).
 *Example:*
 
 ```javascript
-const eventName = "af_add_to_cart";
+const eventName = 'af_add_to_cart';
 const eventValues = {
-"af_content_id": "id123",
-"af_currency":"USD",
-"af_revenue": "2"
+  af_content_id: 'id123',
+  af_currency: 'USD',
+  af_revenue: '2',
 };
 
-appsFlyer.trackEvent(eventName, eventValues,
-(result) => {
-console.log(result);
-},
-(error) => {
-console.error(error);
-}
-)
+appsFlyer.trackEvent(
+  eventName,
+  eventValues,
+  (result) => {
+    console.log(result);
+  },
+  (error) => {
+    console.error(error);
+  }
+);
 
 ```
 *With Promise:*
 
 ```javascript
 try {
-     var result = await appsFlyer.trackEvent(eventName, eventValues);     
-     } catch (error) {
-    }
+  var result = await appsFlyer.trackEvent(eventName, eventValues);
+} catch (error) {}
 ```
 
 
@@ -283,12 +282,9 @@ Updates Firebase device token so it can be sent to AppsFlyer
 *Example:*
 
 ```javascript
-
-appsFlyer.updateServerUninstallToken(newFirebaseToken,
-(success) => {
- //...
-})
-
+appsFlyer.updateServerUninstallToken(newFirebaseToken, (success) => {
+  //...
+});
 ```
 
 Read more about Android  Uninstall Tracking: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)
@@ -320,29 +316,27 @@ Read more: [Android](http://support.appsflyer.com/entries/69796693-Accessing-App
 Example of `onInstallConversionDataLoaded`:
 ```
 {
-    "status": "success",
-    "type": "onInstallConversionDataLoaded",
-    "data": {
-        "af_status": "Organic",
-        "af_message": "organic install"
-    }
+  status: 'success',
+  type: 'onInstallConversionDataLoaded',
+  data: {
+    af_status: 'Organic',
+    af_message: 'organic install',
+  },
 }
-
 ```
 
 Example of `onAppOpenAttribution`:
 ```
 {
-    "status": "success",
-    "type": "onAppOpenAttribution",
-    "data": {
-        "af_sub1": "some custom data",
-        "link": "https://rndemotest.onelink.me/7y5s/f78c46d5",
-        "c": 'my campaign',
-        "pid": "my media source" }
-        }
+  status: 'success',
+  type: 'onAppOpenAttribution',
+  data: {
+    af_sub1: 'some custom data',
+    link: 'https://rndemotest.onelink.me/7y5s/f78c46d5',
+    c: 'my campaign',
+    pid: 'my media source',
+  },
 }
-
 ```
 
 The code implementation for the conversion listener must be made **prior to the initialization** code of the SDK
@@ -350,18 +344,13 @@ The code implementation for the conversion listener must be made **prior to the 
 *Example:*
 
 ```javascript
-this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
-      data => {
-        console.log(data);        
-      }
-    );
+this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData((data) => {
+  console.log(data);
+});
 
-    this.onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution(
-      data => {
-        console.log(data);        
-      }
-    );
-
+this.onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((data) => {
+  console.log(data);
+});
 
 appsFlyer.initSdk(/*...*/);
 //...
@@ -372,33 +361,35 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
 *Example:*
 
 ```javascript
-state = {
-  appState: AppState.currentState
-}
+  state = {
+    appState: AppState.currentState,
+  };
 
-componentDidMount() {
+  componentDidMount() {
     AppState.addEventListener('change', this._handleAppStateChange);
-}
+  }
 
-componentWillUnmount() {
-  AppState.removeEventListener('change', this._handleAppStateChange);
-}
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this._handleAppStateChange);
+  }
 
-_handleAppStateChange = (nextAppState) => {
-    
-    if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
-         if(this.onInstallConversionDataCanceller){
-           this.onInstallConversionDataCanceller();
-           console.log("unregister onInstallConversionDataCanceller");
-         } 
-         if(this.onAppOpenAttributionCanceller){
-           this.onAppOpenAttributionCanceller();
-           console.log("unregister onAppOpenAttributionCanceller");
-         }  
+  _handleAppStateChange = (nextAppState) => {
+    if (
+      this.state.appState.match(/active|foreground/) &&
+      nextAppState === 'background'
+    ) {
+      if (this.onInstallConversionDataCanceller) {
+        this.onInstallConversionDataCanceller();
+        console.log('unregister onInstallConversionDataCanceller');
+      }
+      if (this.onAppOpenAttributionCanceller) {
+        this.onAppOpenAttributionCanceller();
+        console.log('unregister onAppOpenAttributionCanceller');
+      }
     }
 
     this.setState({appState: nextAppState});
-  }
+  };
 ```
 
 ---
@@ -418,11 +409,11 @@ Get AppsFlyer’s proprietary Device ID. The AppsFlyer Device ID is the main ID 
 
 ```javascript
 appsFlyer.getAppsFlyerUID((error, appsFlyerUID) => {
-if (error) {
-console.error(error);
-} else {
-console.log("on getAppsFlyerUID: " + appsFlyerUID);
-}
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('on getAppsFlyerUID: ' + appsFlyerUID);
+  }
 });
 ```
 
@@ -441,14 +432,14 @@ Track the location (lat,long) of the device / user.
 
 ```javascript
 const latitude = -18.406655;
-const longitude = 46.406250;
+const longitude = 46.40625;
 
 appsFlyer.trackLocation(longitude, latitude, (error, coords) => {
-if (error) {
-console.error(error);
-} else {
-this.setState({ ...this.state, trackLocation: coords });
-}
+  if (error) {
+    console.error(error);
+  } else {
+    this.setState({...this.state, trackLocation: coords});
+  }
 });
 ```
 
@@ -461,14 +452,16 @@ This method should be called when an app is opened using a deep link.
 
 *Example:*
 ```javascript
-componentDidMount() {
-Linking.getInitialURL().then((url) => {
-if (appsFlyer) {
-appsFlyer.sendDeepLinkData(url); // Report Deep Link to AppsFlyer
-// Additional Deep Link Logic Here ...
-}
-}).catch(err => console.error('An error occurred', err));
-}
+  componentDidMount() {
+    Linking.getInitialURL()
+      .then((url) => {
+        if (appsFlyer) {
+          appsFlyer.sendDeepLinkData(url); // Report Deep Link to AppsFlyer
+          // Additional Deep Link Logic Here ...
+        }
+      })
+      .catch((err) => console.error('An error occurred', err));
+  }
 ```
 
 More about Deep Links in React-Native: [React-Native Linking](https://facebook.github.io/react-native/docs/linking.html)
@@ -491,15 +484,15 @@ The `setAdditionalData` API is required to integrate on the SDK level with sever
 
 ```javascript
 appsFlyer.setAdditionalData(
-    {
-      val1: "data1",
-      val2: false,
-      val3: 23
-    },
-    (result) => {
-       //... SUCCESS
-    });
-
+  {
+    val1: 'data1',
+    val2: false,
+    val3: 23,
+  },
+  (result) => {
+    //... SUCCESS
+  }
+);
 ```
 
 ---
@@ -527,22 +520,19 @@ More info you can find on [AppsFlyer-SDK-Integration-Android](https://support.ap
 
 ```javascript
 const options = {
-"emailsCryptType": 2,
-"emails": [
-"user1@gmail.com",
-"user2@gmail.com"
-]
+  emailsCryptType: 2,
+  emails: ['user1@gmail.com', 'user2@gmail.com'],
 };
 
-appsFlyer.setUserEmails(options,
-(response) => {
-this.setState({ ...this.state, setUserEmailsResponse: response });
-},
-(error) => {
-console.error(error);
-}
+appsFlyer.setUserEmails(
+  options,
+  (response) => {
+    this.setState({...this.state, setUserEmailsResponse: response});
+  },
+  (error) => {
+    console.error(error);
+  }
 );
-
 ```
 ---
 
@@ -552,9 +542,9 @@ Set AppsFlyer’s OneLink ID. Setting a valid OneLink ID will result in shortene
 *Example:*
 
 ```javascript
-
-appsFlyer.setAppInviteOneLinkID("oneLinkID" , (success)=>{console.log(success)});
-
+appsFlyer.setAppInviteOneLinkID('oneLinkID', (success) => {
+  console.log(success);
+});
 ```
 
 | parameter   | type                        | description |
@@ -625,12 +615,16 @@ Use this call to track the click and launch the app store's app page (via Browse
 
 *Example:*
 ```javascript
-var crossPromOptions {
+var crossPromOptions = {
   customerID: '1234',
-  myCustomParameter: 'newUser'
+  myCustomParameter: 'newUser',
 };
 
-appsFlyer.trackAndOpenStore('com.myandroid.app', 'myCampaign', crossPromOptions);
+appsFlyer.trackAndOpenStore(
+  'com.myandroid.app',
+  'myCampaign',
+  crossPromOptions
+);
 ```
 
 | parameter   | type                        | description |
@@ -651,7 +645,7 @@ You can set the currency code for all events by calling this method.
 
 *Example:*
 ```javascript
-appsFlyer.setCurrencyCode(currencyCode, ()=>{});
+appsFlyer.setCurrencyCode(currencyCode, () => {});
 ```
 
 | parameter   | type                        | description |
