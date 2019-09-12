@@ -6,7 +6,7 @@ Updated Android AppsFlyer SDK to 4.10.2
 Updated iOS AppsFlyer SDK to 4.10.4
 
 Changes and fixes: 
- - Support for iOS 13
+ - Update for iOS 13 push token retrieval needed for Uninstall Measurement
  - replaced NativeAppEventEmitter with NativeEventEmitter  - https://github.com/AppsFlyerSDK/react-native-appsflyer/issues/105
 
 ## 1.4.4
