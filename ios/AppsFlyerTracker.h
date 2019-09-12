@@ -2,7 +2,7 @@
 //  AppsFlyerTracker.h
 //  AppsFlyerLib
 //
-//  AppsFlyer iOS SDK 4.10.3 (840)
+//  AppsFlyer iOS SDK 4.10.4 (871)
 //  Copyright (c) 2019 AppsFlyer Ltd. All rights reserved.
 //
 
@@ -312,6 +312,13 @@ typedef enum  {
  </pre>
  */
 @property(nonatomic) NSArray<NSString *> *oneLinkCustomDomains;
+
+/*
+ * Set phone number for each `trackAppLaunch` event. `phoneNumber` will be sent as SHA256 string
+ */
+@property(nonatomic) NSString *phoneNumber;
+
+- (NSString *)phoneNumber UNAVAILABLE_ATTRIBUTE;
 
 /**
  Enable the collection of Facebook Deferred AppLinks

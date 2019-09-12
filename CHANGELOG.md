@@ -3,10 +3,10 @@
 ## 1.4.5
 
 Updated Android AppsFlyer SDK to 4.10.2
-Updated iOS AppsFlyer SDK to 4.10.3
+Updated iOS AppsFlyer SDK to 4.10.4
 
 Changes and fixes: 
-
+ - Support for iOS 13
  - replaced NativeAppEventEmitter with NativeEventEmitter  - https://github.com/AppsFlyerSDK/react-native-appsflyer/issues/105
 
 ## 1.4.4
