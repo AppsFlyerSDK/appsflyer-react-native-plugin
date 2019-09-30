@@ -196,7 +196,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                     obj.put("type", eventType);
                     obj.put("data", new JSONObject(data));
                     if (eventType.equals(afOnInstallConversionDataLoaded)) {
-                        sendEvent(reactContext, afOnInstallConversionData, obj.toString());
+                        sendEvent(reactContext, afOnInstallConversionDataLoaded, obj.toString());
                     } else if (eventType.equals(afOnAppOpenAttribution)) {
                         sendEvent(reactContext, afOnAppOpenAttribution, obj.toString());
                     }
@@ -212,7 +212,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                     obj.put("status", afFailure);
                     obj.put("type", eventType);
                     obj.put("data", errorMessage);
-                    sendEvent(reactContext, afOnInstallConversionData, obj.toString());
+                    sendEvent(reactContext, afOnInstallConversionDataLoaded, obj.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
