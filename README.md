@@ -105,7 +105,7 @@ appsFlyer.initSdk(
 Great installation and setup guides can be viewed [here](/Docs/Guides.md).
 - [init SDK Guide](/Docs/Guides.md#init-sdk)
 - [Deeplinking Guide](/Docs/Guides.md#deeplinking)
-- [Uninstall Guide](/Docs/Guides.md#uninstall)
+- [Uninstall Guide](/Docs/Guides.md#track-app-uninstalls)
 
 
 
