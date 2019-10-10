@@ -1,5 +1,10 @@
 # Versions
 
+## 1.4.6
+
+Fixed issue #111 - https://github.com/AppsFlyerSDK/react-native-appsflyer/issues/111
+See - https://github.com/AppsFlyerSDK/react-native-appsflyer/pull/112
+
 ## 1.4.5
 
 Updated Android AppsFlyer SDK to 4.10.2
