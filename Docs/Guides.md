@@ -80,7 +80,7 @@ Example of `onAppOpenAttribution`:
 }
 ```
 
-The code implementation fro the conversion listener must be made **prior to the initialization** code of the SDK
+The code implementation for the conversion listener must be made **prior to the initialization** code of the SDK
 
 *Example:*
 
