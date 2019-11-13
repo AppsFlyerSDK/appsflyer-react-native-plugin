@@ -98,7 +98,7 @@ appsFlyer.initSdk(
 );
 ```
 
-**Important** - For iOS another step is required for tracking. AppState logic is required to track Background-to-foreground transitions. Check out the [relevant guide](./Docs/API.md#--appsflyertrackapplaunch-void) to see how this manidtory step is impelemented.
+**Important** - For iOS another step is required for tracking. AppState logic is required to track Background-to-foreground transitions. Check out the [relevant guide](./Docs/API.md#--appsflyertrackapplaunch-void) to see how this mandatory step is implemented.
 
  ## <a id="guides"> 📖 Guides
 
