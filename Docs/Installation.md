@@ -5,9 +5,16 @@
   - [iOS](#manual-installation-ios)
   - [Android](#manual-installation-android)
 
-## <a id="installation-using-cli"> Installation
+## <a id="installation-using-cli"> Installation (without [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md))
+  
+  
+  Run the following:
+  
+```
+$ npm install react-native-appsflyer --save
+$ react-native link react-native-appsflyer
+```
 
-`$ npm install react-native-appsflyer --save`
 
 ### <a id="manual-installation-ios"> iOS
 

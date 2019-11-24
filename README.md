@@ -12,71 +12,42 @@
 
 ## Table of content
 
-- [SDK versions](#plugin-build-for)
-- [Installation](#installation)
+- [Adding the SDK to your project](#installation)
+- [Initializing the SDK](#init-sdk)
 - [Guides](#guides)
 - [API](#api) 
-- [Demo](#demo)  
-
-
+  
 ### <a id="plugin-build-for"> This plugin is built for
 
 - iOS AppsFlyerSDK **v4.10.4**
 - Android AppsFlyerSDK **v4.10.2** 
 
 
-## <a id="installation">📲Installation
+## <a id="installation"> 📲 Adding the SDK to your project
 
 ```
 $ npm install react-native-appsflyer --save
 ```
 
-Then run:
+Then run the following:
+
+*iOS*
 ```
-$ react-native link react-native-appsflyer
-```
-
-### <a id="installation_ios"> iOS
-
-#### With Cocoapods
-
-Add the `appsFlyerFramework` to `podfile` and run `pod install`.
-
-```
-pod 'react-native-appsflyer',
-:path => '../node_modules/react-native-appsflyer'
+$ cd ios && pod install
+$ react-native run-ios
 ```
 
-Note that You must also have the React dependencies defined in the Podfile as described [here](https://facebook.github.io/react-native/docs/next/troubleshooting.html#missing-libraries-for-react).
+*Android*
+```
+$ react-native run-android
+```
 
-Check out the [sample pod file](./Docs/Installation.md) for a working example.
+> Starting from RN [v0.60](https://facebook.github.io/react-native/blog/2019/07/03/version-60), and react-native-appsflyer `v1.4.7` the plugin uses [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md). <br/>
+If your app does not support autolinking, check out the Installation Guide [here](./Docs/Installation.md).
 
+## <a id="init-sdk"> 🚀 Initializing the SDK
 
-#### Without Cocoapods
-
-1. Download the Static Lib of the AppsFlyer iOS SDK from [here](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS#2-quick-start).
-2. Unzip and copy the contents of the Zip file into your project directory.
-3. Copy RNAppsFlyer.h and RNAppsFlyer.m from `node_modules` ➜ `react-native-appsflyer` to your project directory.
-
-For more info check out the Installation guide [here](./Docs/Installation.md).
-
-### <a id="installation_ios"> Android
-    
-Running `react-native link react-native-appsflyer` will complete the Android integration.
-
-
-For the manual integration steps, check out the Installation guide [here](./Docs/Installation.md).
-
-## <a id="setup"> 🚀 Setup
-
-####  Set your App_ID (iOS only), Dev_Key and enable AppsFlyer to detect installations, sessions (app opens) and updates.  
-> This is the minimum requirement to start tracking your app installs and is already implemented in this plugin. You **MUST** modify this call and provide:  
- **devKey** - Your application devKey provided by AppsFlyer.<br>
-**appId**  - ***For iOS only.*** Your iTunes Application ID.
-
-
-Add the following lines to your code to be able to initialize tracking with your own AppsFlyer dev key:
-
+Initialize the SDK to enable AppsFlyer to detect installations, sessions (app opens) and updates.  
 
 ```javascript
 import React, {Component} from 'react';
@@ -98,7 +69,14 @@ appsFlyer.initSdk(
 );
 ```
 
-**Important** - For iOS another step is required for tracking. AppState logic is required to track Background-to-foreground transitions. Check out the [relevant guide](./Docs/API.md#--appsflyertrackapplaunch-void) to see how this mandatory step is implemented.
+| Setting  | Description   |
+| -------- | ------------- |
+| devKey   | Your application [devKey](https://support.appsflyer.com/hc/en-us/articles/211719806-Global-app-settings-#sdk-dev-key) provided by AppsFlyer (required)  |
+| appId      | Your iTunes [application ID](https://support.appsflyer.com/hc/en-us/articles/207377436-Adding-a-new-app#available-in-the-app-store-google-play-store-windows-phone-store)  (iOS only)  |
+| isDebug    | Debug mode - set to `true` for testing only  |
+
+
+**Important** - For iOS another step is required. AppState logic is required to record Background-to-foreground transitions. Check out the [relevant guide](./Docs/API.md#--appsflyertrackapplaunch-void) to see how this mandatory step is implemented.
 
  ## <a id="guides"> 📖 Guides
 
@@ -113,7 +91,3 @@ Great installation and setup guides can be viewed [here](/Docs/Guides.md).
   
 See the full [API](/Docs/API.md) available for this plugin.
 
-
-## <a id="demo"> 📱 Demo
-  
-  Check out the demo for this project [here](Docs/Guides.md#demo).
