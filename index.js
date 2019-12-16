@@ -58,7 +58,7 @@ appsFlyer.trackAppLaunch = () => {
 
 /**
  * Manually record the location of the user
- * 
+ *
  * @param longitude latitude as double.
  * @param latitude latitude as double.
  * @callback callback success callback function.
@@ -70,7 +70,7 @@ appsFlyer.trackLocation = (longitude, latitude, callback) => {
 
 /**
  * Set the user emails and encrypt them.
- * 
+ *
  * @param options latitude as double.
  * @callback successC success callback function.
  * @callback errorC error callback function.
@@ -81,7 +81,7 @@ appsFlyer.setUserEmails = (options, successC, errorC) => {
 
 /**
  * Set additional data to be sent to AppsFlyer.
- * 
+ *
  * @param additionalData additional data Dictionary.
  * @callback successC success callback function.
  */
@@ -91,7 +91,7 @@ appsFlyer.setAdditionalData = (additionalData, successC) => {
 
 /**
  * Get AppsFlyer's unique device ID is created for every new install of an app.
- * 
+ *
  * @callback callback function that returns (error,uid)
  */
 appsFlyer.getAppsFlyerUID = callback => {
@@ -103,7 +103,7 @@ appsFlyer.sendDeepLinkData = callback => {
 };
 
 /**
- * @deprecated 
+ * @deprecated
  */
 appsFlyer.setGCMProjectNumber = (gcmProjectNumber, successC, errorC) => {
   return RNAppsFlyer.setGCMProjectNumber(gcmProjectNumber, successC, errorC);
@@ -111,16 +111,19 @@ appsFlyer.setGCMProjectNumber = (gcmProjectNumber, successC, errorC) => {
 
 /**
  * For Android only (GCM). iOS uses 'didRegisterForRemoteNotificationsWithDeviceToken' in AppDelegate.m
- * 
+ *
  */
 
+/**
+ * @deprecated
+ */
 appsFlyer.enableUninstallTracking = (gcmProjectNumber, successC) => {
   return RNAppsFlyer.enableUninstallTracking(gcmProjectNumber, successC);
 };
 
 /**
  * Manually pass the Firebase / GCM Device Token for Uninstall measurement.
- * 
+ *
  * @param token Firebase Device Token.
  * @callback successC success callback function.
  * @platform android
@@ -132,7 +135,7 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
 /**
  * Setting your own customer ID enables you to cross-reference your own unique ID with AppsFlyer’s unique ID and the other devices’ IDs.
  * This ID is available in AppsFlyer CSV reports along with Postback APIs for cross-referencing with your internal IDs.
- * 
+ *
  * @param {string} userId Customer ID for client.
  * @callback successC success callback function.
  */
@@ -144,7 +147,7 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
  * Once this API is invoked, our SDK no longer communicates with our servers and stops functioning.
  * In some extreme cases you might want to shut down all SDK activity due to legal and privacy compliance.
  * This can be achieved with the stopTracking API.
- * 
+ *
  * @param {boolean} isStopTracking boolean should SDK be stopped.
  * @callback successC success callback function.
  */
@@ -156,7 +159,7 @@ appsFlyer.stopTracking = (isStopTracking, successC) => {
  * Opt-out of collection of IMEI.
  * If the app does NOT contain Google Play Services, device IMEI is collected by the SDK.
  * However, apps with Google play services should avoid IMEI collection as this is in violation of the Google Play policy.
- * 
+ *
  * @param {boolean} isCollect boolean, false to opt out.
  * @callback successC success callback function.
  * @platform android
@@ -169,7 +172,7 @@ appsFlyer.setCollectIMEI = (isCollect, successC) => {
  * Opt-out of collection of Android ID.
  * If the app does NOT contain Google Play Services, Android ID is collected by the SDK.
  * However, apps with Google play services should avoid Android ID collection as this is in violation of the Google Play policy.
- * 
+ *
  * @param {boolean} isCollect boolean, false to opt out.
  * @callback successC success callback function.
  * @platform android
@@ -181,7 +184,7 @@ appsFlyer.setCollectAndroidID = (isCollect, successC) => {
 /**
  * Set the OneLink ID that should be used for User-Invite-API.
  * The link that is generated for the user invite will use this OneLink as the base link.
- * 
+ *
  * @param {string} oneLinkID OneLink ID obtained from the AppsFlyer Dashboard.
  * @callback successC success callback function.
  */
@@ -192,7 +195,7 @@ appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
 /**
  * The LinkGenerator class builds the invite URL according to various setter methods which allow passing on additional information on the click.
  * @see https://support.appsflyer.com/hc/en-us/articles/115004480866-User-invite-attribution-
- * 
+ *
  * @param parameters Dictionary.
  * @callback success success callback function.
  * @callback error error callback function.
@@ -204,7 +207,7 @@ appsFlyer.generateInviteLink = (parameters, success, error) => {
 /**
  * To attribute an impression use the following API call.
  * Make sure to use the promoted App ID as it appears within the AppsFlyer dashboard.
- * 
+ *
  * @param appId promoted App ID.
  * @param campaign cross promotion campaign.
  */
@@ -214,7 +217,7 @@ appsFlyer.trackCrossPromotionImpression = (appId, campaign) => {
 
 /**
  * Use the following API to attribute the click and launch the app store's app page.
- * 
+ *
  * @param appId promoted App ID.
  * @param campaign cross promotion campaign.
  * @param params additional user params.
@@ -227,7 +230,7 @@ appsFlyer.trackAndOpenStore = (appId, campaign, params) => {
  * Setting user local currency code for in-app purchases.
  * The currency code should be a 3 character ISO 4217 code. (default is USD).
  * You can set the currency code for all events by calling the following method.
- * @param currencyCode 
+ * @param currencyCode
  * @param successC success callback function.
  */
 appsFlyer.setCurrencyCode = (currencyCode, successC) => {
@@ -269,7 +272,7 @@ appsFlyer.onInstallConversionData = callback => {
     }
   );
 
-   eventsMap["onInstallConversionData"] = listener;  
+   eventsMap["onInstallConversionData"] = listener;
 
   // unregister listener (suppose should be called from componentWillUnmount() )
   return function remove() {
@@ -295,9 +298,9 @@ appsFlyer.onAppOpenAttribution = callback => {
     }
   );
 
-  
+
   eventsMap["onAppOpenAttribution"] = listener;
-  
+
   // unregister listener (suppose should be called from componentWillUnmount() )
   return function remove() {
     listener.remove();
