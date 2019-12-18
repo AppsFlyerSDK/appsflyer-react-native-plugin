@@ -141,6 +141,27 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
   };
 ```
 
+Or with Hooks:
+
+```javascript
+  const [appState, setAppState] = useState(AppState.currentState);
+
+  useEffect(() => {
+      function handleAppStateChange(nextAppState){
+          if (appState.match(/inactive|background/) && nextAppState === 'active') {
+              if (Platform.OS === 'ios') {
+                  appsFlyer.trackAppLaunch();
+              }
+          }
+          setAppState(nextAppState);
+      };
+
+    AppState.addEventListener('change', handleAppStateChange);
+    return () => {
+      AppState.removeEventListener('change', handleAppStateChange);
+    };
+  });
+```
 
 
 

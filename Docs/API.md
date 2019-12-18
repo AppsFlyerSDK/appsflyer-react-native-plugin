@@ -109,6 +109,31 @@ _handleAppStateChange = (nextAppState) => {
 };
 ```
 
+
+Or with Hooks:
+
+```javascript
+const [appState, setAppState] = useState(AppState.currentState);
+
+useEffect(() => {
+  function handleAppStateChange(nextAppState) {
+    if (appState.match(/inactive|background/) && nextAppState === 'active') {
+      if (Platform.OS === 'ios') {
+        appsFlyer.trackAppLaunch();
+      }
+    }
+
+    setAppState(nextAppState);
+  }
+
+  AppState.addEventListener('change', handleAppStateChange);
+
+  return () => {
+    AppState.removeEventListener('change', handleAppStateChange);
+  };
+});
+```
+
 ---
 
 ##### <a id="onInstallConversionData"> **`onInstallConversionData(callback) : function:unregister`**
