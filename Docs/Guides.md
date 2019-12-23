@@ -150,6 +150,16 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
 
 In order to track retargeting and use the onAppOpenAttribution callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
 
+#### import
+```objectivec
+#import <React/RCTLinkingManager.h>
+#if __has_include(<AppsFlyerLib/AppsFlyerTracker.h>) // from Pod
+#import <AppsFlyerLib/AppsFlyerTracker.h>
+#else
+#import "AppsFlyerTracker.h"
+#endif
+```
+
 #### Universal Links (iOS 9 +)
 ```objectivec
 - (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
