@@ -170,7 +170,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
             @Override
             public void onAppOpenAttribution(Map<String, String> attributionData) {
-                handleSuccess(afOnAppOpenAttribution, attributionData);
+                handleSuccess(afOnAppOpenAttribution, null, attributionData);
             }
 
             @Override
@@ -179,22 +179,23 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             }
 
             @Override
-            public void onInstallConversionDataLoaded(Map<String, String> conversionData) {
-                handleSuccess(afOnInstallConversionDataLoaded, conversionData);
+            public void onConversionDataSuccess(Map<String, Object> conversionData) {
+                handleSuccess(afOnInstallConversionDataLoaded, conversionData, null);
             }
 
             @Override
-            public void onInstallConversionFailure(String errorMessage) {
+            public void onConversionDataFail(String errorMessage) {
                 handleError(afOnInstallConversionFailure, errorMessage);
             }
 
-            private void handleSuccess(String eventType, Map<String, String> data) {
+            private void handleSuccess(String eventType, Map<String, Object> conversionData, Map<String, String> attributionData) {
                 JSONObject obj = new JSONObject();
 
                 try {
+                    JSONObject data = new JSONObject(conversionData == null ? attributionData : conversionData);
                     obj.put("status", afSuccess);
                     obj.put("type", eventType);
-                    obj.put("data", new JSONObject(data));
+                    obj.put("data", data);
                     if (eventType.equals(afOnInstallConversionDataLoaded)) {
                         sendEvent(reactContext, afOnInstallConversionDataLoaded, obj.toString());
                     } else if (eventType.equals(afOnAppOpenAttribution)) {
@@ -322,20 +323,27 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         callback.invoke(null, appId);
     }
 
+    /**
+    Deprecated - please use updateServerUninstallToken
+    */
     @ReactMethod
     @Deprecated
     public void setGCMProjectNumber(final String gcmProjectNumber,
                                     Callback successCallback,
                                     Callback errorCallback) {
-        AppsFlyerLib.getInstance().setGCMProjectNumber(gcmProjectNumber);
-        successCallback.invoke(SUCCESS);
+       // AppsFlyerLib.getInstance().setGCMProjectNumber(gcmProjectNumber);
+        errorCallback.invoke("Deprecated - please use updateServerUninstallToken");
     }
 
+    /**
+    Deprecated - please use updateServerUninstallToken
+    */
     @ReactMethod
+    @Deprecated
     public void enableUninstallTracking(final String gcmProjectNumber,
                                         Callback successCallback) {
-        AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectNumber);
-        successCallback.invoke(SUCCESS);
+        //AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectNumber);
+        successCallback.invoke("Deprecated - please use updateServerUninstallToken");
     }
 
     @ReactMethod

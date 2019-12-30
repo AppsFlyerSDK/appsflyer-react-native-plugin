@@ -1,5 +1,10 @@
 # Versions
 
+## 1.4.8
+
+Android AppsFlyer SDK 5.0.0
+iOS SDK AppsFlyer 5.0.0
+
 ## 1.4.7
 
 Added Support for autolinking
