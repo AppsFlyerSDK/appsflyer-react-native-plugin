@@ -124,10 +124,12 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
       if (this.onInstallConversionDataCanceller) {
         this.onInstallConversionDataCanceller();
         console.log('unregister onInstallConversionDataCanceller');
+        this.onInstallConversionDataCanceller = null;
       }
       if (this.onAppOpenAttributionCanceller) {
         this.onAppOpenAttributionCanceller();
         console.log('unregister onAppOpenAttributionCanceller');
+        this.onAppOpenAttributionCanceller = null;
       }
     }
 
@@ -141,30 +143,90 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
   };
 ```
 
-Or with Hooks:
+Init SDK with Hooks:
 
 ```javascript
-  const [appState, setAppState] = useState(AppState.currentState);
+import React, {useEffect, useState} from 'react';
+import {AppState, SafeAreaView, Text, View} from 'react-native';
+import appsFlyer from 'react-native-appsflyer';
 
-  useEffect(() => {
-      function handleAppStateChange(nextAppState){
-          if (appState.match(/inactive|background/) && nextAppState === 'active') {
-              if (Platform.OS === 'ios') {
-                  appsFlyer.trackAppLaunch();
-              }
-          }
-          setAppState(nextAppState);
-      };
+var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+    (res) => {
+        if (JSON.parse(res.data.is_first_launch) == true) {
+            if (res.data.af_status === 'Non-organic') {
+                var media_source = res.data.media_source;
+                var campaign = res.data.campaign;
+                console.log('This is first launch and a Non-Organic install. Media source: ' + media_source + ' Campaign: ' + campaign);
+            } else if (res.data.af_status === 'Organic') {
+                console.log('This is first launch and a Organic Install');
+            }
+        } else {
+            console.log('This is not first launch');
+        }
+    },
+);
 
-    AppState.addEventListener('change', handleAppStateChange);
-    return () => {
-      AppState.removeEventListener('change', handleAppStateChange);
-    };
-  });
+var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
+    console.log(res);
+});
+
+
+appsFlyer.initSdk(
+    {
+        devKey: 'K2a*********99',
+        isDebug: false,
+        appId: '41******5',
+    },
+    (result) => {
+        console.log(result);
+    },
+    (error) => {
+        console.error(error);
+    },
+);
+
+const Home = (props) => {
+
+    const [appState, setAppState] = useState(AppState.currentState);
+
+    useEffect(() => {
+        function handleAppStateChange(nextAppState) {
+            if (appState.match(/inactive|background/) && nextAppState === 'active') {
+                if (Platform.OS === 'ios') {
+                    appsFlyer.trackAppLaunch();
+                }
+            }
+            if (appState.match(/active|foreground/) && nextAppState === 'background') {
+                if (onInstallConversionDataCanceller) {
+                    onInstallConversionDataCanceller();
+                    onInstallConversionDataCanceller = null;
+                }
+                if (onAppOpenAttributionCanceller) {
+                    onAppOpenAttributionCanceller();
+                    onAppOpenAttributionCanceller = null;
+                }
+            }
+
+            setAppState(nextAppState);
+        }
+
+        AppState.addEventListener('change', handleAppStateChange);
+
+        return () => {
+            AppState.removeEventListener('change', handleAppStateChange);
+        };
+    });
+
+    return (
+        <SafeAreaView>
+            <View>
+                <Text>{'App'}</Text>
+            </View>
+        </SafeAreaView>
+    );
+};
+
 ```
-
-
-
 
 
 ### <a id="iosdeeplinks"> iOS Deep Links - Universal Links and URL Schemes
