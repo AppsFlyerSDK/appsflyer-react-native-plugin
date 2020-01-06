@@ -195,9 +195,11 @@ Therefore it is required to call the canceller method in the next [appStateChang
     if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
       if (this.onInstallConversionDataCanceller) {
         this.onInstallConversionDataCanceller();
+        this.onInstallConversionDataCanceller = null;
       }
       if (this.onAppOpenAttributionCanceller) {
         this.onAppOpenAttributionCanceller();
+        this.onAppOpenAttributionCanceller = null;
       }
     }
 ```
