@@ -64,7 +64,7 @@ Code Sample to handle the conversion data:
 
 
 ```javascript
-this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
   (res) => {
     if (JSON.parse(res.data.is_first_launch) == true) {
       if (res.data.af_status === 'Non-organic') {
@@ -84,12 +84,20 @@ appsFlyer.initSdk(/*...*/);
 ```
 **Note:** The code implementation for `onInstallConversionData` must be made **prior to the initialization** code of the SDK.
 
+<hr/>
+
+**Important**
+
+The `appsFlyer.onInstallConversionData` returns function to  unregister this event listener. If you want to remove the listener for any reason, you can simply call `onInstallConversionDataCanceller()`. This function will call `NativeAppEventEmitter.remove()`.
+
+<hr/>
+
 ###  <a id="direct-deep-linking"> 2. Direct Deep Linking
     
 When a deep link is clicked on the device the AppsFlyer SDK will return the link in the [onAppOpenAttribution](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#deep-linking-data-the-onappopenattribution-method-) method.
 
 ```javascript
-this.onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
+var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
   console.log(res);
 });
 
@@ -98,11 +106,11 @@ appsFlyer.initSdk(/*...*/);
 ```
 **Note:** The code implementation for `onAppOpenAttribution` must be made **prior to the initialization** code of the SDK.
 
-<hr/>
-
 **Important**
 
-The `appsFlyer.onInstallConversionData` returns function to  unregister this event listener. Actually it calls `NativeAppEventEmitter.remove()`. It is **required** on iOS to call the `onInstallConversionDataCanceller` and `onAppOpenAttributionCanceller`.
+The `appsFlyer.onAppOpenAttribution` returns function to  unregister this event listener. If you want to remove the listener for any reason, you can simply call `onAppOpenAttributionCanceller()`. This function will call `NativeAppEventEmitter.remove()`.
+
+<hr/>
 
 *Example:*
 
@@ -117,28 +125,26 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
 
   componentWillUnmount() {
     AppState.removeEventListener('change', this._handleAppStateChange);
+    
+    // Optionaly remove listeners for deep link data if you no longer need them
+    if (onInstallConversionDataCanceller) {
+      onInstallConversionDataCanceller();
+      console.log('unregister onInstallConversionDataCanceller');
+      onInstallConversionDataCanceller = null;
+    }
+    if (onAppOpenAttributionCanceller) {
+      onAppOpenAttributionCanceller();
+      console.log('unregister onAppOpenAttributionCanceller');
+      onAppOpenAttributionCanceller = null;
+    }
   }
 
   _handleAppStateChange = (nextAppState) => {
-    if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
-      if (this.onInstallConversionDataCanceller) {
-        this.onInstallConversionDataCanceller();
-        console.log('unregister onInstallConversionDataCanceller');
-        this.onInstallConversionDataCanceller = null;
-      }
-      if (this.onAppOpenAttributionCanceller) {
-        this.onAppOpenAttributionCanceller();
-        console.log('unregister onAppOpenAttributionCanceller');
-        this.onAppOpenAttributionCanceller = null;
-      }
-    }
-
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
       if (Platform.OS === 'ios') {
         appsFlyer.trackAppLaunch();
       }
     }
-
     this.setState({appState: nextAppState});
   };
 ```
