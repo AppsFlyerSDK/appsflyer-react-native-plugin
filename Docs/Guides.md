@@ -112,10 +112,47 @@ The `appsFlyer.onAppOpenAttribution` returns function to  unregister this event 
 
 <hr/>
 
-*Example:*
+### *Example:*
 
 ```javascript
+import React, {useEffect, useState} from 'react';
+import {AppState, SafeAreaView, Text, View} from 'react-native';
+import appsFlyer from 'react-native-appsflyer';
 
+var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
+  console.log(res);
+});
+
+var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+  (res) => {
+    if (JSON.parse(res.data.is_first_launch) == true) {
+      if (res.data.af_status === 'Non-organic') {
+        var media_source = res.data.media_source;
+        var campaign = res.data.campaign;
+        alert('This is first launch and a Non-Organic install. Media source: ' + media_source + ' Campaign: ' + campaign);
+      } else if (res.data.af_status === 'Organic') {
+        alert('This is first launch and a Organic Install');
+      }
+    } else {
+      alert('This is not first launch');
+    }
+  }
+);
+
+appsFlyer.initSdk(
+  {
+    devKey: 'K2***********99',
+    isDebug: false,
+    appId: '41*****44',
+  },
+  (result) => {
+    console.log(result);
+  },
+  (error) => {
+    console.error(error);
+  }
+);
+// ...
 
 class App extends Component<{}> {
   state = {
