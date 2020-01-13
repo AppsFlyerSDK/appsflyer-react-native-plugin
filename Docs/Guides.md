@@ -115,6 +115,9 @@ The `appsFlyer.onAppOpenAttribution` returns function to  unregister this event 
 *Example:*
 
 ```javascript
+
+
+class App extends Component<{}> {
   state = {
     appState: AppState.currentState,
   };
@@ -147,6 +150,7 @@ The `appsFlyer.onAppOpenAttribution` returns function to  unregister this event 
     }
     this.setState({appState: nextAppState});
   };
+}
 ```
 
 Init SDK with Hooks:
