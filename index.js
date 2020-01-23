@@ -110,11 +110,6 @@ appsFlyer.setGCMProjectNumber = (gcmProjectNumber, successC, errorC) => {
 };
 
 /**
- * For Android only (GCM). iOS uses 'didRegisterForRemoteNotificationsWithDeviceToken' in AppDelegate.m
- *
- */
-
-/**
  * @deprecated
  */
 appsFlyer.enableUninstallTracking = (gcmProjectNumber, successC) => {
