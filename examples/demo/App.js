@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import appsFlyer from 'react-native-appsflyer';
 
-this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
   (res) => {
     console.log(res);
     if (JSON.parse(res.data.is_first_launch) == true) {
@@ -26,7 +26,7 @@ this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
 );
 
 
-this.onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
+var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
   console.log(res);
 });
 
@@ -68,28 +68,30 @@ class App extends React.Component {
   }
 
   componentWillUnmount() {
-    if(this.onInstallConversionDataCanceller){
-      this.onInstallConversionDataCanceller();
+    AppState.removeEventListener('change', this._handleAppStateChange);
+    
+    // Optionaly remove listeners for deep link data if you no longer need them
+    if (onInstallConversionDataCanceller) {
+      onInstallConversionDataCanceller();
+      console.log('unregister onInstallConversionDataCanceller');
+      onInstallConversionDataCanceller = null;
     }
-     AppState.removeEventListener('change', this._handleAppStateChange);
+    if (onAppOpenAttributionCanceller) {
+      onAppOpenAttributionCanceller();
+      console.log('unregister onAppOpenAttributionCanceller');
+      onAppOpenAttributionCanceller = null;
+    }
   }
 
-  _handleAppStateChange = (nextAppState) => {
+    _handleAppStateChange = (nextAppState) => {
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-
-        if (Platform.OS === 'ios') {
-          appsFlyer.trackAppLaunch();
-        }
-    }
-
-    if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
-      if(this.onInstallConversionDataCanceller){
-        this.onInstallConversionDataCanceller();
+      if (Platform.OS === 'ios') {
+        appsFlyer.trackAppLaunch();
       }
     }
-
     this.setState({appState: nextAppState});
-  }
+  };
+
 
      TrackEventPressed() {
       const eventName = "af_test_event";

@@ -1,6 +1,11 @@
 # Versions
 
-## 1.4.8
+## 5.1.0
+
+Android AppsFlyer SDK 5.1.0
+iOS SDK AppsFlyer 5.1.0
+
+## 5.0.0
 
 Android AppsFlyer SDK 5.0.0
 iOS SDK AppsFlyer 5.0.0
