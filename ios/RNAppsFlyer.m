@@ -380,4 +380,9 @@ RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)appID
     }
 }
 
+RCT_EXPORT_METHOD(updateServerUninstallToken: (NSData *)deviceToken callback:(RCTResponseSenderBlock)callback) {
+    [[AppsFlyerTracker sharedTracker] registerUninstall:deviceToken];
+    callback(@[SUCCESS]);
+}
+
 @end

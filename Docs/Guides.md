@@ -311,6 +311,8 @@ return YES;
 
 #### <a id="track-app-uninstalls-ios"> iOS
 
+#### First method 
+
 AppsFlyer enables you to track app uninstalls. To handle notifications it requires  to modify your `AppDelegate.m`. Use [didRegisterForRemoteNotificationsWithDeviceToken](https://developer.apple.com/reference/uikit/uiapplicationdelegate) to register to the uninstall feature.
 
 *Example:*
@@ -328,10 +330,21 @@ AppsFlyer enables you to track app uninstalls. To handle notifications it requir
 
 Read more about Uninstall register: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS)
 
+#### Second method 
+
+Pass the device token to AppsFlyer
+
+*Example:*
+
+```javascript
+appsFlyer.updateServerUninstallToken(deviceToken, (success) => {
+  //...
+});
+```
+
 #### <a id="track-app-uninstalls-android"> Android
 
-
-Updates Firebase device token so it can be sent to AppsFlyer
+Update Firebase device token so it can be sent to AppsFlyer
 
 *Example:*
 
