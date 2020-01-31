@@ -1,5 +1,10 @@
 # Versions
 
+## 5.1.1
+
+add setDeviceTrackingDisabled API 
+add registerUninstall API for iOS
+
 ## 5.1.0
 
 Android AppsFlyer SDK 5.1.0
