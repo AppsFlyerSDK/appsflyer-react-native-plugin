@@ -280,6 +280,11 @@ const Home = (props) => {
 
 In order to track retargeting and use the onAppOpenAttribution callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
 
+#### import 
+```objectivec
+@import AppsFlyerLib;
+```
+
 #### Universal Links (iOS 9 +)
 ```objectivec
 - (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
