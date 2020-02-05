@@ -549,4 +549,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
         CrossPromotionHelper.trackAndOpenStore(getReactApplicationContext(), appId, campaign, data);
     }
+
+    @ReactMethod
+    public void setDeviceTrackingDisabled(boolean b, Callback callback){
+        AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
+        callback.invoke(SUCCESS);
+    }
 }

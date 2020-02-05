@@ -380,4 +380,9 @@ RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)appID
     }
 }
 
+RCT_EXPORT_METHOD(setDeviceTrackingDisabled: (BOOL *)b callback:(RCTResponseSenderBlock)callback) {
+    [[AppsFlyerTracker sharedTracker] setDeviceTrackingDisabled:b];
+    callback(@[SUCCESS]);
+}
+
 @end
