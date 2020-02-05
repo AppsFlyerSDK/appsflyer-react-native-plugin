@@ -1,5 +1,9 @@
 # Versions
 
+## 5.1.1
+
+Added setDeviceTrackingDisabled api 
+
 ## 5.1.0
 
 Android AppsFlyer SDK 5.1.0
