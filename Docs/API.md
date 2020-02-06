@@ -21,6 +21,7 @@
 - [trackCrossPromotionImpression](#trackCrossPromotionImpression) 
 - [trackAndOpenStore](#trackAndOpenStore) 
 - [setCurrencyCode](#setCurrencyCode) 
+- [setDeviceTrackingDisabled](#setDeviceTrackingDisabled)
 
 
 ---
@@ -653,6 +654,26 @@ You can set the currency code for all events by calling the following method.<br
 
 ```javascript
 appsFlyer.setCurrencyCode(currencyCode, () => {});
+```
+
+---
+
+##### <a id="setDeviceTrackingDisabled"> **`setDeviceTrackingDisabled(isDeviceTrackingDisabled, callback)`**
+
+It is possible to anonymize specific user identifiers within AppsFlyer analytics.<br/>
+This complies with both the latest privacy requirements (GDPR, COPPA) and Facebook's data and privacy policies.<br/>
+To anonymize an app user:<br/>
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| isDeviceTrackingDisabled    | boolean  | True if want Anonymize user Data (default value is false). |
+| callback                    | function | success callback                                           |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setDeviceTrackingDisabled(true, () => {});
 ```
 
 ---
