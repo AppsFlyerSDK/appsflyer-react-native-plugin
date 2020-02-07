@@ -119,6 +119,9 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
                 case EmailCryptTypeMD5:
                     emailsCryptType = EmailCryptTypeMD5;
                     break;
+                case EmailCryptTypeSHA256:
+                    emailsCryptType = EmailCryptTypeSHA256;
+                    break;
                 default:
                     emailsCryptType = EmailCryptTypeNone;
             }
