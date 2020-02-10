@@ -385,7 +385,7 @@ RCT_EXPORT_METHOD(setDeviceTrackingDisabled: (BOOL *)b callback:(RCTResponseSend
     callback(@[SUCCESS]);
 }
 
-RCT_EXPORT_METHOD(updateServerUninstallToken: (NSData *)deviceToken callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(updateServerUninstallToken: (NSString *)deviceToken callback:(RCTResponseSenderBlock)callback) {
     deviceToken = [deviceToken stringByReplacingOccurrencesOfString:@" " withString:@""];
     NSMutableData *deviceTokenData= [[NSMutableData alloc] init];
     unsigned char whole_byte;

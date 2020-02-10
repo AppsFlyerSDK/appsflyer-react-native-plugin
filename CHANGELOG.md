@@ -1,5 +1,8 @@
 # Versions
 
+## 5.1.2
+Add support for iOS for updateServerUninstallToken api 
+
 ## 5.1.1
 Added setDeviceTrackingDisabled api 
 
