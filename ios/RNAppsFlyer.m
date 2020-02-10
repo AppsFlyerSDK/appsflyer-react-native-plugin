@@ -380,6 +380,11 @@ RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)appID
     }
 }
 
+RCT_EXPORT_METHOD(setDeviceTrackingDisabled: (BOOL *)b callback:(RCTResponseSenderBlock)callback) {
+    [[AppsFlyerTracker sharedTracker] setDeviceTrackingDisabled:b];
+    callback(@[SUCCESS]);
+}
+
 RCT_EXPORT_METHOD(updateServerUninstallToken: (NSData *)deviceToken callback:(RCTResponseSenderBlock)callback) {
     deviceToken = [deviceToken stringByReplacingOccurrencesOfString:@" " withString:@""];
     NSMutableData *deviceTokenData= [[NSMutableData alloc] init];

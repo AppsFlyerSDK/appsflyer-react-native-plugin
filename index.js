@@ -301,10 +301,22 @@ appsFlyer.onAppOpenAttribution = callback => {
   };
 };
 
+/**
+ * Anonymize user Data.
+ * Use this API during the SDK Initialization to explicitly anonymize a user's installs, events and sessions.
+ * Default is false
+ * @param isDeviceTrackingDisabled boolean 
+ * @param successC success callback function.
+ */
+appsFlyer.setDeviceTrackingDisabled = (isDeviceTrackingDisabled, successC) => {
+  return RNAppsFlyer.setDeviceTrackingDisabled(isDeviceTrackingDisabled, successC);
+};
+
 function AFParseJSONException(_message, _data) {
   this.message = _message;
   this.data = _data;
   this.name = "AFParseJSONException";
 }
+
 
 export default appsFlyer;

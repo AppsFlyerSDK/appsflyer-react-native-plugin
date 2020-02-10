@@ -1,9 +1,7 @@
 # Versions
 
 ## 5.1.1
-
-add setDeviceTrackingDisabled API 
-add registerUninstall API for iOS
+Added setDeviceTrackingDisabled api 
 
 ## 5.1.0
 
