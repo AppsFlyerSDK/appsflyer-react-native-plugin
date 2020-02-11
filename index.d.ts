@@ -12,7 +12,7 @@ declare module "react-native-appsflyer" {
             | "onAttributionFailure"
             | "onInstallConversionFailure",
         data: {
-            is_first_launch: boolean;
+            is_first_launch: "true" | "false";
             media_source: string;
             campaign: string;
             af_status : "Organic" | "Non-organic";
