@@ -376,7 +376,7 @@ Set the user emails and encrypt them.
 
 | option          | type  | description   |
 | --------------  | ----  |------------- |
-| emailsCryptType | int   | none - 0 (default), SHA1 - 1, MD5 - 2 |
+| emailsCryptType | int   | none - 0 (default), SHA1 - 1, MD5 - 2, SHA256 - 3 |
 | emails          | array | comma separated list of emails |
 
 
