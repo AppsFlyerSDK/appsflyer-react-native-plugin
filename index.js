@@ -121,7 +121,6 @@ appsFlyer.enableUninstallTracking = (gcmProjectNumber, successC) => {
  *
  * @param token Firebase Device Token.
  * @callback successC success callback function.
- * @platform android
  */
 appsFlyer.updateServerUninstallToken = (token, successC) => {
   return RNAppsFlyer.updateServerUninstallToken(token, successC);
