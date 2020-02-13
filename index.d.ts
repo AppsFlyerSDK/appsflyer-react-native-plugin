@@ -23,7 +23,8 @@ declare module "react-native-appsflyer" {
     export enum AF_EMAIL_CRYPT_TYPE {
         NONE,
         SHA1,
-        MD5
+        MD5,
+        SHA256
     }
 
     export interface InitSDKOptions {
@@ -34,7 +35,7 @@ declare module "react-native-appsflyer" {
 
     export interface SetEmailsOptions {
         emails?:string[];
-        emailsCryptType:AF_EMAIL_CRYPT_TYPE | 0 | 1 | 2;
+        emailsCryptType:AF_EMAIL_CRYPT_TYPE | 0 | 1 | 2 | 3;
     }
 
     export interface GenerateInviteLinkParams {
@@ -54,7 +55,6 @@ declare module "react-native-appsflyer" {
         setUserEmails(options:SetEmailsOptions, successC?:SuccessCB, errorC?:ErrorCB): void
         setAdditionalData(additionalData:object, successC?:SuccessCB): void
         getAppsFlyerUID(callback:(error:Error, uid:string)=>any): void
-        updateServerUninstallToken(token:string, successC?:SuccessCB): void
         setCustomerUserId(userId:string, successC?:SuccessCB): void
         stopTracking(isStopTracking:boolean, successC?:SuccessCB): void
         setAppInviteOneLinkID(oneLinkID:string, successC?:SuccessCB): void
@@ -76,6 +76,7 @@ declare module "react-native-appsflyer" {
         sendDeepLinkData(callback:any): void
         setCollectIMEI(isCollect:boolean, successC?:SuccessCB): void
         setCollectAndroidID(isCollect:boolean, successC?:SuccessCB): void
+        updateServerUninstallToken(token:string, successC?:SuccessCB): void
         /** @deprecated - please use updateServerUninstallToken **/
         setGCMProjectNumber(gcmProjectNumber:any, successC?:SuccessCB, errorC?:ErrorCB): void
         /** @deprecated - please use updateServerUninstallToken **/
