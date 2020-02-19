@@ -1,5 +1,8 @@
 # Versions
 
+## 5.1.3
+Downgrade installReferrer to 1.0 due to bug in installReferrer 1.1
+
 ## 5.1.2
 Add support for iOS for updateServerUninstallToken api 
 
