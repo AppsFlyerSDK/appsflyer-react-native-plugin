@@ -2,7 +2,7 @@
 //  AppsFlyerTracker.h
 //  AppsFlyerLib
 //
-//  AppsFlyer iOS SDK 5.1.0 (951)
+//  AppsFlyer iOS SDK 5.2.0 (964)
 //  Copyright (c) 2012-2019 AppsFlyer Ltd. All rights reserved.
 //
 
@@ -573,6 +573,11 @@ NS_SWIFT_NAME(trackEvent(name:values:completionHandler:));
  @warning This will disable all requests from AppsFlyer SDK.
  */
 @property(atomic) BOOL isStopTracking;
+
+/**
+ API to set manually Facebook deferred app link
+ */
+@property(nonatomic, nullable) NSURL *facebookDeferredAppLink;
 
 @end
 
