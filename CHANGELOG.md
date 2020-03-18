@@ -1,5 +1,10 @@
 # Versions
 
+## 5.2.0
+Android AppsFlyer SDK 5.2.0
+iOS SDK AppsFlyer 5.2.0
+Added brandDomain support for iOS & Android
+
 ## 5.1.3
 Downgrade installReferrer to 1.0 due to bug in installReferrer 1.1
 

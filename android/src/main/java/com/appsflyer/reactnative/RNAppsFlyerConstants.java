@@ -36,5 +36,6 @@ public class RNAppsFlyerConstants {
     final static String INVITE_CUSTOMERID = "customerID";
     final static String INVITE_DEEPLINK = "baseDeepLink";
     final static String PROMOTE_ID = "promotedAppId";
+    final static String INVITE_BRAND_DOMAIN = "brandDomain";
 }
 

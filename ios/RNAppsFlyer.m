@@ -241,6 +241,8 @@ RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
             [generator setReferrerImageURL:[inviteLinkOptions objectForKey: @"referrerImageUrl"]];
             [generator setDeeplinkPath:[inviteLinkOptions objectForKey: @"deeplinkPath"]];
             [generator setBaseDeeplink:[inviteLinkOptions objectForKey: @"baseDeeplink"]];
+            [generator setBrandDomain:[inviteLinkOptions objectForKey: @"brandDomain"]];
+
 
             if (![customParams isKindOfClass:[NSNull class]]) {
                 [generator addParameters:customParams];

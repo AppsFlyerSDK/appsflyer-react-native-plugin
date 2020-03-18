@@ -458,6 +458,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         String referrerImageUrl = null;
         String customerID = null;
         String baseDeepLink = null;
+        String brandDomain = null;
 
         LinkGenerator linkGenerator = ShareInviteHelper.generateInviteUrl(getReactApplicationContext());
 
@@ -471,6 +472,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         referrerImageUrl = options.optString(INVITE_IMAGEURL, "");
         customerID = options.optString(INVITE_CUSTOMERID, "");
         baseDeepLink = options.optString(INVITE_DEEPLINK, "");
+        brandDomain = options.optString(INVITE_BRAND_DOMAIN, "");
 
         if (channel != null && channel != "") {
             linkGenerator.setChannel(channel);
@@ -490,6 +492,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         if (baseDeepLink != null && baseDeepLink != "") {
             linkGenerator.setBaseDeeplink(baseDeepLink);
         }
+        if (brandDomain != null && brandDomain != "") {
+            linkGenerator.setBrandDomain(brandDomain);
+        }
+
+
 
         if (options.length() > 1 && !options.get("userParams").equals("")) {
 
