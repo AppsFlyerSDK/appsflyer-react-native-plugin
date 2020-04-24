@@ -248,7 +248,6 @@ appsFlyer.setCurrencyCode = (currencyCode, successC) => {
  * @returns {remove: function - unregister listener}
  */
 appsFlyer.onInstallConversionData = callback => {
-  //console.log("onInstallConversionData is called" );
 
   const listener = appsFlyerEventEmitter.addListener(
     "onInstallConversionDataLoaded",
@@ -267,6 +266,32 @@ appsFlyer.onInstallConversionData = callback => {
   );
 
    eventsMap["onInstallConversionData"] = listener;
+
+  // unregister listener (suppose should be called from componentWillUnmount() )
+  return function remove() {
+    listener.remove();
+  };
+};
+
+appsFlyer.onInstallConversionFailure = callback => {
+
+  const listener = appsFlyerEventEmitter.addListener(
+    "onInstallConversionFailure",
+    _data => {
+      if (callback && typeof callback === typeof Function) {
+        try {
+          let data = JSON.parse(_data);
+          callback(data);
+        } catch (_error) {
+          //throw new AFParseJSONException("...");
+          //TODO: for today we return an error in callback
+          callback(new AFParseJSONException("Invalid data structure", _data));
+        }
+      }
+    }
+  );
+
+   eventsMap["onInstallConversionFailure"] = listener;
 
   // unregister listener (suppose should be called from componentWillUnmount() )
   return function remove() {
