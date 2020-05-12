@@ -33,14 +33,6 @@ appsFlyer.initSdk(
 );
 ```
 
-*With Promise:*
-
-```javascript
-try {
-  var result = await appsFlyer.initSdk(options);
-} catch (error) {}
-```
-
 
 ##  <a id="deeplinking"> Deep Linking
     
