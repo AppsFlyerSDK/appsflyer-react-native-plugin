@@ -9,6 +9,7 @@
     - [Deferred Deep Linking (Get Conversion Data)](#deferred-deep-linking)
     - [Direct Deep Linking](#direct-deep-linking)
     - [iOS Deeplink Setup](#iosdeeplinks)
+    - [Android Deeplink Setup](#android-deeplinks)
 - [Uninstall](#track-app-uninstalls)
     - [iOS Uninstall Setup](#track-app-uninstalls-ios)
     - [Android Uninstall Setup](#track-app-uninstalls-android)
@@ -305,9 +306,21 @@ options:(NSDictionary *) options {
 return YES;
 }
 ```
+
+### <a id="android-deeplinks"> Android Deep Links
+    
+On Android, AppsLyer SDK inspects activity intent object during onResume(). Because if that, for each activity that may be configured or launched with any [non-standard launch mode](https://developer.android.com/guide/topics/manifest/activity-element#lmode) please make sure to add the following code:
+
+```
+@Override
+protected void onNewIntent(Intent intent) {
+     super.onNewIntent(intent);
+     setIntent(intent);
+}
+```
+This method makes sure that you get the latest deep link data even if the app was initially launched with another deep link. See the [Android developer documentation](https://developer.android.com/reference/android/app/Activity#onNewIntent(android.content.Intent)) for more details. 
+
 ---
-
-
 
 ### <a id="track-app-uninstalls"> Track App Uninstalls
 
