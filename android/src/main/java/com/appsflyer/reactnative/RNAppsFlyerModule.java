@@ -137,16 +137,14 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         if (currentActivity != null) {
             intent = currentActivity.getIntent();
         }
-
         //Generally we already do this validation into the SDK, anyways, we want to show it to clients
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             AppsFlyerLib.getInstance().setPluginDeepLinkData(intent);
         }
 
         trackAppLaunch();
+        // register for lifecycle natively
         instance.startTracking(application, devKey);
-
-
         return null;
     }
 
