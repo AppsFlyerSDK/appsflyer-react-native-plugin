@@ -402,7 +402,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         JSONArray emailsJSON = options.optJSONArray(afEmails);
 
         if (emailsJSON.length() == 0) {
-            errorCallback.invoke(new Exception(NO_EMAILS_FOUND_OR_CORRUPTED).getMessage());
+            errorCallback.invoke(new Exception(EMPTY_OR_CORRUPTED_LIST).getMessage());
             return;
         }
 
@@ -422,7 +422,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            errorCallback.invoke(new Exception(NO_EMAILS_FOUND_OR_CORRUPTED).getMessage());
+            errorCallback.invoke(new Exception(EMPTY_OR_CORRUPTED_LIST).getMessage());
             return;
         }
 
@@ -561,5 +561,39 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void setDeviceTrackingDisabled(boolean b, Callback callback){
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
         callback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void setOneLinkCustomDomains(ReadableArray domainsArray, Callback successCallback, Callback errorCallback) {
+        if (domainsArray.size <= 0) {
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            return;
+        }
+        ArrayList<Object> domainsList = domainsArray.toArrayList();
+        try {
+            String[] domains = (String[]) domainsList.toArray();
+            AppsFlyerLib.getInstance().setOneLinkCustomDomain(domains);
+            successCallback.invoke(SUCCESS);
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+        }
+    }
+
+    @ReactMethod
+    public void setResolveDeepLinkURLs(ReadableArray urlsArray, Callback successCallback, Callback errorCallback) {
+        if (urlsArray.size <= 0) {
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            return;
+        }
+        ArrayList<Object> urlsList = urlsArray.toArrayList();
+        try {
+            String[] urls = (String[]) urlsList.toArray();
+            AppsFlyerLib.getInstance().setResolveDeepLinkURLs(urls);
+            successCallback.invoke(SUCCESS);
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+        }
     }
 }

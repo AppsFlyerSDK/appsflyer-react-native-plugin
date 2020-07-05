@@ -1,4 +1,4 @@
-import { NativeEventEmitter, NativeModules } from "react-native";
+import {NativeEventEmitter, NativeModules} from "react-native";
 
 const { RNAppsFlyer }        = NativeModules;
 const appsFlyer              = {};
@@ -330,12 +330,39 @@ appsFlyer.onAppOpenAttribution = callback => {
  * Anonymize user Data.
  * Use this API during the SDK Initialization to explicitly anonymize a user's installs, events and sessions.
  * Default is false
- * @param isDeviceTrackingDisabled boolean 
+ * @param isDeviceTrackingDisabled boolean
  * @param successC success callback function.
  */
 appsFlyer.setDeviceTrackingDisabled = (isDeviceTrackingDisabled, successC) => {
   return RNAppsFlyer.setDeviceTrackingDisabled(isDeviceTrackingDisabled, successC);
 };
+
+/**
+ * Set Onelink custom/branded domains
+ * Use this API during the SDK Initialization to indicate branded domains.
+ * For more information please refer to https://support.appsflyer.com/hc/en-us/articles/360002329137-Implementing-Branded-Links
+ * @param domains array of strings
+ * @param successC success callback function.
+ * @param errorC error callback function.
+ */
+appsFlyer.setOneLinkCustomDomains = (domains, successC, errorC) => {
+  return RNAppsFlyer.setOneLinkCustomDomains(domains, successC, errorC);
+};
+
+/**
+ * Set domains used by ESP when wrapping your deeplinks.
+ * Use this API during the SDK Initialization to indicate that links from certain domains should be resolved
+ * in order to get original deeplink
+ * For more information please refer to https://support.appsflyer.com/hc/en-us/articles/360001409618-Email-service-provider-challenges-with-iOS-Universal-links
+ * @param urls array of strings
+ * @param successC success callback function.
+ * @param errorC error callback function.
+ */
+appsFlyer.setResolveDeepLinkURLs = (urls, successC, errorC) => {
+  return RNAppsFlyer.setResolveDeepLinkURLs(urls, successC, errorC);
+};
+
+// TODO: update docs with the new API
 
 function AFParseJSONException(_message, _data) {
   this.message = _message;

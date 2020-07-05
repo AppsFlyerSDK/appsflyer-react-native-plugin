@@ -131,7 +131,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     NSError* error = nil;
 
     if (!emails || [emails count] == 0) {
-        error = [NSError errorWithDomain:NO_EMAILS_FOUND_OR_CORRUPTED code:0 userInfo:nil];
+        error = [NSError errorWithDomain:EMPTY_OR_CORRUPTED_LIST code:0 userInfo:nil];
     }
 
     if(error != nil){
@@ -404,6 +404,20 @@ RCT_EXPORT_METHOD(updateServerUninstallToken: (NSString *)deviceToken callback:(
     }
     [[AppsFlyerTracker sharedTracker] registerUninstall:deviceTokenData];
     callback(@[SUCCESS]);
+}
+
+RCT_EXPORT_METHOD(setOneLinkCustomDomains:(NSArray *) domains
+                    successCallback :(RCTResponseSenderBlock)successCallback
+                    errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    [[AppsFlyerTracker sharedTracker] setOneLinkCustomDomains:domains];
+    successCallback(@[SUCCESS]);
+}
+
+RCT_EXPORT_METHOD(setResolveDeepLinkURLs:(NSArray *) urls
+                    successCallback :(RCTResponseSenderBlock)successCallback
+                    errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    [[AppsFlyerTracker sharedTracker] setResolveDeepLinkURLs:urls];
+    successCallback(@[SUCCESS]);
 }
 
 @end
