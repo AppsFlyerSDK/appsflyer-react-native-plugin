@@ -17,7 +17,7 @@
 static NSString *const NO_DEVKEY_FOUND              = @"No 'devKey' found or its empty";
 static NSString *const NO_APPID_FOUND               = @"No 'appId' found or its empty";
 static NSString *const NO_EVENT_NAME_FOUND          = @"No 'eventName' found or its empty";
-static NSString *const NO_EMAILS_FOUND_OR_CORRUPTED = @"No 'emails' found, or list is corrupted";
+static NSString *const EMPTY_OR_CORRUPTED_LIST      = @"No arguments found or list is corrupted";
 static NSString *const SUCCESS                      = @"Success";
 
   // Appsflyer JS objects

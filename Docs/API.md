@@ -677,3 +677,53 @@ appsFlyer.setDeviceTrackingDisabled(true, () => {});
 ```
 
 ---
+##### <a id="setOneLinkCustomDomains"> **`setOneLinkCustomDomains(domains, successC, errorC)`**
+
+ Set Onelink custom/branded domains<br/>
+ Use this API during the SDK Initialization to indicate branded domains.<br/>
+ For more information please refer to the [documentation](https://support.appsflyer.com/hc/en-us/articles/360002329137-Implementing-Branded-Links)
+ 
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| domains                     | array    | Comma separated array of branded domains                   |
+| successC                    | function | success callback                                           |
+| errorC                      | function | error callback                                             |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setOneLinkCustomDomains(["click.mybrand.com"],
+    (res) => {
+        console.log(res);
+    }, (error) => {
+        console.log(error);
+    });
+```
+---
+
+##### <a id="setResolveDeepLinkURLs"> **`setResolveDeepLinkURLs(urls, successC, errorC)`**
+
+Set domains used by ESP when wrapping your deeplinks.<br/>
+Use this API during the SDK Initialization to indicate that links from certain domains should be resolved in order to get original deeplink<br/>
+For more information please refer to the [documentation](https://support.appsflyer.com/hc/en-us/articles/360001409618-Email-service-provider-challenges-with-iOS-Universal-links) <br/>
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| urls                        | array    | Comma separated array of ESP domains requiring resolving   |
+| successC                    | function | success callback                                           |
+| errorC                      | function | error callback                                             |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setResolveDeepLinkURLs(["click.esp-domain.com"],
+    (res) => {
+        console.log(res);
+    }, (error) => {
+        console.log(error);
+    });
+```
+
+---
