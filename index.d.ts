@@ -66,6 +66,7 @@ declare module "react-native-appsflyer" {
         setDeviceTrackingDisabled(isDeviceTrackingDisabled: boolean, successC: SuccessCB): void
         setOneLinkCustomDomains(domains: string[], successC?: SuccessCB, errorC?: ErrorCB): void
         setResolveDeepLinkURLs(urls: string[], successC?: SuccessCB, errorC?: ErrorCB): void
+        performOnAppAttribution(urlString, callback): void
 
         /**
          * For iOS Only

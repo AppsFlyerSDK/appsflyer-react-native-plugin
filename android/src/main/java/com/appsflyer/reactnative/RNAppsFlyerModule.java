@@ -596,4 +596,12 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
         }
     }
+
+    @ReactMethod
+    public void performOnAppAttribution(String urlString, Callback callback) {
+        Uri uri = Uri.parse(urlString);
+        Context c = application.getApplicationContext();
+        AppsFlyerLib.getInstance().performOnAppAttribution(c, uri);
+        callback.invoke(SUCCESS);
+    }
 }
