@@ -192,8 +192,17 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         [AppsFlyerTracker sharedTracker].isDebug = isDebug;
         [[AppsFlyerTracker sharedTracker] trackAppLaunch];
 
+        // Register for background-foreground transitions natively instead of doing this in JavaScript
+        [[NSNotificationCenter defaultCenter] addObserver:self
+            selector:@selector(sendLaunch:)
+            name:UIApplicationDidBecomeActiveNotification
+            object:nil];
         return nil;
     }
+}
+
+-(void)sendLaunch:(UIApplication *)application {
+    [[AppsFlyerTracker sharedTracker] trackAppLaunch];
 }
 
 -(NSError *) trackEventInternal: (NSString *)eventName eventValues:(NSDictionary *)eventValues {
