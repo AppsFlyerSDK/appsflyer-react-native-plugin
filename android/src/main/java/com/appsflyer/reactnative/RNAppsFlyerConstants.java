@@ -11,6 +11,7 @@ public class RNAppsFlyerConstants {
     final static String SUCCESS = "Success";
     final static String NO_EVENT_NAME_FOUND = "No 'eventName' found or its empty";
     final static String EMPTY_OR_CORRUPTED_LIST = "No arguments found or list is corrupted";
+    final static String INVALID_URI = "Passed string is not a valid URI";
 
 
     final static String afIsDebug = "isDebug";

@@ -30,6 +30,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
@@ -599,9 +600,15 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void performOnAppAttribution(String urlString, Callback callback) {
-        Uri uri = Uri.parse(urlString);
-        Context c = application.getApplicationContext();
-        AppsFlyerLib.getInstance().performOnAppAttribution(c, uri);
-        callback.invoke(SUCCESS);
+        try {
+            URI uri = URI.create(urlString);
+            Context c = application.getApplicationContext();
+            AppsFlyerLib.getInstance().performOnAppAttribution(c, uri);
+            callback.invoke(SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            callback.invoke(INVALID_URI);
+        }
+
     }
 }
