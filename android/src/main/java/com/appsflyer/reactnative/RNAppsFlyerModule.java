@@ -23,6 +23,7 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import org.json.JSONArray;
@@ -32,6 +33,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 
@@ -563,16 +565,16 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setOneLinkCustomDomains(ReadableArray domainsArray, Callback successCallback, Callback errorCallback) {
-        if (domainsArray.size <= 0) {
+        if (domainsArray.size() <= 0) {
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
             return;
         }
         ArrayList<Object> domainsList = domainsArray.toArrayList();
         try {
-            String[] domains = (String[]) domainsList.toArray();
+            String[] domains = domainsList.toArray(new String[domainsList.size()]);
             AppsFlyerLib.getInstance().setOneLinkCustomDomain(domains);
             successCallback.invoke(SUCCESS);
-        } catch (ClassCastException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
         }
@@ -580,16 +582,16 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setResolveDeepLinkURLs(ReadableArray urlsArray, Callback successCallback, Callback errorCallback) {
-        if (urlsArray.size <= 0) {
+        if (urlsArray.size() <= 0) {
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
             return;
         }
         ArrayList<Object> urlsList = urlsArray.toArrayList();
         try {
-            String[] urls = (String[]) urlsList.toArray();
+            String[] urls = urlsList.toArray(new String[urlsList.size()]);
             AppsFlyerLib.getInstance().setResolveDeepLinkURLs(urls);
             successCallback.invoke(SUCCESS);
-        } catch (ClassCastException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
         }
