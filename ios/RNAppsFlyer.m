@@ -429,4 +429,11 @@ RCT_EXPORT_METHOD(setResolveDeepLinkURLs:(NSArray *) urls
     successCallback(@[SUCCESS]);
 }
 
+RCT_EXPORT_METHOD(performOnAppAttribution:(NSString *) urlString
+                    callback :(RCTResponseSenderBlock)callback) {
+    NSURL *url = [NSURL URLWithString:urlString];
+    [[AppsFlyerTracker sharedTracker] performOnAppAttributionWithURL:url];
+    callback(@[SUCCESS]);
+}
+
 @end

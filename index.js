@@ -362,7 +362,9 @@ appsFlyer.setResolveDeepLinkURLs = (urls, successC, errorC) => {
   return RNAppsFlyer.setResolveDeepLinkURLs(urls, successC, errorC);
 };
 
-// TODO: update docs with the new API
+appsFlyer.performOnAppAttribution = (urlString, callback) => {
+  return RNAppsFlyer.performOnAppAttribution(urlString, callback);
+}
 
 function AFParseJSONException(_message, _data) {
   this.message = _message;
