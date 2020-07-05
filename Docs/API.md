@@ -727,3 +727,25 @@ appsFlyer.setResolveDeepLinkURLs(["click.esp-domain.com"],
 ```
 
 ---
+
+##### <a id="performOnAppAttribution"> **`performOnAppAttribution(url, callback)`**
+
+This function allows developers to manually re-trigger onAppOpenAttribution with a specific link (URI or URL), **without recording a new re-engagement**.<br>
+This method may be required if the app needs to redirect users based on the given link, or resolve the AppsFlyer short URL while staying in the foreground/opened. This might be needed because regular onAppOpenAttribution callback is only called if the app was opened with the deep link.
+
+| parameter                   | type     | description                                                                                          |
+| ----------                  |----------|------------------                                                                                    |
+| url                         | string   | String representing the URL that needs to be resolved/returned in the onAppOpenAttribution callback  |
+| callback                    | function | Result callback                                                                                             |
+
+
+*Example:*
+
+```javascript
+        let uriString = "sdktest://test"
+        appsFlyer.performOnAppAttribution(uriString, (res) => {
+            console.log(res);
+        })
+```
+
+---
