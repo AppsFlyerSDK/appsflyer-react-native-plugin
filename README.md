@@ -13,7 +13,7 @@
 ## Table of content
 
 - [Adding the SDK to your project](#installation)
-- [Initializing the SDK](#inits-sdk)
+- [Initializing the SDK](#init-sdk)
 - [Guides](#guides)
 - [API](#api) 
   
