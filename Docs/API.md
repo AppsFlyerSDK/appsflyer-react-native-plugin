@@ -747,5 +747,35 @@ This method may be required if the app needs to redirect users based on the give
             console.log(res);
         })
 ```
+---
+##### <a id="setSharingFilterForAllPartners"> **`setSharingFilterForAllPartners()`**
 
+Used by advertisers to exclude **all** networks/integrated partners from getting data. Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data)
+
+*Example:*
+
+```javascript
+        appsFlyer.setSharingFilterForAllPartners()
+```
+---
+##### <a id="setSharingFilter"> **`setSharingFilter(partners, sucessC, errorC)`**
+
+Used by advertisers to exclude **specified** networks/integrated partners from getting data. Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data)
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| partners                    | array    | Comma separated array of partners that need to be excluded |
+| successC                    | function | success callback                                           |
+| errorC                      | function | error callback                                             |
+*Example:*
+
+```javascript
+        let partners = ["facebook_int","googleadwords_int","snapchat_int","doubleclick_int"]
+        appsFlyer.setSharingFilterForAllPartners(partners,
+        (res) => {
+            console.log(res);
+        }, (error) => {
+            console.log(error);
+        })
+```
 ---

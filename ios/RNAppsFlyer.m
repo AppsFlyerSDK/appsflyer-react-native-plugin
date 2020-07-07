@@ -436,4 +436,15 @@ RCT_EXPORT_METHOD(performOnAppAttribution:(NSString *) urlString
     callback(@[SUCCESS]);
 }
 
+RCT_EXPORT_METHOD(setSharingFilterForAllPartners) {
+    [[AppsFlyerTracker sharedTracker] setSharingFilterForAllPartners];
+}
+
+RCT_EXPORT_METHOD(setSharingFilter:(NSArray *)partners
+                    successCallback:(RCTResponseSenderBlock)successCallback
+                    errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    [[AppsFlyerTracker sharedTracker] setSharingFilter:partners];
+    successCallback(@[SUCCESS]);
+}
+
 @end
