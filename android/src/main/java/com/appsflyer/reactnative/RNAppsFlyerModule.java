@@ -138,16 +138,14 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         Activity currentActivity = getCurrentActivity();
 
         if (currentActivity != null) {
-            intent = currentActivity.getIntent();
+            // register for lifecycle with Activity (automatically fetching deeplink from Activity if present)
+            instance.startTracking(currentActivity, devKey);
+        } else {
+            // register for lifecycle with Application (cannot fetch deeplink without access to the Activity,
+            // also sending first session manually)
+            trackAppLaunch();
+            instance.startTracking(application, devKey);
         }
-        //Generally we already do this validation into the SDK, anyways, we want to show it to clients
-        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
-            AppsFlyerLib.getInstance().setPluginDeepLinkData(intent);
-        }
-
-        trackAppLaunch();
-        // register for lifecycle natively
-        instance.startTracking(application, devKey);
         return null;
     }
 
