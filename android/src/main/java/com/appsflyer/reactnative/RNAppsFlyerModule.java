@@ -607,6 +607,27 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             e.printStackTrace();
             callback.invoke(INVALID_URI);
         }
+    }
 
+    @ReactMethod
+    public void setSharingFilterForAllPartners() {
+        AppsFlyerLib.getInstance().setSharingFilterForAllPartners();
+    }
+
+    @ReactMethod
+    public void setSharingFilter(ReadableArray partnersArray, Callback successCallback, Callback errorCallback) {
+        if (partnersArray.size() <= 0) {
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            return;
+        }
+        ArrayList<Object> partnersList = partnersArray.toArrayList();
+        try {
+            String[] partners = partnersList.toArray(new String[partnersList.size()]);
+            AppsFlyerLib.getInstance().setSharingFilter(partners);
+            successCallback.invoke(SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+        }
     }
 }

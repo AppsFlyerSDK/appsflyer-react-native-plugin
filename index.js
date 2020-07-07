@@ -366,6 +366,14 @@ appsFlyer.performOnAppAttribution = (urlString, callback) => {
   return RNAppsFlyer.performOnAppAttribution(urlString, callback);
 }
 
+appsFlyer.setSharingFilterForAllPartners = () => {
+  return RNAppsFlyer.setSharingFilterForAllPartners();
+}
+
+appsFlyer.setSharingFilter = (partners, successC, errorC) => {
+  return RNAppsFlyer.setSharingFilter(partners, successC, errorC);
+}
+
 function AFParseJSONException(_message, _data) {
   this.message = _message;
   this.data = _data;

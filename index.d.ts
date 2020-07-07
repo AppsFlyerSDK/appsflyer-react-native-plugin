@@ -67,6 +67,8 @@ declare module "react-native-appsflyer" {
         setOneLinkCustomDomains(domains: string[], successC?: SuccessCB, errorC?: ErrorCB): void
         setResolveDeepLinkURLs(urls: string[], successC?: SuccessCB, errorC?: ErrorCB): void
         performOnAppAttribution(urlString, callback): void
+        setSharingFilterForAllPartners(): void
+        setSharingFilter(partners, successC, errorC): void
 
         /**
          * For iOS Only
