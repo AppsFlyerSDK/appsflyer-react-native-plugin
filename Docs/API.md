@@ -22,7 +22,11 @@
 - [trackAndOpenStore](#trackAndOpenStore) 
 - [setCurrencyCode](#setCurrencyCode) 
 - [setDeviceTrackingDisabled](#setDeviceTrackingDisabled)
-
+- [setOneLinkCustomDomains](#setOneLinkCustomDomains)
+- [setResolveDeepLinkURLs](#setResolveDeepLinkURLs)
+- [performOnAppAttribution](#performOnAppAttribution)
+- [setSharingFilterForAllPartners](#setSharingFilterForAllPartners)
+- [setSharingFilter](#setSharingFilter)
 
 ---
 
