@@ -274,14 +274,21 @@ return YES;
 
 ### <a id="android-deeplinks"> Android Deep Links
     
-On Android, AppsLyer SDK inspects activity intent object during onResume(). Because if that, for each activity that may be configured or launched with any [non-standard launch mode](https://developer.android.com/guide/topics/manifest/activity-element#lmode) please make sure to add the following code:
+On Android, AppsLyer SDK inspects activity intent object during onResume(). Because if that, for each activity that may be configured or launched with any [non-standard launch mode](https://developer.android.com/guide/topics/manifest/activity-element#lmode) please make sure to add the following code to `MainActivity.java` in `android/app/src/main/java/com...`:
 
 ```
-@Override
-protected void onNewIntent(Intent intent) {
-     super.onNewIntent(intent);
-     setIntent(intent);
-}
+...
+import android.content.Intent;
+...
+
+public class MainActivity extends ReactActivity {
+...
+    @Override
+    public void onNewIntent(Intent intent) {
+         super.onNewIntent(intent);
+         setIntent(intent);
+    }
+ }
 ```
 This method makes sure that you get the latest deep link data even if the app was initially launched with another deep link. See the [Android developer documentation](https://developer.android.com/reference/android/app/Activity#onNewIntent(android.content.Intent)) for more details. 
 
