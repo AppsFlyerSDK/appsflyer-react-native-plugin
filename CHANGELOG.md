@@ -1,5 +1,18 @@
 # Versions
 
+## 5.4.1
+- Android and iOS SDK 5.4.1
+- iOS lifecycle now handled natively and not from _handleAppStateChange
+
+_New APIs:_
+
+- setOneLinkCustomDomains  
+- setResolveDeepLinkURLs  
+- performOnAppAttribute  
+- setSharingFilterForAllPartners  
+- setSharingFilter  
+
+
 ## 5.2.0
 Android AppsFlyer SDK 5.2.0
 iOS SDK AppsFlyer 5.2.0
