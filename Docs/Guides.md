@@ -108,8 +108,6 @@ The `appsFlyer.onAppOpenAttribution` returns function to  unregister this event 
 ### *Example:*
 
 ```javascript
-import React, {useEffect, useState} from 'react';
-import {AppState, SafeAreaView, Text, View} from 'react-native';
 import appsFlyer from 'react-native-appsflyer';
 
 var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
@@ -148,18 +146,8 @@ appsFlyer.initSdk(
 // ...
 
 class App extends Component<{}> {
-  state = {
-    appState: AppState.currentState,
-  };
-
-  componentDidMount() {
-    AppState.addEventListener('change', this._handleAppStateChange);
-  }
-
   componentWillUnmount() {
-    AppState.removeEventListener('change', this._handleAppStateChange);
-    
-    // Optionaly remove listeners for deep link data if you no longer need them
+    // Optionaly remove listeners for deep link data if you no longer need them after componentWillUnmount
     if (onInstallConversionDataCanceller) {
       onInstallConversionDataCanceller();
       console.log('unregister onInstallConversionDataCanceller');
@@ -171,15 +159,6 @@ class App extends Component<{}> {
       onAppOpenAttributionCanceller = null;
     }
   }
-
-  _handleAppStateChange = (nextAppState) => {
-    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-      if (Platform.OS === 'ios') {
-        appsFlyer.trackAppLaunch();
-      }
-    }
-    this.setState({appState: nextAppState});
-  };
 }
 ```
 
@@ -227,33 +206,19 @@ appsFlyer.initSdk(
 
 const Home = (props) => {
 
-    const [appState, setAppState] = useState(AppState.currentState);
-
     useEffect(() => {
-        function handleAppStateChange(nextAppState) {
-            if (appState.match(/inactive|background/) && nextAppState === 'active') {
-                if (Platform.OS === 'ios') {
-                    appsFlyer.trackAppLaunch();
-                }
-            }
-            if (appState.match(/active|foreground/) && nextAppState === 'background') {
-                if (onInstallConversionDataCanceller) {
-                    onInstallConversionDataCanceller();
-                    onInstallConversionDataCanceller = null;
-                }
-                if (onAppOpenAttributionCanceller) {
-                    onAppOpenAttributionCanceller();
-                    onAppOpenAttributionCanceller = null;
-                }
-            }
-
-            setAppState(nextAppState);
-        }
-
-        AppState.addEventListener('change', handleAppStateChange);
-
         return () => {
-            AppState.removeEventListener('change', handleAppStateChange);
+            // Optionaly remove listeners for deep link data if you no longer need them after componentWillUnmount
+            if (onInstallConversionDataCanceller) {
+              onInstallConversionDataCanceller();
+              console.log('unregister onInstallConversionDataCanceller');
+              onInstallConversionDataCanceller = null;
+            }
+            if (onAppOpenAttributionCanceller) {
+              onAppOpenAttributionCanceller();
+              console.log('unregister onAppOpenAttributionCanceller');
+              onAppOpenAttributionCanceller = null;
+            }
         };
     });
 

@@ -23,15 +23,18 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 
@@ -135,18 +138,14 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         Activity currentActivity = getCurrentActivity();
 
         if (currentActivity != null) {
-            intent = currentActivity.getIntent();
+            // register for lifecycle with Activity (automatically fetching deeplink from Activity if present)
+            instance.startTracking(currentActivity, devKey);
+        } else {
+            // register for lifecycle with Application (cannot fetch deeplink without access to the Activity,
+            // also sending first session manually)
+            trackAppLaunch();
+            instance.startTracking(application, devKey);
         }
-
-        //Generally we already do this validation into the SDK, anyways, we want to show it to clients
-        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
-            AppsFlyerLib.getInstance().setPluginDeepLinkData(intent);
-        }
-
-        trackAppLaunch();
-        instance.startTracking(application, devKey);
-
-
         return null;
     }
 
@@ -402,7 +401,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         JSONArray emailsJSON = options.optJSONArray(afEmails);
 
         if (emailsJSON.length() == 0) {
-            errorCallback.invoke(new Exception(NO_EMAILS_FOUND_OR_CORRUPTED).getMessage());
+            errorCallback.invoke(new Exception(EMPTY_OR_CORRUPTED_LIST).getMessage());
             return;
         }
 
@@ -422,7 +421,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            errorCallback.invoke(new Exception(NO_EMAILS_FOUND_OR_CORRUPTED).getMessage());
+            errorCallback.invoke(new Exception(EMPTY_OR_CORRUPTED_LIST).getMessage());
             return;
         }
 
@@ -561,5 +560,74 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void setDeviceTrackingDisabled(boolean b, Callback callback){
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
         callback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void setOneLinkCustomDomains(ReadableArray domainsArray, Callback successCallback, Callback errorCallback) {
+        if (domainsArray.size() <= 0) {
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            return;
+        }
+        ArrayList<Object> domainsList = domainsArray.toArrayList();
+        try {
+            String[] domains = domainsList.toArray(new String[domainsList.size()]);
+            AppsFlyerLib.getInstance().setOneLinkCustomDomain(domains);
+            successCallback.invoke(SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+        }
+    }
+
+    @ReactMethod
+    public void setResolveDeepLinkURLs(ReadableArray urlsArray, Callback successCallback, Callback errorCallback) {
+        if (urlsArray.size() <= 0) {
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            return;
+        }
+        ArrayList<Object> urlsList = urlsArray.toArrayList();
+        try {
+            String[] urls = urlsList.toArray(new String[urlsList.size()]);
+            AppsFlyerLib.getInstance().setResolveDeepLinkURLs(urls);
+            successCallback.invoke(SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+        }
+    }
+
+    @ReactMethod
+    public void performOnAppAttribution(String urlString, Callback callback) {
+        try {
+            URI uri = URI.create(urlString);
+            Context c = application.getApplicationContext();
+            AppsFlyerLib.getInstance().performOnAppAttribution(c, uri);
+            callback.invoke(SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            callback.invoke(INVALID_URI);
+        }
+    }
+
+    @ReactMethod
+    public void setSharingFilterForAllPartners() {
+        AppsFlyerLib.getInstance().setSharingFilterForAllPartners();
+    }
+
+    @ReactMethod
+    public void setSharingFilter(ReadableArray partnersArray, Callback successCallback, Callback errorCallback) {
+        if (partnersArray.size() <= 0) {
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            return;
+        }
+        ArrayList<Object> partnersList = partnersArray.toArrayList();
+        try {
+            String[] partners = partnersList.toArray(new String[partnersList.size()]);
+            AppsFlyerLib.getInstance().setSharingFilter(partners);
+            successCallback.invoke(SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+        }
     }
 }

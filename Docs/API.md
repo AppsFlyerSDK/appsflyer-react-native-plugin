@@ -677,3 +677,105 @@ appsFlyer.setDeviceTrackingDisabled(true, () => {});
 ```
 
 ---
+##### <a id="setOneLinkCustomDomains"> **`setOneLinkCustomDomains(domains, successC, errorC)`**
+
+ Set Onelink custom/branded domains<br/>
+ Use this API during the SDK Initialization to indicate branded domains.<br/>
+ For more information please refer to the [documentation](https://support.appsflyer.com/hc/en-us/articles/360002329137-Implementing-Branded-Links)
+ 
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| domains                     | array    | Comma separated array of branded domains                   |
+| successC                    | function | success callback                                           |
+| errorC                      | function | error callback                                             |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setOneLinkCustomDomains(["click.mybrand.com"],
+    (res) => {
+        console.log(res);
+    }, (error) => {
+        console.log(error);
+    });
+```
+---
+
+##### <a id="setResolveDeepLinkURLs"> **`setResolveDeepLinkURLs(urls, successC, errorC)`**
+
+Set domains used by ESP when wrapping your deeplinks.<br/>
+Use this API during the SDK Initialization to indicate that links from certain domains should be resolved in order to get original deeplink<br/>
+For more information please refer to the [documentation](https://support.appsflyer.com/hc/en-us/articles/360001409618-Email-service-provider-challenges-with-iOS-Universal-links) <br/>
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| urls                        | array    | Comma separated array of ESP domains requiring resolving   |
+| successC                    | function | success callback                                           |
+| errorC                      | function | error callback                                             |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setResolveDeepLinkURLs(["click.esp-domain.com"],
+    (res) => {
+        console.log(res);
+    }, (error) => {
+        console.log(error);
+    });
+```
+
+---
+
+##### <a id="performOnAppAttribution"> **`performOnAppAttribution(url, callback)`**
+
+This function allows developers to manually re-trigger onAppOpenAttribution with a specific link (URI or URL), **without recording a new re-engagement**.<br>
+This method may be required if the app needs to redirect users based on the given link, or resolve the AppsFlyer short URL while staying in the foreground/opened. This might be needed because regular onAppOpenAttribution callback is only called if the app was opened with the deep link.
+
+| parameter                   | type     | description                                                                                          |
+| ----------                  |----------|------------------                                                                                    |
+| url                         | string   | String representing the URL that needs to be resolved/returned in the onAppOpenAttribution callback  |
+| callback                    | function | Result callback                                                                                             |
+
+
+*Example:*
+
+```javascript
+        let uriString = "sdktest://test"
+        appsFlyer.performOnAppAttribution(uriString, (res) => {
+            console.log(res);
+        })
+```
+---
+##### <a id="setSharingFilterForAllPartners"> **`setSharingFilterForAllPartners()`**
+
+Used by advertisers to exclude **all** networks/integrated partners from getting data. Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data)
+
+*Example:*
+
+```javascript
+        appsFlyer.setSharingFilterForAllPartners()
+```
+---
+##### <a id="setSharingFilter"> **`setSharingFilter(partners, sucessC, errorC)`**
+
+Used by advertisers to exclude **specified** networks/integrated partners from getting data. Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data)
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| partners                    | array    | Comma separated array of partners that need to be excluded |
+| successC                    | function | success callback                                           |
+| errorC                      | function | error callback                                             |
+*Example:*
+
+```javascript
+        let partners = ["facebook_int","googleadwords_int","snapchat_int","doubleclick_int"]
+        appsFlyer.setSharingFilterForAllPartners(partners,
+        (res) => {
+            console.log(res);
+        }, (error) => {
+            console.log(error);
+        })
+```
+---

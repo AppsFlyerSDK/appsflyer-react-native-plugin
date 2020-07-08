@@ -131,7 +131,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     NSError* error = nil;
 
     if (!emails || [emails count] == 0) {
-        error = [NSError errorWithDomain:NO_EMAILS_FOUND_OR_CORRUPTED code:0 userInfo:nil];
+        error = [NSError errorWithDomain:EMPTY_OR_CORRUPTED_LIST code:0 userInfo:nil];
     }
 
     if(error != nil){
@@ -192,8 +192,17 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         [AppsFlyerTracker sharedTracker].isDebug = isDebug;
         [[AppsFlyerTracker sharedTracker] trackAppLaunch];
 
+        // Register for background-foreground transitions natively instead of doing this in JavaScript
+        [[NSNotificationCenter defaultCenter] addObserver:self
+            selector:@selector(sendLaunch:)
+            name:UIApplicationDidBecomeActiveNotification
+            object:nil];
         return nil;
     }
+}
+
+-(void)sendLaunch:(UIApplication *)application {
+    [[AppsFlyerTracker sharedTracker] trackAppLaunch];
 }
 
 -(NSError *) trackEventInternal: (NSString *)eventName eventValues:(NSDictionary *)eventValues {
@@ -404,6 +413,38 @@ RCT_EXPORT_METHOD(updateServerUninstallToken: (NSString *)deviceToken callback:(
     }
     [[AppsFlyerTracker sharedTracker] registerUninstall:deviceTokenData];
     callback(@[SUCCESS]);
+}
+
+RCT_EXPORT_METHOD(setOneLinkCustomDomains:(NSArray *) domains
+                    successCallback :(RCTResponseSenderBlock)successCallback
+                    errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    [[AppsFlyerTracker sharedTracker] setOneLinkCustomDomains:domains];
+    successCallback(@[SUCCESS]);
+}
+
+RCT_EXPORT_METHOD(setResolveDeepLinkURLs:(NSArray *) urls
+                    successCallback :(RCTResponseSenderBlock)successCallback
+                    errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    [[AppsFlyerTracker sharedTracker] setResolveDeepLinkURLs:urls];
+    successCallback(@[SUCCESS]);
+}
+
+RCT_EXPORT_METHOD(performOnAppAttribution:(NSString *) urlString
+                    callback :(RCTResponseSenderBlock)callback) {
+    NSURL *url = [NSURL URLWithString:urlString];
+    [[AppsFlyerTracker sharedTracker] performOnAppAttributionWithURL:url];
+    callback(@[SUCCESS]);
+}
+
+RCT_EXPORT_METHOD(setSharingFilterForAllPartners) {
+    [[AppsFlyerTracker sharedTracker] setSharingFilterForAllPartners];
+}
+
+RCT_EXPORT_METHOD(setSharingFilter:(NSArray *)partners
+                    successCallback:(RCTResponseSenderBlock)successCallback
+                    errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    [[AppsFlyerTracker sharedTracker] setSharingFilter:partners];
+    successCallback(@[SUCCESS]);
 }
 
 @end
