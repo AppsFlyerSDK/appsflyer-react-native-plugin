@@ -2,7 +2,6 @@
 
 
 - [initSdk](#initSdk)
-- [trackAppLaunch](#trackAppLaunch)
 - [onInstallConversionData](#onInstallConversionData) 
 - [onAppOpenAttribution](#onAppOpenAttribution) 
 - [trackEvent](#trackEvent)
@@ -79,68 +78,6 @@ try {
 ```
 
 ---
-##### <a id="trackAppLaunch"> **`trackAppLaunch()`**
-
-(iOS Only)
-
-Necessary for tracking sessions and deep link callbacks in iOS on background-to-foreground transitions.<br/>
-This API Should be used with the relevant [AppState](https://facebook.github.io/react-native/docs/appstate.html) logic.
-
-*Example:*
-
-```javascript
-state = {
-  appState: AppState.currentState,
-};
-
-componentDidMount();
-{
-  AppState.addEventListener('change', this._handleAppStateChange);
-}
-
-componentWillUnmount();
-{
-  AppState.removeEventListener('change', this._handleAppStateChange);
-}
-
-_handleAppStateChange = (nextAppState) => {
-  if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-    if (Platform.OS === 'ios') {
-      appsFlyer.trackAppLaunch();
-    }
-  }
-
-  this.setState({appState: nextAppState});
-};
-```
-
-
-Or with Hooks:
-
-```javascript
-const [appState, setAppState] = useState(AppState.currentState);
-
-useEffect(() => {
-  function handleAppStateChange(nextAppState) {
-    if (appState.match(/inactive|background/) && nextAppState === 'active') {
-      if (Platform.OS === 'ios') {
-        appsFlyer.trackAppLaunch();
-      }
-    }
-
-    setAppState(nextAppState);
-  }
-
-  AppState.addEventListener('change', handleAppStateChange);
-
-  return () => {
-    AppState.removeEventListener('change', handleAppStateChange);
-  };
-});
-```
-
----
-
 ##### <a id="onInstallConversionData"> **`onInstallConversionData(callback) : function:unregister`**
 
 Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking).<br/>

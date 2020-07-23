@@ -4,7 +4,6 @@ import {
   View,
   Text,
   Button,
-  AppState
 } from 'react-native';
 import appsFlyer from 'react-native-appsflyer';
 
@@ -59,17 +58,7 @@ class App extends React.Component {
 
   }
 
-  state = {
-    appState: AppState.currentState
-  }
-
-  componentDidMount() {
-    AppState.addEventListener('change', this._handleAppStateChange);
-  }
-
   componentWillUnmount() {
-    AppState.removeEventListener('change', this._handleAppStateChange);
-    
     // Optionaly remove listeners for deep link data if you no longer need them
     if (onInstallConversionDataCanceller) {
       onInstallConversionDataCanceller();
@@ -83,32 +72,22 @@ class App extends React.Component {
     }
   }
 
-    _handleAppStateChange = (nextAppState) => {
-    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-      if (Platform.OS === 'ios') {
-        appsFlyer.trackAppLaunch();
+  TrackEventPressed() {
+    const eventName = "af_test_event";
+    const eventValues = {
+        "af_event_param0" : "biz",
+        "af_event_param1" : "buz",
+        "af_event_param2" : "bizbuz"
+    };
+    appsFlyer.trackEvent(eventName, eventValues,
+      (result) => {
+        console.log(result);
+      },
+      (error) => {
+        console.error(error);
       }
-    }
-    this.setState({appState: nextAppState});
-  };
-
-
-     TrackEventPressed() {
-      const eventName = "af_test_event";
-      const eventValues = {
-          "af_event_param0" : "biz",
-          "af_event_param1" : "buz",
-          "af_event_param2" : "bizbuz"
-      };
-      appsFlyer.trackEvent(eventName, eventValues,
-        (result) => {
-          console.log(result);
-        },
-        (error) => {
-          console.error(error);
-        }
-      )
-    }
+    )
+  }
 
   render() {
     return (
