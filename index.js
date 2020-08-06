@@ -16,8 +16,8 @@ function initSdkPromise(options): Promise<string> {
 
 function initSdk(options, success, error): Promise<string> {
   options.onInstallConversionDataListener = eventsMap["onInstallConversionData"]
-    ? true
-    : false;
+      ? true
+      : false;
 
   if (success && error) {
     //initSdk is a callback function
@@ -205,8 +205,8 @@ appsFlyer.generateInviteLink = (parameters, success, error) => {
  * @param appId promoted App ID.
  * @param campaign cross promotion campaign.
  */
-appsFlyer.trackCrossPromotionImpression = (appId, campaign) => {
-  return RNAppsFlyer.trackCrossPromotionImpression(appId, campaign);
+appsFlyer.trackCrossPromotionImpression = (appId, campaign, parameters) => {
+  return RNAppsFlyer.trackCrossPromotionImpression(appId, campaign, parameters);
 };
 
 /**
@@ -250,22 +250,22 @@ appsFlyer.setCurrencyCode = (currencyCode, successC) => {
 appsFlyer.onInstallConversionData = callback => {
 
   const listener = appsFlyerEventEmitter.addListener(
-    "onInstallConversionDataLoaded",
-    _data => {
-      if (callback && typeof callback === typeof Function) {
-        try {
-          let data = JSON.parse(_data);
-          callback(data);
-        } catch (_error) {
-          //throw new AFParseJSONException("...");
-          //TODO: for today we return an error in callback
-          callback(new AFParseJSONException("Invalid data structure", _data));
+      "onInstallConversionDataLoaded",
+      _data => {
+        if (callback && typeof callback === typeof Function) {
+          try {
+            let data = JSON.parse(_data);
+            callback(data);
+          } catch (_error) {
+            //throw new AFParseJSONException("...");
+            //TODO: for today we return an error in callback
+            callback(new AFParseJSONException("Invalid data structure", _data));
+          }
         }
       }
-    }
   );
 
-   eventsMap["onInstallConversionData"] = listener;
+  eventsMap["onInstallConversionData"] = listener;
 
   // unregister listener (suppose should be called from componentWillUnmount() )
   return function remove() {
@@ -276,22 +276,22 @@ appsFlyer.onInstallConversionData = callback => {
 appsFlyer.onInstallConversionFailure = callback => {
 
   const listener = appsFlyerEventEmitter.addListener(
-    "onInstallConversionFailure",
-    _data => {
-      if (callback && typeof callback === typeof Function) {
-        try {
-          let data = JSON.parse(_data);
-          callback(data);
-        } catch (_error) {
-          //throw new AFParseJSONException("...");
-          //TODO: for today we return an error in callback
-          callback(new AFParseJSONException("Invalid data structure", _data));
+      "onInstallConversionFailure",
+      _data => {
+        if (callback && typeof callback === typeof Function) {
+          try {
+            let data = JSON.parse(_data);
+            callback(data);
+          } catch (_error) {
+            //throw new AFParseJSONException("...");
+            //TODO: for today we return an error in callback
+            callback(new AFParseJSONException("Invalid data structure", _data));
+          }
         }
       }
-    }
   );
 
-   eventsMap["onInstallConversionFailure"] = listener;
+  eventsMap["onInstallConversionFailure"] = listener;
 
   // unregister listener (suppose should be called from componentWillUnmount() )
   return function remove() {
@@ -304,17 +304,17 @@ appsFlyer.onAppOpenAttribution = callback => {
   //console.log("onAppOpenAttribution is called" );
 
   const listener = appsFlyerEventEmitter.addListener(
-    "onAppOpenAttribution",
-    _data => {
-      if (callback && typeof callback === typeof Function) {
-        try {
-          let data = JSON.parse(_data);
-          callback(data);
-        } catch (_error) {
-          callback(new AFParseJSONException("Invalid data structure", _data));
+      "onAppOpenAttribution",
+      _data => {
+        if (callback && typeof callback === typeof Function) {
+          try {
+            let data = JSON.parse(_data);
+            callback(data);
+          } catch (_error) {
+            callback(new AFParseJSONException("Invalid data structure", _data));
+          }
         }
       }
-    }
   );
 
 
@@ -372,6 +372,19 @@ appsFlyer.setSharingFilterForAllPartners = () => {
 
 appsFlyer.setSharingFilter = (partners, successC, errorC) => {
   return RNAppsFlyer.setSharingFilter(partners, successC, errorC);
+}
+
+/**
+ * iOS only
+ */
+appsFlyer.waitForAdvertisingIdentifierWithTimeoutInterval = (timeoutInterval, successC, errorC) => {
+  return RNAppsFlyer.waitForAdvertisingIdentifierWithTimeoutInterval(timeoutInterval * 1000, successC, errorC);
+}
+/**
+ * iOS only
+ */
+appsFlyer.requestTrackingAuthorization = (successC, errorC) => {
+  RNAppsFlyer.requestTrackingAuthorizationWith(successC, errorC);
 }
 
 function AFParseJSONException(_message, _data) {

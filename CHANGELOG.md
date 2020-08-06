@@ -1,5 +1,14 @@
 # Versions
 
+## 6.0.0-Beta
+
+- iOS SDK 6.0.0-Beta
+- Android SDK 5.4.1
+
+_APIs renamed:_
+
+track -> log
+
 ## 5.4.1
 - Android and iOS SDK 5.4.1
 - iOS lifecycle now handled natively and not from _handleAppStateChange

@@ -60,7 +60,7 @@ declare module "react-native-appsflyer" {
         stopTracking(isStopTracking: boolean, successC?: SuccessCB): void
         setAppInviteOneLinkID(oneLinkID: string, successC?: SuccessCB): void
         generateInviteLink(params: GenerateInviteLinkParams, successC?: SuccessCB, errorC?: ErrorCB): void
-        trackCrossPromotionImpression(appId: string, campaign: string): void
+        trackCrossPromotionImpression(appId: string, campaign: string, parameters: object): void
         trackAndOpenStore(appId: string, campaign: string, params: object): void
         setCurrencyCode(currencyCode: string, successC: SuccessCB): void
         setDeviceTrackingDisabled(isDeviceTrackingDisabled: boolean, successC: SuccessCB): void
@@ -75,14 +75,17 @@ declare module "react-native-appsflyer" {
          * */
         trackAppLaunch(): void
         trackLocation(longitude: number, latitude: number, callback: SuccessCB): void
+        waitForAdvertisingIdentifierWithTimeoutInterval(timeoutInterval: number, successC?: SuccessCB, errorC?: ErrorCB): void
+        requestTrackingAuthorization(successC, errorC): void
+
 
         /**
          * For Android Only
          * */
-        sendDeepLinkData(callback:any): void
-        setCollectIMEI(isCollect:boolean, successC?:SuccessCB): void
-        setCollectAndroidID(isCollect:boolean, successC?:SuccessCB): void
-        updateServerUninstallToken(token:string, successC?:SuccessCB): void
+        sendDeepLinkData(callback: any): void
+        setCollectIMEI(isCollect: boolean, successC?: SuccessCB): void
+        setCollectAndroidID(isCollect: boolean, successC?: SuccessCB): void
+        updateServerUninstallToken(token: string, successC?: SuccessCB): void
         /** @deprecated - please use updateServerUninstallToken **/
         setGCMProjectNumber(gcmProjectNumber:any, successC?:SuccessCB, errorC?:ErrorCB): void
         /** @deprecated - please use updateServerUninstallToken **/
