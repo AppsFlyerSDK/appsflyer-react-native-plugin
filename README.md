@@ -15,7 +15,7 @@
 
 ## Table of content
 
-- [v6 Breaking changes](#v6-breaking-chenges)
+- [v6 Breaking changes](#v6-breaking-changes)
 - [Adding the SDK to your project](#installation)
 - [Initializing the SDK](#init-sdk)
 - [Guides](#guides)
@@ -26,7 +26,7 @@
 - iOS AppsFlyerSDK **v6.0.1**
 - Android AppsFlyerSDK **v5.4.1**
 
-## <a id="installation"> 📲 v6 Breaking Changes
+## <a id="v6-breaking-changes"> 📲 v6 Breaking Changes
 
 INSERT TABLE WITH ALL NEW API NAMES
 
