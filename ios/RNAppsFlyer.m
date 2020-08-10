@@ -6,8 +6,6 @@
 #import "AppsFlyerLib.h"
 #endif
 
-#import <AppTrackingTransparency/AppTrackingTransparency.h>
-
 @interface RNAppsFlyer() <AppsFlyerLibDelegate>
 
 @end
@@ -24,36 +22,6 @@ RCT_EXPORT_METHOD(waitForAdvertisingIdentifierWithTimeoutInterval:(NSTimeInterva
     if (@available(iOS 14, *)) {
         [[AppsFlyerLib shared] waitForAdvertisingIdentifierWithTimeoutInterval:timeoutInterval];
         successCallback(@[SUCCESS]);
-    } else {
-        NSError* error = [NSError errorWithDomain:IOS_14_ONLY code:0 userInfo:nil];
-        errorCallback(error);
-    }
-}
-
-RCT_EXPORT_METHOD(requestTrackingAuthorizationWith:(RCTResponseSenderBlock)successCallback
-                  errorCallback:(RCTResponseErrorBlock)errorCallback){
-    if (@available(iOS 14, *)) {
-        [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
-            NSString* statusDescription;
-            switch (status) {
-                case ATTrackingManagerAuthorizationStatusDenied:
-                    statusDescription = @"Denied";
-                    break;
-                case ATTrackingManagerAuthorizationStatusAuthorized:
-                    statusDescription = @"Authorized";
-                    break;
-                case ATTrackingManagerAuthorizationStatusRestricted:
-                    statusDescription = @"Restricted";
-                    break;
-                case ATTrackingManagerAuthorizationStatusNotDetermined:
-                    statusDescription = @"NotDetermined";
-                    break;
-                default:
-                    statusDescription = @"Unknown (please report an issue to AppsFlyer github if you get this)";
-                    break;
-            }
-            successCallback(@[statusDescription]);
-        }];
     } else {
         NSError* error = [NSError errorWithDomain:IOS_14_ONLY code:0 userInfo:nil];
         errorCallback(error);
@@ -87,11 +55,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
     }
 }
 
-RCT_EXPORT_METHOD(trackAppLaunch) {
-    [[AppsFlyerLib shared] start];
-}
-
-RCT_EXPORT_METHOD(trackEvent: (NSString *)eventName eventValues:(NSDictionary *)eventValues
+RCT_EXPORT_METHOD(logEvent: (NSString *)eventName eventValues:(NSDictionary *)eventValues
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
     NSError *error = [self logEventInternal:eventName eventValues:eventValues];
@@ -104,8 +68,8 @@ RCT_EXPORT_METHOD(trackEvent: (NSString *)eventName eventValues:(NSDictionary *)
     }
 }
 
-RCT_EXPORT_METHOD(trackEventWithPromise: (NSString *)eventName eventValues:(NSDictionary *)eventValues
-                  trackEventWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
+RCT_EXPORT_METHOD(logEventWithPromise: (NSString *)eventName eventValues:(NSDictionary *)eventValues
+                  logEventWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
 
     NSError *error = [self logEventInternal:eventName eventValues:eventValues];
@@ -129,15 +93,15 @@ RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSen
     callback(@[SUCCESS]);
 }
 
-RCT_EXPORT_METHOD(stopTracking: (BOOL)isStopTracking callback:(RCTResponseSenderBlock)callback) {
-    [AppsFlyerLib shared].isStopped  = isStopTracking;
+RCT_EXPORT_METHOD(stop: (BOOL)isStopped callback:(RCTResponseSenderBlock)callback) {
+    [AppsFlyerLib shared].isStopped  = isStopped;
     callback(@[SUCCESS]);
 }
 
-RCT_EXPORT_METHOD(trackLocation: (double)longitude latitude:(double)latitude callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(logLocation: (double)longitude latitude:(double)latitude callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] logLocationEvent:longitude latitude:latitude];
     NSArray *events = @[[NSNumber numberWithDouble:longitude], [NSNumber numberWithDouble:latitude]];
-    callback(@[[NSNull null], events]);
+    callback(@[SUCCESS, events]);
 }
 
 RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
@@ -192,6 +156,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     NSString* appId = nil;
     BOOL isDebug = NO;
     BOOL isConversionData = NO;
+    NSNumber* interval = 0;
 
     if (![initSdkOptions isKindOfClass:[NSNull class]]) {
 
@@ -199,6 +164,8 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         id isConversionDataValue = nil;
         devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
         appId = (NSString*)[initSdkOptions objectForKey: afAppId];
+        interval = (NSNumber*)[initSdkOptions objectForKey: advertisingIdWaitInterval];
+
 
         isDebugValue = [initSdkOptions objectForKey: afIsDebug];
         if ([isDebugValue isKindOfClass:[NSNumber class]]) {
@@ -221,13 +188,17 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         error = [NSError errorWithDomain:NO_APPID_FOUND code:1 userInfo:nil];
     }
 
-
     if(error != nil){
         return error;
     }
     else{
         if(isConversionData == YES){
             [AppsFlyerLib shared].delegate = self;
+        }
+
+        if (interval != 0 && interval != nil){
+            double timeoutInterval = [interval doubleValue];
+            [[AppsFlyerLib shared] waitForAdvertisingIdentifierWithTimeoutInterval:timeoutInterval];
         }
 
         [AppsFlyerLib shared].appleAppID = appId;
@@ -313,13 +284,13 @@ RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
 }
 
 //CROSS PROMOTION
-RCT_EXPORT_METHOD(trackCrossPromotionImpression: (NSString *)appId campaign:(NSString *)campaign parameters:(NSDictionary *)parameters) {
+RCT_EXPORT_METHOD(logCrossPromotionImpression: (NSString *)appId campaign:(NSString *)campaign parameters:(NSDictionary *)parameters) {
     if (appId != nil && ![appId isEqualToString:@""]) {
         [AppsFlyerCrossPromotionHelper logCrossPromoteImpression:appId campaign:campaign parameters:parameters];
     }
 }
 
-RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)appID
+RCT_EXPORT_METHOD(logAndOpenStore: (NSString *)appID
                   campaign:(NSString *)campaign
                   customParams:(NSDictionary *)customParams) {
 
@@ -336,7 +307,6 @@ RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)appID
         } completionHandler: ^(NSURL * _Nullable url) {
             NSString *appLink = url.absoluteString;
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:appLink] options:@{} completionHandler:^(BOOL success) {
-
             }];
         }];
     }
@@ -437,7 +407,7 @@ RCT_EXPORT_METHOD(trackAndOpenStore: (NSString *)appID
     }
 }
 
-RCT_EXPORT_METHOD(setDeviceTrackingDisabled: (BOOL *)b callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(setDeviceLoggingDisabled: (BOOL *)b callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setDeviceLoggingDisabled:b];
     callback(@[SUCCESS]);
 }

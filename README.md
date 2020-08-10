@@ -76,14 +76,12 @@ appsFlyer.initSdk(
 | isDebug    | Debug mode - set to `true` for testing only  |
 
 
-**Important** - For iOS another step is required. AppState logic is required to record Background-to-foreground transitions. Check out the [relevant guide](./Docs/API.md#--appsflyertrackapplaunch-void) to see how this mandatory step is implemented.
-
  ## <a id="guides"> 📖 Guides
 
 Great installation and setup guides can be viewed [here](/Docs/Guides.md).
 - [init SDK Guide](/Docs/Guides.md#init-sdk)
 - [Deeplinking Guide](/Docs/Guides.md#deeplinking)
-- [Uninstall Guide](/Docs/Guides.md#track-app-uninstalls)
+- [Uninstall Guide](/Docs/Guides.md#measure-app-uninstalls)
 
 
 

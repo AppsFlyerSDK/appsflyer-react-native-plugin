@@ -29,32 +29,25 @@ function initSdk(options, success, error): Promise<string> {
 }
 appsFlyer.initSdk = initSdk;
 
-function trackEventCallback(eventName, eventValues, successC, errorC) {
-  return RNAppsFlyer.trackEvent(eventName, eventValues, successC, errorC);
+function logEventCallback(eventName, eventValues, successC, errorC) {
+  return RNAppsFlyer.logEvent(eventName, eventValues, successC, errorC);
 }
 
-function trackEventPromise(eventName, eventValues): Promise<string> {
-  return RNAppsFlyer.trackEventWithPromise(eventName, eventValues);
+function logEventPromise(eventName, eventValues): Promise<string> {
+  return RNAppsFlyer.logEventWithPromise(eventName, eventValues);
 }
 
-function trackEvent(eventName, eventValues, success, error): Promise<string> {
+function logEvent(eventName, eventValues, success, error): Promise<string> {
   if (success && error) {
-    //trackEvent is a callback function
-    trackEventCallback(eventName, eventValues, success, error);
+    //logEvent is a callback function
+    logEventCallback(eventName, eventValues, success, error);
   } else if (!success) {
-    //trackEvent is a promise function
-    return trackEventPromise(eventName, eventValues);
+    //logEvent is a promise function
+    return logEventPromise(eventName, eventValues);
   }
 }
 
-appsFlyer.trackEvent = trackEvent;
-
-/**
- * iOS only
- */
-appsFlyer.trackAppLaunch = () => {
-  return RNAppsFlyer.trackAppLaunch();
-};
+appsFlyer.logEvent = logEvent;
 
 /**
  * Manually record the location of the user
@@ -62,10 +55,9 @@ appsFlyer.trackAppLaunch = () => {
  * @param longitude latitude as double.
  * @param latitude latitude as double.
  * @callback callback success callback function.
- * @platform ios only
  */
-appsFlyer.trackLocation = (longitude, latitude, callback) => {
-  return RNAppsFlyer.trackLocation(longitude, latitude, callback);
+appsFlyer.logLocation = (longitude, latitude, callback) => {
+  return RNAppsFlyer.logLocation(longitude, latitude, callback);
 };
 
 /**
@@ -110,13 +102,6 @@ appsFlyer.setGCMProjectNumber = (gcmProjectNumber, successC, errorC) => {
 };
 
 /**
- * @deprecated
- */
-appsFlyer.enableUninstallTracking = (gcmProjectNumber, successC) => {
-  return RNAppsFlyer.enableUninstallTracking(gcmProjectNumber, successC);
-};
-
-/**
  * Manually pass the Firebase / GCM Device Token for Uninstall measurement.
  *
  * @param token Firebase Device Token.
@@ -140,13 +125,13 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
 /**
  * Once this API is invoked, our SDK no longer communicates with our servers and stops functioning.
  * In some extreme cases you might want to shut down all SDK activity due to legal and privacy compliance.
- * This can be achieved with the stopTracking API.
+ * This can be achieved with the stop API.
  *
- * @param {boolean} isStopTracking boolean should SDK be stopped.
+ * @param {boolean} isStopped boolean should SDK be stopped.
  * @callback successC success callback function.
  */
-appsFlyer.stopTracking = (isStopTracking, successC) => {
-  return RNAppsFlyer.stopTracking(isStopTracking, successC);
+appsFlyer.stop = (isStopped, successC) => {
+  return RNAppsFlyer.stop(isStopped, successC);
 };
 
 /**
@@ -205,8 +190,8 @@ appsFlyer.generateInviteLink = (parameters, success, error) => {
  * @param appId promoted App ID.
  * @param campaign cross promotion campaign.
  */
-appsFlyer.trackCrossPromotionImpression = (appId, campaign, parameters) => {
-  return RNAppsFlyer.trackCrossPromotionImpression(appId, campaign, parameters);
+appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
+  return RNAppsFlyer.logCrossPromotionImpression(appId, campaign, parameters);
 };
 
 /**
@@ -216,8 +201,8 @@ appsFlyer.trackCrossPromotionImpression = (appId, campaign, parameters) => {
  * @param campaign cross promotion campaign.
  * @param params additional user params.
  */
-appsFlyer.trackAndOpenStore = (appId, campaign, params) => {
-  return RNAppsFlyer.trackAndOpenStore(appId, campaign, params);
+appsFlyer.logAndOpenStore = (appId, campaign, params) => {
+  return RNAppsFlyer.logAndOpenStore(appId, campaign, params);
 };
 
 /**
@@ -330,11 +315,11 @@ appsFlyer.onAppOpenAttribution = callback => {
  * Anonymize user Data.
  * Use this API during the SDK Initialization to explicitly anonymize a user's installs, events and sessions.
  * Default is false
- * @param isDeviceTrackingDisabled boolean
+ * @param isDeviceLoggingDisabled boolean
  * @param successC success callback function.
  */
-appsFlyer.setDeviceTrackingDisabled = (isDeviceTrackingDisabled, successC) => {
-  return RNAppsFlyer.setDeviceTrackingDisabled(isDeviceTrackingDisabled, successC);
+appsFlyer.setDeviceLoggingDisabled = (isDeviceLoggingDisabled, successC) => {
+  return RNAppsFlyer.setDeviceLoggingDisabled(isDeviceLoggingDisabled, successC);
 };
 
 /**
@@ -379,12 +364,6 @@ appsFlyer.setSharingFilter = (partners, successC, errorC) => {
  */
 appsFlyer.waitForAdvertisingIdentifierWithTimeoutInterval = (timeoutInterval, successC, errorC) => {
   return RNAppsFlyer.waitForAdvertisingIdentifierWithTimeoutInterval(timeoutInterval * 1000, successC, errorC);
-}
-/**
- * iOS only
- */
-appsFlyer.requestTrackingAuthorization = (successC, errorC) => {
-  RNAppsFlyer.requestTrackingAuthorizationWith(successC, errorC);
 }
 
 function AFParseJSONException(_message, _data) {

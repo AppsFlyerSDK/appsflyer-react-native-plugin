@@ -10,9 +10,9 @@
     - [Direct Deep Linking](#direct-deep-linking)
     - [iOS Deeplink Setup](#iosdeeplinks)
     - [Android Deeplink Setup](#android-deeplinks)
-- [Uninstall](#track-app-uninstalls)
-    - [iOS Uninstall Setup](#track-app-uninstalls-ios)
-    - [Android Uninstall Setup](#track-app-uninstalls-android)
+- [Uninstall](#measure-app-uninstalls)
+    - [iOS Uninstall Setup](#measure-app-uninstalls-ios)
+    - [Android Uninstall Setup](#measure-app-uninstalls-android)
 
 
 ##  <a id="init-sdk"> Init SDK
@@ -236,22 +236,22 @@ const Home = (props) => {
 
 ### <a id="iosdeeplinks"> iOS Deep Links - Universal Links and URL Schemes
 
-In order to track retargeting and use the onAppOpenAttribution callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
+In order to record retargeting and use the onAppOpenAttribution callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
 
 #### import
 ```objectivec
 #import <React/RCTLinkingManager.h>
-#if __has_include(<AppsFlyerLib/AppsFlyerTracker.h>) // from Pod
-#import <AppsFlyerLib/AppsFlyerTracker.h>
+#if __has_include(<AppsFlyerLib/AppsFlyerLib.h>) // from Pod
+#import <AppsFlyerLib/AppsFlyerLib.h>
 #else
-#import "AppsFlyerTracker.h"
+#import "AppsFlyerLib.h"
 #endif
 ```
 
 #### Universal Links (iOS 9 +)
 ```objectivec
 - (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
-  [[AppsFlyerTracker sharedTracker] continueUserActivity:userActivity restorationHandler:restorationHandler];
+  [[AppsFlyerLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
   return YES;
 }
 ```
@@ -260,14 +260,14 @@ In order to track retargeting and use the onAppOpenAttribution callbacks in iOS,
 ```objectivec
 // Reports app open from deep link from apps which do not support Universal Links (Twitter) and for iOS8 and below
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
-[[AppsFlyerTracker sharedTracker] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
+ [[AppsFlyerLib shared] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
 return YES;
 }
 
 // Reports app open from URL Scheme deep link for iOS 10
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
 options:(NSDictionary *) options {
-[[AppsFlyerTracker sharedTracker] handleOpenUrl:url options:options];
+ [[AppsFlyerLib shared] handleOpenUrl:url options:options];
 return YES;
 }
 ```
@@ -294,13 +294,13 @@ This method makes sure that you get the latest deep link data even if the app wa
 
 ---
 
-### <a id="track-app-uninstalls"> Track App Uninstalls
+### <a id="measure-app-uninstalls"> Measure App Uninstalls
 
-#### <a id="track-app-uninstalls-ios"> iOS
+#### <a id="measure-app-uninstalls-ios"> iOS
 
 #### First method 
 
-AppsFlyer enables you to track app uninstalls. To handle notifications it requires  to modify your `AppDelegate.m`. Use [didRegisterForRemoteNotificationsWithDeviceToken](https://developer.apple.com/reference/uikit/uiapplicationdelegate) to register to the uninstall feature.
+AppsFlyer enables you to measure app uninstalls. To handle notifications it requires  to modify your `AppDelegate.m`. Use [didRegisterForRemoteNotificationsWithDeviceToken](https://developer.apple.com/reference/uikit/uiapplicationdelegate) to register to the uninstall feature.
 
 *Example:*
 
@@ -310,8 +310,8 @@ AppsFlyer enables you to track app uninstalls. To handle notifications it requir
 ...
 
 - (void)application:(UIApplication ​*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *​)deviceToken {
-// notify AppsFlyerTracker
-[[AppsFlyerTracker sharedTracker] registerUninstall:deviceToken];
+// notify AppsFlyerLib
+ [[AppsFlyerLib shared] registerUninstall:deviceToken];
 }
 ```
 
@@ -329,7 +329,7 @@ appsFlyer.updateServerUninstallToken(deviceToken, (success) => {
 });
 ```
 
-#### <a id="track-app-uninstalls-android"> Android
+#### <a id="measure-app-uninstalls-android"> Android
 
 Update Firebase device token so it can be sent to AppsFlyer
 
@@ -341,5 +341,5 @@ appsFlyer.updateServerUninstallToken(newFirebaseToken, (success) => {
 });
 ```
 
-Read more about Android  Uninstall Tracking: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)
+Read more about Android  Uninstall Measurement: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)
 

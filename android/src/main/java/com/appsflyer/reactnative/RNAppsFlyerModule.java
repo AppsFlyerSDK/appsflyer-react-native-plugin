@@ -126,7 +126,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         isConversionData = options.optBoolean(afConversionData, false);
 
         if (isDebug == true) {
-            Log.d("AppsFlyer", "Starting Tracking");
+            Log.d("AppsFlyer", "Starting SDK");
         }
 
         instance.init(
@@ -228,13 +228,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         };
     }
 
-    private void trackAppLaunch() {
-        Context c = application.getApplicationContext();
-        AppsFlyerLib.getInstance().trackEvent(c, null, null);
-    }
-
-
-    private String trackEventInternal(final String eventName, ReadableMap eventData) {
+    private String logEventInternal(final String eventName, ReadableMap eventData) {
 
         if (eventName.trim().equals("")) {
             return NO_EVENT_NAME_FOUND;
@@ -256,12 +250,12 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void trackEvent(
+    public void logEvent(
             final String eventName, ReadableMap eventData,
             Callback successCallback,
             Callback errorCallback) {
         try {
-            final String errorReason = trackEventInternal(eventName, eventData);
+            final String errorReason = logEventInternal(eventName, eventData);
 
             if (errorReason != null) {
                 errorCallback.invoke(new Exception(errorReason).getMessage());
@@ -276,10 +270,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void trackEventWithPromise(
+    public void logEventWithPromise(
             final String eventName, ReadableMap eventData, Promise promise) {
         try {
-            final String errorReason = trackEventInternal(eventName, eventData);
+            final String errorReason = logEventInternal(eventName, eventData);
 
             if (errorReason != null) {
                 promise.reject(errorReason, new Exception(errorReason).getMessage());
@@ -310,39 +304,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @Deprecated
-    @ReactMethod
-    public void sendTrackingWithEvent(final String eventName) {
-        AppsFlyerLib.getInstance().trackEvent(getReactApplicationContext(), eventName, null);
-    }
-
     @ReactMethod
     public void getAppsFlyerUID(Callback callback) {
         String appId = AppsFlyerLib.getInstance().getAppsFlyerUID(getReactApplicationContext());
         callback.invoke(null, appId);
-    }
-
-    /**
-    Deprecated - please use updateServerUninstallToken
-    */
-    @ReactMethod
-    @Deprecated
-    public void setGCMProjectNumber(final String gcmProjectNumber,
-                                    Callback successCallback,
-                                    Callback errorCallback) {
-       // AppsFlyerLib.getInstance().setGCMProjectNumber(gcmProjectNumber);
-        errorCallback.invoke("Deprecated - please use updateServerUninstallToken");
-    }
-
-    /**
-    Deprecated - please use updateServerUninstallToken
-    */
-    @ReactMethod
-    @Deprecated
-    public void enableUninstallTracking(final String gcmProjectNumber,
-                                        Callback successCallback) {
-        //AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectNumber);
-        successCallback.invoke("Deprecated - please use updateServerUninstallToken");
     }
 
     @ReactMethod
@@ -370,7 +335,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void stopTracking(boolean isCollect, Callback callback) {
+    public void stop(boolean isStopped, Callback callback) {
         AppsFlyerLib.getInstance().stopTracking(isCollect, getReactApplicationContext());
         callback.invoke(SUCCESS);
     }
@@ -531,14 +496,14 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void trackCrossPromotionImpression(final String appId, final String campaign) {
+    public void logCrossPromotionImpression(final String appId, final String campaign) {
         if (appId != "" && campaign != "") {
             CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
         }
     }
 
     @ReactMethod
-    public void trackAndOpenStore(final String appId, final String campaign, ReadableMap params) {
+    public void logAndOpenStore(final String appId, final String campaign, ReadableMap params) {
 
         if (appId == null || appId == "") {
             return;
@@ -557,7 +522,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setDeviceTrackingDisabled(boolean b, Callback callback){
+    public void setDeviceLoggingDisabled(boolean b, Callback callback){
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
         callback.invoke(SUCCESS);
     }
@@ -629,5 +594,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             e.printStackTrace();
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
         }
+    }
+
+    @ReactMethod
+    public void logLocation(double longitude, double latitude, Callback successCallback) {
+        AppsFlyerLib.getInstance().setSharingFilterForAllPartners(getReactApplicationContext(), latitude, longitude);
+        successCallback.invoke(SUCCESS, longitude, latitude);
     }
 }

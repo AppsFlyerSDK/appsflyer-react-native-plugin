@@ -51,32 +51,26 @@ declare module "react-native-appsflyer" {
         onInstallConversionFailure(callback:(data:ConversionData)=>any): () => void;
         onAppOpenAttribution(callback:(data:any)=>any): () => void;
 
-        initSdk(options:InitSDKOptions, successC?:SuccessCB, errorC?:ErrorCB): Response<string>
-        trackEvent(eventName:string, eventValues:object, successC?:SuccessCB, errorC?:ErrorCB): Response<string>
-        setUserEmails(options:SetEmailsOptions, successC?:SuccessCB, errorC?:ErrorCB): void
+        initSdk(options: InitSDKOptions, successC?: SuccessCB, errorC?: ErrorCB): Response<string>
+        logEvent(eventName: string, eventValues: object, successC?: SuccessCB, errorC?: ErrorCB): Response<string>
+        setUserEmails(options: SetEmailsOptions, successC?: SuccessCB, errorC?: ErrorCB): void
         setAdditionalData(additionalData: object, successC?: SuccessCB): void
         getAppsFlyerUID(callback: (error: Error, uid: string) => any): void
         setCustomerUserId(userId: string, successC?: SuccessCB): void
-        stopTracking(isStopTracking: boolean, successC?: SuccessCB): void
+        stop(isStopped: boolean, successC?: SuccessCB): void
         setAppInviteOneLinkID(oneLinkID: string, successC?: SuccessCB): void
         generateInviteLink(params: GenerateInviteLinkParams, successC?: SuccessCB, errorC?: ErrorCB): void
-        trackCrossPromotionImpression(appId: string, campaign: string, parameters: object): void
-        trackAndOpenStore(appId: string, campaign: string, params: object): void
+        logCrossPromotionImpression(appId: string, campaign: string, parameters: object): void
+        logAndOpenStore(appId: string, campaign: string, params: object): void
         setCurrencyCode(currencyCode: string, successC: SuccessCB): void
-        setDeviceTrackingDisabled(isDeviceTrackingDisabled: boolean, successC: SuccessCB): void
+        setDeviceLoggingDisabled(isDeviceLoggingDisabled: boolean, successC: SuccessCB): void
         setOneLinkCustomDomains(domains: string[], successC?: SuccessCB, errorC?: ErrorCB): void
         setResolveDeepLinkURLs(urls: string[], successC?: SuccessCB, errorC?: ErrorCB): void
         performOnAppAttribution(urlString, callback): void
         setSharingFilterForAllPartners(): void
         setSharingFilter(partners, successC, errorC): void
-
-        /**
-         * For iOS Only
-         * */
-        trackAppLaunch(): void
-        trackLocation(longitude: number, latitude: number, callback: SuccessCB): void
+        logLocation(longitude: number, latitude: number, callback: SuccessCB): void
         waitForAdvertisingIdentifierWithTimeoutInterval(timeoutInterval: number, successC?: SuccessCB, errorC?: ErrorCB): void
-        requestTrackingAuthorization(successC, errorC): void
 
 
         /**
@@ -86,10 +80,6 @@ declare module "react-native-appsflyer" {
         setCollectIMEI(isCollect: boolean, successC?: SuccessCB): void
         setCollectAndroidID(isCollect: boolean, successC?: SuccessCB): void
         updateServerUninstallToken(token: string, successC?: SuccessCB): void
-        /** @deprecated - please use updateServerUninstallToken **/
-        setGCMProjectNumber(gcmProjectNumber:any, successC?:SuccessCB, errorC?:ErrorCB): void
-        /** @deprecated - please use updateServerUninstallToken **/
-        enableUninstallTracking(gcmProjectNumber:any, successC?:SuccessCB): void
     };
 
     export default appsFlyer;
