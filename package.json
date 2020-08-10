@@ -6,7 +6,7 @@
   "scripts": {
     "demo.ios": "npm run ios-pod; cd SampleApp; react-native run-ios",
     "demo.android": "cd SampleApp; react-native run-android",
-    "ios-pod": "cd SampleApp/ios; pod install"
+    "ios-pod": "cd SampleApp/ios; pod install; cd ../"
   },
   "repository": {
     "type": "git",
