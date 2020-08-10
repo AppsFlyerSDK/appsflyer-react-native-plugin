@@ -9,9 +9,23 @@
 import React, {Node} from 'react';
 import appsFlyer from 'react-native-appsflyer';
 
-import {Button, ImageBackground, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View,} from 'react-native';
+import {
+  Button,
+  ImageBackground,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
-import {Colors, DebugInstructions, LearnMoreLinks, ReloadInstructions,} from 'react-native/Libraries/NewAppScreen';
+import {
+  Colors,
+  DebugInstructions,
+  LearnMoreLinks,
+  ReloadInstructions,
+} from 'react-native/Libraries/NewAppScreen';
 
 var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
   (res) => {
