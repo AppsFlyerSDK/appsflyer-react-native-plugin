@@ -54,7 +54,7 @@ appsFlyer.logEvent = logEvent;
  *
  * @param longitude latitude as double.
  * @param latitude latitude as double.
- * @callback callback success callback function.
+ * @param callback success callback function
  */
 appsFlyer.logLocation = (longitude, latitude, callback) => {
   return RNAppsFlyer.logLocation(longitude, latitude, callback);
@@ -64,8 +64,8 @@ appsFlyer.logLocation = (longitude, latitude, callback) => {
  * Set the user emails and encrypt them.
  *
  * @param options latitude as double.
- * @callback successC success callback function.
- * @callback errorC error callback function.
+ * @param successC success callback function.
+ * @param errorC error callback function.
  */
 appsFlyer.setUserEmails = (options, successC, errorC) => {
   return RNAppsFlyer.setUserEmails(options, successC, errorC);
@@ -75,7 +75,7 @@ appsFlyer.setUserEmails = (options, successC, errorC) => {
  * Set additional data to be sent to AppsFlyer.
  *
  * @param additionalData additional data Dictionary.
- * @callback successC success callback function.
+ * @param successC success callback function.
  */
 appsFlyer.setAdditionalData = (additionalData, successC) => {
   return RNAppsFlyer.setAdditionalData(additionalData, successC);
@@ -105,7 +105,7 @@ appsFlyer.setGCMProjectNumber = (gcmProjectNumber, successC, errorC) => {
  * Manually pass the Firebase / GCM Device Token for Uninstall measurement.
  *
  * @param token Firebase Device Token.
- * @callback successC success callback function.
+ * @param successC success callback function.
  */
 appsFlyer.updateServerUninstallToken = (token, successC) => {
   return RNAppsFlyer.updateServerUninstallToken(token, successC);
@@ -116,7 +116,7 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
  * This ID is available in AppsFlyer CSV reports along with Postback APIs for cross-referencing with your internal IDs.
  *
  * @param {string} userId Customer ID for client.
- * @callback successC success callback function.
+ * @param successC callback function.
  */
 appsFlyer.setCustomerUserId = (userId, successC) => {
   return RNAppsFlyer.setCustomerUserId(userId, successC);
@@ -128,7 +128,7 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
  * This can be achieved with the stop API.
  *
  * @param {boolean} isStopped boolean should SDK be stopped.
- * @callback successC success callback function.
+ * @param successC callback function.
  */
 appsFlyer.stop = (isStopped, successC) => {
   return RNAppsFlyer.stop(isStopped, successC);
@@ -140,7 +140,7 @@ appsFlyer.stop = (isStopped, successC) => {
  * However, apps with Google play services should avoid IMEI collection as this is in violation of the Google Play policy.
  *
  * @param {boolean} isCollect boolean, false to opt out.
- * @callback successC success callback function.
+ * @param successC callback function.
  * @platform android
  */
 appsFlyer.setCollectIMEI = (isCollect, successC) => {
@@ -153,7 +153,7 @@ appsFlyer.setCollectIMEI = (isCollect, successC) => {
  * However, apps with Google play services should avoid Android ID collection as this is in violation of the Google Play policy.
  *
  * @param {boolean} isCollect boolean, false to opt out.
- * @callback successC success callback function.
+ * @param successC callback function.
  * @platform android
  */
 appsFlyer.setCollectAndroidID = (isCollect, successC) => {
@@ -165,7 +165,7 @@ appsFlyer.setCollectAndroidID = (isCollect, successC) => {
  * The link that is generated for the user invite will use this OneLink as the base link.
  *
  * @param {string} oneLinkID OneLink ID obtained from the AppsFlyer Dashboard.
- * @callback successC success callback function.
+ * @param successC callback function.
  */
 appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
   return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, successC);
@@ -176,8 +176,8 @@ appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
  * @see https://support.appsflyer.com/hc/en-us/articles/115004480866-User-invite-attribution-
  *
  * @param parameters Dictionary.
- * @callback success success callback function.
- * @callback error error callback function.
+ * @param success success callback function..
+ * @param error error callback function.
  */
 appsFlyer.generateInviteLink = (parameters, success, error) => {
   return RNAppsFlyer.generateInviteLink(parameters, success, error);
@@ -189,6 +189,7 @@ appsFlyer.generateInviteLink = (parameters, success, error) => {
  *
  * @param appId promoted App ID.
  * @param campaign cross promotion campaign.
+ * @param parameters additional params to be added to the attribution link
  */
 appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
   return RNAppsFlyer.logCrossPromotionImpression(appId, campaign, parameters);
