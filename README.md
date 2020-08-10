@@ -26,7 +26,7 @@
 - iOS AppsFlyerSDK **v6.0.1**
 - Android AppsFlyerSDK **v5.4.1**
 
-## <a id="v6-breaking-changes"> 📲 v6 Breaking Changes
+## <a id="v6-breaking-changes"> ❗ v6 Breaking Changes
 
 INSERT TABLE WITH ALL NEW API NAMES
 
@@ -39,7 +39,7 @@ $ npm install react-native-appsflyer --save
 OR
 **Beta** version from github branch: 
 ```
-$  npm install AppsFlyerSDK/appsflyer-react-native-plugin.git#dev/sdk-v6-beta
+$  npm install AppsFlyerSDK/appsflyer-react-native-plugin.git#dev/sdk-v6-beta --save
 ```
 
 
