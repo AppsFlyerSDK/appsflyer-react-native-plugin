@@ -70,7 +70,6 @@ declare module "react-native-appsflyer" {
         setSharingFilterForAllPartners(): void
         setSharingFilter(partners, successC, errorC): void
         logLocation(longitude: number, latitude: number, callback: SuccessCB): void
-        waitForAdvertisingIdentifierWithTimeoutInterval(timeoutInterval: number, successC?: SuccessCB, errorC?: ErrorCB): void
 
 
         /**

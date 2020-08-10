@@ -358,13 +358,6 @@ appsFlyer.setSharingFilter = (partners, successC, errorC) => {
   return RNAppsFlyer.setSharingFilter(partners, successC, errorC);
 }
 
-/**
- * iOS only
- */
-appsFlyer.waitForAdvertisingIdentifierWithTimeoutInterval = (timeoutInterval, successC, errorC) => {
-  return RNAppsFlyer.waitForAdvertisingIdentifierWithTimeoutInterval(timeoutInterval * 1000, successC, errorC);
-}
-
 function AFParseJSONException(_message, _data) {
   this.message = _message;
   this.data = _data;

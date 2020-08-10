@@ -16,18 +16,6 @@
 
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(waitForAdvertisingIdentifierWithTimeoutInterval:(NSTimeInterval)timeoutInterval
-                  successCallback :(RCTResponseSenderBlock)successCallback
-                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
-    if (@available(iOS 14, *)) {
-        [[AppsFlyerLib shared] waitForAdvertisingIdentifierWithTimeoutInterval:timeoutInterval];
-        successCallback(@[SUCCESS]);
-    } else {
-        NSError* error = [NSError errorWithDomain:IOS_14_ONLY code:0 userInfo:nil];
-        errorCallback(error);
-    }
-}
-
 RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
