@@ -143,7 +143,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         } else {
             // register for lifecycle with Application (cannot fetch deeplink without access to the Activity,
             // also sending first session manually)
-            trackAppLaunch();
+            instance.trackAppLaunch(application, devKey);
             instance.startTracking(application, devKey);
         }
         return null;
@@ -336,7 +336,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void stop(boolean isStopped, Callback callback) {
-        AppsFlyerLib.getInstance().stopTracking(isCollect, getReactApplicationContext());
+        AppsFlyerLib.getInstance().stopTracking(isStopped, getReactApplicationContext());
         callback.invoke(SUCCESS);
     }
 
@@ -428,52 +428,52 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
         try {
 
-        JSONObject options = RNUtil.readableMapToJson(args);
+            JSONObject options = RNUtil.readableMapToJson(args);
 
-        channel = options.optString(INVITE_CHANNEL, "");
-        campaign = options.optString(INVITE_CAMPAIGN, "");
-        referrerName = options.optString(INVITE_REFERRER, "");
-        referrerImageUrl = options.optString(INVITE_IMAGEURL, "");
-        customerID = options.optString(INVITE_CUSTOMERID, "");
-        baseDeepLink = options.optString(INVITE_DEEPLINK, "");
-        brandDomain = options.optString(INVITE_BRAND_DOMAIN, "");
+            channel = options.optString(INVITE_CHANNEL, "");
+            campaign = options.optString(INVITE_CAMPAIGN, "");
+            referrerName = options.optString(INVITE_REFERRER, "");
+            referrerImageUrl = options.optString(INVITE_IMAGEURL, "");
+            customerID = options.optString(INVITE_CUSTOMERID, "");
+            baseDeepLink = options.optString(INVITE_DEEPLINK, "");
+            brandDomain = options.optString(INVITE_BRAND_DOMAIN, "");
 
-        if (channel != null && channel != "") {
-            linkGenerator.setChannel(channel);
-        }
-        if (campaign != null && campaign != "") {
-            linkGenerator.setCampaign(campaign);
-        }
-        if (referrerName != null && referrerName != "") {
-            linkGenerator.setReferrerName(referrerName);
-        }
-        if (referrerImageUrl != null && referrerImageUrl != "") {
-            linkGenerator.setReferrerImageURL(referrerImageUrl);
-        }
-        if (customerID != null && customerID != "") {
-            linkGenerator.setReferrerCustomerId(customerID);
-        }
-        if (baseDeepLink != null && baseDeepLink != "") {
-            linkGenerator.setBaseDeeplink(baseDeepLink);
-        }
-        if (brandDomain != null && brandDomain != "") {
-            linkGenerator.setBrandDomain(brandDomain);
-        }
-
-
-
-        if (options.length() > 1 && !options.get("userParams").equals("")) {
-
-            JSONObject jsonCustomValues = options.getJSONObject("userParams");
-
-            Iterator<?> keys = jsonCustomValues.keys();
-
-            while( keys.hasNext() ) {
-                String key = (String)keys.next();
-                Object keyvalue = jsonCustomValues.get(key);
-                linkGenerator.addParameter(key, keyvalue.toString());
+            if (channel != null && channel != "") {
+                linkGenerator.setChannel(channel);
             }
-        }
+            if (campaign != null && campaign != "") {
+                linkGenerator.setCampaign(campaign);
+            }
+            if (referrerName != null && referrerName != "") {
+                linkGenerator.setReferrerName(referrerName);
+            }
+            if (referrerImageUrl != null && referrerImageUrl != "") {
+                linkGenerator.setReferrerImageURL(referrerImageUrl);
+            }
+            if (customerID != null && customerID != "") {
+                linkGenerator.setReferrerCustomerId(customerID);
+            }
+            if (baseDeepLink != null && baseDeepLink != "") {
+                linkGenerator.setBaseDeeplink(baseDeepLink);
+            }
+            if (brandDomain != null && brandDomain != "") {
+                linkGenerator.setBrandDomain(brandDomain);
+            }
+
+
+
+            if (options.length() > 1 && !options.get("userParams").equals("")) {
+
+                JSONObject jsonCustomValues = options.getJSONObject("userParams");
+
+                Iterator<?> keys = jsonCustomValues.keys();
+
+                while( keys.hasNext() ) {
+                    String key = (String)keys.next();
+                    Object keyvalue = jsonCustomValues.get(key);
+                    linkGenerator.addParameter(key, keyvalue.toString());
+                }
+            }
 
         } catch (JSONException e){
 
@@ -598,7 +598,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void logLocation(double longitude, double latitude, Callback successCallback) {
-        AppsFlyerLib.getInstance().setSharingFilterForAllPartners(getReactApplicationContext(), latitude, longitude);
+        AppsFlyerLib.getInstance().trackLocation(getReactApplicationContext(), latitude, longitude);
         successCallback.invoke(SUCCESS, longitude, latitude);
     }
 }
