@@ -217,8 +217,6 @@ appsFlyer.setCurrencyCode = (currencyCode, successC) => {
   return RNAppsFlyer.setCurrencyCode(currencyCode, successC);
 };
 
-
-
 /**
  * Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking)
  * @param callback: contains fields:
