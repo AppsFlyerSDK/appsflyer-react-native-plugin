@@ -1,7 +1,10 @@
 
 <img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="450">
 
-# React Native AppsFlyer plugin for Android and iOS. 
+# React Native AppsFlyer plugin for Android and iOS.
+
+## This is a BETA version of the ReactNative plugin for AppsFlyer SDK that is built with BETA version of iOS SDK v6.0.1. 
+**Do not use this version on Production builds!** 
 
 🛠 In order for us to provide optimal support, we would kindly ask you to submit any issues to support@appsflyer.com
 
@@ -12,6 +15,7 @@
 
 ## Table of content
 
+- [v6 Breaking changes](#v6-breaking-chenges)
 - [Adding the SDK to your project](#installation)
 - [Initializing the SDK](#init-sdk)
 - [Guides](#guides)
@@ -19,15 +23,26 @@
   
 ### <a id="plugin-build-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v5.4.1**
+- iOS AppsFlyerSDK **v6.0.1**
 - Android AppsFlyerSDK **v5.4.1**
 
+## <a id="installation"> 📲 v6 Breaking Changes
+
+INSERT TABLE WITH ALL NEW API NAMES
 
 ## <a id="installation"> 📲 Adding the SDK to your project
 
+**Production** version from npm: 
 ```
 $ npm install react-native-appsflyer --save
 ```
+OR
+**Beta** version from github branch: 
+```
+$  npm install AppsFlyerSDK/appsflyer-react-native-plugin.git#dev/sdk-v6-beta
+```
+
+
 
 Then run the following:
 
