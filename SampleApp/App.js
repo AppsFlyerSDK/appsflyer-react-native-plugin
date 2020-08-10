@@ -27,28 +27,32 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+// eslint-disable-next-line no-unused-vars
 var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
   (res) => {
     console.log('onInstallConversionData: ' + JSON.stringify(res));
-    if (JSON.parse(res.data.is_first_launch) == true) {
-      if (res.data.af_status === 'Non-organic') {
-        var media_source = res.data.media_source;
-        var campaign = res.data.campaign;
-        console.log(
-          'This is first launch and a Non-Organic install. Media source: ' +
-            media_source +
-            ' Campaign: ' +
-            campaign,
-        );
-      } else if (res.data.af_status === 'Organic') {
-        console.log('This is first launch and a Organic Install');
+    if (res.type === 'onInstallConversionSuccess') {
+      if (JSON.parse(res.data.is_first_launch) === true) {
+        if (res.data.af_status === 'Non-organic') {
+          var media_source = res.data.media_source;
+          var campaign = res.data.campaign;
+          console.log(
+            'This is first launch and a Non-Organic install. Media source: ' +
+              media_source +
+              ' Campaign: ' +
+              campaign,
+          );
+        } else if (res.data.af_status === 'Organic') {
+          console.log('This is first launch and a Organic Install');
+        }
+      } else {
+        console.log('This is not first launch');
       }
-    } else {
-      console.log('This is not first launch');
     }
   },
 );
 
+// eslint-disable-next-line no-unused-vars
 var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
   console.log(res);
 });
@@ -108,11 +112,6 @@ const App: () => React$Node = () => {
           contentInsetAdjustmentBehavior="automatic"
           style={styles.scrollView}>
           <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
           <View style={styles.body}>
             <Text style={styles.welcome}>
               {' '}
