@@ -14,25 +14,25 @@ import {Button, ImageBackground, SafeAreaView, ScrollView, StatusBar, StyleSheet
 import {Colors, DebugInstructions, LearnMoreLinks, ReloadInstructions,} from 'react-native/Libraries/NewAppScreen';
 
 var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
-    (res) => {
-      console.log('onInstallConversionData: ' + JSON.stringify(res));
-      if (JSON.parse(res.data.is_first_launch) == true) {
-        if (res.data.af_status === 'Non-organic') {
-          var media_source = res.data.media_source;
-          var campaign = res.data.campaign;
-          console.log(
-              'This is first launch and a Non-Organic install. Media source: ' +
-              media_source +
-              ' Campaign: ' +
-              campaign,
-          );
-        } else if (res.data.af_status === 'Organic') {
-          console.log('This is first launch and a Organic Install');
-        }
-      } else {
-        console.log('This is not first launch');
+  (res) => {
+    console.log('onInstallConversionData: ' + JSON.stringify(res));
+    if (JSON.parse(res.data.is_first_launch) == true) {
+      if (res.data.af_status === 'Non-organic') {
+        var media_source = res.data.media_source;
+        var campaign = res.data.campaign;
+        console.log(
+          'This is first launch and a Non-Organic install. Media source: ' +
+            media_source +
+            ' Campaign: ' +
+            campaign,
+        );
+      } else if (res.data.af_status === 'Organic') {
+        console.log('This is first launch and a Organic Install');
       }
-    },
+    } else {
+      console.log('This is not first launch');
+    }
+  },
 );
 
 var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
@@ -40,18 +40,18 @@ var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
 });
 
 appsFlyer.initSdk(
-    {
-      isDebug: true,
-      devKey: '4UGrDF4vFvPLbHq5bXtCza',
-      appId: '753258300',
-      advertisingIdWaitInterval: 60,
-    },
-    (result) => {
-      console.log('initSdk: ' + result);
-    },
-    (error) => {
-      console.error('initSdk: ' + error);
-    },
+  {
+    isDebug: true,
+    devKey: '4UGrDF4vFvPLbHq5bXtCza',
+    appId: '753258300',
+    advertisingIdWaitInterval: 60,
+  },
+  (result) => {
+    console.log('initSdk: ' + result);
+  },
+  (error) => {
+    console.error('initSdk: ' + error);
+  },
 );
 
 const App: () => React$Node = () => {
@@ -63,82 +63,82 @@ const App: () => React$Node = () => {
       af_event_param2: 'bizbuz',
     };
     appsFlyer.logEvent(
-        eventName,
-        eventValues,
-        (result) => {
-          console.log('logEvent: ' + result);
-        },
-        (error) => {
-          console.error('logEvent: ' + error);
-        },
+      eventName,
+      eventValues,
+      (result) => {
+        console.log('logEvent: ' + result);
+      },
+      (error) => {
+        console.error('logEvent: ' + error);
+      },
     );
   };
 
   const Header = (): Node => (
-      <ImageBackground
-          accessibilityRole={'image'}
-          source={require('./logo.png')}
-          style={styles.background}
-          imageStyle={styles.logo}>
-        <Text style={styles.text}>
-          Welcome to the React Native AppsFlyer Test App!
-        </Text>
-      </ImageBackground>
+    <ImageBackground
+      accessibilityRole={'image'}
+      source={require('./logo.png')}
+      style={styles.background}
+      imageStyle={styles.logo}>
+      <Text style={styles.text}>
+        Welcome to the React Native AppsFlyer Test App!
+      </Text>
+    </ImageBackground>
   );
 
   return (
-      <>
-        <StatusBar barStyle="dark-content"/>
-        <SafeAreaView>
-          <ScrollView
-              contentInsetAdjustmentBehavior="automatic"
-              style={styles.scrollView}>
-            <Header/>
-            {global.HermesInternal == null ? null : (
-                <View style={styles.engine}>
-                  <Text style={styles.footer}>Engine: Hermes</Text>
-                </View>
-            )}
-            <View style={styles.body}>
-              <Text style={styles.welcome}>
-                {' '}
-                Press to log an AppsFlyer Event!{' '}
-              </Text>
-              <Button
-                  onPress={LogEventPressed}
-                  title="Log Event"
-                  color="#009688"
-              />
-              <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>Step One</Text>
-                <Text style={styles.sectionDescription}>
-                  Edit <Text style={styles.highlight}>App.js</Text> to change this
-                  screen and then come back to see your edits.
-                </Text>
-              </View>
-              <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>See Your Changes</Text>
-                <Text style={styles.sectionDescription}>
-                  <ReloadInstructions/>
-                </Text>
-              </View>
-              <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>Debug</Text>
-                <Text style={styles.sectionDescription}>
-                  <DebugInstructions/>
-                </Text>
-              </View>
-              <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>Learn More</Text>
-                <Text style={styles.sectionDescription}>
-                  Read the docs to discover what to do next:
-                </Text>
-              </View>
-              <LearnMoreLinks/>
+    <>
+      <StatusBar barStyle="dark-content" />
+      <SafeAreaView>
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          style={styles.scrollView}>
+          <Header />
+          {global.HermesInternal == null ? null : (
+            <View style={styles.engine}>
+              <Text style={styles.footer}>Engine: Hermes</Text>
             </View>
-          </ScrollView>
-        </SafeAreaView>
-      </>
+          )}
+          <View style={styles.body}>
+            <Text style={styles.welcome}>
+              {' '}
+              Press to log an AppsFlyer Event!{' '}
+            </Text>
+            <Button
+              onPress={LogEventPressed}
+              title="Log Event"
+              color="#009688"
+            />
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>Step One</Text>
+              <Text style={styles.sectionDescription}>
+                Edit <Text style={styles.highlight}>App.js</Text> to change this
+                screen and then come back to see your edits.
+              </Text>
+            </View>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>See Your Changes</Text>
+              <Text style={styles.sectionDescription}>
+                <ReloadInstructions />
+              </Text>
+            </View>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>Debug</Text>
+              <Text style={styles.sectionDescription}>
+                <DebugInstructions />
+              </Text>
+            </View>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>Learn More</Text>
+              <Text style={styles.sectionDescription}>
+                Read the docs to discover what to do next:
+              </Text>
+            </View>
+            <LearnMoreLinks />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </>
   );
 };
 
