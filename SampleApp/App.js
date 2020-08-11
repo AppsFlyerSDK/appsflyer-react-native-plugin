@@ -92,6 +92,39 @@ const App: () => React$Node = () => {
     );
   };
 
+  const LogLocationPressed = () => {
+    appsFlyer.logLocation(32.0853, 34.781769, (result) => {
+      console.log('logLocation: ' + result);
+    });
+  };
+
+  const StopPressed = () => {
+    appsFlyer.stop(true, (res) => {
+      console.log('stop: ' + res);
+    }),
+      (err) => {
+        console.log('stop: ' + err);
+      };
+  };
+
+  const LogCrossPromotion = () => {
+    appsFlyer.logCrossPromotionImpression('1192323960', 'test', {
+      custom_param: 'custom_value',
+    });
+  };
+
+  const LogAndOpenStore = () => {
+    appsFlyer.logAndOpenStore('1192323960', 'test', {
+      custom_param: 'custom_value',
+    });
+  };
+
+  const setDeviceLoggingDisabled = () => {
+    appsFlyer.setDeviceLoggingDisabled(true, (res) => {
+      console.log('setDeviceLoggingDisabled: ' + res);
+    });
+  };
+
   const Header = (): Node => (
     <ImageBackground
       accessibilityRole={'image'}
@@ -113,15 +146,50 @@ const App: () => React$Node = () => {
           style={styles.scrollView}>
           <Header />
           <View style={styles.body}>
-            <Text style={styles.welcome}>
-              {' '}
-              Press to log an AppsFlyer Event!{' '}
-            </Text>
+            <Text style={styles.welcome}>Press to log event!</Text>
             <Button
               onPress={LogEventPressed}
               title="Log Event"
               color="#009688"
             />
+
+            <Text style={styles.welcome}>Press to log location!</Text>
+            <Button
+              onPress={LogLocationPressed}
+              title="Log Location"
+              color="#009688"
+            />
+
+            <Text style={styles.welcome}>Press to stop AF SDK!</Text>
+            <Button
+              onPress={StopPressed}
+              title="Stop SDK"
+              color="#009688"
+            />
+
+            <Text style={styles.welcome}>Press to Log cross promotion impression!</Text>
+            <Button
+              onPress={LogCrossPromotion}
+              title="Log cross promotion impression"
+              color="#009688"
+            />
+
+            <Text style={styles.welcome}>Press to Log and open Store!</Text>
+            <Button
+              onPress={LogAndOpenStore}
+              title="Log and open Store"
+              color="#009688"
+            />
+
+            <Text style={styles.welcome}>
+              Press to Set device logging disabled!
+            </Text>
+            <Button
+              onPress={setDeviceLoggingDisabled}
+              title="Set device logging disabled"
+              color="#009688"
+            />
+
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>Step One</Text>
               <Text style={styles.sectionDescription}>
