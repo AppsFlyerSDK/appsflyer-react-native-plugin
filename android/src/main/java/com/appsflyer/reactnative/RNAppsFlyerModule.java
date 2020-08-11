@@ -496,9 +496,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void logCrossPromotionImpression(final String appId, final String campaign) {
+    public void logCrossPromotionImpression(final String appId, final String campaign, final ReadableMap params) {
         if (appId != "" && campaign != "") {
-            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
+            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign, params);
         }
     }
 
