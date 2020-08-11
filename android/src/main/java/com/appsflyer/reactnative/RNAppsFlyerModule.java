@@ -496,9 +496,16 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void logCrossPromotionImpression(final String appId, final String campaign, final ReadableMap params) {
+    public void logCrossPromotionImpression(final String appId, final String campaign, ReadableMap params) {
         if (appId != "" && campaign != "") {
-            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign, params);
+            try {
+                Map<String, Object> temp = RNUtil.toMap(params);
+                Map<String, String> data = null;
+                data = (Map) temp;
+                CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign, data);
+            } catch (Exception e) {
+                CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
+            }
         }
     }
 
