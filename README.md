@@ -30,14 +30,14 @@
 
 We have renamed the following APIs:
 
-| Old API                       | New API                   |
-| ------------------------------|---------------------------|
-| trackEvent                    | logEvent                  |
-| trackLocation                 | logLocation               |
-| stopTracking                  | stop                      |
-| trackCrossPromotionImpression | logCrossPromoteImpression |
-| trackAndOpenStore             | logAndOpenStore           |
-| setDeviceTrackingDisabled     | setDeviceLoggingDisabled  |
+| Old API                       | New API                       |
+| ------------------------------|-------------------------------|
+| trackEvent                    | logEvent                      |
+| trackLocation                 | logLocation                   |
+| stopTracking                  | stop                          |
+| trackCrossPromotionImpression | logCrossPromotionImpression   |
+| trackAndOpenStore             | logAndOpenStore               |
+| setDeviceTrackingDisabled     | setDeviceLoggingDisabled      |
 
 And removed the following ones:
 

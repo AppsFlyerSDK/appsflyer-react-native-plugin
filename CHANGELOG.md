@@ -7,14 +7,14 @@
 
 _APIs renamed:_
 
-| Old API                       | New API                   |
-| ------------------------------|---------------------------|
-| trackEvent                    | logEvent                  |
-| trackLocation                 | logLocation               |
-| stopTracking                  | stop                      |
-| trackCrossPromotionImpression | logCrossPromoteImpression |
-| trackAndOpenStore             | logAndOpenStore           |
-| setDeviceTrackingDisabled     | setDeviceLoggingDisabled  |
+| Old API                       | New API                       |
+| ------------------------------|-------------------------------|
+| trackEvent                    | logEvent                      |
+| trackLocation                 | logLocation                   |
+| stopTracking                  | stop                          |
+| trackCrossPromotionImpression | logCrossPromotionImpression   |
+| trackAndOpenStore             | logAndOpenStore               |
+| setDeviceTrackingDisabled     | setDeviceLoggingDisabled      |
 
 
 _APIs removed:_
