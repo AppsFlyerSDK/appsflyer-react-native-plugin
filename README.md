@@ -36,8 +36,8 @@ We have renamed the following APIs:
 | trackLocation                 | logLocation               |
 | stopTracking                  | stop                      |
 | trackCrossPromotionImpression | logCrossPromoteImpression |
-| trackAndOpenStore             |logAndOpenStore            |
-| setDeviceTrackingDisabled     |setDeviceLoggingDisabled   |
+| trackAndOpenStore             | logAndOpenStore           |
+| setDeviceTrackingDisabled     | setDeviceLoggingDisabled  |
 
 And removed the following ones:
 
