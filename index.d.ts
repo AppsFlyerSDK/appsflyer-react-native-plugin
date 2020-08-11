@@ -29,8 +29,9 @@ declare module "react-native-appsflyer" {
 
     export interface InitSDKOptions {
         devKey:string;
-        appId?:string; //for iOS
+        appId?:string; // iOS only
         isDebug?:boolean;
+        advertisingIdWaitInterval?:number; // iOS only
     }
 
     export interface SetEmailsOptions {
