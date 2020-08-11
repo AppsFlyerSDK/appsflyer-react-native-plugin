@@ -2,12 +2,27 @@
 
 ## 6.0.0-Beta
 
+- Android SDK 5.4.1 (no change)
 - iOS SDK 6.0.0-Beta
-- Android SDK 5.4.1
 
 _APIs renamed:_
 
-track -> log
+| Old API                       | New API                   |
+| ------------------------------|---------------------------|
+| trackEvent                    | logEvent                  |
+| trackLocation                 | logLocation               |
+| stopTracking                  | stop                      |
+| trackCrossPromotionImpression | logCrossPromoteImpression |
+| trackAndOpenStore             | logAndOpenStore           |
+| setDeviceTrackingDisabled     | setDeviceLoggingDisabled  |
+
+
+_APIs removed:_
+
+- trackAppLaunch
+- enableUninstallTracking
+
+
 
 ## 5.4.1
 - Android and iOS SDK 5.4.1

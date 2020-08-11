@@ -28,7 +28,23 @@
 
 ## <a id="v6-breaking-changes"> ❗ v6 Breaking Changes
 
-INSERT TABLE WITH ALL NEW API NAMES
+We have renamed the following APIs:
+
+| Old API                       | New API                   |
+| ------------------------------|---------------------------|
+| trackEvent                    | logEvent                  |
+| trackLocation                 | logLocation               |
+| stopTracking                  | stop                      |
+| trackCrossPromotionImpression | logCrossPromoteImpression |
+| trackAndOpenStore             |logAndOpenStore            |
+| setDeviceTrackingDisabled     |setDeviceLoggingDisabled   |
+
+And removed the following ones:
+
+- trackAppLaunch
+- enableUninstallTracking
+
+If you have used 1 of the removed APIs, please check the integration guide for the updated instructions
 
 ## <a id="installation"> 📲 Adding the SDK to your project
 
