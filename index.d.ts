@@ -31,7 +31,7 @@ declare module "react-native-appsflyer" {
         devKey:string;
         appId?:string; // iOS only
         isDebug?:boolean;
-        advertisingIdWaitInterval?:number; // iOS only
+        timeToWaitForAdvertiserID?:number; // iOS only
     }
 
     export interface SetEmailsOptions {
@@ -62,9 +62,9 @@ declare module "react-native-appsflyer" {
         setAppInviteOneLinkID(oneLinkID: string, successC?: SuccessCB): void
         generateInviteLink(params: GenerateInviteLinkParams, successC?: SuccessCB, errorC?: ErrorCB): void
         logCrossPromotionImpression(appId: string, campaign: string, parameters: object): void
-        logAndOpenStore(appId: string, campaign: string, params: object): void
+        logCrossPromotionAndOpenStore(appId: string, campaign: string, params: object): void
         setCurrencyCode(currencyCode: string, successC: SuccessCB): void
-        setDeviceLoggingDisabled(isDeviceLoggingDisabled: boolean, successC: SuccessCB): void
+        anonymizeUser(shouldAnonymize: boolean, successC: SuccessCB): void
         setOneLinkCustomDomains(domains: string[], successC?: SuccessCB, errorC?: ErrorCB): void
         setResolveDeepLinkURLs(urls: string[], successC?: SuccessCB, errorC?: ErrorCB): void
         performOnAppAttribution(urlString, callback): void

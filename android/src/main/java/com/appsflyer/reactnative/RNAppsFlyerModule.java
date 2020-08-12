@@ -510,7 +510,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void logAndOpenStore(final String appId, final String campaign, ReadableMap params) {
+    public void logCrossPromotionAndOpenStore(final String appId, final String campaign, ReadableMap params) {
 
         if (appId == null || appId == "") {
             return;
@@ -529,7 +529,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setDeviceLoggingDisabled(boolean b, Callback callback){
+    public void anonymizeUser(boolean b, Callback callback){
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
         callback.invoke(SUCCESS);
     }

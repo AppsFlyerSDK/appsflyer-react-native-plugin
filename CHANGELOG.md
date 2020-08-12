@@ -13,8 +13,8 @@ _APIs renamed:_
 | trackLocation                 | logLocation                   |
 | stopTracking                  | stop                          |
 | trackCrossPromotionImpression | logCrossPromotionImpression   |
-| trackAndOpenStore             | logAndOpenStore               |
-| setDeviceTrackingDisabled     | setDeviceLoggingDisabled      |
+| trackAndOpenStore             | logCrossPromotionAndOpenStore |
+| setDeviceTrackingDisabled     | anonymizeUser                 |
 
 
 _APIs removed:_

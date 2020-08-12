@@ -62,7 +62,7 @@ appsFlyer.initSdk(
     isDebug: true,
     devKey: '4UGrDF4vFvPLbHq5bXtCza',
     appId: '753258300',
-    advertisingIdWaitInterval: 60,
+    timeToWaitForAdvertiserID: 60,
   },
   (result) => {
     console.log('initSdk: ' + result);
@@ -113,15 +113,15 @@ const App: () => React$Node = () => {
     });
   };
 
-  const LogAndOpenStore = () => {
-    appsFlyer.logAndOpenStore('1192323960', 'test', {
+  const logCrossPromotionAndOpenStore = () => {
+    appsFlyer.logCrossPromotionAndOpenStore('1192323960', 'test', {
       custom_param: 'custom_value',
     });
   };
 
-  const setDeviceLoggingDisabled = () => {
-    appsFlyer.setDeviceLoggingDisabled(true, (res) => {
-      console.log('setDeviceLoggingDisabled: ' + res);
+  const anonymizeUser = () => {
+    appsFlyer.anonymizeUser(true, (res) => {
+      console.log('anonymizeUser: ' + res);
     });
   };
 
@@ -176,7 +176,7 @@ const App: () => React$Node = () => {
 
             <Text style={styles.welcome}>Press to Log and open Store!</Text>
             <Button
-              onPress={LogAndOpenStore}
+              onPress={logCrossPromotionAndOpenStore}
               title="Log and open Store"
               color="#009688"
             />
@@ -185,7 +185,7 @@ const App: () => React$Node = () => {
               Press to Set device logging disabled!
             </Text>
             <Button
-              onPress={setDeviceLoggingDisabled}
+              onPress={anonymizeUser}
               title="Set device logging disabled"
               color="#009688"
             />

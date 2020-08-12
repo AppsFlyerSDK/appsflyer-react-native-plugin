@@ -152,7 +152,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         id isConversionDataValue = nil;
         devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
         appId = (NSString*)[initSdkOptions objectForKey: afAppId];
-        interval = (NSNumber*)[initSdkOptions objectForKey: advertisingIdWaitInterval];
+        interval = (NSNumber*)[initSdkOptions objectForKey: timeToWaitForAdvertiserID];
 
 
         isDebugValue = [initSdkOptions objectForKey: afIsDebug];
@@ -278,7 +278,7 @@ RCT_EXPORT_METHOD(logCrossPromotionImpression: (NSString *)appId campaign:(NSStr
     }
 }
 
-RCT_EXPORT_METHOD(logAndOpenStore: (NSString *)appID
+RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
                   campaign:(NSString *)campaign
                   customParams:(NSDictionary *)customParams) {
 
@@ -395,7 +395,7 @@ RCT_EXPORT_METHOD(logAndOpenStore: (NSString *)appID
     }
 }
 
-RCT_EXPORT_METHOD(setDeviceLoggingDisabled: (BOOL *)b callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(anonymizeUser: (BOOL *)b callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setDeviceLoggingDisabled:b];
     callback(@[SUCCESS]);
 }

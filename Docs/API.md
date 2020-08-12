@@ -18,9 +18,9 @@
 - [setAppInviteOneLinkID](#setAppInviteOneLinkID) 
 - [generateInviteLink](#generateInviteLink) 
 - [logCrossPromotionImpression](#logCrossPromotionImpression) 
-- [logAndOpenStore](#logAndOpenStore) 
+- [logCrossPromotionAndOpenStore](#logCrossPromotionAndOpenStore) 
 - [setCurrencyCode](#setCurrencyCode) 
-- [setDeviceLoggingDisabled](#setDeviceLoggingDisabled)
+- [anonymizeUser](#anonymizeUser)
 - [setOneLinkCustomDomains](#setOneLinkCustomDomains)
 - [setResolveDeepLinkURLs](#setResolveDeepLinkURLs)
 - [performOnAppAttribution](#performOnAppAttribution)
@@ -551,7 +551,7 @@ For more details about Cross-Promotion logging please see the relevent doc [here
 
 ---
 
-##### <a id="logAndOpenStore"> **`logAndOpenStore(appId, campaign, params)`**
+##### <a id="logCrossPromotionAndOpenStore"> **`logCrossPromotionAndOpenStore(appId, campaign, params)`**
 
 Use the following API to attribute the click and launch the app store's app page.
 
@@ -570,7 +570,7 @@ var crossPromOptions = {
   myCustomParameter: 'newUser',
 };
 
-appsFlyer.logAndOpenStore(
+appsFlyer.logCrossPromotionAndOpenStore(
   'com.myandroid.app',
   'myCampaign',
   crossPromOptions
@@ -599,7 +599,7 @@ appsFlyer.setCurrencyCode(currencyCode, () => {});
 
 ---
 
-##### <a id="setDeviceLoggingDisabled"> **`setDeviceLoggingDisabled(isDeviceLoggingDisabled, callback)`**
+##### <a id="anonymizeUser"> **`anonymizeUser(shouldAnonymize, callback)`**
 
 It is possible to anonymize specific user identifiers within AppsFlyer analytics.<br/>
 This complies with both the latest privacy requirements (GDPR, COPPA) and Facebook's data and privacy policies.<br/>
@@ -607,14 +607,14 @@ To anonymize an app user:<br/>
 
 | parameter                   | type     | description                                                |
 | ----------                  |----------|------------------                                          |
-| isDeviceLoggingDisabled    | boolean  | True if want Anonymize user Data (default value is false). |
+| shouldAnonymize             | boolean  | True if want Anonymize user Data (default value is false). |
 | callback                    | function | success callback                                           |
 
 
 *Example:*
 
 ```javascript
-appsFlyer.setDeviceLoggingDisabled(true, () => {});
+appsFlyer.anonymizeUser(true, () => {});
 ```
 
 ---

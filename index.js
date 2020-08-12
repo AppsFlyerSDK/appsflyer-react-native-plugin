@@ -202,8 +202,8 @@ appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
  * @param campaign cross promotion campaign.
  * @param params additional user params.
  */
-appsFlyer.logAndOpenStore = (appId, campaign, params) => {
-  return RNAppsFlyer.logAndOpenStore(appId, campaign, params);
+appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
+  return RNAppsFlyer.logCrossPromotionAndOpenStore(appId, campaign, params);
 };
 
 /**
@@ -314,11 +314,11 @@ appsFlyer.onAppOpenAttribution = callback => {
  * Anonymize user Data.
  * Use this API during the SDK Initialization to explicitly anonymize a user's installs, events and sessions.
  * Default is false
- * @param isDeviceLoggingDisabled boolean
+ * @param shouldAnonymize boolean
  * @param successC success callback function.
  */
-appsFlyer.setDeviceLoggingDisabled = (isDeviceLoggingDisabled, successC) => {
-  return RNAppsFlyer.setDeviceLoggingDisabled(isDeviceLoggingDisabled, successC);
+appsFlyer.anonymizeUser = (shouldAnonymize, successC) => {
+  return RNAppsFlyer.anonymizeUser(shouldAnonymize, successC);
 };
 
 /**

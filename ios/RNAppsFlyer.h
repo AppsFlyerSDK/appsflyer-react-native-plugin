@@ -25,7 +25,7 @@ static NSString *const IOS_14_ONLY                  = @"Feature only supported o
   #define afDevKey                        @"devKey"
   #define afAppId                         @"appId"
   #define afIsDebug                       @"isDebug"
-  #define advertisingIdWaitInterval       @"advertisingIdWaitInterval"
+  #define timeToWaitForAdvertiserID       @"timeToWaitForAdvertiserID"
 
   #define afEmailsCryptType               @"emailsCryptType"
   #define afEmails                        @"emails"
