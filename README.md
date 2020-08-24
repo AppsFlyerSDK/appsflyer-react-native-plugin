@@ -41,8 +41,8 @@ We have renamed the following APIs:
 
 And removed the following ones:
 
-- trackAppLaunch
-- enableUninstallTracking
+- trackAppLaunch -> no longer needed. See new init guide
+- enableUninstallTracking -> no longer needed. See new uninstall measurement guide
 
 If you have used 1 of the removed APIs, please check the integration guide for the updated instructions
 
