@@ -447,4 +447,12 @@ RCT_EXPORT_METHOD(setSharingFilter:(NSArray *)partners
     successCallback(@[SUCCESS]);
 }
 
+RCT_EXPORT_METHOD(disableAdvertiserIdentifier) {
+    [[AppsFlyerTracker sharedTracker] disableAppleAdSupportTracking];
+}
+
+RCT_EXPORT_METHOD(disableCollectASA) {
+    [[AppsFlyerTracker sharedTracker] disableIAdTracking];
+}
+
 @end

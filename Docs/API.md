@@ -26,6 +26,8 @@
 - [performOnAppAttribution](#performOnAppAttribution)
 - [setSharingFilterForAllPartners](#setSharingFilterForAllPartners)
 - [setSharingFilter](#setSharingFilter)
+- [disableCollectASA](#disableCollectASA)
+- [disableAdvertiserIdentifier](#disableAdvertiserIdentifier)
 
 ---
 
@@ -719,4 +721,33 @@ Used by advertisers to exclude **specified** networks/integrated partners from g
             console.log(error);
         })
 ```
+---
+
+##### <a id="disableCollectASA"> **`disableCollectASA(callback)`**
+  
+(iOS only)
+
+Disables Apple Search Ads collecting
+
+*Example:*
+
+```javascript
+
+appsFlyer.disableCollectASA();
+```
+
+---
+
+##### <a id="disableAdvertiserIdentifier"> **`disableAdvertiserIdentifier(callback)`**
+  
+(iOS only)
+
+Disables IDFA collecting
+
+*Example:*
+
+```javascript
+appsFlyer.disableAdvertiserIdentifier();
+```
+
 ---

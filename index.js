@@ -374,6 +374,22 @@ appsFlyer.setSharingFilter = (partners, successC, errorC) => {
   return RNAppsFlyer.setSharingFilter(partners, successC, errorC);
 }
 
+/**
+ * Disables IDFA collecting
+ * iOS only
+ */
+appsFlyer.disableAdvertiserIdentifier = () => {
+  return RNAppsFlyer.disableAdvertiserIdentifier();
+}
+
+/**
+ * Disables Apple Search Ads collecting
+ * iOS only
+ */
+appsFlyer.disableCollectASA = () => {
+  return RNAppsFlyer.disableCollectASA();
+}
+
 function AFParseJSONException(_message, _data) {
   this.message = _message;
   this.data = _data;
