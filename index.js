@@ -363,13 +363,35 @@ appsFlyer.setResolveDeepLinkURLs = (urls, successC, errorC) => {
   return RNAppsFlyer.setResolveDeepLinkURLs(urls, successC, errorC);
 };
 
+/**
+ * This function allows developers to manually re-trigger onAppOpenAttribution with a specific link (URI or URL),
+ * without recording a new re-engagement.
+ * This method may be required if the app needs to redirect users based on the given link,
+ * or resolve the AppsFlyer short URL while staying in the foreground/opened. This might be needed because
+ * regular onAppOpenAttribution callback is only called if the app was opened with the deep link.
+ * @param urlString String representing the URL that needs to be resolved/returned in the onAppOpenAttribution callback
+ * @param callback Result callback
+ */
 appsFlyer.performOnAppAttribution = (urlString, callback) => {
   return RNAppsFlyer.performOnAppAttribution(urlString, callback);
 }
 
+/**
+ * Used by advertisers to exclude **all** networks/integrated partners from getting data.
+ * Learn more - https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data
+ */
+
 appsFlyer.setSharingFilterForAllPartners = () => {
   return RNAppsFlyer.setSharingFilterForAllPartners();
 }
+
+/**
+ * Used by advertisers to exclude specified networks/integrated partners from getting data.
+ * Learn more - https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data
+ * @param partners Comma separated array of partners that need to be excluded
+ * @param successC Success callback
+ * @param errorC Error callback
+ */
 
 appsFlyer.setSharingFilter = (partners, successC, errorC) => {
   return RNAppsFlyer.setSharingFilter(partners, successC, errorC);
@@ -377,7 +399,8 @@ appsFlyer.setSharingFilter = (partners, successC, errorC) => {
 
 /**
  * Disables IDFA collecting
- * iOS only
+ * @param shouldDisable Flag to disable/enable IDFA collection
+ * @platform iOS only
  */
 appsFlyer.disableAdvertiserIdentifier = (shouldDisable) => {
   return RNAppsFlyer.disableAdvertiserIdentifier(shouldDisable);
@@ -385,7 +408,8 @@ appsFlyer.disableAdvertiserIdentifier = (shouldDisable) => {
 
 /**
  * Disables Apple Search Ads collecting
- * iOS only
+ * @param shouldDisable Flag to disable/enable Apple Search Ads data collection
+ * @platform iOS only
  */
 appsFlyer.disableCollectASA = (shouldDisable) => {
   return RNAppsFlyer.disableCollectASA(shouldDisable);
