@@ -15,6 +15,7 @@ function initSdkPromise(options): Promise<string> {
 }
 
 function initSdk(options, success, error): Promise<string> {
+  appsFlyer.appId = options.appId;
   options.onInstallConversionDataListener = eventsMap["onInstallConversionData"]
     ? true
     : false;
@@ -378,16 +379,16 @@ appsFlyer.setSharingFilter = (partners, successC, errorC) => {
  * Disables IDFA collecting
  * iOS only
  */
-appsFlyer.disableAdvertiserIdentifier = () => {
-  return RNAppsFlyer.disableAdvertiserIdentifier();
+appsFlyer.disableAdvertiserIdentifier = (shouldDisable) => {
+  return RNAppsFlyer.disableAdvertiserIdentifier(shouldDisable);
 }
 
 /**
  * Disables Apple Search Ads collecting
  * iOS only
  */
-appsFlyer.disableCollectASA = () => {
-  return RNAppsFlyer.disableCollectASA();
+appsFlyer.disableCollectASA = (shouldDisable) => {
+  return RNAppsFlyer.disableCollectASA(shouldDisable);
 }
 
 function AFParseJSONException(_message, _data) {

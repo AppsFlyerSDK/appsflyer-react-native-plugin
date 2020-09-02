@@ -75,8 +75,8 @@ declare module "react-native-appsflyer" {
          * */
         trackAppLaunch(): void
         trackLocation(longitude: number, latitude: number, callback: SuccessCB): void
-        disableAdvertiserIdentifier():void
-        disableCollectASA():void
+        disableAdvertiserIdentifier(shouldDisable: boolean):void
+        disableCollectASA(shouldDisable: boolean):void
 
         /**
          * For Android Only
