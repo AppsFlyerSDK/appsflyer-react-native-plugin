@@ -447,7 +447,7 @@ RCT_EXPORT_METHOD(setSharingFilter:(NSArray *)partners
     successCallback(@[SUCCESS]);
 }
 
-RCT_EXPORT_METHOD(disableAdvertiserIdentifier:(BOOL)shouldDisable {
+RCT_EXPORT_METHOD(disableAdvertiserIdentifier:(BOOL)shouldDisable) {
     [AppsFlyerTracker sharedTracker].disableAppleAdSupportTracking = shouldDisable;
 }
 
