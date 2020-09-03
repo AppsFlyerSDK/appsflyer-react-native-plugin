@@ -12,6 +12,6 @@
   "dependencies": {
     "react": "16.13.1",
     "react-native": "^0.63.2",
-    "react-native-appsflyer": "github:AppsFlyerSDK/appsflyer-react-native-plugin#dev/sdk-v6-beta"
+    "react-native-appsflyer": "AppsFlyerSDK/appsflyer-react-native-plugin.git#dev/sdk-v6-beta"
   }
 }
