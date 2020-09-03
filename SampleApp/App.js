@@ -182,11 +182,11 @@ const App: () => React$Node = () => {
             />
 
             <Text style={styles.welcome}>
-              Press to Set device logging disabled!
+              Press to anonymize user!
             </Text>
             <Button
               onPress={anonymizeUser}
-              title="Set device logging disabled"
+              title="Anonymize user"
               color="#009688"
             />
 
