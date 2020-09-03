@@ -83,7 +83,6 @@ declare module "react-native-appsflyer" {
         /**
          * For Android Only
          * */
-        sendDeepLinkData(callback: any): void
         setCollectIMEI(isCollect: boolean, successC?: SuccessCB): void
         setCollectAndroidID(isCollect: boolean, successC?: SuccessCB): void
         updateServerUninstallToken(token: string, successC?: SuccessCB): void

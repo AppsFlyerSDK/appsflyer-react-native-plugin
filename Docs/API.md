@@ -10,8 +10,7 @@
 - [stop](#stop) 
 - [logLocation](#logLocation) 
 - [setUserEmails](#setUserEmails) 
-- [setAdditionalData](#setAdditionalData) 
-- [sendDeepLinkData](#sendDeepLinkData) 
+- [setAdditionalData](#setAdditionalData)  
 - [updateServerUninstallToken](#updateServerUninstallToken) 
 - [setCollectIMEI](#setCollectIMEI) 
 - [setCollectAndroidID](#setCollectAndroidID) 
@@ -380,37 +379,6 @@ appsFlyer.setAdditionalData(
   }
 );
 ```
-
----
-
-##### <a id="sendDeepLinkData"> **`sendDeepLinkData(callback)`**
-  
-(Android only)
-
-Report Deep Links for Re-Targeting Attribution (Android). This method should be called when an app is opened using a deep link.
-
-| parameter       | type     | description               |
-| ----------      |----------|------------------         |
-| callback        | function | success callback |
-
-
-*Example:*
-
-```javascript
-  componentDidMount() {
-    Linking.getInitialURL()
-      .then((url) => {
-        if (appsFlyer) {
-          appsFlyer.sendDeepLinkData(url); // Report Deep Link to AppsFlyer
-          // Additional Deep Link Logic Here ...
-        }
-      })
-      .catch((err) => console.error('An error occurred', err));
-  }
-```
-
-More about Deep Links in React-Native: [React-Native Linking](https://facebook.github.io/react-native/docs/linking.html).<br/>
-More about Deep Links in Android: [Android Deep Linking , Adding Filters](https://developer.android.com/training/app-indexing/deep-linking.html#adding-filters).
 
 ---
 

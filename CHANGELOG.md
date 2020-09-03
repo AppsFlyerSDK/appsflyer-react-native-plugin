@@ -21,6 +21,7 @@ _APIs removed:_
 
 - trackAppLaunch
 - enableUninstallTracking
+- sendDeepLinkData
 
 
 ## 5.4.40

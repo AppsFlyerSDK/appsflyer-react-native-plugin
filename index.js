@@ -91,17 +91,6 @@ appsFlyer.getAppsFlyerUID = callback => {
   return RNAppsFlyer.getAppsFlyerUID(callback);
 };
 
-appsFlyer.sendDeepLinkData = callback => {
-  return RNAppsFlyer.sendDeepLinkData(callback);
-};
-
-/**
- * @deprecated
- */
-appsFlyer.setGCMProjectNumber = (gcmProjectNumber, successC, errorC) => {
-  return RNAppsFlyer.setGCMProjectNumber(gcmProjectNumber, successC, errorC);
-};
-
 /**
  * Manually pass the Firebase / GCM Device Token for Uninstall measurement.
  *

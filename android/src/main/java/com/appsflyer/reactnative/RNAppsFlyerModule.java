@@ -287,23 +287,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @Deprecated
-    @ReactMethod
-    public void sendDeepLinkData(String url) {
-        if (url != null) {
-
-            Intent intent = null;
-            Activity currentActivity = getCurrentActivity();
-
-            if (currentActivity != null) {
-                intent = currentActivity.getIntent();
-                Uri uri = Uri.parse(url);
-                intent.setData(uri);
-                AppsFlyerLib.getInstance().sendDeepLinkData(this.getCurrentActivity());
-            }
-        }
-    }
-
     @ReactMethod
     public void getAppsFlyerUID(Callback callback) {
         String appId = AppsFlyerLib.getInstance().getAppsFlyerUID(getReactApplicationContext());
