@@ -1,6 +1,6 @@
 # Versions
 
-## 6.0.2
+## 6.0.20
 
 - iOS SDK 6.0.2
 
@@ -14,14 +14,13 @@ _APIs renamed:_
 | trackCrossPromotionImpression | logCrossPromotionImpression   |
 | trackAndOpenStore             | logCrossPromotionAndOpenStore |
 | setDeviceTrackingDisabled     | anonymizeUser                 |
+| disableAdvertiserIdentifier   | disableAdvertisingIdentifier  |
 
 
 _APIs removed:_
 
 - trackAppLaunch
 - enableUninstallTracking
-
-
 
 
 ## 5.4.40

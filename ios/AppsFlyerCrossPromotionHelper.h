@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
  iOS allows you to utilize the StoreKit component to open
  the App Store while remaining in the context of your app.
  More details at https://support.appsflyer.com/hc/en-us/articles/115004481946-Cross-Promotion-Tracking#tracking-cross-promotion-impressions
-
+ 
  @param appID Promoted App ID
  @param campaign A campaign name
  @param parameters Additional params like `@{@"af_sub1": @"val", @"custom_param": @"val2" }`

@@ -27,7 +27,7 @@
 - [setSharingFilterForAllPartners](#setSharingFilterForAllPartners)
 - [setSharingFilter](#setSharingFilter)
 - [disableCollectASA](#disableCollectASA)
-- [disableAdvertiserIdentifier](#disableAdvertiserIdentifier)
+- [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
 
 ---
 
@@ -753,7 +753,7 @@ appsFlyer.disableCollectASA(true);
 
 ---
 
-##### <a id="disableAdvertiserIdentifier"> **`disableAdvertiserIdentifier(shouldDisable)`**
+##### <a id="disableAdvertisingIdentifier"> **`disableAdvertisingIdentifier(shouldDisable)`**
   
 (iOS only)
 
@@ -766,7 +766,7 @@ Disables IDFA collecting
 *Example:*
 
 ```javascript
-appsFlyer.disableAdvertiserIdentifier(true);
+appsFlyer.disableAdvertisingIdentifier(true);
 ```
 
 ---

@@ -87,7 +87,7 @@ RCT_EXPORT_METHOD(stop: (BOOL)isStopped callback:(RCTResponseSenderBlock)callbac
 }
 
 RCT_EXPORT_METHOD(logLocation: (double)longitude latitude:(double)latitude callback:(RCTResponseSenderBlock)callback) {
-    [[AppsFlyerLib shared] logLocationEvent:longitude latitude:latitude];
+    [[AppsFlyerLib shared] logLocation:longitude latitude:latitude];
     NSArray *events = @[[NSNumber numberWithDouble:longitude], [NSNumber numberWithDouble:latitude]];
     callback(@[SUCCESS, events]);
 }
@@ -396,7 +396,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 }
 
 RCT_EXPORT_METHOD(anonymizeUser: (BOOL *)b callback:(RCTResponseSenderBlock)callback) {
-    [[AppsFlyerLib shared] setDeviceLoggingDisabled:b];
+    [[AppsFlyerLib shared] anonymizeUser:b];
     callback(@[SUCCESS]);
 }
 
@@ -448,12 +448,12 @@ RCT_EXPORT_METHOD(setSharingFilter:(NSArray *)partners
     successCallback(@[SUCCESS]);
 }
 
-RCT_EXPORT_METHOD(disableAdvertiserIdentifier:(BOOL)shouldDisable) {
-    [AppsFlyerTracker sharedTracker].disableAppleAdSupportTracking = shouldDisable;
+RCT_EXPORT_METHOD(disableAdvertisingIdentifier:(BOOL)shouldDisable) {
+    [AppsFlyerLib shared].disableAdvertisingIdentifier = shouldDisable;
 }
 
 RCT_EXPORT_METHOD(disableCollectASA: (BOOL)shouldDisable) {
-    [AppsFlyerTracker sharedTracker].disableIAdTracking = shouldDisable;
+    [AppsFlyerLib shared].disableCollectASA = shouldDisable;
 }
 
 @end
