@@ -72,6 +72,13 @@ declare module "react-native-appsflyer" {
         setSharingFilter(partners, successC, errorC): void
         logLocation(longitude: number, latitude: number, callback: SuccessCB): void
 
+        /**
+         * For iOS Only
+         * */
+        trackAppLaunch(): void
+        trackLocation(longitude: number, latitude: number, callback: SuccessCB): void
+        disableAdvertiserIdentifier(shouldDisable: boolean):void
+        disableCollectASA(shouldDisable: boolean):void
 
         /**
          * For Android Only

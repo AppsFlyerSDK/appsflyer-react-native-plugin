@@ -1,9 +1,8 @@
 # Versions
 
-## 6.0.0-Beta
+## 6.0.2
 
-- Android SDK 5.4.1 (no change)
-- iOS SDK 6.0.0-Beta
+- iOS SDK 6.0.2
 
 _APIs renamed:_
 
@@ -23,6 +22,17 @@ _APIs removed:_
 - enableUninstallTracking
 
 
+
+
+## 5.4.40
+- Android SDK v5.4.3
+- iOS SDK v5.4.4 
+- Install Referrer v1.1.2
+
+_New APIs:_
+
+- disableAdvertiserIdentifier
+- disableCollectASA
 
 ## 5.4.1
 - Android and iOS SDK 5.4.1

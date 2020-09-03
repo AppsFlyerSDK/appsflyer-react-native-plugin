@@ -1,7 +1,7 @@
 # API
 
-
 - [initSdk](#initSdk)
+- [appId](#appId)
 - [onInstallConversionData](#onInstallConversionData) 
 - [onAppOpenAttribution](#onAppOpenAttribution) 
 - [logEvent](#logEvent)
@@ -26,6 +26,8 @@
 - [performOnAppAttribution](#performOnAppAttribution)
 - [setSharingFilterForAllPartners](#setSharingFilterForAllPartners)
 - [setSharingFilter](#setSharingFilter)
+- [disableCollectASA](#disableCollectASA)
+- [disableAdvertiserIdentifier](#disableAdvertiserIdentifier)
 
 ---
 
@@ -75,6 +77,17 @@ With Promise:
 try {
   var res = await appsFlyer.initSdk(options);
 } catch (err) {}
+```
+---
+
+##### <a id="appId"> **`appId`**
+
+AppsFlyer app ID property populated from `options` passed in the `initSdk` function. Can be used to read appId back later in the app
+
+*Example:*
+
+```javascript
+var appId = appsFlyer.appId;
 ```
 
 ---
@@ -719,4 +732,41 @@ Used by advertisers to exclude **specified** networks/integrated partners from g
             console.log(error);
         })
 ```
+---
+
+##### <a id="disableCollectASA"> **`disableCollectASA(shouldDisable)`**
+  
+(iOS only)
+
+Disables Apple Search Ads collecting
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| shouldDisable               | boolean  | Flag to disable/enable Apple Search Ads data collection    |
+
+*Example:*
+
+```javascript
+
+appsFlyer.disableCollectASA(true);
+```
+
+---
+
+##### <a id="disableAdvertiserIdentifier"> **`disableAdvertiserIdentifier(shouldDisable)`**
+  
+(iOS only)
+
+Disables IDFA collecting
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| shouldDisable               | boolean  | Flag to disable/enable IDFA collection    |
+
+*Example:*
+
+```javascript
+appsFlyer.disableAdvertiserIdentifier(true);
+```
+
 ---

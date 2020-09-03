@@ -13,6 +13,6 @@ Pod::Spec.new do |s|
   s.source_files     = 'ios/**/*.{h,m}'
   s.platform         = :ios, "8.0"
   s.static_framework = true
-  s.dependency 'Beta-AppsFlyerFramework', '~> 6.0.1'
+  s.dependency 'AppsFlyerFramework', '~> 6.0.2'
   s.dependency 'React'
 end
