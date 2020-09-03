@@ -33,7 +33,7 @@ e.g. Run `pod install`
 ## What did you expect to happen?
 
 ℹ Please replace these two lines with what you expected to happen.  
-e.g. Event to be tracked
+e.g. Event to be logged
 
 ## What happened instead?
 

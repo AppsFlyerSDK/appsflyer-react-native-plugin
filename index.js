@@ -17,8 +17,8 @@ function initSdkPromise(options): Promise<string> {
 function initSdk(options, success, error): Promise<string> {
   appsFlyer.appId = options.appId;
   options.onInstallConversionDataListener = eventsMap["onInstallConversionData"]
-    ? true
-    : false;
+      ? true
+      : false;
 
   if (success && error) {
     //initSdk is a callback function
@@ -30,51 +30,43 @@ function initSdk(options, success, error): Promise<string> {
 }
 appsFlyer.initSdk = initSdk;
 
-function trackEventCallback(eventName, eventValues, successC, errorC) {
-  return RNAppsFlyer.trackEvent(eventName, eventValues, successC, errorC);
+function logEventCallback(eventName, eventValues, successC, errorC) {
+  return RNAppsFlyer.logEvent(eventName, eventValues, successC, errorC);
 }
 
-function trackEventPromise(eventName, eventValues): Promise<string> {
-  return RNAppsFlyer.trackEventWithPromise(eventName, eventValues);
+function logEventPromise(eventName, eventValues): Promise<string> {
+  return RNAppsFlyer.logEventWithPromise(eventName, eventValues);
 }
 
-function trackEvent(eventName, eventValues, success, error): Promise<string> {
+function logEvent(eventName, eventValues, success, error): Promise<string> {
   if (success && error) {
-    //trackEvent is a callback function
-    trackEventCallback(eventName, eventValues, success, error);
+    //logEvent is a callback function
+    logEventCallback(eventName, eventValues, success, error);
   } else if (!success) {
-    //trackEvent is a promise function
-    return trackEventPromise(eventName, eventValues);
+    //logEvent is a promise function
+    return logEventPromise(eventName, eventValues);
   }
 }
 
-appsFlyer.trackEvent = trackEvent;
-
-/**
- * iOS only
- */
-appsFlyer.trackAppLaunch = () => {
-  return RNAppsFlyer.trackAppLaunch();
-};
+appsFlyer.logEvent = logEvent;
 
 /**
  * Manually record the location of the user
  *
  * @param longitude latitude as double.
  * @param latitude latitude as double.
- * @callback callback success callback function.
- * @platform ios only
+ * @param callback success callback function
  */
-appsFlyer.trackLocation = (longitude, latitude, callback) => {
-  return RNAppsFlyer.trackLocation(longitude, latitude, callback);
+appsFlyer.logLocation = (longitude, latitude, callback) => {
+  return RNAppsFlyer.logLocation(longitude, latitude, callback);
 };
 
 /**
  * Set the user emails and encrypt them.
  *
  * @param options latitude as double.
- * @callback successC success callback function.
- * @callback errorC error callback function.
+ * @param successC success callback function.
+ * @param errorC error callback function.
  */
 appsFlyer.setUserEmails = (options, successC, errorC) => {
   return RNAppsFlyer.setUserEmails(options, successC, errorC);
@@ -84,7 +76,7 @@ appsFlyer.setUserEmails = (options, successC, errorC) => {
  * Set additional data to be sent to AppsFlyer.
  *
  * @param additionalData additional data Dictionary.
- * @callback successC success callback function.
+ * @param successC success callback function.
  */
 appsFlyer.setAdditionalData = (additionalData, successC) => {
   return RNAppsFlyer.setAdditionalData(additionalData, successC);
@@ -99,29 +91,11 @@ appsFlyer.getAppsFlyerUID = callback => {
   return RNAppsFlyer.getAppsFlyerUID(callback);
 };
 
-appsFlyer.sendDeepLinkData = callback => {
-  return RNAppsFlyer.sendDeepLinkData(callback);
-};
-
-/**
- * @deprecated
- */
-appsFlyer.setGCMProjectNumber = (gcmProjectNumber, successC, errorC) => {
-  return RNAppsFlyer.setGCMProjectNumber(gcmProjectNumber, successC, errorC);
-};
-
-/**
- * @deprecated
- */
-appsFlyer.enableUninstallTracking = (gcmProjectNumber, successC) => {
-  return RNAppsFlyer.enableUninstallTracking(gcmProjectNumber, successC);
-};
-
 /**
  * Manually pass the Firebase / GCM Device Token for Uninstall measurement.
  *
  * @param token Firebase Device Token.
- * @callback successC success callback function.
+ * @param successC success callback function.
  */
 appsFlyer.updateServerUninstallToken = (token, successC) => {
   return RNAppsFlyer.updateServerUninstallToken(token, successC);
@@ -132,7 +106,7 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
  * This ID is available in AppsFlyer CSV reports along with Postback APIs for cross-referencing with your internal IDs.
  *
  * @param {string} userId Customer ID for client.
- * @callback successC success callback function.
+ * @param successC callback function.
  */
 appsFlyer.setCustomerUserId = (userId, successC) => {
   return RNAppsFlyer.setCustomerUserId(userId, successC);
@@ -141,13 +115,13 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
 /**
  * Once this API is invoked, our SDK no longer communicates with our servers and stops functioning.
  * In some extreme cases you might want to shut down all SDK activity due to legal and privacy compliance.
- * This can be achieved with the stopTracking API.
+ * This can be achieved with the stop API.
  *
- * @param {boolean} isStopTracking boolean should SDK be stopped.
- * @callback successC success callback function.
+ * @param {boolean} isStopped boolean should SDK be stopped.
+ * @param successC callback function.
  */
-appsFlyer.stopTracking = (isStopTracking, successC) => {
-  return RNAppsFlyer.stopTracking(isStopTracking, successC);
+appsFlyer.stop = (isStopped, successC) => {
+  return RNAppsFlyer.stop(isStopped, successC);
 };
 
 /**
@@ -156,7 +130,7 @@ appsFlyer.stopTracking = (isStopTracking, successC) => {
  * However, apps with Google play services should avoid IMEI collection as this is in violation of the Google Play policy.
  *
  * @param {boolean} isCollect boolean, false to opt out.
- * @callback successC success callback function.
+ * @param successC callback function.
  * @platform android
  */
 appsFlyer.setCollectIMEI = (isCollect, successC) => {
@@ -169,7 +143,7 @@ appsFlyer.setCollectIMEI = (isCollect, successC) => {
  * However, apps with Google play services should avoid Android ID collection as this is in violation of the Google Play policy.
  *
  * @param {boolean} isCollect boolean, false to opt out.
- * @callback successC success callback function.
+ * @param successC callback function.
  * @platform android
  */
 appsFlyer.setCollectAndroidID = (isCollect, successC) => {
@@ -181,7 +155,7 @@ appsFlyer.setCollectAndroidID = (isCollect, successC) => {
  * The link that is generated for the user invite will use this OneLink as the base link.
  *
  * @param {string} oneLinkID OneLink ID obtained from the AppsFlyer Dashboard.
- * @callback successC success callback function.
+ * @param successC callback function.
  */
 appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
   return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, successC);
@@ -192,8 +166,8 @@ appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
  * @see https://support.appsflyer.com/hc/en-us/articles/115004480866-User-invite-attribution-
  *
  * @param parameters Dictionary.
- * @callback success success callback function.
- * @callback error error callback function.
+ * @param success success callback function..
+ * @param error error callback function.
  */
 appsFlyer.generateInviteLink = (parameters, success, error) => {
   return RNAppsFlyer.generateInviteLink(parameters, success, error);
@@ -205,9 +179,10 @@ appsFlyer.generateInviteLink = (parameters, success, error) => {
  *
  * @param appId promoted App ID.
  * @param campaign cross promotion campaign.
+ * @param parameters additional params to be added to the attribution link
  */
-appsFlyer.trackCrossPromotionImpression = (appId, campaign) => {
-  return RNAppsFlyer.trackCrossPromotionImpression(appId, campaign);
+appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
+  return RNAppsFlyer.logCrossPromotionImpression(appId, campaign, parameters);
 };
 
 /**
@@ -217,8 +192,8 @@ appsFlyer.trackCrossPromotionImpression = (appId, campaign) => {
  * @param campaign cross promotion campaign.
  * @param params additional user params.
  */
-appsFlyer.trackAndOpenStore = (appId, campaign, params) => {
-  return RNAppsFlyer.trackAndOpenStore(appId, campaign, params);
+appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
+  return RNAppsFlyer.logCrossPromotionAndOpenStore(appId, campaign, params);
 };
 
 /**
@@ -231,8 +206,6 @@ appsFlyer.trackAndOpenStore = (appId, campaign, params) => {
 appsFlyer.setCurrencyCode = (currencyCode, successC) => {
   return RNAppsFlyer.setCurrencyCode(currencyCode, successC);
 };
-
-
 
 /**
  * Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking)
@@ -251,22 +224,22 @@ appsFlyer.setCurrencyCode = (currencyCode, successC) => {
 appsFlyer.onInstallConversionData = callback => {
 
   const listener = appsFlyerEventEmitter.addListener(
-    "onInstallConversionDataLoaded",
-    _data => {
-      if (callback && typeof callback === typeof Function) {
-        try {
-          let data = JSON.parse(_data);
-          callback(data);
-        } catch (_error) {
-          //throw new AFParseJSONException("...");
-          //TODO: for today we return an error in callback
-          callback(new AFParseJSONException("Invalid data structure", _data));
+      "onInstallConversionDataLoaded",
+      _data => {
+        if (callback && typeof callback === typeof Function) {
+          try {
+            let data = JSON.parse(_data);
+            callback(data);
+          } catch (_error) {
+            //throw new AFParseJSONException("...");
+            //TODO: for today we return an error in callback
+            callback(new AFParseJSONException("Invalid data structure", _data));
+          }
         }
       }
-    }
   );
 
-   eventsMap["onInstallConversionData"] = listener;
+  eventsMap["onInstallConversionData"] = listener;
 
   // unregister listener (suppose should be called from componentWillUnmount() )
   return function remove() {
@@ -277,22 +250,22 @@ appsFlyer.onInstallConversionData = callback => {
 appsFlyer.onInstallConversionFailure = callback => {
 
   const listener = appsFlyerEventEmitter.addListener(
-    "onInstallConversionFailure",
-    _data => {
-      if (callback && typeof callback === typeof Function) {
-        try {
-          let data = JSON.parse(_data);
-          callback(data);
-        } catch (_error) {
-          //throw new AFParseJSONException("...");
-          //TODO: for today we return an error in callback
-          callback(new AFParseJSONException("Invalid data structure", _data));
+      "onInstallConversionFailure",
+      _data => {
+        if (callback && typeof callback === typeof Function) {
+          try {
+            let data = JSON.parse(_data);
+            callback(data);
+          } catch (_error) {
+            //throw new AFParseJSONException("...");
+            //TODO: for today we return an error in callback
+            callback(new AFParseJSONException("Invalid data structure", _data));
+          }
         }
       }
-    }
   );
 
-   eventsMap["onInstallConversionFailure"] = listener;
+  eventsMap["onInstallConversionFailure"] = listener;
 
   // unregister listener (suppose should be called from componentWillUnmount() )
   return function remove() {
@@ -305,17 +278,17 @@ appsFlyer.onAppOpenAttribution = callback => {
   //console.log("onAppOpenAttribution is called" );
 
   const listener = appsFlyerEventEmitter.addListener(
-    "onAppOpenAttribution",
-    _data => {
-      if (callback && typeof callback === typeof Function) {
-        try {
-          let data = JSON.parse(_data);
-          callback(data);
-        } catch (_error) {
-          callback(new AFParseJSONException("Invalid data structure", _data));
+      "onAppOpenAttribution",
+      _data => {
+        if (callback && typeof callback === typeof Function) {
+          try {
+            let data = JSON.parse(_data);
+            callback(data);
+          } catch (_error) {
+            callback(new AFParseJSONException("Invalid data structure", _data));
+          }
         }
       }
-    }
   );
 
 
@@ -331,11 +304,11 @@ appsFlyer.onAppOpenAttribution = callback => {
  * Anonymize user Data.
  * Use this API during the SDK Initialization to explicitly anonymize a user's installs, events and sessions.
  * Default is false
- * @param isDeviceTrackingDisabled boolean
+ * @param shouldAnonymize boolean
  * @param successC success callback function.
  */
-appsFlyer.setDeviceTrackingDisabled = (isDeviceTrackingDisabled, successC) => {
-  return RNAppsFlyer.setDeviceTrackingDisabled(isDeviceTrackingDisabled, successC);
+appsFlyer.anonymizeUser = (shouldAnonymize, successC) => {
+  return RNAppsFlyer.anonymizeUser(shouldAnonymize, successC);
 };
 
 /**
@@ -402,8 +375,8 @@ appsFlyer.setSharingFilter = (partners, successC, errorC) => {
  * @param shouldDisable Flag to disable/enable IDFA collection
  * @platform iOS only
  */
-appsFlyer.disableAdvertiserIdentifier = (shouldDisable) => {
-  return RNAppsFlyer.disableAdvertiserIdentifier(shouldDisable);
+appsFlyer.disableAdvertisingIdentifier = (shouldDisable) => {
+  return RNAppsFlyer.disableAdvertisingIdentifier(shouldDisable);
 }
 
 /**

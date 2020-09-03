@@ -1,7 +1,7 @@
 
 <img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="450">
 
-# React Native AppsFlyer plugin for Android and iOS. 
+# React Native AppsFlyer plugin for Android and iOS.
 
 🛠 In order for us to provide optimal support, we would kindly ask you to submit any issues to support@appsflyer.com
 
@@ -12,6 +12,7 @@
 
 ## Table of content
 
+- [v6 Breaking changes](#v6-breaking-changes)
 - [Adding the SDK to your project](#installation)
 - [Initializing the SDK](#init-sdk)
 - [Guides](#guides)
@@ -19,12 +20,33 @@
   
 ### <a id="plugin-build-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v5.4.4**
+- iOS AppsFlyerSDK **v6.0.2**
 - Android AppsFlyerSDK **v5.4.3**
 
+## <a id="v6-breaking-changes"> ❗ v6 Breaking Changes
+
+We have renamed the following APIs:
+
+| Old API                       | New API                       |
+| ------------------------------|-------------------------------|
+| trackEvent                    | logEvent                      |
+| trackLocation                 | logLocation                   |
+| stopTracking                  | stop                          |
+| trackCrossPromotionImpression | logCrossPromotionImpression   |
+| trackAndOpenStore             | logCrossPromotionAndOpenStore               |
+| setDeviceTrackingDisabled     | anonymizeUser                 |
+
+And removed the following ones:
+
+- trackAppLaunch -> no longer needed. See new init guide
+- sendDeepLinkData -> no longer needed. See new init guide
+- enableUninstallTracking -> no longer needed. See new uninstall measurement guide
+
+If you have used 1 of the removed APIs, please check the integration guide for the updated instructions
 
 ## <a id="installation"> 📲 Adding the SDK to your project
 
+**Production** version from npm: 
 ```
 $ npm install react-native-appsflyer --save
 ```
@@ -76,14 +98,12 @@ appsFlyer.initSdk(
 | isDebug    | Debug mode - set to `true` for testing only  |
 
 
-**Important** - For iOS another step is required. AppState logic is required to record Background-to-foreground transitions. Check out the [relevant guide](./Docs/API.md#--appsflyertrackapplaunch-void) to see how this mandatory step is implemented.
-
  ## <a id="guides"> 📖 Guides
 
 Great installation and setup guides can be viewed [here](/Docs/Guides.md).
 - [init SDK Guide](/Docs/Guides.md#init-sdk)
 - [Deeplinking Guide](/Docs/Guides.md#deeplinking)
-- [Uninstall Guide](/Docs/Guides.md#track-app-uninstalls)
+- [Uninstall Guide](/Docs/Guides.md#measure-app-uninstalls)
 
 
 

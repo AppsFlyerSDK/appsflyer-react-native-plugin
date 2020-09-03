@@ -4,30 +4,29 @@
 - [appId](#appId)
 - [onInstallConversionData](#onInstallConversionData) 
 - [onAppOpenAttribution](#onAppOpenAttribution) 
-- [trackEvent](#trackEvent)
+- [logEvent](#logEvent)
 - [setCustomerUserId](#setCustomerUserId) 
 - [getAppsFlyerUID](#getAppsFlyerUID) 
-- [stopTracking](#stopTracking) 
-- [trackLocation](#trackLocation) 
+- [stop](#stop) 
+- [logLocation](#logLocation) 
 - [setUserEmails](#setUserEmails) 
-- [setAdditionalData](#setAdditionalData) 
-- [sendDeepLinkData](#sendDeepLinkData) 
+- [setAdditionalData](#setAdditionalData)  
 - [updateServerUninstallToken](#updateServerUninstallToken) 
 - [setCollectIMEI](#setCollectIMEI) 
 - [setCollectAndroidID](#setCollectAndroidID) 
 - [setAppInviteOneLinkID](#setAppInviteOneLinkID) 
 - [generateInviteLink](#generateInviteLink) 
-- [trackCrossPromotionImpression](#trackCrossPromotionImpression) 
-- [trackAndOpenStore](#trackAndOpenStore) 
+- [logCrossPromotionImpression](#logCrossPromotionImpression) 
+- [logCrossPromotionAndOpenStore](#logCrossPromotionAndOpenStore) 
 - [setCurrencyCode](#setCurrencyCode) 
-- [setDeviceTrackingDisabled](#setDeviceTrackingDisabled)
+- [anonymizeUser](#anonymizeUser)
 - [setOneLinkCustomDomains](#setOneLinkCustomDomains)
 - [setResolveDeepLinkURLs](#setResolveDeepLinkURLs)
 - [performOnAppAttribution](#performOnAppAttribution)
 - [setSharingFilterForAllPartners](#setSharingFilterForAllPartners)
 - [setSharingFilter](#setSharingFilter)
 - [disableCollectASA](#disableCollectASA)
-- [disableAdvertiserIdentifier](#disableAdvertiserIdentifier)
+- [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
 
 ---
 
@@ -182,7 +181,7 @@ appsFlyer.initSdk(/*...*/);
 
 ---
 
-##### <a id="trackEvent"> **`trackEvent(eventName, eventValues, success, error)`**
+##### <a id="logEvent"> **`logEvent(eventName, eventValues, success, error)`**
 
 In-App Events provide insight on what is happening in your app. It is recommended to take the time and define the events you want to measure to allow you to measure ROI (Return on Investment) and LTV (Lifetime Value).
 
@@ -207,7 +206,7 @@ const eventValues = {
   af_revenue: '2',
 };
 
-appsFlyer.trackEvent(
+appsFlyer.logEvent(
   eventName,
   eventValues,
   (res) => {
@@ -266,7 +265,7 @@ appsFlyer.getAppsFlyerUID((err, appsFlyerUID) => {
 
 ---
 
-##### <a id="stopTracking"> **`stopTracking(isStopTracking, callback)`**
+##### <a id="stop"> **`stop(isStopped, callback)`**
 
 In some extreme cases you might want to shut down all SDK functions due to legal and privacy compliance. This can be achieved with the stopSDK API. Once this API is invoked, our SDK no longer communicates with our servers and stops functioning.
 
@@ -276,21 +275,21 @@ In any event, the SDK can be reactivated by calling the same API, by passing fal
 
 | parameter       | type     | description                                          |
 | ----------      |----------|------------------                                    |
-| isStopTracking  | boolean  | True if the SDK is stopped (default value is false). |
+| isStopped  | boolean  | True if the SDK is stopped (default value is false). |
 | callback        | function | success callback                                     |
 
 
 *Example:*
 
 ```javascript
-appsFlyer.stopTracking(true, (res) => {
+appsFlyer.stop(true, (res) => {
   //...
 });
 ```
 
 ---
 
-##### <a id="trackLocation"> **`trackLocation(longitude, latitude, callback)`**
+##### <a id="logLocation"> **`logLocation(longitude, latitude, callback)`**
 
 Manually record the location of the user.
 
@@ -307,7 +306,7 @@ Manually record the location of the user.
 const latitude = -18.406655;
 const longitude = 46.40625;
 
-appsFlyer.trackLocation(longitude, latitude, (err, coords) => {
+appsFlyer.logLocation(longitude, latitude, (err, coords) => {
   if (err) {
     console.error(err);
   } else {
@@ -380,37 +379,6 @@ appsFlyer.setAdditionalData(
   }
 );
 ```
-
----
-
-##### <a id="sendDeepLinkData"> **`sendDeepLinkData(callback)`**
-  
-(Android only)
-
-Report Deep Links for Re-Targeting Attribution (Android). This method should be called when an app is opened using a deep link.
-
-| parameter       | type     | description               |
-| ----------      |----------|------------------         |
-| callback        | function | success callback |
-
-
-*Example:*
-
-```javascript
-  componentDidMount() {
-    Linking.getInitialURL()
-      .then((url) => {
-        if (appsFlyer) {
-          appsFlyer.sendDeepLinkData(url); // Report Deep Link to AppsFlyer
-          // Additional Deep Link Logic Here ...
-        }
-      })
-      .catch((err) => console.error('An error occurred', err));
-  }
-```
-
-More about Deep Links in React-Native: [React-Native Linking](https://facebook.github.io/react-native/docs/linking.html).<br/>
-More about Deep Links in Android: [Android Deep Linking , Adding Filters](https://developer.android.com/training/app-indexing/deep-linking.html#adding-filters).
 
 ---
 
@@ -542,7 +510,7 @@ A complete list of supported parameters is available [here](https://support.apps
 
 ---
 
-##### <a id="trackCrossPromotionImpression"> **`trackCrossPromotionImpression(appId, campaign)`**
+##### <a id="logCrossPromotionImpression"> **`logCrossPromotionImpression(appId, campaign)`**
 
 To attribute an impression use the following API call.<br/>
 Make sure to use the promoted App ID as it appears within the AppsFlyer dashboard.
@@ -557,14 +525,14 @@ Make sure to use the promoted App ID as it appears within the AppsFlyer dashboar
 *Example:*
 
 ```javascript
-appsFlyer.trackCrossPromotionImpression("com.myandroid.app", "myCampaign");
+appsFlyer.logCrossPromotionImpression("com.myandroid.app", "myCampaign");
 ```
 
-For more details about Cross-Promotion tracking please see the relevent doc [here](https://support.appsflyer.com/hc/en-us/articles/115004481946-Cross-Promotion-Tracking).
+For more details about Cross-Promotion logging please see the relevent doc [here](https://support.appsflyer.com/hc/en-us/articles/115004481946-Cross-Promotion-Tracking).
 
 ---
 
-##### <a id="trackAndOpenStore"> **`trackAndOpenStore(appId, campaign, params)`**
+##### <a id="logCrossPromotionAndOpenStore"> **`logCrossPromotionAndOpenStore(appId, campaign, params)`**
 
 Use the following API to attribute the click and launch the app store's app page.
 
@@ -583,7 +551,7 @@ var crossPromOptions = {
   myCustomParameter: 'newUser',
 };
 
-appsFlyer.trackAndOpenStore(
+appsFlyer.logCrossPromotionAndOpenStore(
   'com.myandroid.app',
   'myCampaign',
   crossPromOptions
@@ -612,7 +580,7 @@ appsFlyer.setCurrencyCode(currencyCode, () => {});
 
 ---
 
-##### <a id="setDeviceTrackingDisabled"> **`setDeviceTrackingDisabled(isDeviceTrackingDisabled, callback)`**
+##### <a id="anonymizeUser"> **`anonymizeUser(shouldAnonymize, callback)`**
 
 It is possible to anonymize specific user identifiers within AppsFlyer analytics.<br/>
 This complies with both the latest privacy requirements (GDPR, COPPA) and Facebook's data and privacy policies.<br/>
@@ -620,14 +588,14 @@ To anonymize an app user:<br/>
 
 | parameter                   | type     | description                                                |
 | ----------                  |----------|------------------                                          |
-| isDeviceTrackingDisabled    | boolean  | True if want Anonymize user Data (default value is false). |
+| shouldAnonymize             | boolean  | True if want Anonymize user Data (default value is false). |
 | callback                    | function | success callback                                           |
 
 
 *Example:*
 
 ```javascript
-appsFlyer.setDeviceTrackingDisabled(true, () => {});
+appsFlyer.anonymizeUser(true, () => {});
 ```
 
 ---
@@ -753,7 +721,7 @@ appsFlyer.disableCollectASA(true);
 
 ---
 
-##### <a id="disableAdvertiserIdentifier"> **`disableAdvertiserIdentifier(shouldDisable)`**
+##### <a id="disableAdvertisingIdentifier"> **`disableAdvertisingIdentifier(shouldDisable)`**
   
 (iOS only)
 
@@ -766,7 +734,7 @@ Disables IDFA collecting
 *Example:*
 
 ```javascript
-appsFlyer.disableAdvertiserIdentifier(true);
+appsFlyer.disableAdvertisingIdentifier(true);
 ```
 
 ---

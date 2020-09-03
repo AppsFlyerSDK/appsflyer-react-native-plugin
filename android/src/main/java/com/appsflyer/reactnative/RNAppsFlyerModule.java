@@ -126,7 +126,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         isConversionData = options.optBoolean(afConversionData, false);
 
         if (isDebug == true) {
-            Log.d("AppsFlyer", "Starting Tracking");
+            Log.d("AppsFlyer", "Starting SDK");
         }
 
         instance.init(
@@ -143,7 +143,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         } else {
             // register for lifecycle with Application (cannot fetch deeplink without access to the Activity,
             // also sending first session manually)
-            trackAppLaunch();
+            instance.trackAppLaunch(application, devKey);
             instance.startTracking(application, devKey);
         }
         return null;
@@ -228,13 +228,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         };
     }
 
-    private void trackAppLaunch() {
-        Context c = application.getApplicationContext();
-        AppsFlyerLib.getInstance().trackEvent(c, null, null);
-    }
-
-
-    private String trackEventInternal(final String eventName, ReadableMap eventData) {
+    private String logEventInternal(final String eventName, ReadableMap eventData) {
 
         if (eventName.trim().equals("")) {
             return NO_EVENT_NAME_FOUND;
@@ -256,12 +250,12 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void trackEvent(
+    public void logEvent(
             final String eventName, ReadableMap eventData,
             Callback successCallback,
             Callback errorCallback) {
         try {
-            final String errorReason = trackEventInternal(eventName, eventData);
+            final String errorReason = logEventInternal(eventName, eventData);
 
             if (errorReason != null) {
                 errorCallback.invoke(new Exception(errorReason).getMessage());
@@ -276,10 +270,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void trackEventWithPromise(
+    public void logEventWithPromise(
             final String eventName, ReadableMap eventData, Promise promise) {
         try {
-            final String errorReason = trackEventInternal(eventName, eventData);
+            final String errorReason = logEventInternal(eventName, eventData);
 
             if (errorReason != null) {
                 promise.reject(errorReason, new Exception(errorReason).getMessage());
@@ -293,56 +287,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @Deprecated
-    @ReactMethod
-    public void sendDeepLinkData(String url) {
-        if (url != null) {
-
-            Intent intent = null;
-            Activity currentActivity = getCurrentActivity();
-
-            if (currentActivity != null) {
-                intent = currentActivity.getIntent();
-                Uri uri = Uri.parse(url);
-                intent.setData(uri);
-                AppsFlyerLib.getInstance().sendDeepLinkData(this.getCurrentActivity());
-            }
-        }
-    }
-
-    @Deprecated
-    @ReactMethod
-    public void sendTrackingWithEvent(final String eventName) {
-        AppsFlyerLib.getInstance().trackEvent(getReactApplicationContext(), eventName, null);
-    }
-
     @ReactMethod
     public void getAppsFlyerUID(Callback callback) {
         String appId = AppsFlyerLib.getInstance().getAppsFlyerUID(getReactApplicationContext());
         callback.invoke(null, appId);
-    }
-
-    /**
-    Deprecated - please use updateServerUninstallToken
-    */
-    @ReactMethod
-    @Deprecated
-    public void setGCMProjectNumber(final String gcmProjectNumber,
-                                    Callback successCallback,
-                                    Callback errorCallback) {
-       // AppsFlyerLib.getInstance().setGCMProjectNumber(gcmProjectNumber);
-        errorCallback.invoke("Deprecated - please use updateServerUninstallToken");
-    }
-
-    /**
-    Deprecated - please use updateServerUninstallToken
-    */
-    @ReactMethod
-    @Deprecated
-    public void enableUninstallTracking(final String gcmProjectNumber,
-                                        Callback successCallback) {
-        //AppsFlyerLib.getInstance().enableUninstallTracking(gcmProjectNumber);
-        successCallback.invoke("Deprecated - please use updateServerUninstallToken");
     }
 
     @ReactMethod
@@ -370,8 +318,8 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void stopTracking(boolean isCollect, Callback callback) {
-        AppsFlyerLib.getInstance().stopTracking(isCollect, getReactApplicationContext());
+    public void stop(boolean isStopped, Callback callback) {
+        AppsFlyerLib.getInstance().stopTracking(isStopped, getReactApplicationContext());
         callback.invoke(SUCCESS);
     }
 
@@ -463,52 +411,52 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
         try {
 
-        JSONObject options = RNUtil.readableMapToJson(args);
+            JSONObject options = RNUtil.readableMapToJson(args);
 
-        channel = options.optString(INVITE_CHANNEL, "");
-        campaign = options.optString(INVITE_CAMPAIGN, "");
-        referrerName = options.optString(INVITE_REFERRER, "");
-        referrerImageUrl = options.optString(INVITE_IMAGEURL, "");
-        customerID = options.optString(INVITE_CUSTOMERID, "");
-        baseDeepLink = options.optString(INVITE_DEEPLINK, "");
-        brandDomain = options.optString(INVITE_BRAND_DOMAIN, "");
+            channel = options.optString(INVITE_CHANNEL, "");
+            campaign = options.optString(INVITE_CAMPAIGN, "");
+            referrerName = options.optString(INVITE_REFERRER, "");
+            referrerImageUrl = options.optString(INVITE_IMAGEURL, "");
+            customerID = options.optString(INVITE_CUSTOMERID, "");
+            baseDeepLink = options.optString(INVITE_DEEPLINK, "");
+            brandDomain = options.optString(INVITE_BRAND_DOMAIN, "");
 
-        if (channel != null && channel != "") {
-            linkGenerator.setChannel(channel);
-        }
-        if (campaign != null && campaign != "") {
-            linkGenerator.setCampaign(campaign);
-        }
-        if (referrerName != null && referrerName != "") {
-            linkGenerator.setReferrerName(referrerName);
-        }
-        if (referrerImageUrl != null && referrerImageUrl != "") {
-            linkGenerator.setReferrerImageURL(referrerImageUrl);
-        }
-        if (customerID != null && customerID != "") {
-            linkGenerator.setReferrerCustomerId(customerID);
-        }
-        if (baseDeepLink != null && baseDeepLink != "") {
-            linkGenerator.setBaseDeeplink(baseDeepLink);
-        }
-        if (brandDomain != null && brandDomain != "") {
-            linkGenerator.setBrandDomain(brandDomain);
-        }
-
-
-
-        if (options.length() > 1 && !options.get("userParams").equals("")) {
-
-            JSONObject jsonCustomValues = options.getJSONObject("userParams");
-
-            Iterator<?> keys = jsonCustomValues.keys();
-
-            while( keys.hasNext() ) {
-                String key = (String)keys.next();
-                Object keyvalue = jsonCustomValues.get(key);
-                linkGenerator.addParameter(key, keyvalue.toString());
+            if (channel != null && channel != "") {
+                linkGenerator.setChannel(channel);
             }
-        }
+            if (campaign != null && campaign != "") {
+                linkGenerator.setCampaign(campaign);
+            }
+            if (referrerName != null && referrerName != "") {
+                linkGenerator.setReferrerName(referrerName);
+            }
+            if (referrerImageUrl != null && referrerImageUrl != "") {
+                linkGenerator.setReferrerImageURL(referrerImageUrl);
+            }
+            if (customerID != null && customerID != "") {
+                linkGenerator.setReferrerCustomerId(customerID);
+            }
+            if (baseDeepLink != null && baseDeepLink != "") {
+                linkGenerator.setBaseDeeplink(baseDeepLink);
+            }
+            if (brandDomain != null && brandDomain != "") {
+                linkGenerator.setBrandDomain(brandDomain);
+            }
+
+
+
+            if (options.length() > 1 && !options.get("userParams").equals("")) {
+
+                JSONObject jsonCustomValues = options.getJSONObject("userParams");
+
+                Iterator<?> keys = jsonCustomValues.keys();
+
+                while( keys.hasNext() ) {
+                    String key = (String)keys.next();
+                    Object keyvalue = jsonCustomValues.get(key);
+                    linkGenerator.addParameter(key, keyvalue.toString());
+                }
+            }
 
         } catch (JSONException e){
 
@@ -531,14 +479,21 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void trackCrossPromotionImpression(final String appId, final String campaign) {
+    public void logCrossPromotionImpression(final String appId, final String campaign, ReadableMap params) {
         if (appId != "" && campaign != "") {
-            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
+            try {
+                Map<String, Object> temp = RNUtil.toMap(params);
+                Map<String, String> data = null;
+                data = (Map) temp;
+                CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign, data);
+            } catch (Exception e) {
+                CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
+            }
         }
     }
 
     @ReactMethod
-    public void trackAndOpenStore(final String appId, final String campaign, ReadableMap params) {
+    public void logCrossPromotionAndOpenStore(final String appId, final String campaign, ReadableMap params) {
 
         if (appId == null || appId == "") {
             return;
@@ -557,7 +512,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setDeviceTrackingDisabled(boolean b, Callback callback){
+    public void anonymizeUser(boolean b, Callback callback){
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
         callback.invoke(SUCCESS);
     }
@@ -629,5 +584,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             e.printStackTrace();
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
         }
+    }
+
+    @ReactMethod
+    public void logLocation(double longitude, double latitude, Callback successCallback) {
+        AppsFlyerLib.getInstance().trackLocation(getReactApplicationContext(), latitude, longitude);
+        successCallback.invoke(SUCCESS, longitude, latitude);
     }
 }

@@ -1,5 +1,29 @@
 # Versions
 
+## 6.0.20
+
+- iOS SDK 6.0.2
+
+_APIs renamed:_
+
+| Old API                       | New API                       |
+| ------------------------------|-------------------------------|
+| trackEvent                    | logEvent                      |
+| trackLocation                 | logLocation                   |
+| stopTracking                  | stop                          |
+| trackCrossPromotionImpression | logCrossPromotionImpression   |
+| trackAndOpenStore             | logCrossPromotionAndOpenStore |
+| setDeviceTrackingDisabled     | anonymizeUser                 |
+| disableAdvertiserIdentifier   | disableAdvertisingIdentifier  |
+
+
+_APIs removed:_
+
+- trackAppLaunch
+- enableUninstallTracking
+- sendDeepLinkData
+
+
 ## 5.4.40
 - Android SDK v5.4.3
 - iOS SDK v5.4.4 
