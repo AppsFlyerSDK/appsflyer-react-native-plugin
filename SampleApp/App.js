@@ -56,16 +56,19 @@ var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
 var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
   console.log(res);
 });
-
+appsFlyer.setCustomerUserId("testID");
 appsFlyer.initSdk(
   {
     isDebug: true,
     devKey: '4UGrDF4vFvPLbHq5bXtCza',
     appId: '753258300',
-    timeToWaitForAdvertiserID: 60,
+    timeToWaitForATTUserAuthorization: 60,
   },
   (result) => {
     console.log('initSdk: ' + result);
+    if (Platform.OS === 'android') {
+      appsFlyer.setCollectAndroidID(true)
+    }
   },
   (error) => {
     console.error('initSdk: ' + error);

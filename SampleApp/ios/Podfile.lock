@@ -1,5 +1,5 @@
 PODS:
-  - AppsFlyerFramework (6.0.2)
+  - AppsFlyerFramework (6.0.3)
   - boost-for-react-native (1.63.0)
   - CocoaAsyncSocket (7.6.4)
   - CocoaLibEvent (1.0.0)
@@ -237,8 +237,8 @@ PODS:
     - React-cxxreact (= 0.63.2)
     - React-jsi (= 0.63.2)
   - React-jsinspector (0.63.2)
-  - react-native-appsflyer (6.0.20):
-    - AppsFlyerFramework (~> 6.0.2)
+  - react-native-appsflyer (6.0.30):
+    - AppsFlyerFramework (~> 6.0.3)
     - React
   - React-RCTActionSheet (0.63.2):
     - React-Core/RCTActionSheetHeaders (= 0.63.2)
@@ -427,7 +427,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  AppsFlyerFramework: 9e0cd7b807ccd375a87bef34fd50049f4c655eef
+  AppsFlyerFramework: 89ae0155d63b1890676ed22cf8a0752b9f22c9e6
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   CocoaAsyncSocket: 694058e7c0ed05a9e217d1b3c7ded962f4180845
   CocoaLibEvent: 2fab71b8bd46dd33ddb959f7928ec5909f838e3f
@@ -454,7 +454,7 @@ SPEC CHECKSUMS:
   React-jsi: 54245e1d5f4b690dec614a73a3795964eeef13a8
   React-jsiexecutor: 8ca588cc921e70590820ce72b8789b02c67cce38
   React-jsinspector: b14e62ebe7a66e9231e9581279909f2fc3db6606
-  react-native-appsflyer: cd59d41093d264f5e54dc431632e910ece6595c0
+  react-native-appsflyer: 8c3ddae37f526ae860d5cf6fc95207dc51f9d6a6
   React-RCTActionSheet: 910163b6b09685a35c4ebbc52b66d1bfbbe39fc5
   React-RCTAnimation: 9a883bbe1e9d2e158d4fb53765ed64c8dc2200c6
   React-RCTBlob: 39cf0ece1927996c4466510e25d2105f67010e13

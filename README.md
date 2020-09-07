@@ -20,7 +20,7 @@
   
 ### <a id="plugin-build-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v6.0.2**
+- iOS AppsFlyerSDK **v6.0.3**
 - Android AppsFlyerSDK **v5.4.3**
 
 ## <a id="v6-breaking-changes"> ❗ v6 Breaking Changes
@@ -33,7 +33,7 @@ We have renamed the following APIs:
 | trackLocation                 | logLocation                   |
 | stopTracking                  | stop                          |
 | trackCrossPromotionImpression | logCrossPromotionImpression   |
-| trackAndOpenStore             | logCrossPromotionAndOpenStore               |
+| trackAndOpenStore             | logCrossPromotionAndOpenStore |
 | setDeviceTrackingDisabled     | anonymizeUser                 |
 
 And removed the following ones:

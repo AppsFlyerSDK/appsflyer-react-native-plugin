@@ -78,12 +78,16 @@ RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback) {
 
 RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setCustomerUserID:userId];
-    callback(@[SUCCESS]);
+    if (callback != nil) {
+        callback(@[SUCCESS]);
+    }
 }
 
 RCT_EXPORT_METHOD(stop: (BOOL)isStopped callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerLib shared].isStopped  = isStopped;
-    callback(@[SUCCESS]);
+    if (callback != nil) {
+        callback(@[SUCCESS]);
+    }
 }
 
 RCT_EXPORT_METHOD(logLocation: (double)longitude latitude:(double)latitude callback:(RCTResponseSenderBlock)callback) {
@@ -108,12 +112,6 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
             int _t = [emailsCryptTypeId intValue];
 
             switch (_t) {
-                case EmailCryptTypeSHA1:
-                    emailsCryptType = EmailCryptTypeSHA1;
-                    break;
-                case EmailCryptTypeMD5:
-                    emailsCryptType = EmailCryptTypeMD5;
-                    break;
                 case EmailCryptTypeSHA256:
                     emailsCryptType = EmailCryptTypeSHA256;
                     break;
@@ -152,7 +150,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         id isConversionDataValue = nil;
         devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
         appId = (NSString*)[initSdkOptions objectForKey: afAppId];
-        interval = (NSNumber*)[initSdkOptions objectForKey: timeToWaitForAdvertiserID];
+        interval = (NSNumber*)[initSdkOptions objectForKey: timeToWaitForATTUserAuthorization];
 
 
         isDebugValue = [initSdkOptions objectForKey: afIsDebug];
@@ -186,7 +184,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 
         if (interval != 0 && interval != nil){
             double timeoutInterval = [interval doubleValue];
-            [[AppsFlyerLib shared] waitForAdvertisingIdentifierWithTimeoutInterval:timeoutInterval];
+            [[AppsFlyerLib shared] waitForATTUserAuthorizationWithTimeoutInterval:timeoutInterval];
         }
 
         [AppsFlyerLib shared].appleAppID = appId;
@@ -220,19 +218,25 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 
 RCT_EXPORT_METHOD(setAdditionalData: (NSDictionary *)additionalData callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setAdditionalData:additionalData];
-    callback(@[SUCCESS]);
+    if (callback != nil) {
+        callback(@[SUCCESS]);
+    }
 }
 
 //USER INVITES
 
 RCT_EXPORT_METHOD(setAppInviteOneLinkID: (NSString *)oneLinkID callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerLib shared].appInviteOneLinkID = oneLinkID;
-    callback(@[SUCCESS]);
+    if (callback != nil) {
+        callback(@[SUCCESS]);
+    }
 }
 
 RCT_EXPORT_METHOD(setCurrencyCode: (NSString *)currencyCode callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setCurrencyCode:currencyCode];
-    callback(@[SUCCESS]);
+    if (callback != nil) {
+        callback(@[SUCCESS]);
+    }
 }
 
 RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
@@ -397,7 +401,9 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 
 RCT_EXPORT_METHOD(anonymizeUser: (BOOL *)b callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerLib shared].anonymizeUser = b;
-    callback(@[SUCCESS]);
+    if (callback != nil) {
+        callback(@[SUCCESS]);
+    }
 }
 
 RCT_EXPORT_METHOD(updateServerUninstallToken: (NSString *)deviceToken callback:(RCTResponseSenderBlock)callback) {
@@ -431,10 +437,16 @@ RCT_EXPORT_METHOD(setResolveDeepLinkURLs:(NSArray *) urls
 }
 
 RCT_EXPORT_METHOD(performOnAppAttribution:(NSString *) urlString
-                  callback :(RCTResponseSenderBlock)callback) {
+                    successCallback :(RCTResponseSenderBlock)successCallback
+                    errorCallback:(RCTResponseErrorBlock)errorCallback) {
     NSURL *url = [NSURL URLWithString:urlString];
-    [[AppsFlyerLib shared] performOnAppAttributionWithURL:url];
-    callback(@[SUCCESS]);
+    if (url == nil) {
+        NSError* error = [NSError errorWithDomain:INVALID_URI code:0 userInfo:nil];
+        errorCallback(error);
+    } else {
+        [[AppsFlyerLib shared] performOnAppAttributionWithURL:url];
+        successCallback(@[SUCCESS]);
+    }
 }
 
 RCT_EXPORT_METHOD(setSharingFilterForAllPartners) {

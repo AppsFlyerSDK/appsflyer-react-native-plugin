@@ -345,8 +345,8 @@ appsFlyer.setResolveDeepLinkURLs = (urls, successC, errorC) => {
  * @param urlString String representing the URL that needs to be resolved/returned in the onAppOpenAttribution callback
  * @param callback Result callback
  */
-appsFlyer.performOnAppAttribution = (urlString, callback) => {
-  return RNAppsFlyer.performOnAppAttribution(urlString, callback);
+appsFlyer.performOnAppAttribution = (urlString, successC, errorC) => {
+  return RNAppsFlyer.performOnAppAttribution(urlString, successC, errorC);
 }
 
 /**

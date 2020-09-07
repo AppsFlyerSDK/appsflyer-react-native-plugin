@@ -296,31 +296,41 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void updateServerUninstallToken(final String token, Callback callback) {
         AppsFlyerLib.getInstance().updateServerUninstallToken(getReactApplicationContext(), token);
-        callback.invoke(SUCCESS);
+        if (callback != null) {
+            callback.invoke(SUCCESS);
+        }
     }
 
     @ReactMethod
     public void setCustomerUserId(final String userId, Callback callback) {
         AppsFlyerLib.getInstance().setCustomerUserId(userId);
-        callback.invoke(SUCCESS);
+        if (callback != null) {
+            callback.invoke(SUCCESS);
+        }
     }
 
     @ReactMethod
     public void setCollectIMEI(boolean isCollect, Callback callback) {
         AppsFlyerLib.getInstance().setCollectIMEI(isCollect);
-        callback.invoke(SUCCESS);
+        if (callback != null) {
+            callback.invoke(SUCCESS);
+        }
     }
 
     @ReactMethod
     public void setCollectAndroidID(boolean isCollect, Callback callback) {
         AppsFlyerLib.getInstance().setCollectAndroidID(isCollect);
-        callback.invoke(SUCCESS);
+        if (callback != null) {
+            callback.invoke(SUCCESS);
+        }
     }
 
     @ReactMethod
     public void stop(boolean isStopped, Callback callback) {
         AppsFlyerLib.getInstance().stopTracking(isStopped, getReactApplicationContext());
-        callback.invoke(SUCCESS);
+        if (callback != null) {
+            callback.invoke(SUCCESS);
+        }
     }
 
     @ReactMethod
@@ -334,7 +344,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
         HashMap<String, Object> copyData = new HashMap<>(data);
         AppsFlyerLib.getInstance().setAdditionalData(copyData);
-        callback.invoke(SUCCESS);
+        if (callback != null) {
+            callback.invoke(SUCCESS);
+        }
     }
 
 
@@ -384,7 +396,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             return;
         }
         AppsFlyerLib.getInstance().setAppInviteOneLink(oneLinkID);
-        callback.invoke(SUCCESS);
+        if (callback != null) {
+            callback.invoke(SUCCESS);
+        }
     }
 
     @ReactMethod
@@ -393,7 +407,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             return;
         }
         AppsFlyerLib.getInstance().setCurrencyCode(currencyCode);
-        callback.invoke(SUCCESS);
+        if (callback != null) {
+            callback.invoke(SUCCESS);
+        }
     }
 
     @ReactMethod
@@ -514,7 +530,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void anonymizeUser(boolean b, Callback callback){
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
-        callback.invoke(SUCCESS);
+        if (callback != null) {
+            callback.invoke(SUCCESS);
+        }
     }
 
     @ReactMethod
@@ -552,15 +570,15 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void performOnAppAttribution(String urlString, Callback callback) {
+    public void performOnAppAttribution(String urlString, Callback successCallback, Callback errorCallback) {
         try {
             URI uri = URI.create(urlString);
             Context c = application.getApplicationContext();
             AppsFlyerLib.getInstance().performOnAppAttribution(c, uri);
-            callback.invoke(SUCCESS);
+            successCallback.invoke(SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();
-            callback.invoke(INVALID_URI);
+            errorCallback.invoke(INVALID_URI);
         }
     }
 
@@ -589,6 +607,8 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void logLocation(double longitude, double latitude, Callback successCallback) {
         AppsFlyerLib.getInstance().trackLocation(getReactApplicationContext(), latitude, longitude);
-        successCallback.invoke(SUCCESS, longitude, latitude);
+        if (successCallback != null) {
+            successCallback.invoke(SUCCESS);
+        }
     }
 }

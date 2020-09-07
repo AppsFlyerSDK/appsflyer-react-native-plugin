@@ -22,8 +22,6 @@ declare module "react-native-appsflyer" {
 
     export enum AF_EMAIL_CRYPT_TYPE {
         NONE,
-        SHA1,
-        MD5,
         SHA256
     }
 
@@ -31,12 +29,12 @@ declare module "react-native-appsflyer" {
         devKey:string;
         appId?:string; // iOS only
         isDebug?:boolean;
-        timeToWaitForAdvertiserID?:number; // iOS only
+        timeToWaitForATTUserAuthorization?:number; // iOS only
     }
 
     export interface SetEmailsOptions {
         emails?:string[];
-        emailsCryptType:AF_EMAIL_CRYPT_TYPE | 0 | 1 | 2 | 3;
+        emailsCryptType:AF_EMAIL_CRYPT_TYPE | 0 | 3;
     }
 
     export interface GenerateInviteLinkParams {
@@ -54,23 +52,23 @@ declare module "react-native-appsflyer" {
 
         initSdk(options: InitSDKOptions, successC?: SuccessCB, errorC?: ErrorCB): Response<string>
         logEvent(eventName: string, eventValues: object, successC?: SuccessCB, errorC?: ErrorCB): Response<string>
-        setUserEmails(options: SetEmailsOptions, successC?: SuccessCB, errorC?: ErrorCB): void
+        setUserEmails(options: SetEmailsOptions, successC: SuccessCB, errorC: ErrorCB): void
         setAdditionalData(additionalData: object, successC?: SuccessCB): void
         getAppsFlyerUID(callback: (error: Error, uid: string) => any): void
         setCustomerUserId(userId: string, successC?: SuccessCB): void
         stop(isStopped: boolean, successC?: SuccessCB): void
         setAppInviteOneLinkID(oneLinkID: string, successC?: SuccessCB): void
-        generateInviteLink(params: GenerateInviteLinkParams, successC?: SuccessCB, errorC?: ErrorCB): void
+        generateInviteLink(params: GenerateInviteLinkParams, successC: SuccessCB, errorC: ErrorCB): void
         logCrossPromotionImpression(appId: string, campaign: string, parameters: object): void
         logCrossPromotionAndOpenStore(appId: string, campaign: string, params: object): void
-        setCurrencyCode(currencyCode: string, successC: SuccessCB): void
-        anonymizeUser(shouldAnonymize: boolean, successC: SuccessCB): void
-        setOneLinkCustomDomains(domains: string[], successC?: SuccessCB, errorC?: ErrorCB): void
-        setResolveDeepLinkURLs(urls: string[], successC?: SuccessCB, errorC?: ErrorCB): void
-        performOnAppAttribution(urlString, callback): void
+        setCurrencyCode(currencyCode: string, successC?: SuccessCB): void
+        anonymizeUser(shouldAnonymize: boolean, successC?: SuccessCB): void
+        setOneLinkCustomDomains(domains: string[], successC: SuccessCB, errorC: ErrorCB): void
+        setResolveDeepLinkURLs(urls: string[], successC: SuccessCB, errorC: ErrorCB): void
+        performOnAppAttribution(urlString, successC: SuccessCB, errorC: ErrorCB): void
         setSharingFilterForAllPartners(): void
         setSharingFilter(partners, successC, errorC): void
-        logLocation(longitude: number, latitude: number, callback: SuccessCB): void
+        logLocation(longitude: number, latitude: number, successC?: SuccessCB): void
 
         /**
          * For iOS Only

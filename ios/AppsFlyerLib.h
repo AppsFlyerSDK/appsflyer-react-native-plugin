@@ -2,7 +2,7 @@
 //  AppsFlyerLib.h
 //  AppsFlyerLib
 //
-//  AppsFlyer iOS SDK 6.0.2 (179)
+//  AppsFlyer iOS SDK 6.0.3 (182)
 //  Copyright (c) 2012-2020 AppsFlyer Ltd. All rights reserved.
 //
 
@@ -232,7 +232,11 @@ typedef enum  {
 
 @property(nonatomic, strong, readonly) NSString *advertisingIdentifier;
 
-- (void)waitForAdvertisingIdentifierWithTimeoutInterval:(NSTimeInterval)timeoutInterval;
+/**
+ Waits for request user authorization to access app-related data
+ */
+- (void)waitForATTUserAuthorizationWithTimeoutInterval:(NSTimeInterval)timeoutInterval
+NS_SWIFT_NAME(waitForATTUserAuthorization(timeoutInterval:));
 
 @property(nonatomic) BOOL disableSKAdNetwork;
 
