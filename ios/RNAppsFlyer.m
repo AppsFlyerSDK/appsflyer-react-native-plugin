@@ -441,7 +441,8 @@ RCT_EXPORT_METHOD(performOnAppAttribution:(NSString *) urlString
                     errorCallback:(RCTResponseErrorBlock)errorCallback) {
     NSURL *url = [NSURL URLWithString:urlString];
     if (url == nil) {
-        errorCallback(@[INVALID_URI])
+        NSError* error = [NSError errorWithDomain:INVALID_URI code:0 userInfo:nil];
+        errorCallback(error);
     } else {
         [[AppsFlyerLib shared] performOnAppAttributionWithURL:url];
         successCallback(@[SUCCESS]);
