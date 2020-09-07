@@ -56,7 +56,7 @@ var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
 var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
   console.log(res);
 });
-
+appsFlyer.setCustomerUserId("testID");
 appsFlyer.initSdk(
   {
     isDebug: true,
