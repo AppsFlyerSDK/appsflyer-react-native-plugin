@@ -152,7 +152,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         id isConversionDataValue = nil;
         devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
         appId = (NSString*)[initSdkOptions objectForKey: afAppId];
-        interval = (NSNumber*)[initSdkOptions objectForKey: timeToWaitForAdvertiserID];
+        interval = (NSNumber*)[initSdkOptions objectForKey: timeToWaitForATTUserAuthorization];
 
 
         isDebugValue = [initSdkOptions objectForKey: afIsDebug];
@@ -186,7 +186,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 
         if (interval != 0 && interval != nil){
             double timeoutInterval = [interval doubleValue];
-            [[AppsFlyerLib shared] waitForAdvertisingIdentifierWithTimeoutInterval:timeoutInterval];
+            [[AppsFlyerLib shared] waitForATTUserAuthorizationWithTimeoutInterval:timeoutInterval];
         }
 
         [AppsFlyerLib shared].appleAppID = appId;

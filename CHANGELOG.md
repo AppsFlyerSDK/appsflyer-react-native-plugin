@@ -1,5 +1,15 @@
 # Versions
 
+## 6.0.30
+
+- iOS SDK 6.0.3
+
+_init options properties renamed:_
+
+| Old API                       | New API                           |
+| ------------------------------|-----------------------------------|
+| timeToWaitForAdvertiserID     | timeToWaitForATTUserAuthorization |
+
 ## 6.0.20
 
 - iOS SDK 6.0.2

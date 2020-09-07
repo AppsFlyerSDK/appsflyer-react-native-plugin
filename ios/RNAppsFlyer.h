@@ -22,10 +22,10 @@ static NSString *const SUCCESS                      = @"Success";
 static NSString *const IOS_14_ONLY                  = @"Feature only supported on iOS 14 and above";
 
   // Appsflyer JS objects
-  #define afDevKey                        @"devKey"
-  #define afAppId                         @"appId"
-  #define afIsDebug                       @"isDebug"
-  #define timeToWaitForAdvertiserID       @"timeToWaitForAdvertiserID"
+  #define afDevKey                                  @"devKey"
+  #define afAppId                                   @"appId"
+  #define afIsDebug                                 @"isDebug"
+  #define timeToWaitForATTUserAuthorization         @"timeToWaitForATTUserAuthorization"
 
   #define afEmailsCryptType               @"emailsCryptType"
   #define afEmails                        @"emails"

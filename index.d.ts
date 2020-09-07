@@ -31,7 +31,7 @@ declare module "react-native-appsflyer" {
         devKey:string;
         appId?:string; // iOS only
         isDebug?:boolean;
-        timeToWaitForAdvertiserID?:number; // iOS only
+        timeToWaitForATTUserAuthorization?:number; // iOS only
     }
 
     export interface SetEmailsOptions {

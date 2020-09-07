@@ -62,7 +62,7 @@ appsFlyer.initSdk(
     isDebug: true,
     devKey: '4UGrDF4vFvPLbHq5bXtCza',
     appId: '753258300',
-    timeToWaitForAdvertiserID: 60,
+    timeToWaitForATTUserAuthorization: 60,
   },
   (result) => {
     console.log('initSdk: ' + result);
