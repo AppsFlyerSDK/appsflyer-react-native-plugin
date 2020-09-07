@@ -66,6 +66,9 @@ appsFlyer.initSdk(
   },
   (result) => {
     console.log('initSdk: ' + result);
+    if (Platform.OS === 'android') {
+      appsFlyer.setCollectAndroidID(true)
+    }
   },
   (error) => {
     console.error('initSdk: ' + error);
