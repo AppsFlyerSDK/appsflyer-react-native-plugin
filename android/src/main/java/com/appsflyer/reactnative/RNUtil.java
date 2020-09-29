@@ -309,4 +309,16 @@ public class RNUtil {
         return writableArray;
     }
 
+    @Nullable
+    public static Map<String, String> jsonObjectToMap(JSONObject object) throws JSONException {
+        Map<String, String> map = new HashMap<String, String>();
+
+        Iterator<String> keysItr = object.keys();
+        while (keysItr.hasNext()) {
+            String key = keysItr.next();
+            String value = (String) object.get(key);
+            map.put(key, value);
+        }
+        return map;
+    }
 }
