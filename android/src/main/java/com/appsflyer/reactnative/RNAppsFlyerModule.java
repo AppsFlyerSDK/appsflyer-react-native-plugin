@@ -530,8 +530,8 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             return;
         }
 
-//        ArrayList<Object> domainsList = domainsArray.toArrayList();
-        List<Object> domainsList = RNUtil.toList(domainsArray);
+        ArrayList<Object> domainsList = domainsArray.toArrayList();
+//        List<Object> domainsList = RNUtil.toList(domainsArray);
         try {
             String[] domains = domainsList.toArray(new String[domainsList.size()]);
             AppsFlyerLib.getInstance().setOneLinkCustomDomain(domains);
@@ -549,8 +549,8 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             return;
         }
 
-//        ArrayList<Object> urlsList = urlsArray.toArrayList();
-        List<Object> urlsList = RNUtil.toList(urlsArray);
+        ArrayList<Object> urlsList = urlsArray.toArrayList();
+//        List<Object> urlsList = RNUtil.toList(urlsArray);
         try {
             String[] urls = urlsList.toArray(new String[urlsList.size()]);
             AppsFlyerLib.getInstance().setResolveDeepLinkURLs(urls);
@@ -585,8 +585,8 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
             return;
         }
-//        ArrayList<Object> partnersList = partnersArray.toArrayList();
-        List<Object> partnersList = RNUtil.toList(partnersArray);
+        ArrayList<Object> partnersList = partnersArray.toArrayList();
+//        List<Object> partnersList = RNUtil.toList(partnersArray);
         try {
             String[] partners = partnersList.toArray(new String[partnersList.size()]);
             AppsFlyerLib.getInstance().setSharingFilter(partners);
