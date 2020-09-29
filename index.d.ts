@@ -2,9 +2,9 @@
  * Typescript Definition Sync with v5.1.1
  **/
 declare module "react-native-appsflyer" {
-    type Response<T>    = void | Promise<T>;
-    type SuccessCB      = (result?:any) => any;
-    type ErrorCB        = (error?:any) => any;
+    type Response<T> = void | Promise<T>;
+    type SuccessCB = (result?: any) => any;
+    type ErrorCB = (error?: any) => any;
     export type ConversionData = {
         status: "success" | "failure",
         type: "onAppOpenAttribution"
@@ -15,8 +15,8 @@ declare module "react-native-appsflyer" {
             is_first_launch: "true" | "false";
             media_source: string;
             campaign: string;
-            af_status : "Organic" | "Non-organic";
-            [key:string]:any;
+            af_status: "Organic" | "Non-organic";
+            [key: string]: any;
         }
     }
 
@@ -26,15 +26,15 @@ declare module "react-native-appsflyer" {
     }
 
     export interface InitSDKOptions {
-        devKey:string;
-        appId?:string; // iOS only
-        isDebug?:boolean;
-        timeToWaitForATTUserAuthorization?:number; // iOS only
+        devKey: string;
+        appId?: string; // iOS only
+        isDebug?: boolean;
+        timeToWaitForATTUserAuthorization?: number; // iOS only
     }
 
     export interface SetEmailsOptions {
-        emails?:string[];
-        emailsCryptType:AF_EMAIL_CRYPT_TYPE | 0 | 3;
+        emails?: string[];
+        emailsCryptType: AF_EMAIL_CRYPT_TYPE | 0 | 3;
     }
 
     export interface GenerateInviteLinkParams {
@@ -42,13 +42,14 @@ declare module "react-native-appsflyer" {
         campaign?: string;
         customerID?: string;
         userParams?: object;
-        [key:string]:any;
+
+        [key: string]: any;
     }
 
     const appsFlyer: {
-        onInstallConversionData(callback:(data:ConversionData)=>any): () => void;
-        onInstallConversionFailure(callback:(data:ConversionData)=>any): () => void;
-        onAppOpenAttribution(callback:(data:any)=>any): () => void;
+        onInstallConversionData(callback: (data: ConversionData) => any): () => void;
+        onInstallConversionFailure(callback: (data: ConversionData) => any): () => void;
+        onAppOpenAttribution(callback: (data: any) => any): () => void;
 
         initSdk(options: InitSDKOptions, successC?: SuccessCB, errorC?: ErrorCB): Response<string>
         logEvent(eventName: string, eventValues: object, successC?: SuccessCB, errorC?: ErrorCB): Response<string>
@@ -73,10 +74,8 @@ declare module "react-native-appsflyer" {
         /**
          * For iOS Only
          * */
-        trackAppLaunch(): void
-        trackLocation(longitude: number, latitude: number, callback: SuccessCB): void
-        disableAdvertisingIdentifier(shouldDisable: boolean):void
-        disableCollectASA(shouldDisable: boolean):void
+        disableAdvertisingIdentifier(shouldDisable: boolean): void
+        disableCollectASA(shouldDisable: boolean): void
 
         /**
          * For Android Only

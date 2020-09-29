@@ -297,7 +297,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void updateServerUninstallToken(final String token, Callback callback) {
         AppsFlyerLib.getInstance().updateServerUninstallToken(getReactApplicationContext(), token);
         if (callback != null) {
-            callback.invoke(SUCCESS);
+            callback.invoke(afSuccess);
         }
     }
 
@@ -305,7 +305,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void setCustomerUserId(final String userId, Callback callback) {
         AppsFlyerLib.getInstance().setCustomerUserId(userId);
         if (callback != null) {
-            callback.invoke(SUCCESS);
+            callback.invoke(afSuccess);
         }
     }
 
@@ -313,7 +313,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void setCollectIMEI(boolean isCollect, Callback callback) {
         AppsFlyerLib.getInstance().setCollectIMEI(isCollect);
         if (callback != null) {
-            callback.invoke(SUCCESS);
+            callback.invoke(afSuccess);
         }
     }
 
@@ -321,7 +321,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void setCollectAndroidID(boolean isCollect, Callback callback) {
         AppsFlyerLib.getInstance().setCollectAndroidID(isCollect);
         if (callback != null) {
-            callback.invoke(SUCCESS);
+            callback.invoke(afSuccess);
         }
     }
 
@@ -329,7 +329,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void stop(boolean isStopped, Callback callback) {
         AppsFlyerLib.getInstance().stopTracking(isStopped, getReactApplicationContext());
         if (callback != null) {
-            callback.invoke(SUCCESS);
+            callback.invoke(afSuccess);
         }
     }
 
@@ -460,21 +460,20 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             }
 
 
-
             if (options.length() > 1 && !options.get("userParams").equals("")) {
 
                 JSONObject jsonCustomValues = options.getJSONObject("userParams");
 
                 Iterator<?> keys = jsonCustomValues.keys();
 
-                while( keys.hasNext() ) {
-                    String key = (String)keys.next();
+                while (keys.hasNext()) {
+                    String key = (String) keys.next();
                     Object keyvalue = jsonCustomValues.get(key);
                     linkGenerator.addParameter(key, keyvalue.toString());
                 }
             }
 
-        } catch (JSONException e){
+        } catch (JSONException e) {
 
         }
 
@@ -528,10 +527,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void anonymizeUser(boolean b, Callback callback){
+    public void anonymizeUser(boolean b, Callback callback) {
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
         if (callback != null) {
-            callback.invoke(SUCCESS);
+            callback.invoke(afSuccess);
         }
     }
 
@@ -545,7 +544,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         try {
             String[] domains = domainsList.toArray(new String[domainsList.size()]);
             AppsFlyerLib.getInstance().setOneLinkCustomDomain(domains);
-            successCallback.invoke(SUCCESS);
+            successCallback.invoke(afSuccess);
         } catch (Exception e) {
             e.printStackTrace();
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
@@ -562,7 +561,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         try {
             String[] urls = urlsList.toArray(new String[urlsList.size()]);
             AppsFlyerLib.getInstance().setResolveDeepLinkURLs(urls);
-            successCallback.invoke(SUCCESS);
+            successCallback.invoke(afSuccess);
         } catch (Exception e) {
             e.printStackTrace();
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
@@ -575,7 +574,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             URI uri = URI.create(urlString);
             Context c = application.getApplicationContext();
             AppsFlyerLib.getInstance().performOnAppAttribution(c, uri);
-            successCallback.invoke(SUCCESS);
+            successCallback.invoke(afSuccess);
         } catch (Exception e) {
             e.printStackTrace();
             errorCallback.invoke(INVALID_URI);
@@ -597,7 +596,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         try {
             String[] partners = partnersList.toArray(new String[partnersList.size()]);
             AppsFlyerLib.getInstance().setSharingFilter(partners);
-            successCallback.invoke(SUCCESS);
+            successCallback.invoke(afSuccess);
         } catch (Exception e) {
             e.printStackTrace();
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
@@ -606,9 +605,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void logLocation(double longitude, double latitude, Callback successCallback) {
-        AppsFlyerLib.getInstance().trackLocation(getReactApplicationContext(), latitude, longitude);
+            AppsFlyerLib.getInstance().trackLocation(getReactApplicationContext(), latitude, longitude);
         if (successCallback != null) {
-            successCallback.invoke(SUCCESS);
+            successCallback.invoke(afSuccess);
         }
     }
 }
