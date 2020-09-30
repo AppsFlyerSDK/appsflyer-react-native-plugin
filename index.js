@@ -59,6 +59,10 @@ appsFlyer.logEvent = logEvent;
  * @param callback success callback function
  */
 appsFlyer.logLocation = (longitude, latitude, callback) => {
+    if (longitude == null || latitude == null || longitude == "" || latitude == "") {
+        console.log("longitude or latitude are missing!");
+        return;
+    }
     if (typeof longitude != "number" || typeof latitude != "number") {
         longitude = parseFloat(longitude);
         latitude = parseFloat(latitude);
@@ -103,6 +107,10 @@ appsFlyer.getAppsFlyerUID = callback => {
  * @param successC success callback function.
  */
 appsFlyer.updateServerUninstallToken = (token, successC) => {
+    if ( token == null || token == "") {
+        console.log("token is missing!");
+        return;
+    }
     if (typeof token != "string") {
         token = token.toString();
     }
@@ -117,6 +125,10 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
  * @param successC callback function.
  */
 appsFlyer.setCustomerUserId = (userId, successC) => {
+    if ( userId == null || userId == "") {
+        console.log("userId is missing!");
+        return;
+    }
     if (typeof userId != "string") {
         userId = userId.toString();
     }
@@ -169,6 +181,13 @@ appsFlyer.setCollectAndroidID = (isCollect, successC) => {
  * @param successC callback function.
  */
 appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
+    if ( oneLinkID == null || oneLinkID == "") {
+        console.log("oneLinkID is missing!");
+        return;
+    }
+    if (typeof oneLinkID != "string") {
+        oneLinkID = oneLinkID.toString();
+    }
     return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, successC);
 };
 
@@ -193,6 +212,14 @@ appsFlyer.generateInviteLink = (parameters, success, error) => {
  * @param parameters additional params to be added to the attribution link
  */
 appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
+    if ( appId == null ||  campaign == null || appId == "" || campaign == "") {
+        console.log("App-Id or campaign is missing!");
+        return;
+    }
+    if (typeof appId != "string" || typeof campaign != "string") {
+        appId = appId.toString();
+        campaign = campaign.toString();
+    }
     return RNAppsFlyer.logCrossPromotionImpression(appId, campaign, parameters);
 };
 
@@ -204,7 +231,16 @@ appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
  * @param params additional user params.
  */
 appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
+    if ( appId == null ||  campaign == null || appId == "" || campaign == "") {
+        console.log("App-Id or campaign is missing!");
+        return;
+    }
+    if (typeof appId != "string" || typeof campaign != "string") {
+        appId = appId.toString();
+        campaign = campaign.toString();
+    }
     return RNAppsFlyer.logCrossPromotionAndOpenStore(appId, campaign, params);
+
 };
 
 /**
@@ -215,9 +251,13 @@ appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
  * @param successC success callback function.
  */
 appsFlyer.setCurrencyCode = (currencyCode, successC) => {
-  if (typeof currencyCode != "string") {
-    currencyCode = currencyCode.toString();
-  }
+    if ( currencyCode == null || currencyCode == "") {
+        console.log("currencyCode is missing!");
+        return;
+    }
+    if (typeof currencyCode != "string") {
+        currencyCode = currencyCode.toString();
+    }
     return RNAppsFlyer.setCurrencyCode(currencyCode, successC);
 };
 
@@ -360,6 +400,9 @@ appsFlyer.setResolveDeepLinkURLs = (urls, successC, errorC) => {
  * @param callback Result callback
  */
 appsFlyer.performOnAppAttribution = (urlString, successC, errorC) => {
+    if (typeof urlString != "string") {
+        urlString = urlString.toString();
+    }
     return RNAppsFlyer.performOnAppAttribution(urlString, successC, errorC);
 }
 
