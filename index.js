@@ -107,9 +107,8 @@ appsFlyer.getAppsFlyerUID = callback => {
  * @param successC success callback function.
  */
 appsFlyer.updateServerUninstallToken = (token, successC) => {
-    if ( token == null || token == "") {
-        console.log("token is missing!");
-        return;
+    if (token == null) {
+        token = "";
     }
     if (typeof token != "string") {
         token = token.toString();
@@ -125,9 +124,8 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
  * @param successC callback function.
  */
 appsFlyer.setCustomerUserId = (userId, successC) => {
-    if ( userId == null || userId == "") {
-        console.log("userId is missing!");
-        return;
+    if (userId == null) {
+        userId = "";
     }
     if (typeof userId != "string") {
         userId = userId.toString();
@@ -181,15 +179,15 @@ appsFlyer.setCollectAndroidID = (isCollect, successC) => {
  * @param successC callback function.
  */
 appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
-    if ( oneLinkID == null || oneLinkID == "") {
-        console.log("oneLinkID is missing!");
-        return;
+    if (oneLinkID == null) {
+        oneLinkID = "";
     }
     if (typeof oneLinkID != "string") {
         oneLinkID = oneLinkID.toString();
     }
     return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, successC);
-};
+}
+;
 
 /**
  * The LinkGenerator class builds the invite URL according to various setter methods which allow passing on additional information on the click.
@@ -212,9 +210,12 @@ appsFlyer.generateInviteLink = (parameters, success, error) => {
  * @param parameters additional params to be added to the attribution link
  */
 appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
-    if ( appId == null ||  campaign == null || appId == "" || campaign == "") {
-        console.log("App-Id or campaign is missing!");
+    if (appId == null || appId == "") {
+        console.log("appid is missing!");
         return;
+    }
+    if (campaign == null) {
+        campaign = "";
     }
     if (typeof appId != "string" || typeof campaign != "string") {
         appId = appId.toString();
@@ -231,9 +232,12 @@ appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
  * @param params additional user params.
  */
 appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
-    if ( appId == null ||  campaign == null || appId == "" || campaign == "") {
-        console.log("App-Id or campaign is missing!");
+    if (appId == null || appId == "") {
+        console.log("appid is missing!");
         return;
+    }
+    if (campaign == null) {
+        campaign = "";
     }
     if (typeof appId != "string" || typeof campaign != "string") {
         appId = appId.toString();
@@ -251,7 +255,7 @@ appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
  * @param successC success callback function.
  */
 appsFlyer.setCurrencyCode = (currencyCode, successC) => {
-    if ( currencyCode == null || currencyCode == "") {
+    if (currencyCode == null || currencyCode == "") {
         console.log("currencyCode is missing!");
         return;
     }
