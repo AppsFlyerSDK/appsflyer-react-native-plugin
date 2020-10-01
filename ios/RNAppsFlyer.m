@@ -277,16 +277,13 @@ RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
 
 //CROSS PROMOTION
 RCT_EXPORT_METHOD(logCrossPromotionImpression: (NSString *)appId campaign:(NSString *)campaign parameters:(NSDictionary *)parameters) {
-    if (appId != nil && ![appId isEqualToString:@""]) {
         [AppsFlyerCrossPromotionHelper logCrossPromoteImpression:appId campaign:campaign parameters:parameters];
-    }
 }
 
 RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
                   campaign:(NSString *)campaign
                   customParams:(NSDictionary *)customParams) {
 
-    if (appID != nil && ![appID isEqualToString:@""]) {
         [AppsFlyerShareInviteHelper generateInviteUrlWithLinkGenerator:^AppsFlyerLinkGenerator * _Nonnull(AppsFlyerLinkGenerator * _Nonnull generator) {
             if (campaign != nil && ![campaign isEqualToString:@""]) {
                 [generator setCampaign:campaign];
@@ -301,7 +298,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:appLink] options:@{} completionHandler:^(BOOL success) {
             }];
         }];
-    }
+
 }
 
 -(void)onConversionDataSuccess:(NSDictionary*) installData {

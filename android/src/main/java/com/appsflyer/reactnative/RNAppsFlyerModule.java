@@ -335,8 +335,13 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setAdditionalData(ReadableMap additionalData, Callback callback) {
-
-        Map<String, Object> data = RNUtil.toMap(additionalData);
+        Map<String, Object> data = null;
+        try {
+            data = RNUtil.toMap(additionalData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
 
         if (data == null) { // in case of no values
             data = new HashMap<>();
@@ -392,9 +397,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setAppInviteOneLinkID(final String oneLinkID, Callback callback) {
-        if (oneLinkID == null || oneLinkID.length() == 0) {
-            return;
-        }
         AppsFlyerLib.getInstance().setAppInviteOneLink(oneLinkID);
         if (callback != null) {
             callback.invoke(SUCCESS);
@@ -403,9 +405,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setCurrencyCode(final String currencyCode, Callback callback) {
-        if (currencyCode == null || currencyCode.length() == 0) {
-            return;
-        }
         AppsFlyerLib.getInstance().setCurrencyCode(currencyCode);
         if (callback != null) {
             callback.invoke(SUCCESS);
@@ -460,21 +459,20 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             }
 
 
-
             if (options.length() > 1 && !options.get("userParams").equals("")) {
 
                 JSONObject jsonCustomValues = options.getJSONObject("userParams");
 
                 Iterator<?> keys = jsonCustomValues.keys();
 
-                while( keys.hasNext() ) {
-                    String key = (String)keys.next();
+                while (keys.hasNext()) {
+                    String key = (String) keys.next();
                     Object keyvalue = jsonCustomValues.get(key);
                     linkGenerator.addParameter(key, keyvalue.toString());
                 }
             }
 
-        } catch (JSONException e){
+        } catch (JSONException e) {
 
         }
 
@@ -496,39 +494,29 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void logCrossPromotionImpression(final String appId, final String campaign, ReadableMap params) {
-        if (appId != "" && campaign != "") {
-            try {
-                Map<String, Object> temp = RNUtil.toMap(params);
-                Map<String, String> data = null;
-                data = (Map) temp;
-                CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign, data);
-            } catch (Exception e) {
-                CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
-            }
+        try {
+            Map<String, Object> temp = RNUtil.toMap(params);
+            Map<String, String> data = null;
+            data = (Map) temp;
+            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign, data);
+        } catch (Exception e) {
+            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
         }
     }
 
     @ReactMethod
     public void logCrossPromotionAndOpenStore(final String appId, final String campaign, ReadableMap params) {
-
-        if (appId == null || appId == "") {
-            return;
-        }
-
         Map<String, String> data = null;
-
         try {
             Map<String, Object> temp = RNUtil.toMap(params);
             data = (Map) temp;
         } catch (Exception e) {
-
         }
-
         CrossPromotionHelper.trackAndOpenStore(getReactApplicationContext(), appId, campaign, data);
     }
 
     @ReactMethod
-    public void anonymizeUser(boolean b, Callback callback){
+    public void anonymizeUser(boolean b, Callback callback) {
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
         if (callback != null) {
             callback.invoke(SUCCESS);
