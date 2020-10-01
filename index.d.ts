@@ -70,6 +70,7 @@ declare module "react-native-appsflyer" {
         setSharingFilterForAllPartners(): void
         setSharingFilter(partners, successC, errorC): void
         logLocation(longitude: number, latitude: number, successC?: SuccessCB): void
+        updateServerUninstallToken(token: string, successC?: SuccessCB): void
 
         /**
          * For iOS Only
@@ -82,7 +83,6 @@ declare module "react-native-appsflyer" {
          * */
         setCollectIMEI(isCollect: boolean, successC?: SuccessCB): void
         setCollectAndroidID(isCollect: boolean, successC?: SuccessCB): void
-        updateServerUninstallToken(token: string, successC?: SuccessCB): void
     };
 
     export default appsFlyer;
