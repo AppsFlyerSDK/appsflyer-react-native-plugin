@@ -10,11 +10,11 @@ function initSdkCallback(options, successC, errorC) {
   return RNAppsFlyer.initSdk(options, successC, errorC);
 }
 
-function initSdkPromise(options): Promise<string> {
+function initSdkPromise(options) {
   return RNAppsFlyer.initSdkWithPromise(options);
 }
 
-function initSdk(options, success, error): Promise<string> {
+function initSdk(options, success, error) {
   appsFlyer.appId = options.appId;
   options.onInstallConversionDataListener = eventsMap["onInstallConversionData"]
       ? true
@@ -34,11 +34,11 @@ function logEventCallback(eventName, eventValues, successC, errorC) {
   return RNAppsFlyer.logEvent(eventName, eventValues, successC, errorC);
 }
 
-function logEventPromise(eventName, eventValues): Promise<string> {
+function logEventPromise(eventName, eventValues) {
   return RNAppsFlyer.logEventWithPromise(eventName, eventValues);
 }
 
-function logEvent(eventName, eventValues, success, error): Promise<string> {
+function logEvent(eventName, eventValues, success, error) {
   if (success && error) {
     //logEvent is a callback function
     logEventCallback(eventName, eventValues, success, error);
