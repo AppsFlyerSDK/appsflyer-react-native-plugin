@@ -394,8 +394,12 @@ appsFlyer.disableCollectASA = (shouldDisable) => {
  */
 appsFlyer.validateAndLogInAppPurchase = (purchaseInfo, successC, errorC) => {
     RNAppsFlyer.validateAndLogInAppPurchase(purchaseInfo, successC, errorC)
-
 }
+
+appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
+    RNAppsFlyer.setUseReceiptValidationSandbox(isSandbox);
+}
+
 
 function AFParseJSONException(_message, _data) {
     this.message = _message;

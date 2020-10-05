@@ -51,9 +51,8 @@ static NSString *const IOS_14_ONLY                  = @"Feature only supported o
 #define afUiBaseDeepLink                @"baseDeepLink"
 
 //RECEIPT VALIDATION
-#define afPublicKey                       @"publicKey"
-#define afSignature                     @"signature"
-#define afPurchaseData                    @"purchaseData"
+#define afProductIdentifier                       @"productIdentifier"
+#define afTransactionId                     @"transactionId"
 #define afPrice                    @"price"
 #define afCurrency                    @"currency"
 #define afAdditionalParameters                  @"additionalParameters"

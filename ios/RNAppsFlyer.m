@@ -471,26 +471,30 @@ RCT_EXPORT_METHOD(disableCollectASA: (BOOL)shouldDisable) {
     [AppsFlyerLib shared].disableCollectASA = shouldDisable;
 }
 
+RCT_EXPORT_METHOD(setUseReceiptValidationSandbox: (BOOL)isSandbox) {
+    [AppsFlyerLib shared].useReceiptValidationSandbox = isSandbox;
+}
+
 RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
-    NSString* publicKey = nil;
-    NSString* signature = nil;
-    NSString* purchaseData = nil;
-    NSString* price = nil;
-    NSString* currency = nil;
-    NSDictionary* additionalParameters = nil;
-    NSError* error = nil;
+    NSString* productIdentifier = nil;
+       NSString* tranactionId = nil;
+       NSString* price = nil;
+       NSString* currency = nil;
+       NSDictionary* additionalParameters = nil;
+       NSError* error = nil;
+    
 
-    if(![purchaseInfo isKindOfClass: [NSNull class]]){
-        publicKey = (NSString*)[purchaseInfo objectForKey: afPublicKey];
-        signature = (NSString*)[purchaseInfo objectForKey: afSignature];
-        purchaseData = (NSString*)[purchaseInfo objectForKey: afPurchaseData];
-        price = (NSString*)[purchaseInfo objectForKey: afPrice];
-        currency = (NSString*)[purchaseInfo objectForKey: afCurrency];
-        additionalParameters = (NSDictionary*)[purchaseInfo objectForKey: afAdditionalParameters];
+       if(![purchaseInfo isKindOfClass: [NSNull class]]){
+           productIdentifier = (NSString*)[purchaseInfo objectForKey: afProductIdentifier];
+           tranactionId = (NSString*)[purchaseInfo objectForKey: afTransactionId];
+           price = (NSString*)[purchaseInfo objectForKey: afPrice];
+           currency = (NSString*)[purchaseInfo objectForKey: afCurrency];
+           additionalParameters = (NSDictionary*)[purchaseInfo objectForKey: afAdditionalParameters];
 
-        [[AppsFlyerLib shared] validateAndLogInAppPurchase:publicKey price:price currency:currency transactionId:signature additionalParameters:additionalParameters success:^(NSDictionary * _Nonnull response) {
+
+        [[AppsFlyerLib shared] validateAndLogInAppPurchase:productIdentifier price:price currency:currency transactionId:tranactionId additionalParameters:additionalParameters success:^(NSDictionary * _Nonnull response) {
             successCallback(response);
         } failure:^(NSError * _Nullable error, id  _Nullable reponse) {
             errorCallback(error);
