@@ -78,16 +78,12 @@ RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback) {
 
 RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setCustomerUserID:userId];
-    if (callback != nil) {
-        callback(@[SUCCESS]);
-    }
+    callback(@[SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(stop: (BOOL)isStopped callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerLib shared].isStopped  = isStopped;
-    if (callback != nil) {
-        callback(@[SUCCESS]);
-    }
+     callback(@[SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(logLocation: (double)longitude latitude:(double)latitude callback:(RCTResponseSenderBlock)callback) {
@@ -218,25 +214,19 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 
 RCT_EXPORT_METHOD(setAdditionalData: (NSDictionary *)additionalData callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setAdditionalData:additionalData];
-    if (callback != nil) {
-        callback(@[SUCCESS]);
-    }
+    callback(@[SUCCESS]);
 }
 
 //USER INVITES
 
 RCT_EXPORT_METHOD(setAppInviteOneLinkID: (NSString *)oneLinkID callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerLib shared].appInviteOneLinkID = oneLinkID;
-    if (callback != nil) {
-        callback(@[SUCCESS]);
-    }
+    callback(@[SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(setCurrencyCode: (NSString *)currencyCode callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setCurrencyCode:currencyCode];
-    if (callback != nil) {
-        callback(@[SUCCESS]);
-    }
+     callback(@[SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
@@ -398,9 +388,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 
 RCT_EXPORT_METHOD(anonymizeUser: (BOOL *)b callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerLib shared].anonymizeUser = b;
-    if (callback != nil) {
-        callback(@[SUCCESS]);
-    }
+    callback(@[SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(updateServerUninstallToken: (NSString *)deviceToken callback:(RCTResponseSenderBlock)callback) {

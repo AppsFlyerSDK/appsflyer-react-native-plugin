@@ -304,9 +304,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void setCustomerUserId(final String userId, Callback callback) {
         AppsFlyerLib.getInstance().setCustomerUserId(userId);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
@@ -328,9 +326,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void stop(boolean isStopped, Callback callback) {
         AppsFlyerLib.getInstance().stopTracking(isStopped, getReactApplicationContext());
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
@@ -349,9 +345,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
         HashMap<String, Object> copyData = new HashMap<>(data);
         AppsFlyerLib.getInstance().setAdditionalData(copyData);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
 
@@ -398,17 +392,13 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void setAppInviteOneLinkID(final String oneLinkID, Callback callback) {
         AppsFlyerLib.getInstance().setAppInviteOneLink(oneLinkID);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void setCurrencyCode(final String currencyCode, Callback callback) {
         AppsFlyerLib.getInstance().setCurrencyCode(currencyCode);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
@@ -518,9 +508,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void anonymizeUser(boolean b, Callback callback) {
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
@@ -595,8 +583,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void logLocation(double longitude, double latitude, Callback successCallback) {
         AppsFlyerLib.getInstance().trackLocation(getReactApplicationContext(), latitude, longitude);
-        if (successCallback != null) {
-            successCallback.invoke(SUCCESS);
-        }
+        successCallback.invoke(SUCCESS);
     }
 }

@@ -67,7 +67,11 @@ appsFlyer.logLocation = (longitude, latitude, callback) => {
         longitude = parseFloat(longitude);
         latitude = parseFloat(latitude);
     }
-    return RNAppsFlyer.logLocation(longitude, latitude, callback);
+    if (callback) {
+        return RNAppsFlyer.logLocation(longitude, latitude, callback);
+    } else {
+        return RNAppsFlyer.logLocation(longitude, latitude, result => console.log(result));
+    }
 };
 
 /**
@@ -88,7 +92,11 @@ appsFlyer.setUserEmails = (options, successC, errorC) => {
  * @param successC success callback function.
  */
 appsFlyer.setAdditionalData = (additionalData, successC) => {
-    return RNAppsFlyer.setAdditionalData(additionalData, successC);
+    if (successC) {
+        return RNAppsFlyer.setAdditionalData(additionalData, successC);
+    } else {
+        return RNAppsFlyer.setAdditionalData(additionalData, result => console.log(result));
+    }
 };
 
 /**
@@ -113,7 +121,11 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
     if (typeof token != "string") {
         token = token.toString();
     }
-    return RNAppsFlyer.updateServerUninstallToken(token, successC);
+    if (successC) {
+        return RNAppsFlyer.updateServerUninstallToken(token, successC);
+    } else {
+        return RNAppsFlyer.updateServerUninstallToken(token, result => console.log(result));
+    }
 };
 
 /**
@@ -130,7 +142,12 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
     if (typeof userId != "string") {
         userId = userId.toString();
     }
-    return RNAppsFlyer.setCustomerUserId(userId, successC);
+    if (successC) {
+        return RNAppsFlyer.setCustomerUserId(userId, successC);
+    } else {
+        return RNAppsFlyer.setCustomerUserId(userId, result => console.log(result));
+    }
+
 };
 
 /**
@@ -142,7 +159,11 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
  * @param successC callback function.
  */
 appsFlyer.stop = (isStopped, successC) => {
-    return RNAppsFlyer.stop(isStopped, successC);
+    if (successC) {
+        return RNAppsFlyer.stop(isStopped, successC);
+    } else {
+        return RNAppsFlyer.stop(isStopped, result => console.log(result));
+    }
 };
 
 /**
@@ -185,7 +206,12 @@ appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
     if (typeof oneLinkID != "string") {
         oneLinkID = oneLinkID.toString();
     }
-    return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, successC);
+    if (successC) {
+        return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, successC);
+    } else {
+        return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, result => console.log(result));
+    }
+
 }
 ;
 
@@ -262,7 +288,11 @@ appsFlyer.setCurrencyCode = (currencyCode, successC) => {
     if (typeof currencyCode != "string") {
         currencyCode = currencyCode.toString();
     }
-    return RNAppsFlyer.setCurrencyCode(currencyCode, successC);
+    if (successC) {
+        return RNAppsFlyer.setCurrencyCode(currencyCode, successC);
+    } else {
+        return RNAppsFlyer.setCurrencyCode(currencyCode, result => console.log(result));
+    }
 };
 
 /**
@@ -366,7 +396,11 @@ appsFlyer.onAppOpenAttribution = callback => {
  * @param successC success callback function.
  */
 appsFlyer.anonymizeUser = (shouldAnonymize, successC) => {
-    return RNAppsFlyer.anonymizeUser(shouldAnonymize, successC);
+    if (successC) {
+        return RNAppsFlyer.anonymizeUser(shouldAnonymize, successC);
+    } else {
+        return RNAppsFlyer.anonymizeUser(shouldAnonymize, result => console.log(result));
+    }
 };
 
 /**
