@@ -27,6 +27,7 @@
 - [setSharingFilter](#setSharingFilter)
 - [disableCollectASA](#disableCollectASA)
 - [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
+- [validateAndLogInAppPurchase](#validateAndLogInAppPurchase)
 
 ---
 
@@ -738,3 +739,42 @@ appsFlyer.disableAdvertisingIdentifier(true);
 ```
 
 ---
+
+##### <a id="validateAndLogInAppPurchase"> **`validateAndLogInAppPurchase(purchaseInfo, successC, errorC): Response<string>`**
+Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.<br>
+Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases
+Important! for iOS - set SandBox to ```true```<br>
+```appsFlyer.setUseReceiptValidationSandbox(true);```
+
+
+| parameter       | type     | description                      |
+| ----------      |----------|------------------                |
+| purchaseInfo      | json     | In-App Purchase parameters      |
+| successC         | function | success callback (generated link)|
+| errorC           | function | error callback                   |
+
+
+*Example:*
+
+```javascript
+let info = {};
+if (Platform.OS == 'android') {
+    info = {
+        publicKey: 'key',
+        currency: 'biz',
+        signature: 'sig',
+        purchaseData: 'data',
+        price: '123',
+        additionalParameters: {'foo': 'bar'},
+    };
+} else if (Platform.OS == 'ios') {
+     info = {
+         productIdentifier: 'identifier',
+         currency: 'USD',
+         transactionId: '1000000614252747',
+         price: '0.99',
+         additionalParameters: {'foo': 'bar'},
+     };
+}
+appsFlyer.validateAndLogInAppPurchase(info, res => console.log(res), err => console.log(err));
+```

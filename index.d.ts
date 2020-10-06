@@ -29,7 +29,19 @@ declare module "react-native-appsflyer" {
         devKey: string;
         appId?: string; // iOS only
         isDebug?: boolean;
+        onInstallConversionDataListener?: boolean;
         timeToWaitForATTUserAuthorization?: number; // iOS only
+    }
+
+    export interface InAppPurchase {
+        publicKey: string;
+        productIdentifier: string;
+        signature: string;
+        transactionId: string;
+        purchaseData: string;
+        price: string;
+        currency: string;
+        additionalParameters?: object;
     }
 
     export interface SetEmailsOptions {
@@ -37,8 +49,7 @@ declare module "react-native-appsflyer" {
         emailsCryptType: AF_EMAIL_CRYPT_TYPE | 0 | 3;
     }
 
-    export interface GenerateInviteLinkParams {
-        channel: string;
+    export interface GenerateInviteLinkParams {        channel: string;
         campaign?: string;
         customerID?: string;
         userParams?: object;
@@ -70,6 +81,7 @@ declare module "react-native-appsflyer" {
         setSharingFilterForAllPartners(): void
         setSharingFilter(partners, successC, errorC): void
         logLocation(longitude: number, latitude: number, successC?: SuccessCB): void
+        validateAndLogInAppPurchase(purchaseInfo: InAppPurchase, successC, errorC): Response<string>
         updateServerUninstallToken(token: string, successC?: SuccessCB): void
 
         /**
@@ -77,6 +89,7 @@ declare module "react-native-appsflyer" {
          * */
         disableAdvertisingIdentifier(shouldDisable: boolean): void
         disableCollectASA(shouldDisable: boolean): void
+        setUseReceiptValidationSandbox(isSandbox: boolean): void
 
         /**
          * For Android Only

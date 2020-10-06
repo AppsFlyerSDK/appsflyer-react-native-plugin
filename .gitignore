@@ -33,6 +33,9 @@ ios/Podfile.lock
 .idea
 .gradle
 local.properties
+android/gradlew
+android/gradlew.bat
+android/gradle
 
 # node.js
 #

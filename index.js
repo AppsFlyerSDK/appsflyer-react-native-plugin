@@ -7,7 +7,7 @@ const appsFlyerEventEmitter = new NativeEventEmitter(RNAppsFlyer);
 
 
 function initSdkCallback(options, successC, errorC) {
-    return RNAppsFlyer.initSdk(options, successC, errorC);
+    return RNAppsFlyer.initSdkWithCallBack(options, successC, errorC);
 }
 
 function initSdkPromise(options): Promise<string> {
@@ -15,10 +15,6 @@ function initSdkPromise(options): Promise<string> {
 }
 
 function initSdk(options, success, error): Promise<string> {
-    appsFlyer.appId = options.appId;
-    options.onInstallConversionDataListener = eventsMap["onInstallConversionData"]
-        ? true
-        : false;
 
     if (success && error) {
         //initSdk is a callback function
@@ -147,7 +143,6 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
     } else {
         return RNAppsFlyer.setCustomerUserId(userId, result => console.log(result));
     }
-
 };
 
 /**
@@ -212,8 +207,7 @@ appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
         return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, result => console.log(result));
     }
 
-}
-;
+};
 
 /**
  * The LinkGenerator class builds the invite URL according to various setter methods which allow passing on additional information on the click.
@@ -270,7 +264,6 @@ appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
         campaign = campaign.toString();
     }
     return RNAppsFlyer.logCrossPromotionAndOpenStore(appId, campaign, params);
-
 };
 
 /**
@@ -482,6 +475,22 @@ appsFlyer.disableAdvertisingIdentifier = (shouldDisable) => {
 appsFlyer.disableCollectASA = (shouldDisable) => {
     return RNAppsFlyer.disableCollectASA(shouldDisable);
 }
+
+/**
+ * Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.
+ * Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases
+ * @param purchaseInfo ReadableMap includes: String publicKey, String signature, String purchaseData, String price, String currency, JSONObject additionalParameters.
+ * @param successC Success callback
+ * @param errorC Error callback
+ */
+appsFlyer.validateAndLogInAppPurchase = (purchaseInfo, successC, errorC) => {
+    RNAppsFlyer.validateAndLogInAppPurchase(purchaseInfo, successC, errorC)
+}
+
+appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
+    RNAppsFlyer.setUseReceiptValidationSandbox(isSandbox);
+}
+
 
 function AFParseJSONException(_message, _data) {
     this.message = _message;

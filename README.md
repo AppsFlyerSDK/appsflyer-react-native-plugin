@@ -81,6 +81,7 @@ appsFlyer.initSdk(
     devKey: 'K2***********99',
     isDebug: false,
     appId: '41*****44',
+    onInstallConversionDataListener: true,
   },
   (result) => {
     console.log(result);
@@ -96,6 +97,7 @@ appsFlyer.initSdk(
 | devKey   | Your application [devKey](https://support.appsflyer.com/hc/en-us/articles/211719806-Global-app-settings-#sdk-dev-key) provided by AppsFlyer (required)  |
 | appId      | Your iTunes [application ID](https://support.appsflyer.com/hc/en-us/articles/207377436-Adding-a-new-app#available-in-the-app-store-google-play-store-windows-phone-store)  (iOS only)  |
 | isDebug    | Debug mode - set to `true` for testing only  |
+|onInstallConversionDataListener| Set listener for SDK init response (Optional. default=false) |
 
 
  ## <a id="guides"> 📖 Guides

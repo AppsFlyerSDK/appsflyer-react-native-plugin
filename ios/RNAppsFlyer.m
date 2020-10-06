@@ -16,33 +16,96 @@
 
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
+RCT_EXPORT_METHOD(initSdkWithCallBack: (NSDictionary*)initSdkOptions
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
 
-    NSError *error = [self callSdkInternal:initSdkOptions];
-
-    if(error){
+    NSError* error = nil;
+    error = [self callSdkInternal:initSdkOptions];
+    if (error == nil){
+        successCallback(@[SUCCESS]);
+    }else{
         errorCallback(error);
     }
-    else{
-        successCallback(@[SUCCESS]);
-    }
 }
-
 
 RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
                   initSdkWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    NSError *error = [self callSdkInternal:initSdkOptions];
 
-    if(error) {
-        reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
-    } else {
+    NSError* error = nil;
+    error = [self callSdkInternal:initSdkOptions];
+    if (error == nil){
         resolve(@[SUCCESS]);
-    }
+    }else{
+        reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);    }
 }
 
+-(NSError *) callSdkInternal:(NSDictionary*)initSdkOptions {
+
+    NSString* devKey = nil;
+    NSString* appId = nil;
+    BOOL isDebug = NO;
+    BOOL isConversionData = NO;
+    NSNumber* interval = 0;
+
+    if (![initSdkOptions isKindOfClass:[NSNull class]]) {
+
+        id isDebugValue = nil;
+        id isConversionDataValue = nil;
+        devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
+        appId = (NSString*)[initSdkOptions objectForKey: afAppId];
+        interval = (NSNumber*)[initSdkOptions objectForKey: timeToWaitForATTUserAuthorization];
+
+
+        isDebugValue = [initSdkOptions objectForKey: afIsDebug];
+        if ([isDebugValue isKindOfClass:[NSNumber class]]) {
+            // isDebug is a boolean that will come through as an NSNumber
+            isDebug = [(NSNumber*)isDebugValue boolValue];
+        }
+        isConversionDataValue = [initSdkOptions objectForKey: afConversionData];
+        if ([isConversionDataValue isKindOfClass:[NSNumber class]]) {
+            isConversionData = [(NSNumber*)isConversionDataValue boolValue];
+        }
+    }
+
+    NSError* error = nil;
+
+    if (!devKey || [devKey isEqualToString:@""]) {
+        error = [NSError errorWithDomain:NO_DEVKEY_FOUND code:0 userInfo:nil];
+
+    }
+    else if (!appId || [appId isEqualToString:@""]) {
+        error = [NSError errorWithDomain:NO_APPID_FOUND code:1 userInfo:nil];
+    }
+
+    if(error != nil){
+        return error;
+    }
+    else{
+        if(isConversionData == YES){
+            [AppsFlyerLib shared].delegate = self;
+        }
+
+        if (interval != 0 && interval != nil){
+            double timeoutInterval = [interval doubleValue];
+            [[AppsFlyerLib shared] waitForATTUserAuthorizationWithTimeoutInterval:timeoutInterval];
+        }
+
+        [AppsFlyerLib shared].appleAppID = appId;
+        [AppsFlyerLib shared].appsFlyerDevKey = devKey;
+        [AppsFlyerLib shared].isDebug = isDebug;
+        [[AppsFlyerLib shared] start];
+        
+
+        // Register for background-foreground transitions natively instead of doing this in JavaScript
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(sendLaunch:)
+                                                     name:UIApplicationDidBecomeActiveNotification
+                                                   object:nil];
+        return nil;
+    }
+}
 RCT_EXPORT_METHOD(logEvent: (NSString *)eventName eventValues:(NSDictionary *)eventValues
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
@@ -129,71 +192,6 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     else{
         [[AppsFlyerLib shared] setUserEmails:emails withCryptType:emailsCryptType];
         successCallback(@[SUCCESS]);
-    }
-}
-
--(NSError *) callSdkInternal:(NSDictionary*)initSdkOptions {
-
-    NSString* devKey = nil;
-    NSString* appId = nil;
-    BOOL isDebug = NO;
-    BOOL isConversionData = NO;
-    NSNumber* interval = 0;
-
-    if (![initSdkOptions isKindOfClass:[NSNull class]]) {
-
-        id isDebugValue = nil;
-        id isConversionDataValue = nil;
-        devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
-        appId = (NSString*)[initSdkOptions objectForKey: afAppId];
-        interval = (NSNumber*)[initSdkOptions objectForKey: timeToWaitForATTUserAuthorization];
-
-
-        isDebugValue = [initSdkOptions objectForKey: afIsDebug];
-        if ([isDebugValue isKindOfClass:[NSNumber class]]) {
-            // isDebug is a boolean that will come through as an NSNumber
-            isDebug = [(NSNumber*)isDebugValue boolValue];
-        }
-        isConversionDataValue = [initSdkOptions objectForKey: afConversionData];
-        if ([isConversionDataValue isKindOfClass:[NSNumber class]]) {
-            isConversionData = [(NSNumber*)isConversionDataValue boolValue];
-        }
-    }
-
-    NSError* error = nil;
-
-    if (!devKey || [devKey isEqualToString:@""]) {
-        error = [NSError errorWithDomain:NO_DEVKEY_FOUND code:0 userInfo:nil];
-
-    }
-    else if (!appId || [appId isEqualToString:@""]) {
-        error = [NSError errorWithDomain:NO_APPID_FOUND code:1 userInfo:nil];
-    }
-
-    if(error != nil){
-        return error;
-    }
-    else{
-        if(isConversionData == YES){
-            [AppsFlyerLib shared].delegate = self;
-        }
-
-        if (interval != 0 && interval != nil){
-            double timeoutInterval = [interval doubleValue];
-            [[AppsFlyerLib shared] waitForATTUserAuthorizationWithTimeoutInterval:timeoutInterval];
-        }
-
-        [AppsFlyerLib shared].appleAppID = appId;
-        [AppsFlyerLib shared].appsFlyerDevKey = devKey;
-        [AppsFlyerLib shared].isDebug = isDebug;
-        [[AppsFlyerLib shared] start];
-
-        // Register for background-foreground transitions natively instead of doing this in JavaScript
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(sendLaunch:)
-                                                     name:UIApplicationDidBecomeActiveNotification
-                                                   object:nil];
-        return nil;
     }
 }
 
@@ -422,8 +420,8 @@ RCT_EXPORT_METHOD(setResolveDeepLinkURLs:(NSArray *) urls
 }
 
 RCT_EXPORT_METHOD(performOnAppAttribution:(NSString *) urlString
-                    successCallback :(RCTResponseSenderBlock)successCallback
-                    errorCallback:(RCTResponseErrorBlock)errorCallback) {
+                  successCallback :(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
     NSURL *url = [NSURL URLWithString:urlString];
     if (url == nil) {
         NSError* error = [NSError errorWithDomain:INVALID_URI code:0 userInfo:nil];
@@ -453,4 +451,39 @@ RCT_EXPORT_METHOD(disableCollectASA: (BOOL)shouldDisable) {
     [AppsFlyerLib shared].disableCollectASA = shouldDisable;
 }
 
+RCT_EXPORT_METHOD(setUseReceiptValidationSandbox: (BOOL)isSandbox) {
+    [AppsFlyerLib shared].useReceiptValidationSandbox = isSandbox;
+}
+
+RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
+                  successCallback :(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    NSString* productIdentifier = nil;
+       NSString* tranactionId = nil;
+       NSString* price = nil;
+       NSString* currency = nil;
+       NSDictionary* additionalParameters = nil;
+       NSError* error = nil;
+    
+
+       if(![purchaseInfo isKindOfClass: [NSNull class]]){
+           productIdentifier = (NSString*)[purchaseInfo objectForKey: afProductIdentifier];
+           tranactionId = (NSString*)[purchaseInfo objectForKey: afTransactionId];
+           price = (NSString*)[purchaseInfo objectForKey: afPrice];
+           currency = (NSString*)[purchaseInfo objectForKey: afCurrency];
+           additionalParameters = (NSDictionary*)[purchaseInfo objectForKey: afAdditionalParameters];
+
+
+        [[AppsFlyerLib shared] validateAndLogInAppPurchase:productIdentifier price:price currency:currency transactionId:tranactionId additionalParameters:additionalParameters success:^(NSDictionary * _Nonnull response) {
+            successCallback(response);
+        } failure:^(NSError * _Nullable error, id  _Nullable reponse) {
+            errorCallback(error);
+        }];
+
+    }else{
+        error = [NSError errorWithDomain:NO_PARAMETERS_ERROR code:0 userInfo:nil];
+        errorCallback(error);
+    }
+
+}
 @end
