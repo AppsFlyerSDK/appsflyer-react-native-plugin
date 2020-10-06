@@ -35,7 +35,9 @@ declare module "react-native-appsflyer" {
 
     export interface InAppPurchase {
         publicKey: string;
+        productIdentifier: string;
         signature: string;
+        transactionId: string;
         purchaseData: string;
         price: string;
         currency: string;
@@ -85,8 +87,6 @@ declare module "react-native-appsflyer" {
         /**
          * For iOS Only
          * */
-        trackAppLaunch(): void
-        trackLocation(longitude: number, latitude: number, callback: SuccessCB): void
         disableAdvertisingIdentifier(shouldDisable: boolean): void
         disableCollectASA(shouldDisable: boolean): void
         setUseReceiptValidationSandbox(isSandbox: boolean): void

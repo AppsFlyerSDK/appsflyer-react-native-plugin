@@ -96,6 +96,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         [AppsFlyerLib shared].appsFlyerDevKey = devKey;
         [AppsFlyerLib shared].isDebug = isDebug;
         [[AppsFlyerLib shared] start];
+        
 
         // Register for background-foreground transitions natively instead of doing this in JavaScript
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -105,8 +106,6 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         return nil;
     }
 }
-
-
 RCT_EXPORT_METHOD(logEvent: (NSString *)eventName eventValues:(NSDictionary *)eventValues
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
@@ -119,10 +118,6 @@ RCT_EXPORT_METHOD(logEvent: (NSString *)eventName eventValues:(NSDictionary *)ev
         successCallback(@[SUCCESS]);
     }
 }
-
-
-
-
 
 RCT_EXPORT_METHOD(logEventWithPromise: (NSString *)eventName eventValues:(NSDictionary *)eventValues
                   logEventWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
