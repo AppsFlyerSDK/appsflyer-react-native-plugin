@@ -20,7 +20,6 @@ public class RNAppsFlyerConstants {
     final static String afEmails = "emails";
 
     final static String afConversionData = "onInstallConversionDataListener";
-    final static String afOnInstallConversionData = "onInstallConversionData";
 
     final static String afSuccess = "success";
     final static String afFailure = "failure";
@@ -38,5 +37,17 @@ public class RNAppsFlyerConstants {
     final static String INVITE_DEEPLINK = "baseDeepLink";
     final static String PROMOTE_ID = "promotedAppId";
     final static String INVITE_BRAND_DOMAIN = "brandDomain";
+
+    //RECEIPT VALIDATION
+    final static String PUBLIC_KEY = "publicKey";
+    final static String SIGNATURE = "signature";
+    final static String PURCHASE_DATA = "purchaseData";
+    final static String PRICE = "price";
+    final static String CURRENCY = "currency";
+    final static String ADDITIONAL_PARAMETERS = "additionalParameters";
+    final static String NO_PARAMETERS_ERROR = "Please provide purchase parameters";
+    final static String VALIDATE_SUCCESS = "In-App Purchase Validation success";
+    final static String VALIDATE_FAILED = "In-App Purchase Validation failed with error: ";
+
 }
 

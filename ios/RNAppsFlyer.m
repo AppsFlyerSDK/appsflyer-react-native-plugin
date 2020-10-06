@@ -16,124 +16,29 @@
 
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
+RCT_EXPORT_METHOD(initSdkWithCallBack: (NSDictionary*)initSdkOptions
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
 
-    NSError *error = [self callSdkInternal:initSdkOptions];
-
-    if(error){
+    NSError* error = nil;
+    error = [self callSdkInternal:initSdkOptions];
+    if (error == nil){
+        successCallback(@[SUCCESS]);
+    }else{
         errorCallback(error);
     }
-    else{
-        successCallback(@[SUCCESS]);
-    }
 }
-
 
 RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
                   initSdkWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    NSError *error = [self callSdkInternal:initSdkOptions];
-
-    if(error) {
-        reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
-    } else {
-        resolve(@[SUCCESS]);
-    }
-}
-
-RCT_EXPORT_METHOD(logEvent: (NSString *)eventName eventValues:(NSDictionary *)eventValues
-                  successCallback :(RCTResponseSenderBlock)successCallback
-                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
-    NSError *error = [self logEventInternal:eventName eventValues:eventValues];
-
-    if(error) {
-        errorCallback(error);
-    } else {
-        //TODO wait callback from SDK
-        successCallback(@[SUCCESS]);
-    }
-}
-
-RCT_EXPORT_METHOD(logEventWithPromise: (NSString *)eventName eventValues:(NSDictionary *)eventValues
-                  logEventWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
-
-    NSError *error = [self logEventInternal:eventName eventValues:eventValues];
-
-    if(error){
-        reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
-    }
-    else{
-        //TODO wait callback from SDK
-        resolve(@[SUCCESS]);
-    }
-}
-
-RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback) {
-    NSString *uid = [[AppsFlyerLib shared] getAppsFlyerUID];
-    callback(@[[NSNull null], uid]);
-}
-
-RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSenderBlock)callback) {
-    [[AppsFlyerLib shared] setCustomerUserID:userId];
-    if (callback != nil) {
-        callback(@[SUCCESS]);
-    }
-}
-
-RCT_EXPORT_METHOD(stop: (BOOL)isStopped callback:(RCTResponseSenderBlock)callback) {
-    [AppsFlyerLib shared].isStopped  = isStopped;
-    if (callback != nil) {
-        callback(@[SUCCESS]);
-    }
-}
-
-RCT_EXPORT_METHOD(logLocation: (double)longitude latitude:(double)latitude callback:(RCTResponseSenderBlock)callback) {
-    [[AppsFlyerLib shared] logLocation:longitude latitude:latitude];
-    NSArray *events = @[[NSNumber numberWithDouble:longitude], [NSNumber numberWithDouble:latitude]];
-    callback(@[SUCCESS, events]);
-}
-
-RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
-                  successCallback :(RCTResponseSenderBlock)successCallback
-                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
-    NSArray *emails = nil;
-    id emailsCryptTypeId = nil;
-    EmailCryptType emailsCryptType = EmailCryptTypeNone;
-
-    if (![options isKindOfClass:[NSNull class]]) {
-        emails = (NSArray*)[options valueForKey: afEmails];
-
-        emailsCryptTypeId = [options objectForKey: afEmailsCryptType];
-        if ([emailsCryptTypeId isKindOfClass:[NSNumber class]]) {
-
-            int _t = [emailsCryptTypeId intValue];
-
-            switch (_t) {
-                case EmailCryptTypeSHA256:
-                    emailsCryptType = EmailCryptTypeSHA256;
-                    break;
-                default:
-                    emailsCryptType = EmailCryptTypeNone;
-            }
-        }
-    }
 
     NSError* error = nil;
-
-    if (!emails || [emails count] == 0) {
-        error = [NSError errorWithDomain:EMPTY_OR_CORRUPTED_LIST code:0 userInfo:nil];
-    }
-
-    if(error != nil){
-        errorCallback(error);
-    }
-    else{
-        [[AppsFlyerLib shared] setUserEmails:emails withCryptType:emailsCryptType];
-        successCallback(@[SUCCESS]);
-    }
+    error = [self callSdkInternal:initSdkOptions];
+    if (error == nil){
+        resolve(@[SUCCESS]);
+    }else{
+        reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);    }
 }
 
 -(NSError *) callSdkInternal:(NSDictionary*)initSdkOptions {
@@ -191,6 +96,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
         [AppsFlyerLib shared].appsFlyerDevKey = devKey;
         [AppsFlyerLib shared].isDebug = isDebug;
         [[AppsFlyerLib shared] start];
+        
 
         // Register for background-foreground transitions natively instead of doing this in JavaScript
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -198,6 +104,94 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
                                                      name:UIApplicationDidBecomeActiveNotification
                                                    object:nil];
         return nil;
+    }
+}
+RCT_EXPORT_METHOD(logEvent: (NSString *)eventName eventValues:(NSDictionary *)eventValues
+                  successCallback :(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    NSError *error = [self logEventInternal:eventName eventValues:eventValues];
+
+    if(error) {
+        errorCallback(error);
+    } else {
+        //TODO wait callback from SDK
+        successCallback(@[SUCCESS]);
+    }
+}
+
+RCT_EXPORT_METHOD(logEventWithPromise: (NSString *)eventName eventValues:(NSDictionary *)eventValues
+                  logEventWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+
+    NSError *error = [self logEventInternal:eventName eventValues:eventValues];
+
+    if(error){
+        reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
+    }
+    else{
+        //TODO wait callback from SDK
+        resolve(@[SUCCESS]);
+    }
+}
+
+RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback) {
+    NSString *uid = [[AppsFlyerLib shared] getAppsFlyerUID];
+    callback(@[[NSNull null], uid]);
+}
+
+RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSenderBlock)callback) {
+    [[AppsFlyerLib shared] setCustomerUserID:userId];
+    callback(@[SUCCESS]);
+}
+
+RCT_EXPORT_METHOD(stop: (BOOL)isStopped callback:(RCTResponseSenderBlock)callback) {
+    [AppsFlyerLib shared].isStopped  = isStopped;
+     callback(@[SUCCESS]);
+}
+
+RCT_EXPORT_METHOD(logLocation: (double)longitude latitude:(double)latitude callback:(RCTResponseSenderBlock)callback) {
+    [[AppsFlyerLib shared] logLocation:longitude latitude:latitude];
+    NSArray *events = @[[NSNumber numberWithDouble:longitude], [NSNumber numberWithDouble:latitude]];
+    callback(@[SUCCESS, events]);
+}
+
+RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
+                  successCallback :(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    NSArray *emails = nil;
+    id emailsCryptTypeId = nil;
+    EmailCryptType emailsCryptType = EmailCryptTypeNone;
+
+    if (![options isKindOfClass:[NSNull class]]) {
+        emails = (NSArray*)[options valueForKey: afEmails];
+
+        emailsCryptTypeId = [options objectForKey: afEmailsCryptType];
+        if ([emailsCryptTypeId isKindOfClass:[NSNumber class]]) {
+
+            int _t = [emailsCryptTypeId intValue];
+
+            switch (_t) {
+                case EmailCryptTypeSHA256:
+                    emailsCryptType = EmailCryptTypeSHA256;
+                    break;
+                default:
+                    emailsCryptType = EmailCryptTypeNone;
+            }
+        }
+    }
+
+    NSError* error = nil;
+
+    if (!emails || [emails count] == 0) {
+        error = [NSError errorWithDomain:EMPTY_OR_CORRUPTED_LIST code:0 userInfo:nil];
+    }
+
+    if(error != nil){
+        errorCallback(error);
+    }
+    else{
+        [[AppsFlyerLib shared] setUserEmails:emails withCryptType:emailsCryptType];
+        successCallback(@[SUCCESS]);
     }
 }
 
@@ -218,25 +212,19 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 
 RCT_EXPORT_METHOD(setAdditionalData: (NSDictionary *)additionalData callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setAdditionalData:additionalData];
-    if (callback != nil) {
-        callback(@[SUCCESS]);
-    }
+    callback(@[SUCCESS]);
 }
 
 //USER INVITES
 
 RCT_EXPORT_METHOD(setAppInviteOneLinkID: (NSString *)oneLinkID callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerLib shared].appInviteOneLinkID = oneLinkID;
-    if (callback != nil) {
-        callback(@[SUCCESS]);
-    }
+    callback(@[SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(setCurrencyCode: (NSString *)currencyCode callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setCurrencyCode:currencyCode];
-    if (callback != nil) {
-        callback(@[SUCCESS]);
-    }
+     callback(@[SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
@@ -277,16 +265,13 @@ RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
 
 //CROSS PROMOTION
 RCT_EXPORT_METHOD(logCrossPromotionImpression: (NSString *)appId campaign:(NSString *)campaign parameters:(NSDictionary *)parameters) {
-    if (appId != nil && ![appId isEqualToString:@""]) {
         [AppsFlyerCrossPromotionHelper logCrossPromoteImpression:appId campaign:campaign parameters:parameters];
-    }
 }
 
 RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
                   campaign:(NSString *)campaign
                   customParams:(NSDictionary *)customParams) {
 
-    if (appID != nil && ![appID isEqualToString:@""]) {
         [AppsFlyerShareInviteHelper generateInviteUrlWithLinkGenerator:^AppsFlyerLinkGenerator * _Nonnull(AppsFlyerLinkGenerator * _Nonnull generator) {
             if (campaign != nil && ![campaign isEqualToString:@""]) {
                 [generator setCampaign:campaign];
@@ -301,7 +286,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:appLink] options:@{} completionHandler:^(BOOL success) {
             }];
         }];
-    }
+
 }
 
 -(void)onConversionDataSuccess:(NSDictionary*) installData {
@@ -401,9 +386,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 
 RCT_EXPORT_METHOD(anonymizeUser: (BOOL *)b callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerLib shared].anonymizeUser = b;
-    if (callback != nil) {
-        callback(@[SUCCESS]);
-    }
+    callback(@[SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(updateServerUninstallToken: (NSString *)deviceToken callback:(RCTResponseSenderBlock)callback) {
@@ -437,8 +420,8 @@ RCT_EXPORT_METHOD(setResolveDeepLinkURLs:(NSArray *) urls
 }
 
 RCT_EXPORT_METHOD(performOnAppAttribution:(NSString *) urlString
-                    successCallback :(RCTResponseSenderBlock)successCallback
-                    errorCallback:(RCTResponseErrorBlock)errorCallback) {
+                  successCallback :(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
     NSURL *url = [NSURL URLWithString:urlString];
     if (url == nil) {
         NSError* error = [NSError errorWithDomain:INVALID_URI code:0 userInfo:nil];
@@ -468,4 +451,39 @@ RCT_EXPORT_METHOD(disableCollectASA: (BOOL)shouldDisable) {
     [AppsFlyerLib shared].disableCollectASA = shouldDisable;
 }
 
+RCT_EXPORT_METHOD(setUseReceiptValidationSandbox: (BOOL)isSandbox) {
+    [AppsFlyerLib shared].useReceiptValidationSandbox = isSandbox;
+}
+
+RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
+                  successCallback :(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    NSString* productIdentifier = nil;
+       NSString* tranactionId = nil;
+       NSString* price = nil;
+       NSString* currency = nil;
+       NSDictionary* additionalParameters = nil;
+       NSError* error = nil;
+    
+
+       if(![purchaseInfo isKindOfClass: [NSNull class]]){
+           productIdentifier = (NSString*)[purchaseInfo objectForKey: afProductIdentifier];
+           tranactionId = (NSString*)[purchaseInfo objectForKey: afTransactionId];
+           price = (NSString*)[purchaseInfo objectForKey: afPrice];
+           currency = (NSString*)[purchaseInfo objectForKey: afCurrency];
+           additionalParameters = (NSDictionary*)[purchaseInfo objectForKey: afAdditionalParameters];
+
+
+        [[AppsFlyerLib shared] validateAndLogInAppPurchase:productIdentifier price:price currency:currency transactionId:tranactionId additionalParameters:additionalParameters success:^(NSDictionary * _Nonnull response) {
+            successCallback(@[@"In App Purchase Validation completed successfully!"]);
+        } failure:^(NSError * _Nullable error, id  _Nullable reponse) {
+            errorCallback(error);
+        }];
+
+    }else{
+        error = [NSError errorWithDomain:NO_PARAMETERS_ERROR code:0 userInfo:nil];
+        errorCallback(error);
+    }
+
+}
 @end

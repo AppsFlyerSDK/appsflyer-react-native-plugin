@@ -32,6 +32,7 @@ import org.json.JSONObject;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -84,12 +85,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void initSdk(
-            ReadableMap _options,
-            Callback successCallback,
-            Callback errorCallback
-    ) {
-
+    public void initSdkWithCallBack(ReadableMap _options, Callback successCallback, Callback errorCallback) {
         try {
             final String errorReason = callSdkInternal(_options);
             if (errorReason == null) {
@@ -101,52 +97,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         } catch (Exception e) {
             errorCallback.invoke(e.getMessage());
         }
-    }
-
-
-    private String callSdkInternal(ReadableMap _options) {
-
-        String devKey;
-        boolean isDebug;
-        boolean isConversionData;
-
-        AppsFlyerLib instance = AppsFlyerLib.getInstance();
-
-        JSONObject options = RNUtil.readableMapToJson(_options);
-
-        devKey = options.optString(afDevKey, "");
-
-        if (devKey.trim().equals("")) {
-            return NO_DEVKEY_FOUND;
-        }
-
-        isDebug = options.optBoolean(afIsDebug, false);
-        instance.setDebugLog(isDebug);
-
-        isConversionData = options.optBoolean(afConversionData, false);
-
-        if (isDebug == true) {
-            Log.d("AppsFlyer", "Starting SDK");
-        }
-
-        instance.init(
-                devKey,
-                (isConversionData == true) ? registerConversionListener() : null,
-                application.getApplicationContext());
-
-        Intent intent = null;
-        Activity currentActivity = getCurrentActivity();
-
-        if (currentActivity != null) {
-            // register for lifecycle with Activity (automatically fetching deeplink from Activity if present)
-            instance.startTracking(currentActivity, devKey);
-        } else {
-            // register for lifecycle with Application (cannot fetch deeplink without access to the Activity,
-            // also sending first session manually)
-            instance.trackAppLaunch(application, devKey);
-            instance.startTracking(application, devKey);
-        }
-        return null;
     }
 
     @ReactMethod
@@ -162,6 +112,45 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         } catch (Exception e) {
             promise.reject(UNKNOWN_ERROR, e);
         }
+    }
+
+
+    private String callSdkInternal(ReadableMap _options) {
+
+        String devKey;
+        boolean isDebug;
+        boolean isConversionData;
+
+        AppsFlyerLib instance = AppsFlyerLib.getInstance();
+
+        JSONObject options = RNUtil.readableMapToJson(_options);
+        devKey = options.optString(afDevKey, "");
+        if (devKey.trim().equals("")) {
+            return NO_DEVKEY_FOUND;
+        }
+
+        isDebug = options.optBoolean(afIsDebug, false);
+        instance.setDebugLog(isDebug);
+
+        isConversionData = options.optBoolean(afConversionData, false);
+        if (isDebug == true) {
+            Log.d("AppsFlyer", "Starting SDK");
+        }
+        instance.init(devKey, (isConversionData == true) ? registerConversionListener() : null, application.getApplicationContext());
+
+        Intent intent = null;
+        Activity currentActivity = getCurrentActivity();
+
+        if (currentActivity != null) {
+            // register for lifecycle with Activity (automatically fetching deeplink from Activity if present)
+            instance.startTracking(currentActivity, devKey);
+        } else {
+            // register for lifecycle with Application (cannot fetch deeplink without access to the Activity,
+            // also sending first session manually)
+            instance.trackAppLaunch(application, devKey);
+            instance.startTracking(application, devKey);
+        }
+        return null;
     }
 
     private AppsFlyerConversionListener registerConversionListener() {
@@ -304,9 +293,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void setCustomerUserId(final String userId, Callback callback) {
         AppsFlyerLib.getInstance().setCustomerUserId(userId);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
@@ -328,15 +315,18 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void stop(boolean isStopped, Callback callback) {
         AppsFlyerLib.getInstance().stopTracking(isStopped, getReactApplicationContext());
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void setAdditionalData(ReadableMap additionalData, Callback callback) {
-
-        Map<String, Object> data = RNUtil.toMap(additionalData);
+        Map<String, Object> data = null;
+        try {
+            data = RNUtil.toMap(additionalData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
 
         if (data == null) { // in case of no values
             data = new HashMap<>();
@@ -344,9 +334,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
         HashMap<String, Object> copyData = new HashMap<>(data);
         AppsFlyerLib.getInstance().setAdditionalData(copyData);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
 
@@ -392,24 +380,14 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setAppInviteOneLinkID(final String oneLinkID, Callback callback) {
-        if (oneLinkID == null || oneLinkID.length() == 0) {
-            return;
-        }
         AppsFlyerLib.getInstance().setAppInviteOneLink(oneLinkID);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void setCurrencyCode(final String currencyCode, Callback callback) {
-        if (currencyCode == null || currencyCode.length() == 0) {
-            return;
-        }
         AppsFlyerLib.getInstance().setCurrencyCode(currencyCode);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
@@ -460,21 +438,20 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             }
 
 
-
             if (options.length() > 1 && !options.get("userParams").equals("")) {
 
                 JSONObject jsonCustomValues = options.getJSONObject("userParams");
 
                 Iterator<?> keys = jsonCustomValues.keys();
 
-                while( keys.hasNext() ) {
-                    String key = (String)keys.next();
+                while (keys.hasNext()) {
+                    String key = (String) keys.next();
                     Object keyvalue = jsonCustomValues.get(key);
                     linkGenerator.addParameter(key, keyvalue.toString());
                 }
             }
 
-        } catch (JSONException e){
+        } catch (JSONException e) {
 
         }
 
@@ -496,43 +473,31 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void logCrossPromotionImpression(final String appId, final String campaign, ReadableMap params) {
-        if (appId != "" && campaign != "") {
-            try {
-                Map<String, Object> temp = RNUtil.toMap(params);
-                Map<String, String> data = null;
-                data = (Map) temp;
-                CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign, data);
-            } catch (Exception e) {
-                CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
-            }
+        try {
+            Map<String, Object> temp = RNUtil.toMap(params);
+            Map<String, String> data = null;
+            data = (Map) temp;
+            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign, data);
+        } catch (Exception e) {
+            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
         }
     }
 
     @ReactMethod
     public void logCrossPromotionAndOpenStore(final String appId, final String campaign, ReadableMap params) {
-
-        if (appId == null || appId == "") {
-            return;
-        }
-
         Map<String, String> data = null;
-
         try {
             Map<String, Object> temp = RNUtil.toMap(params);
             data = (Map) temp;
         } catch (Exception e) {
-
         }
-
         CrossPromotionHelper.trackAndOpenStore(getReactApplicationContext(), appId, campaign, data);
     }
 
     @ReactMethod
-    public void anonymizeUser(boolean b, Callback callback){
+    public void anonymizeUser(boolean b, Callback callback) {
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
@@ -541,7 +506,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
             return;
         }
+
         ArrayList<Object> domainsList = domainsArray.toArrayList();
+//        List<Object> domainsList = RNUtil.toList(domainsArray);
         try {
             String[] domains = domainsList.toArray(new String[domainsList.size()]);
             AppsFlyerLib.getInstance().setOneLinkCustomDomain(domains);
@@ -558,7 +525,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
             return;
         }
+
         ArrayList<Object> urlsList = urlsArray.toArrayList();
+//        List<Object> urlsList = RNUtil.toList(urlsArray);
         try {
             String[] urls = urlsList.toArray(new String[urlsList.size()]);
             AppsFlyerLib.getInstance().setResolveDeepLinkURLs(urls);
@@ -594,6 +563,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             return;
         }
         ArrayList<Object> partnersList = partnersArray.toArrayList();
+//        List<Object> partnersList = RNUtil.toList(partnersArray);
         try {
             String[] partners = partnersList.toArray(new String[partnersList.size()]);
             AppsFlyerLib.getInstance().setSharingFilter(partners);
@@ -607,8 +577,61 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void logLocation(double longitude, double latitude, Callback successCallback) {
         AppsFlyerLib.getInstance().trackLocation(getReactApplicationContext(), latitude, longitude);
-        if (successCallback != null) {
-            successCallback.invoke(SUCCESS);
+        successCallback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void validateAndLogInAppPurchase(ReadableMap purchaseInfo, Callback successCallback, Callback errorCallback) {
+        String publicKey = "";
+        String signature = "";
+        String purchaseData = "";
+        String price = "";
+        String currency = "";
+        Map<String, String> additionalParameters = null;
+        JSONObject additionalParametersJson;
+
+        try {
+            purchaseInfo.hasKey(ADDITIONAL_PARAMETERS);
+            JSONObject purchaseJson = RNUtil.readableMapToJson(purchaseInfo);
+
+            publicKey = purchaseJson.optString(PUBLIC_KEY, "");
+            signature = purchaseJson.optString(SIGNATURE, "");
+            purchaseData = purchaseJson.optString(PURCHASE_DATA, "");
+            price = purchaseJson.optString(PRICE, "");
+            currency = purchaseJson.optString(CURRENCY, "");
+            if (purchaseInfo.hasKey(ADDITIONAL_PARAMETERS)) {
+                additionalParametersJson = purchaseJson.optJSONObject(ADDITIONAL_PARAMETERS);
+                additionalParameters = RNUtil.jsonObjectToMap(additionalParametersJson);
+            }
+
+            if (publicKey == "" || signature == "" || purchaseData == "" || price == "" || currency == "") {
+                errorCallback.invoke(NO_PARAMETERS_ERROR);
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            errorCallback.invoke(e);
+            return;
         }
+        initInAppPurchaseValidatorListener(successCallback, errorCallback);
+        AppsFlyerLib.getInstance().validateAndTrackInAppPurchase(reactContext, publicKey, signature, purchaseData, price, currency, additionalParameters);
+
+    }
+
+    @ReactMethod
+    public void initInAppPurchaseValidatorListener(final Callback successCallback, final Callback errorCallback) {
+        AppsFlyerLib.getInstance().registerValidatorListener(reactContext, new AppsFlyerInAppPurchaseValidatorListener() {
+            @Override
+            public void onValidateInApp() {
+                successCallback.invoke(VALIDATE_SUCCESS);
+
+            }
+
+            @Override
+            public void onValidateInAppFailure(String error) {
+                errorCallback.invoke(VALIDATE_FAILED + error);
+
+            }
+        });
     }
 }

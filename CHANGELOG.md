@@ -1,5 +1,11 @@
 # Versions
 
+## 6.0.31
+- In-App purchase validation
+- Add parameters type check to public api
+- Fix crash on null callbacks
+- Install Referrer v2.1
+
 ## 6.0.30
 
 - iOS SDK 6.0.3
