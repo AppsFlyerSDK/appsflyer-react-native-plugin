@@ -220,7 +220,7 @@ const Home = (props) => {
               onAppOpenAttributionCanceller = null;
             }
         };
-    });
+    }, []);
 
     return (
         <SafeAreaView>
@@ -274,7 +274,7 @@ return YES;
 
 ### <a id="android-deeplinks"> Android Deep Links
     
-On Android, AppsLyer SDK inspects activity intent object during onResume(). Because if that, for each activity that may be configured or launched with any [non-standard launch mode](https://developer.android.com/guide/topics/manifest/activity-element#lmode) please make sure to add the following code to `MainActivity.java` in `android/app/src/main/java/com...`:
+On Android, AppsFlyer SDK inspects activity intent object during onResume(). Because of that, for each activity that may be configured or launched with any [non-standard launch mode](https://developer.android.com/guide/topics/manifest/activity-element#lmode) please make sure to add the following code to `MainActivity.java` in `android/app/src/main/java/com...`:
 
 ```
 ...
