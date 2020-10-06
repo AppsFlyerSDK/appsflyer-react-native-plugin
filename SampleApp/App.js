@@ -61,10 +61,10 @@ appsFlyer.setCustomerUserId("testID");
 appsFlyer.initSdk(
     {
         isDebug: true,
-        devKey: 'Us4Gm2SnJghcuoev846Qed',
-        appId: '789456231',
+        devKey: 'Us********ed',
+        appId: '7********1',
         onInstallConversionDataListener: true,
-        timeToWaitForATTUserAuthorization: 60,
+        timeToWaitForATTUserAuthorization: 10,
     },
     (result) => {
         console.log('initSdk: ' + result);
@@ -94,18 +94,26 @@ const App: () => React$Node = () => {
     };
 
 
-    const logInAppPurchase = () => {
-        const info = {
-            publicKey: 'biz',
-            currency: 'buz',
-            signature: 'sasa',
-            purchaseData: 'ffff',
+    let info = {};
+    if (Platform.OS == 'android') {
+        info = {
+            publicKey: 'key',
+            currency: 'biz',
+            signature: 'sig',
+            purchaseData: 'data',
             price: '123',
             additionalParameters: {'foo': 'bar'},
         };
-
-        appsFlyer.validateAndLogInAppPurchase(info, res => console.log(res), err => console.log(err.message));
-    };
+    } else if (Platform.OS == 'ios') {
+        info = {
+            productIdentifier: 'identifier',
+            currency: 'USD',
+            transactionId: '1000000614252747',
+            price: '0.99',
+            additionalParameters: {'foo': 'bar'},
+        };
+    }
+    appsFlyer.validateAndLogInAppPurchase(info, res => console.log(res), err => console.log(err));
 
     const init = () => {
         appsFlyer.initSdk(option, result => console.log(result), error => console.log(error));

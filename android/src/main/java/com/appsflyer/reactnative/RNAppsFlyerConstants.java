@@ -8,7 +8,7 @@ public class RNAppsFlyerConstants {
 
     final static String NO_DEVKEY_FOUND = "No 'devKey' found or its empty";
     final static String UNKNOWN_ERROR = "AF Unknown Error";
-    final static String SUCCESS = "Success On Plugin Side";
+    final static String SUCCESS = "Success";
     final static String NO_EVENT_NAME_FOUND = "No 'eventName' found or its empty";
     final static String EMPTY_OR_CORRUPTED_LIST = "No arguments found or list is corrupted";
     final static String INVALID_URI = "Passed string is not a valid URI";

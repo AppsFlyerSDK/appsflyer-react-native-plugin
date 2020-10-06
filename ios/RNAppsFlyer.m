@@ -475,7 +475,7 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
 
 
         [[AppsFlyerLib shared] validateAndLogInAppPurchase:productIdentifier price:price currency:currency transactionId:tranactionId additionalParameters:additionalParameters success:^(NSDictionary * _Nonnull response) {
-            successCallback(response);
+            successCallback(@[@"In App Purchase Validation completed successfully!"]);
         } failure:^(NSError * _Nullable error, id  _Nullable reponse) {
             errorCallback(error);
         }];
