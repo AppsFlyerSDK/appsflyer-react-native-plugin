@@ -293,9 +293,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void setCustomerUserId(final String userId, Callback callback) {
         AppsFlyerLib.getInstance().setCustomerUserId(userId);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
@@ -317,15 +315,18 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void stop(boolean isStopped, Callback callback) {
         AppsFlyerLib.getInstance().stopTracking(isStopped, getReactApplicationContext());
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void setAdditionalData(ReadableMap additionalData, Callback callback) {
-
-        Map<String, Object> data = RNUtil.toMap(additionalData);
+        Map<String, Object> data = null;
+        try {
+            data = RNUtil.toMap(additionalData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
 
         if (data == null) { // in case of no values
             data = new HashMap<>();
@@ -333,9 +334,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
         HashMap<String, Object> copyData = new HashMap<>(data);
         AppsFlyerLib.getInstance().setAdditionalData(copyData);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
 
@@ -381,24 +380,14 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setAppInviteOneLinkID(final String oneLinkID, Callback callback) {
-        if (oneLinkID == null || oneLinkID.length() == 0) {
-            return;
-        }
         AppsFlyerLib.getInstance().setAppInviteOneLink(oneLinkID);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void setCurrencyCode(final String currencyCode, Callback callback) {
-        if (currencyCode == null || currencyCode.length() == 0) {
-            return;
-        }
         AppsFlyerLib.getInstance().setCurrencyCode(currencyCode);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
@@ -484,43 +473,31 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void logCrossPromotionImpression(final String appId, final String campaign, ReadableMap params) {
-        if (appId != "" && campaign != "") {
-            try {
-                Map<String, Object> temp = RNUtil.toMap(params);
-                Map<String, String> data = null;
-                data = (Map) temp;
-                CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign, data);
-            } catch (Exception e) {
-                CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
-            }
+        try {
+            Map<String, Object> temp = RNUtil.toMap(params);
+            Map<String, String> data = null;
+            data = (Map) temp;
+            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign, data);
+        } catch (Exception e) {
+            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
         }
     }
 
     @ReactMethod
     public void logCrossPromotionAndOpenStore(final String appId, final String campaign, ReadableMap params) {
-
-        if (appId == null || appId == "") {
-            return;
-        }
-
         Map<String, String> data = null;
-
         try {
             Map<String, Object> temp = RNUtil.toMap(params);
             data = (Map) temp;
         } catch (Exception e) {
-
         }
-
         CrossPromotionHelper.trackAndOpenStore(getReactApplicationContext(), appId, campaign, data);
     }
 
     @ReactMethod
     public void anonymizeUser(boolean b, Callback callback) {
         AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        callback.invoke(SUCCESS);
     }
 
     @ReactMethod
@@ -600,9 +577,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void logLocation(double longitude, double latitude, Callback successCallback) {
         AppsFlyerLib.getInstance().trackLocation(getReactApplicationContext(), latitude, longitude);
-        if (successCallback != null) {
-            successCallback.invoke(SUCCESS);
-        }
+        successCallback.invoke(SUCCESS);
     }
 
     @ReactMethod

@@ -55,7 +55,19 @@ appsFlyer.logEvent = logEvent;
  * @param callback success callback function
  */
 appsFlyer.logLocation = (longitude, latitude, callback) => {
-    return RNAppsFlyer.logLocation(longitude, latitude, callback);
+    if (longitude == null || latitude == null || longitude == "" || latitude == "") {
+        console.log("longitude or latitude are missing!");
+        return;
+    }
+    if (typeof longitude != "number" || typeof latitude != "number") {
+        longitude = parseFloat(longitude);
+        latitude = parseFloat(latitude);
+    }
+    if (callback) {
+        return RNAppsFlyer.logLocation(longitude, latitude, callback);
+    } else {
+        return RNAppsFlyer.logLocation(longitude, latitude, result => console.log(result));
+    }
 };
 
 /**
@@ -76,7 +88,11 @@ appsFlyer.setUserEmails = (options, successC, errorC) => {
  * @param successC success callback function.
  */
 appsFlyer.setAdditionalData = (additionalData, successC) => {
-    return RNAppsFlyer.setAdditionalData(additionalData, successC);
+    if (successC) {
+        return RNAppsFlyer.setAdditionalData(additionalData, successC);
+    } else {
+        return RNAppsFlyer.setAdditionalData(additionalData, result => console.log(result));
+    }
 };
 
 /**
@@ -95,7 +111,17 @@ appsFlyer.getAppsFlyerUID = callback => {
  * @param successC success callback function.
  */
 appsFlyer.updateServerUninstallToken = (token, successC) => {
-    return RNAppsFlyer.updateServerUninstallToken(token, successC);
+    if (token == null) {
+        token = "";
+    }
+    if (typeof token != "string") {
+        token = token.toString();
+    }
+    if (successC) {
+        return RNAppsFlyer.updateServerUninstallToken(token, successC);
+    } else {
+        return RNAppsFlyer.updateServerUninstallToken(token, result => console.log(result));
+    }
 };
 
 /**
@@ -106,7 +132,17 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
  * @param successC callback function.
  */
 appsFlyer.setCustomerUserId = (userId, successC) => {
-    return RNAppsFlyer.setCustomerUserId(userId, successC);
+    if (userId == null) {
+        userId = "";
+    }
+    if (typeof userId != "string") {
+        userId = userId.toString();
+    }
+    if (successC) {
+        return RNAppsFlyer.setCustomerUserId(userId, successC);
+    } else {
+        return RNAppsFlyer.setCustomerUserId(userId, result => console.log(result));
+    }
 };
 
 /**
@@ -118,7 +154,11 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
  * @param successC callback function.
  */
 appsFlyer.stop = (isStopped, successC) => {
-    return RNAppsFlyer.stop(isStopped, successC);
+    if (successC) {
+        return RNAppsFlyer.stop(isStopped, successC);
+    } else {
+        return RNAppsFlyer.stop(isStopped, result => console.log(result));
+    }
 };
 
 /**
@@ -155,7 +195,18 @@ appsFlyer.setCollectAndroidID = (isCollect, successC) => {
  * @param successC callback function.
  */
 appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
-    return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, successC);
+    if (oneLinkID == null) {
+        oneLinkID = "";
+    }
+    if (typeof oneLinkID != "string") {
+        oneLinkID = oneLinkID.toString();
+    }
+    if (successC) {
+        return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, successC);
+    } else {
+        return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, result => console.log(result));
+    }
+
 };
 
 /**
@@ -179,6 +230,17 @@ appsFlyer.generateInviteLink = (parameters, success, error) => {
  * @param parameters additional params to be added to the attribution link
  */
 appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
+    if (appId == null || appId == "") {
+        console.log("appid is missing!");
+        return;
+    }
+    if (campaign == null) {
+        campaign = "";
+    }
+    if (typeof appId != "string" || typeof campaign != "string") {
+        appId = appId.toString();
+        campaign = campaign.toString();
+    }
     return RNAppsFlyer.logCrossPromotionImpression(appId, campaign, parameters);
 };
 
@@ -190,6 +252,17 @@ appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
  * @param params additional user params.
  */
 appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
+    if (appId == null || appId == "") {
+        console.log("appid is missing!");
+        return;
+    }
+    if (campaign == null) {
+        campaign = "";
+    }
+    if (typeof appId != "string" || typeof campaign != "string") {
+        appId = appId.toString();
+        campaign = campaign.toString();
+    }
     return RNAppsFlyer.logCrossPromotionAndOpenStore(appId, campaign, params);
 };
 
@@ -201,7 +274,18 @@ appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
  * @param successC success callback function.
  */
 appsFlyer.setCurrencyCode = (currencyCode, successC) => {
-    return RNAppsFlyer.setCurrencyCode(currencyCode, successC);
+    if (currencyCode == null || currencyCode == "") {
+        console.log("currencyCode is missing!");
+        return;
+    }
+    if (typeof currencyCode != "string") {
+        currencyCode = currencyCode.toString();
+    }
+    if (successC) {
+        return RNAppsFlyer.setCurrencyCode(currencyCode, successC);
+    } else {
+        return RNAppsFlyer.setCurrencyCode(currencyCode, result => console.log(result));
+    }
 };
 
 /**
@@ -305,7 +389,11 @@ appsFlyer.onAppOpenAttribution = callback => {
  * @param successC success callback function.
  */
 appsFlyer.anonymizeUser = (shouldAnonymize, successC) => {
-    return RNAppsFlyer.anonymizeUser(shouldAnonymize, successC);
+    if (successC) {
+        return RNAppsFlyer.anonymizeUser(shouldAnonymize, successC);
+    } else {
+        return RNAppsFlyer.anonymizeUser(shouldAnonymize, result => console.log(result));
+    }
 };
 
 /**
@@ -343,6 +431,9 @@ appsFlyer.setResolveDeepLinkURLs = (urls, successC, errorC) => {
  * @param callback Result callback
  */
 appsFlyer.performOnAppAttribution = (urlString, successC, errorC) => {
+    if (typeof urlString != "string") {
+        urlString = urlString.toString();
+    }
     return RNAppsFlyer.performOnAppAttribution(urlString, successC, errorC);
 }
 
