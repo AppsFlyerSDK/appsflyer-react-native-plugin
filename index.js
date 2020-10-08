@@ -491,6 +491,10 @@ appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
     RNAppsFlyer.setUseReceiptValidationSandbox(isSandbox);
 }
 
+appsFlyer.sendPushNotificationData = (successC) => {
+    RNAppsFlyer.sendPushNotificationData(successC);
+}
+
 
 function AFParseJSONException(_message, _data) {
     this.message = _message;
