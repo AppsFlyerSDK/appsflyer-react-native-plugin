@@ -46,7 +46,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
     NSString* devKey = nil;
     NSString* appId = nil;
     BOOL isDebug = NO;
-    BOOL isConversionData = NO;
+    BOOL isConversionData = YES;
     NSNumber* interval = 0;
 
     if (![initSdkOptions isKindOfClass:[NSNull class]]) {
@@ -64,6 +64,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
             isDebug = [(NSNumber*)isDebugValue boolValue];
         }
         isConversionDataValue = [initSdkOptions objectForKey: afConversionData];
+
         if ([isConversionDataValue isKindOfClass:[NSNumber class]]) {
             isConversionData = [(NSNumber*)isConversionDataValue boolValue];
         }
@@ -96,7 +97,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         [AppsFlyerLib shared].appsFlyerDevKey = devKey;
         [AppsFlyerLib shared].isDebug = isDebug;
         [[AppsFlyerLib shared] start];
-        
+
 
         // Register for background-foreground transitions natively instead of doing this in JavaScript
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -464,7 +465,7 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
        NSString* currency = nil;
        NSDictionary* additionalParameters = nil;
        NSError* error = nil;
-    
+
 
        if(![purchaseInfo isKindOfClass: [NSNull class]]){
            productIdentifier = (NSString*)[purchaseInfo objectForKey: afProductIdentifier];
@@ -472,7 +473,6 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
            price = (NSString*)[purchaseInfo objectForKey: afPrice];
            currency = (NSString*)[purchaseInfo objectForKey: afCurrency];
            additionalParameters = (NSDictionary*)[purchaseInfo objectForKey: afAdditionalParameters];
-
 
         [[AppsFlyerLib shared] validateAndLogInAppPurchase:productIdentifier price:price currency:currency transactionId:tranactionId additionalParameters:additionalParameters success:^(NSDictionary * _Nonnull response) {
             successCallback(@[@"In App Purchase Validation completed successfully!"]);

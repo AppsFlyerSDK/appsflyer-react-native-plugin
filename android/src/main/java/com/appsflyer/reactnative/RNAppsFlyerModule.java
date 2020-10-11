@@ -132,7 +132,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         isDebug = options.optBoolean(afIsDebug, false);
         instance.setDebugLog(isDebug);
 
-        isConversionData = options.optBoolean(afConversionData, false);
+        isConversionData = options.optBoolean(afConversionData, true);
         if (isDebug == true) {
             Log.d("AppsFlyer", "Starting SDK");
         }
