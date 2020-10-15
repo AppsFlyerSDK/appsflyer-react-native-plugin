@@ -49,7 +49,8 @@ declare module "react-native-appsflyer" {
         emailsCryptType: AF_EMAIL_CRYPT_TYPE | 0 | 3;
     }
 
-    export interface GenerateInviteLinkParams {        channel: string;
+    export interface GenerateInviteLinkParams {
+        channel: string;
         campaign?: string;
         customerID?: string;
         userParams?: object;
@@ -83,6 +84,7 @@ declare module "react-native-appsflyer" {
         logLocation(longitude: number, latitude: number, successC?: SuccessCB): void
         validateAndLogInAppPurchase(purchaseInfo: InAppPurchase, successC, errorC): Response<string>
         updateServerUninstallToken(token: string, successC?: SuccessCB): void
+        sendPushNotificationData(pushPayload: object): void
 
         /**
          * For iOS Only

@@ -486,4 +486,9 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
     }
 
 }
+
+RCT_EXPORT_METHOD(sendPushNotificationData: (NSDictionary*)pushPayload) {
+    [[AppsFlyerLib shared] handlePushNotification:pushPayload];
+}
+
 @end
