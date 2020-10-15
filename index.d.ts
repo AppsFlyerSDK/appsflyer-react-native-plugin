@@ -84,7 +84,7 @@ declare module "react-native-appsflyer" {
         logLocation(longitude: number, latitude: number, successC?: SuccessCB): void
         validateAndLogInAppPurchase(purchaseInfo: InAppPurchase, successC, errorC): Response<string>
         updateServerUninstallToken(token: string, successC?: SuccessCB): void
-        sendPushNotificationData(successC): void
+        sendPushNotificationData(pushPayload: object): void
 
         /**
          * For iOS Only

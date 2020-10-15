@@ -636,8 +636,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void sendPushNotificationData(Callback successCallback) {
+    public void sendPushNotificationData(ReadableMap pushPayload) {
         AppsFlyerLib.getInstance().sendPushNotificationData(getCurrentActivity());
-        successCallback.invoke("Push Notifications: " + SUCCESS);
     }
 }

@@ -96,7 +96,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         [AppsFlyerLib shared].appsFlyerDevKey = devKey;
         [AppsFlyerLib shared].isDebug = isDebug;
         [[AppsFlyerLib shared] start];
-        
+
 
         // Register for background-foreground transitions natively instead of doing this in JavaScript
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -464,7 +464,7 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
        NSString* currency = nil;
        NSDictionary* additionalParameters = nil;
        NSError* error = nil;
-    
+
 
        if(![purchaseInfo isKindOfClass: [NSNull class]]){
            productIdentifier = (NSString*)[purchaseInfo objectForKey: afProductIdentifier];
@@ -486,4 +486,9 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
     }
 
 }
+
+RCT_EXPORT_METHOD(sendPushNotificationData: (NSDictionary*)pushPayload) {
+    [[AppsFlyerLib shared] handlePushNotification:pushPayload];
+}
+
 @end
