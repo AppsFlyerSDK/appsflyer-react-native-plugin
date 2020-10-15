@@ -1,5 +1,9 @@
 # Versions
 
+## 6.0.33
+- Send Push Notification API
+
+
 ## 6.0.31
 - In-App purchase validation
 - Add parameters type check to public api
