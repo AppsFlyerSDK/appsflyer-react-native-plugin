@@ -491,6 +491,17 @@ appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
     RNAppsFlyer.setUseReceiptValidationSandbox(isSandbox);
 }
 
+/**
+ *
+ *Push-notification campaigns are used to create fast re-engagements with existing users.
+ *AppsFlyer supplies an open-for-all solution, that enables measuring the success of push-notification campaigns, for both iOS and Android platforms.
+ * Learn more - https://support.appsflyer.com/hc/en-us/articles/207364076-Measuring-Push-Notification-Re-Engagement-Campaigns
+ * @param pushPayload
+ */
+appsFlyer.sendPushNotificationData = (pushPayload) => {
+    RNAppsFlyer.sendPushNotificationData(pushPayload);
+}
+
 
 function AFParseJSONException(_message, _data) {
     this.message = _message;
