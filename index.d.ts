@@ -49,7 +49,8 @@ declare module "react-native-appsflyer" {
         emailsCryptType: AF_EMAIL_CRYPT_TYPE | 0 | 3;
     }
 
-    export interface GenerateInviteLinkParams {        channel: string;
+    export interface GenerateInviteLinkParams {
+        channel: string;
         campaign?: string;
         customerID?: string;
         userParams?: object;
@@ -61,9 +62,10 @@ declare module "react-native-appsflyer" {
         onInstallConversionData(callback: (data: ConversionData) => any): () => void;
         onInstallConversionFailure(callback: (data: ConversionData) => any): () => void;
         onAppOpenAttribution(callback: (data: any) => any): () => void;
-
-        initSdk(options: InitSDKOptions, successC?: SuccessCB, errorC?: ErrorCB): Response<string>
-        logEvent(eventName: string, eventValues: object, successC?: SuccessCB, errorC?: ErrorCB): Response<string>
+        initSdk(options: InitSDKOptions): Promise<string>;
+        initSdk(options: InitSDKOptions, successC: SuccessCB, errorC: ErrorCB): void;
+        logEvent(eventName: string, eventValues: object): Promise<string>;
+        logEvent(eventName: string, eventValues: object, successC: SuccessCB, errorC: ErrorCB): void;
         setUserEmails(options: SetEmailsOptions, successC: SuccessCB, errorC: ErrorCB): void
         setAdditionalData(additionalData: object, successC?: SuccessCB): void
         getAppsFlyerUID(callback: (error: Error, uid: string) => any): void
@@ -83,6 +85,7 @@ declare module "react-native-appsflyer" {
         logLocation(longitude: number, latitude: number, successC?: SuccessCB): void
         validateAndLogInAppPurchase(purchaseInfo: InAppPurchase, successC, errorC): Response<string>
         updateServerUninstallToken(token: string, successC?: SuccessCB): void
+        sendPushNotificationData(pushPayload: object): void
 
         /**
          * For iOS Only

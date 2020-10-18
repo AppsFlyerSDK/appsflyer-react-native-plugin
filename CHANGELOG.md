@@ -1,5 +1,9 @@
 # Versions
 
+## 6.0.33
+- Send Push Notification API
+- Fix TypeScript types for initSdk and logEvent
+
 ## 6.0.31
 - In-App purchase validation
 - Add parameters type check to public api

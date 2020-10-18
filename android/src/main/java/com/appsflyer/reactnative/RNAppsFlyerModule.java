@@ -634,4 +634,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             }
         });
     }
+
+    @ReactMethod
+    public void sendPushNotificationData(ReadableMap pushPayload) {
+        AppsFlyerLib.getInstance().sendPushNotificationData(getCurrentActivity());
+    }
 }
