@@ -1,4 +1,7 @@
 # Versions
+## 6.0.50
+- iOS SDK 6.0.5
+- Android SDK 5.4.4
 
 ## 6.0.33
 - Send Push Notification API
