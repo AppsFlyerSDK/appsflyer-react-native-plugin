@@ -410,7 +410,7 @@ appsFlyer.updateServerUninstallToken('token', (res) => {
 
 ##### <a id="setCollectIMEI"> **`setCollectIMEI(isCollect, callback)`**
   
-(Android only)
+❗(Android only)
 
 Opt-out of collection of IMEI.<br/>
 If the app does NOT contain Google Play Services, device IMEI is collected by the SDK.<br/>
@@ -425,16 +425,18 @@ However, apps with Google play services should avoid IMEI collection as this is 
 *Example:*
 
 ```javascript
+if (Platform.OS == 'android') {
 appsFlyer.setCollectIMEI(false, (res) => {
    //...
 });
+}
 ```
 
 ---
 
 ##### <a id="setCollectAndroidID"> **`setCollectAndroidID(isCollect, callback)`**
   
-(Android only)
+❗(Android only)
 
 Opt-out of collection of Android ID.<br/>
 If the app does NOT contain Google Play Services, Android ID is collected by the SDK.<br/>
@@ -449,9 +451,11 @@ However, apps with Google play services should avoid Android ID collection as th
 *Example:*
 
 ```javascript
+if (Platform.OS == 'android') {
 appsFlyer.setCollectAndroidID(true, (res) => {
    //...
 });
+}
 ```
 
 ---
@@ -708,7 +712,7 @@ Used by advertisers to exclude **specified** networks/integrated partners from g
 
 ##### <a id="disableCollectASA"> **`disableCollectASA(shouldDisable)`**
   
-(iOS only)
+❗(iOS only)
 
 Disables Apple Search Ads collecting
 
@@ -719,15 +723,16 @@ Disables Apple Search Ads collecting
 *Example:*
 
 ```javascript
-
+if (Platform.OS == 'ios') {
 appsFlyer.disableCollectASA(true);
+}
 ```
 
 ---
 
 ##### <a id="disableAdvertisingIdentifier"> **`disableAdvertisingIdentifier(shouldDisable)`**
   
-(iOS only)
+❗(iOS only)
 
 Disables IDFA collecting
 
@@ -738,7 +743,9 @@ Disables IDFA collecting
 *Example:*
 
 ```javascript
+if (Platform.OS == 'ios') {
 appsFlyer.disableAdvertisingIdentifier(true);
+}
 ```
 
 ---
@@ -746,7 +753,7 @@ appsFlyer.disableAdvertisingIdentifier(true);
 ##### <a id="validateAndLogInAppPurchase"> **`validateAndLogInAppPurchase(purchaseInfo, successC, errorC): Response<string>`**
 Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.<br>
 Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases
-Important! for iOS - set SandBox to ```true```<br>
+❗Important❗ for iOS - set SandBox to ```true```<br>
 ```appsFlyer.setUseReceiptValidationSandbox(true);```
 
 
