@@ -459,15 +459,6 @@ appsFlyer.setSharingFilter = (partners, successC, errorC) => {
 }
 
 /**
- * Disables IDFA collecting
- * @param shouldDisable Flag to disable/enable IDFA collection
- * @platform iOS only
- */
-appsFlyer.disableAdvertisingIdentifier = (shouldDisable) => {
-    return RNAppsFlyer.disableAdvertisingIdentifier(shouldDisable);
-}
-
-/**
  * Disables Apple Search Ads collecting
  * @param shouldDisable Flag to disable/enable Apple Search Ads data collection
  * @platform iOS only
