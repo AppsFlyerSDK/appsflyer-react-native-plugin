@@ -143,12 +143,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
         if (currentActivity != null) {
             // register for lifecycle with Activity (automatically fetching deeplink from Activity if present)
-            instance.startTracking(currentActivity, devKey);
+            instance.start(currentActivity, devKey);
         } else {
             // register for lifecycle with Application (cannot fetch deeplink without access to the Activity,
             // also sending first session manually)
-            instance.trackAppLaunch(application, devKey);
-            instance.startTracking(application, devKey);
+            instance.start(application, devKey);
         }
         return null;
     }
@@ -232,7 +231,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         Activity currentActivity = getCurrentActivity();
 
         if (currentActivity != null) {
-            AppsFlyerLib.getInstance().trackEvent(currentActivity.getBaseContext(), eventName, data);
+            AppsFlyerLib.getInstance().logEvent(currentActivity.getBaseContext(), eventName, data);
         }
 
         return null;
@@ -314,7 +313,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void stop(boolean isStopped, Callback callback) {
-        AppsFlyerLib.getInstance().stopTracking(isStopped, getReactApplicationContext());
+        AppsFlyerLib.getInstance().stop(isStopped, getReactApplicationContext());
         callback.invoke(SUCCESS);
     }
 
@@ -477,9 +476,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             Map<String, Object> temp = RNUtil.toMap(params);
             Map<String, String> data = null;
             data = (Map) temp;
-            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign, data);
+            CrossPromotionHelper.logCrossPromoteImpression(getReactApplicationContext(), appId, campaign, data);
         } catch (Exception e) {
-            CrossPromotionHelper.trackCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
+            CrossPromotionHelper.logCrossPromoteImpression(getReactApplicationContext(), appId, campaign);
         }
     }
 
@@ -491,12 +490,12 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             data = (Map) temp;
         } catch (Exception e) {
         }
-        CrossPromotionHelper.trackAndOpenStore(getReactApplicationContext(), appId, campaign, data);
+        CrossPromotionHelper.logAndOpenStore(getReactApplicationContext(), appId, campaign, data);
     }
 
     @ReactMethod
     public void anonymizeUser(boolean b, Callback callback) {
-        AppsFlyerLib.getInstance().setDeviceTrackingDisabled(b);
+        AppsFlyerLib.getInstance().anonymizeUser(b);
         callback.invoke(SUCCESS);
     }
 
@@ -576,7 +575,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void logLocation(double longitude, double latitude, Callback successCallback) {
-        AppsFlyerLib.getInstance().trackLocation(getReactApplicationContext(), latitude, longitude);
+        AppsFlyerLib.getInstance().logLocation(getReactApplicationContext(), latitude, longitude);
         successCallback.invoke(SUCCESS);
     }
 
@@ -614,7 +613,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             return;
         }
         initInAppPurchaseValidatorListener(successCallback, errorCallback);
-        AppsFlyerLib.getInstance().validateAndTrackInAppPurchase(reactContext, publicKey, signature, purchaseData, price, currency, additionalParameters);
+        AppsFlyerLib.getInstance().validateAndLogInAppPurchase(reactContext, publicKey, signature, purchaseData, price, currency, additionalParameters);
 
     }
 
