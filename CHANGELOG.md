@@ -1,4 +1,8 @@
 # Versions
+## 6.1.0
+- iOS SDK 6.1.0
+- Android SDK 6.1.0
+
 ## 6.0.50
 - iOS SDK 6.0.5
 - Android SDK 5.4.4
