@@ -2,15 +2,18 @@
 //  AppsFlyerLib.h
 //  AppsFlyerLib
 //
-//  AppsFlyer iOS SDK 6.0.5 (195)
+//  AppsFlyer iOS SDK 6.1.0 (23)
 //  Copyright (c) 2012-2020 AppsFlyer Ltd. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
+
 #import "AppsFlyerCrossPromotionHelper.h"
 #import "AppsFlyerShareInviteHelper.h"
-NS_ASSUME_NONNULL_BEGIN
+#import "AppsFlyerDeepLinkResult.h"
+#import "AppsFlyerDeepLink.h"
 
+NS_ASSUME_NONNULL_BEGIN
 
 // In app event names constants
 #define AFEventLevelAchieved            @"af_level_achieved"
@@ -139,6 +142,14 @@ typedef enum  {
     /// SHA256
     EmailCryptTypeSHA256 = 3
 } EmailCryptType;
+
+NS_SWIFT_NAME(DeepLinkDelegate)
+@protocol AppsFlyerDeepLinkDelegate <NSObject>
+
+@optional
+- (void)didResolveDeepLink:(AppsFlyerDeepLinkResult *_Nonnull)result;
+
+@end
 
 /**
  Conform and subscribe to this protocol to allow getting data about conversion and
@@ -288,6 +299,8 @@ NS_SWIFT_NAME(waitForATTUserAuthorization(timeoutInterval:));
  AppsFlyer delegate. See `AppsFlyerLibDelegate`
  */
 @property(weak, nonatomic) id<AppsFlyerLibDelegate> delegate;
+
+@property(weak, nonatomic) id<AppsFlyerDeepLinkDelegate> deepLinkDelegate;
 
 /**
  In app purchase receipt validation Apple environment(production or sandbox). The default value is NO
@@ -579,11 +592,25 @@ NS_SWIFT_NAME(logEvent(name:values:completionHandler:));
  */
 @property(nonatomic, nullable) NSArray<NSString *> *sharingFilter;
 
+@property(nonatomic) NSUInteger deepLinkTimeout;
+
 /**
  Block an events from being shared with any partner
  This method overwrite -[AppsFlyerLib setSharingFilter:]
  */
 -(void)setSharingFilterForAllPartners;
+
+/**
+ Validate if URL contains certain string and append quiery
+ parameters to deeplink URL. In case if URL does not contain user-defined string,
+ parameters are not appended to the url.
+ 
+ @param containsString string to check in URL.
+ @param parameters NSDictionary, which containins parameters to append to the deeplink url after it passed validation.
+ */
+- (void)appendParametersToDeepLinkingURLWithString:(NSString *)containsString
+                                        parameters:(NSDictionary<NSString *, NSString*> *)parameters
+NS_SWIFT_NAME(appendParametersToDeeplinkURL(contains:parameters:));
 
 @end
 
