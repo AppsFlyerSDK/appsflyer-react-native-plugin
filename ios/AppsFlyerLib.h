@@ -2,7 +2,7 @@
 //  AppsFlyerLib.h
 //  AppsFlyerLib
 //
-//  AppsFlyer iOS SDK 6.1.0 (23)
+//  AppsFlyer iOS SDK 6.1.1 (33)
 //  Copyright (c) 2012-2020 AppsFlyer Ltd. All rights reserved.
 //
 
@@ -235,6 +235,7 @@ NS_SWIFT_NAME(DeepLinkDelegate)
  */
 @property(nonatomic, strong) NSString * appleAppID;
 
+#ifndef AFSDK_NO_IDFA
 /**
  AppsFlyer SDK collect Apple's `advertisingIdentifier` if the `AdSupport.framework` included in the SDK.
  You can disable this behavior by setting the following property to YES
@@ -248,6 +249,8 @@ NS_SWIFT_NAME(DeepLinkDelegate)
  */
 - (void)waitForATTUserAuthorizationWithTimeoutInterval:(NSTimeInterval)timeoutInterval
 NS_SWIFT_NAME(waitForATTUserAuthorization(timeoutInterval:));
+
+#endif
 
 @property(nonatomic) BOOL disableSKAdNetwork;
 

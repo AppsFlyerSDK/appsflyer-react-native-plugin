@@ -1,4 +1,9 @@
 # Versions
+## 6.1.10
+- iOS SDK 6.1.1
+- Android SDK 6.1.0
+- Add script for switching between Strict and Regular mode
+
 ## 6.1.0
 - iOS SDK 6.1.0
 - Android SDK 6.1.0
