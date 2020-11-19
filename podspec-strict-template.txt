@@ -14,5 +14,6 @@ Pod::Spec.new do |s|
   s.platform         = :ios, "8.0"
   s.static_framework = true
   s.dependency 'React'
-  s.dependency 'AppsFlyerFramework', ' 6.1.1'
+  s.dependency 'AppsFlyerFramework/Strict', '6.1.1'
+  s.xcconfig = {'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) AFSDK_NO_IDFA=1' }
 end

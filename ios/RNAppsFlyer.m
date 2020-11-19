@@ -87,12 +87,12 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         if(isConversionData == YES){
             [AppsFlyerLib shared].delegate = self;
         }
-
+#ifndef AFSDK_NO_IDFA
         if (interval != 0 && interval != nil){
             double timeoutInterval = [interval doubleValue];
             [[AppsFlyerLib shared] waitForATTUserAuthorizationWithTimeoutInterval:timeoutInterval];
         }
-
+#endif
         [AppsFlyerLib shared].appleAppID = appId;
         [AppsFlyerLib shared].appsFlyerDevKey = devKey;
         [AppsFlyerLib shared].isDebug = isDebug;
@@ -443,11 +443,11 @@ RCT_EXPORT_METHOD(setSharingFilter:(NSArray *)partners
     [[AppsFlyerLib shared] setSharingFilter:partners];
     successCallback(@[SUCCESS]);
 }
-
+#ifndef AFSDK_NO_IDFA
 RCT_EXPORT_METHOD(disableAdvertisingIdentifier:(BOOL)shouldDisable) {
     [AppsFlyerLib shared].disableAdvertisingIdentifier = shouldDisable;
 }
-
+#endif
 RCT_EXPORT_METHOD(disableCollectASA: (BOOL)shouldDisable) {
     [AppsFlyerLib shared].disableCollectASA = shouldDisable;
 }
