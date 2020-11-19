@@ -15,13 +15,14 @@
 
 - [v6 Breaking changes](#v6-breaking-changes)
 - [Adding the SDK to your project](#installation)
+- [Add or Remove Strict mode for App-kids](#appKids)
 - [Initializing the SDK](#init-sdk)
 - [Guides](#guides)
 - [API](#api) 
   
 ### <a id="plugin-build-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v6.1.0**
+- iOS AppsFlyerSDK **v6.1.1**
 - Android AppsFlyerSDK **v6.1.0**
 
 ## <a id="v6-breaking-changes"> ❗ v6 Breaking Changes
@@ -67,6 +68,40 @@ $ react-native run-android
 
 > Starting from RN [v0.60](https://facebook.github.io/react-native/blog/2019/07/03/version-60), and react-native-appsflyer `v1.4.7` the plugin uses [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md). <br/>
 If your app does not support autolinking, check out the Installation Guide [here](./Docs/Installation.md).
+
+## <a id="appKids"> 👨‍👩‍👧‍👦 Add or Remove Strict mode for App-kids
+
+Starting from version **6.1.10** iOS SDK comes in two variants: **Strict** mode and **Regular** mode. Please read more [here](https://support.appsflyer.com/hc/en-us/articles/207032066#integration-strict-mode-sdk)
+
+***Change to Strict mode***<br>
+After you [installed](#installation) the AppsFlyer plugin, go to the `react-native-appsflyer` folder inside the `node_modules` folder:
+```
+cd node_modules/react-native-appsflyer
+```
+Run the script `changeMode.sh strict`
+```
+./changeMode.sh strict
+```
+Go to the `ios` folder in your `root` project
+```
+cd ../../ios
+```
+Run `pod install`
+
+***Change to Regular mode***<br>
+Go to the `react-native-appsflyer` folder inside the `node_modules` folder:
+```
+cd node_modules/react-native-appsflyer
+```
+Run the script `changeMode.sh` (WITHOUT `strict`)
+```
+./changeMode.sh
+```
+Go to the `ios` folder in your `root` project
+```
+cd ../../ios
+```
+Run `pod install`
 
 ## <a id="init-sdk"> 🚀 Initializing the SDK
 
