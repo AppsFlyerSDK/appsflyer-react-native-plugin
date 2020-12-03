@@ -1,6 +1,6 @@
 import {NativeEventEmitter, NativeModules} from "react-native";
 
-const {RNAppsFlyer} = NativeModules;
+export const RNAppsFlyer = NativeModules;
 const appsFlyer = {};
 const eventsMap = {};
 const appsFlyerEventEmitter = new NativeEventEmitter(RNAppsFlyer);
@@ -40,7 +40,7 @@ function logEvent(eventName, eventValues, success, error): Promise<string> {
         //logEvent is a callback function
         logEventCallback(eventName, eventValues, success, error);
     } else if (!success) {
-        //logEvent is a promise function
+        // logEvent is a promise function
         return logEventPromise(eventName, eventValues);
     }
 }
@@ -484,11 +484,11 @@ appsFlyer.disableCollectASA = (shouldDisable) => {
  * @param errorC Error callback
  */
 appsFlyer.validateAndLogInAppPurchase = (purchaseInfo, successC, errorC) => {
-    RNAppsFlyer.validateAndLogInAppPurchase(purchaseInfo, successC, errorC)
+    return RNAppsFlyer.validateAndLogInAppPurchase(purchaseInfo, successC, errorC)
 }
 
 appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
-    RNAppsFlyer.setUseReceiptValidationSandbox(isSandbox);
+    return RNAppsFlyer.setUseReceiptValidationSandbox(isSandbox);
 }
 
 /**
@@ -499,7 +499,7 @@ appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
  * @param pushPayload
  */
 appsFlyer.sendPushNotificationData = (pushPayload) => {
-    RNAppsFlyer.sendPushNotificationData(pushPayload);
+    return RNAppsFlyer.sendPushNotificationData(pushPayload);
 }
 
 
