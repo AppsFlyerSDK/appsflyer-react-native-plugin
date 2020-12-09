@@ -8,6 +8,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import com.appsflyer.reactnative.RNUtil;
+import com.appsflyer.deeplink.DeepLink;
+import com.appsflyer.deeplink.DeepLinkListener;
+import com.appsflyer.deeplink.DeepLinkResult;
 import com.appsflyer.*;
 import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
@@ -38,6 +43,7 @@ import java.util.Iterator;
 import java.util.ArrayList;
 
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnDeepLinking;
 
 public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
@@ -120,6 +126,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         String devKey;
         boolean isDebug;
         boolean isConversionData;
+        boolean isDeepLinking;
 
         AppsFlyerLib instance = AppsFlyerLib.getInstance();
 
@@ -136,8 +143,13 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         if (isDebug == true) {
             Log.d("AppsFlyer", "Starting SDK");
         }
+        isDeepLinking = options.optBoolean(afDeepLink, false);
+
         instance.init(devKey, (isConversionData == true) ? registerConversionListener() : null, application.getApplicationContext());
 
+        if (isDeepLinking) {
+            instance.subscribeForDeepLink(registerDeepLinkListener());
+        }
         Intent intent = null;
         Activity currentActivity = getCurrentActivity();
 
@@ -150,6 +162,24 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             instance.start(application, devKey);
         }
         return null;
+    }
+
+    private DeepLinkListener registerDeepLinkListener() {
+        return new DeepLinkListener() {
+            @Override
+            public void onDeepLinking(@NonNull DeepLinkResult deepLinkResult) {
+                DeepLinkResult.Error dlError = deepLinkResult.getError();
+                if (dlError != null) {
+                    sendEvent(reactContext, afOnDeepLinking, dlError.toString());
+                }
+                DeepLinkResult deepLinkObj = deepLinkResult;
+                try {
+                    sendEvent(reactContext, afOnDeepLinking,deepLinkObj.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
     }
 
     private AppsFlyerConversionListener registerConversionListener() {
@@ -174,47 +204,48 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             public void onConversionDataFail(String errorMessage) {
                 handleError(afOnInstallConversionFailure, errorMessage);
             }
-
-            private void handleSuccess(String eventType, Map<String, Object> conversionData, Map<String, String> attributionData) {
-                JSONObject obj = new JSONObject();
-
-                try {
-                    JSONObject data = new JSONObject(conversionData == null ? attributionData : conversionData);
-                    obj.put("status", afSuccess);
-                    obj.put("type", eventType);
-                    obj.put("data", data);
-                    if (eventType.equals(afOnInstallConversionDataLoaded)) {
-                        sendEvent(reactContext, afOnInstallConversionDataLoaded, obj.toString());
-                    } else if (eventType.equals(afOnAppOpenAttribution)) {
-                        sendEvent(reactContext, afOnAppOpenAttribution, obj.toString());
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            private void handleError(String eventType, String errorMessage) {
-                JSONObject obj = new JSONObject();
-
-                try {
-                    obj.put("status", afFailure);
-                    obj.put("type", eventType);
-                    obj.put("data", errorMessage);
-                    sendEvent(reactContext, afOnInstallConversionDataLoaded, obj.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            private void sendEvent(ReactContext reactContext,
-                                   String eventName,
-                                   Object params) {
-                reactContext
-                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                        .emit(eventName, params);
-            }
         };
     }
+
+    private void handleSuccess(String eventType, Map<String, Object> conversionData, Map<String, String> attributionData) {
+        JSONObject obj = new JSONObject();
+
+        try {
+            JSONObject data = new JSONObject(conversionData == null ? attributionData : conversionData);
+            obj.put("status", afSuccess);
+            obj.put("type", eventType);
+            obj.put("data", data);
+            if (eventType.equals(afOnInstallConversionDataLoaded)) {
+                sendEvent(reactContext, afOnInstallConversionDataLoaded, obj.toString());
+            } else if (eventType.equals(afOnAppOpenAttribution)) {
+                sendEvent(reactContext, afOnAppOpenAttribution, obj.toString());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleError(String eventType, String errorMessage) {
+        JSONObject obj = new JSONObject();
+
+        try {
+            obj.put("status", afFailure);
+            obj.put("type", eventType);
+            obj.put("data", errorMessage);
+            sendEvent(reactContext, afOnInstallConversionDataLoaded, obj.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendEvent(ReactContext reactContext,
+                           String eventName,
+                           Object params) {
+        reactContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(eventName, params);
+    }
+
 
     private String logEventInternal(final String eventName, ReadableMap eventData) {
 

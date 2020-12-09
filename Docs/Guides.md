@@ -8,6 +8,7 @@
 - [Deep Linking](#deeplinking)
     - [Deferred Deep Linking (Get Conversion Data)](#deferred-deep-linking)
     - [Direct Deep Linking](#direct-deep-linking)
+    - [Unified deep linking](#Unified-deep-linking)
     - [iOS Deeplink Setup](#iosdeeplinks)
     - [Android Deeplink Setup](#android-deeplinks)
 - [Uninstall](#measure-app-uninstalls)
@@ -41,12 +42,12 @@ appsFlyer.initSdk(
 
 
 
-#### The 2 Deep Linking Types:
+#### The 3 Deep Linking Types:
 Since users may or may not have the mobile app installed, there are 2 types of deep linking:
 
 1. Deferred Deep Linking - Serving personalized content to new or former users, directly after the installation. 
 2. Direct Deep Linking - Directly serving personalized content to existing users, which already have the mobile app installed.
-
+3. Unified deep linking - Unified deep linking sends new and existing users to a specific in-app activity as soon as the app is opened.<br>
 For more info please check out the [OneLink™ Deep Linking Guide](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#Intro).
 
 ###  <a id="deferred-deep-linking"> 1. Deferred Deep Linking (Get Conversion Data)
@@ -102,6 +103,43 @@ appsFlyer.initSdk(/*...*/);
 **Important**
 
 The `appsFlyer.onAppOpenAttribution` returns function to  unregister this event listener. If you want to remove the listener for any reason, you can simply call `onAppOpenAttributionCanceller()`. This function will call `NativeAppEventEmitter.remove()`.
+
+<hr/>
+
+###  <a id="Unified-deep-linking"> 3. Unified deep linking
+In order to use the unified deep link you need to send the `onDeepLinkListener: true` flag inside the object that sent to the sdk.<br>
+**NOTE:** when sending this flag, the sdk will ignore `onAppOpenAttribution`!<br>
+For more information about this api, please check [OneLink Guide Here](https://dev.appsflyer.com/docs/android-unified-deep-linking)
+
+
+```javascript
+var onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
+  console.log('onDeepLinking: ' + JSON.stringify(res));
+})
+
+appsFlyer.initSdk(
+  {
+    devKey: 'K2***********99',
+    isDebug: false,
+    appId: '41*****44',
+    onInstallConversionDataListener: true,
+    onDeepLinkListener: true
+  },
+  (result) => {
+    console.log(result);
+  },
+  (error) => {
+    console.error(error);
+  }
+);
+```
+
+**Note:** The code implementation for `onDeepLink` must be made **prior to the initialization** code of the SDK.
+
+**Important**
+
+The `appsFlyer.onDeepLink` returns function to  unregister this event listener. If you want to remove the listener for any reason, you can simply call `onDeepLinkCanceller()`. This function will call `NativeAppEventEmitter.remove()`.
+
 
 <hr/>
 

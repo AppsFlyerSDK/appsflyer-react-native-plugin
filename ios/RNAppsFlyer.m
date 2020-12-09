@@ -47,6 +47,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
     NSString* appId = nil;
     BOOL isDebug = NO;
     BOOL isConversionData = YES;
+    BOOL isDeepLinking = NO;
     NSNumber* interval = 0;
 
     if (![initSdkOptions isKindOfClass:[NSNull class]]) {
@@ -69,6 +70,10 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
             isConversionData = [(NSNumber*)isConversionDataValue boolValue];
         }
     }
+        isDeepLinkingValue = [initSdkOptions objectForKey: afDeepLink];
+        if ([isDeepLinkingValue isKindOfClass:[NSNumber class]]) {
+            isDeepLinking = [(NSNumber*)isDeepLinkingValue boolValue];
+        }
 
     NSError* error = nil;
 
@@ -86,6 +91,9 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
     else{
         if(isConversionData == YES){
             [AppsFlyerLib shared].delegate = self;
+        }
+        if(isDeepLinking == YES){
+            [AppsFlyerLib shared].deepLinkDelegate = self;
         }
 #ifndef AFSDK_NO_IDFA
         if (interval != 0 && interval != nil){
@@ -289,6 +297,10 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
         }];
 
 }
+
+- (void)didResolveDeepLink:(AppsFlyerDeepLinkResult* _Nonnull) result {
+    [self sendEventWithName:afOnDeepLinking body:result];
+};
 
 -(void)onConversionDataSuccess:(NSDictionary*) installData {
 
