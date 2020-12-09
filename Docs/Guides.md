@@ -43,7 +43,7 @@ appsFlyer.initSdk(
 
 
 #### The 3 Deep Linking Types:
-Since users may or may not have the mobile app installed, there are 2 types of deep linking:
+Since users may or may not have the mobile app installed, there are 3 types of deep linking:
 
 1. Deferred Deep Linking - Serving personalized content to new or former users, directly after the installation. 
 2. Direct Deep Linking - Directly serving personalized content to existing users, which already have the mobile app installed.
@@ -152,6 +152,10 @@ var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
   console.log(res);
 });
 
+var onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
+  console.log('onDeepLinking: ' + JSON.stringify(res));
+})
+
 var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
   (res) => {
     if (JSON.parse(res.data.is_first_launch) == true) {
@@ -195,6 +199,11 @@ class App extends Component<{}> {
       onAppOpenAttributionCanceller();
       console.log('unregister onAppOpenAttributionCanceller');
       onAppOpenAttributionCanceller = null;
+    }
+    if (onDeepLinkCanceller) {
+      onDeepLinkCanceller();
+      console.log('unregister onDeepLinkCanceller');
+      onDeepLinkCanceller = null;
     }
   }
 }
