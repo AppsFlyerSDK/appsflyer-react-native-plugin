@@ -40,6 +40,8 @@ static NSString *const IOS_14_ONLY                  = @"Feature only supported o
   #define afOnAppOpenAttribution          @"onAppOpenAttribution"
   #define afOnInstallConversionFailure    @"onInstallConversionFailure"
   #define afOnInstallConversionDataLoaded @"onInstallConversionDataLoaded"
+  #define afDeepLink                      @"onDeepLinkListener"
+  #define afOnDeepLinking                 @"onDeepLinking"
 
 // User Invites, Cross Promotion
 #define afCpAppID                       @"crossPromotedAppId"

@@ -381,6 +381,31 @@ appsFlyer.onAppOpenAttribution = callback => {
     };
 };
 
+appsFlyer.onDeepLink = callback => {
+
+    const listener = appsFlyerEventEmitter.addListener(
+        "onDeepLinking",
+        _data => {
+            if (callback && typeof callback === typeof Function) {
+                try {
+                    let data = JSON.parse(_data);
+                    callback(data);
+                } catch (_error) {
+                    callback(new AFParseJSONException("Invalid data structure", _data));
+                }
+            }
+        }
+    );
+
+
+    eventsMap["onDeepLinking"] = listener;
+
+    // unregister listener (suppose should be called from componentWillUnmount() )
+    return function remove() {
+        listener.remove();
+    };
+};
+
 /**
  * Anonymize user Data.
  * Use this API during the SDK Initialization to explicitly anonymize a user's installs, events and sessions.

@@ -20,6 +20,7 @@ public class RNAppsFlyerConstants {
     final static String afEmails = "emails";
 
     final static String afConversionData = "onInstallConversionDataListener";
+    final static String afDeepLink = "onDeepLinkListener";
 
     final static String afSuccess = "success";
     final static String afFailure = "failure";
@@ -27,6 +28,7 @@ public class RNAppsFlyerConstants {
     final static String afOnAppOpenAttribution = "onAppOpenAttribution";
     final static String afOnInstallConversionFailure = "onInstallConversionFailure";
     final static String afOnInstallConversionDataLoaded = "onInstallConversionDataLoaded";
+    final static String afOnDeepLinking = "onDeepLinking";
 
     final static String INVITE_FAIL = "Could not create invite link";
     final static String INVITE_CHANNEL = "channel";

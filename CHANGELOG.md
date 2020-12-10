@@ -1,4 +1,7 @@
 # Versions
+## 6.1.20
+- Unified deep linking
+
 ## 6.1.10
 - iOS SDK 6.1.1
 - Android SDK 6.1.0
