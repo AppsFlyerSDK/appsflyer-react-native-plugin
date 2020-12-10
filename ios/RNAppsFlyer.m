@@ -300,6 +300,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 }
 
 - (void)didResolveDeepLink:(AppsFlyerDeepLinkResult* _Nonnull) result {
+    if(result.status != nil){
     NSString *deepLinkStatus = nil;
       switch(result.status) {
           case AFSDKDeepLinkResultStatusFound:
@@ -321,6 +322,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
         @"data": result.deepLink.clickEvent
     };
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
+    }
 }
 
 -(void)onConversionDataSuccess:(NSDictionary*) installData {
