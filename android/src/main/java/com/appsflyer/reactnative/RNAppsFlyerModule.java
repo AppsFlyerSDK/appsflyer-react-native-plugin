@@ -172,7 +172,15 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                 if (dlError != null) {
                     sendEvent(reactContext, afOnDeepLinking, dlError.toString());
                 }
-                DeepLinkResult deepLinkObj = deepLinkResult;
+                JSONObject deepLinkObj = new JSONObject();
+                try {
+                    deepLinkObj.put("status", afSuccess);
+                    deepLinkObj.put("deepLinkStatus", deepLinkResult.getStatus());
+                    deepLinkObj.put("type", afOnDeepLinking);
+                    deepLinkObj.put("data", deepLinkResult.getDeepLink().toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 try {
                     sendEvent(reactContext, afOnDeepLinking,deepLinkObj.toString());
                 } catch (Exception e) {
