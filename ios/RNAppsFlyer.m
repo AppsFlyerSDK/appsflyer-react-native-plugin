@@ -47,12 +47,14 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
     NSString* appId = nil;
     BOOL isDebug = NO;
     BOOL isConversionData = YES;
+    BOOL isDeepLinking = NO;
     NSNumber* interval = 0;
 
     if (![initSdkOptions isKindOfClass:[NSNull class]]) {
 
         id isDebugValue = nil;
         id isConversionDataValue = nil;
+        id isDeepLinkingValue = nil;
         devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
         appId = (NSString*)[initSdkOptions objectForKey: afAppId];
         interval = (NSNumber*)[initSdkOptions objectForKey: timeToWaitForATTUserAuthorization];
@@ -68,8 +70,12 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         if ([isConversionDataValue isKindOfClass:[NSNumber class]]) {
             isConversionData = [(NSNumber*)isConversionDataValue boolValue];
         }
-    }
 
+        isDeepLinkingValue = [initSdkOptions objectForKey: afDeepLink];
+        if ([isDeepLinkingValue isKindOfClass:[NSNumber class]]) {
+            isDeepLinking = [(NSNumber*)isDeepLinkingValue boolValue];
+        }
+}
     NSError* error = nil;
 
     if (!devKey || [devKey isEqualToString:@""]) {
@@ -86,6 +92,9 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
     else{
         if(isConversionData == YES){
             [AppsFlyerLib shared].delegate = self;
+        }
+        if(isDeepLinking == YES){
+            [AppsFlyerLib shared].deepLinkDelegate = self;
         }
 #ifndef AFSDK_NO_IDFA
         if (interval != 0 && interval != nil){
@@ -290,6 +299,32 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 
 }
 
+- (void)didResolveDeepLink:(AppsFlyerDeepLinkResult* _Nonnull) result {
+    if(result.status != nil){
+    NSString *deepLinkStatus = nil;
+      switch(result.status) {
+          case AFSDKDeepLinkResultStatusFound:
+              deepLinkStatus = @"FOUND";
+              break;
+          case AFSDKDeepLinkResultStatusNotFound:
+              deepLinkStatus = @"NOT_FOUND";
+              break;
+          case AFSDKDeepLinkResultStatusFailure:
+              deepLinkStatus = @"Error";
+              break;
+          default:
+              [NSException raise:NSGenericException format:@"Unexpected FormatType."];
+      }
+    NSDictionary* message = @{
+        @"status": afSuccess,
+        @"deepLinkStatus": deepLinkStatus,
+        @"type": afOnDeepLinking,
+        @"data": result.deepLink.clickEvent
+    };
+    [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
+    }
+}
+
 -(void)onConversionDataSuccess:(NSDictionary*) installData {
 
     NSDictionary* message = @{
@@ -370,7 +405,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 }
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[afOnAttributionFailure,afOnAppOpenAttribution,afOnInstallConversionFailure, afOnInstallConversionDataLoaded];
+    return @[afOnAttributionFailure,afOnAppOpenAttribution,afOnInstallConversionFailure, afOnInstallConversionDataLoaded, afOnDeepLinking];
 }
 
 -(void) reportOnFailure:(NSString *)errorMessage type:(NSString*) type {

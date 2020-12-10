@@ -10,7 +10,7 @@ declare module "react-native-appsflyer" {
         type: "onAppOpenAttribution"
             | "onInstallConversionDataLoaded"
             | "onAttributionFailure"
-            | "onInstallConversionFailure",
+            | "onInstallConversionFailure"
         data: {
             is_first_launch: "true" | "false";
             media_source: string;
@@ -30,6 +30,7 @@ declare module "react-native-appsflyer" {
         appId?: string; // iOS only
         isDebug?: boolean;
         onInstallConversionDataListener?: boolean;
+        onDeepLinkListener?: boolean;
         timeToWaitForATTUserAuthorization?: number; // iOS only
     }
 
@@ -62,6 +63,7 @@ declare module "react-native-appsflyer" {
         onInstallConversionData(callback: (data: ConversionData) => any): () => void;
         onInstallConversionFailure(callback: (data: ConversionData) => any): () => void;
         onAppOpenAttribution(callback: (data: any) => any): () => void;
+        onDeepLink(callback: (data: any) => any): () => void;
         initSdk(options: InitSDKOptions): Promise<string>;
         initSdk(options: InitSDKOptions, successC: SuccessCB, errorC: ErrorCB): void;
         logEvent(eventName: string, eventValues: object): Promise<string>;
