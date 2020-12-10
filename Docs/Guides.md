@@ -115,6 +115,8 @@ For more information about this api, please check [OneLink Guide Here](https://d
 ```javascript
 var onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
   console.log('onDeepLinking: ' + JSON.stringify(res));
+  console.log('status: '+ res.status);
+  console.log('type: '+ res.type);
 })
 
 appsFlyer.initSdk(
