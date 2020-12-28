@@ -526,4 +526,8 @@ RCT_EXPORT_METHOD(sendPushNotificationData: (NSDictionary*)pushPayload) {
     [[AppsFlyerLib shared] handlePushNotification:pushPayload];
 }
 
+RCT_EXPORT_METHOD(setHost: (NSString*)hostPrefix hostName: (NSString*)hostName) {
+    [[AppsFlyerLib shared] setHost:hostName withHostPrefix:hostPrefix];
+}
+
 @end

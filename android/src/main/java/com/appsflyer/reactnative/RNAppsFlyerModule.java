@@ -677,4 +677,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void sendPushNotificationData(ReadableMap pushPayload) {
         AppsFlyerLib.getInstance().sendPushNotificationData(getCurrentActivity());
     }
+
+    @ReactMethod
+    public void setHost(String hostPrefix, String hostName) {
+        AppsFlyerLib.getInstance().setHost(hostPrefix, hostName);
+    }
 }

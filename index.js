@@ -527,6 +527,15 @@ appsFlyer.sendPushNotificationData = (pushPayload) => {
     RNAppsFlyer.sendPushNotificationData(pushPayload);
 }
 
+/**
+ * Set a custom host
+ * @param hostPrefix
+ * @param hostName
+ */
+appsFlyer.setHost = (hostPrefix, hostName) => {
+    RNAppsFlyer.setHost(hostPrefix, hostName);
+}
+
 
 function AFParseJSONException(_message, _data) {
     this.message = _message;
