@@ -530,4 +530,10 @@ RCT_EXPORT_METHOD(setHost: (NSString*)hostPrefix hostName: (NSString*)hostName) 
     [[AppsFlyerLib shared] setHost:hostName withHostPrefix:hostPrefix];
 }
 
+RCT_EXPORT_METHOD(addPushNotificationDeepLinkPath: (NSArray*)path successCallback :(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    [[AppsFlyerLib shared] addPushNotificationDeepLinkPath: path];
+    successCallback(@[SUCCESS]);
+}
+
 @end

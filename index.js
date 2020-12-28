@@ -536,6 +536,16 @@ appsFlyer.setHost = (hostPrefix, hostName) => {
     RNAppsFlyer.setHost(hostPrefix, hostName);
 }
 
+/**
+ * The addPushNotificationDeepLinkPath method provides app owners with a flexible interface for configuring how deep links are extracted from push notification payloads.
+ * for more information: https://support.appsflyer.com/hc/en-us/articles/207032126-Android-SDK-integration-for-developers#core-apis-65-configure-push-notification-deep-link-resolution
+ * @param path: an array of string that represents the path
+ * @param successC: success callback
+ * @param errorC: error callback
+ */
+appsFlyer.addPushNotificationDeepLinkPath = (path, successC, errorC) => {
+    RNAppsFlyer.addPushNotificationDeepLinkPath(path, successC, errorC);
+}
 
 function AFParseJSONException(_message, _data) {
     this.message = _message;
