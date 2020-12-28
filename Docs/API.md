@@ -840,11 +840,12 @@ appsFlyer.setHost('foo', 'bar.appsflyer.com');
 
 ##### <a id="addPushNotificationDeepLinkPath"> **`addPushNotificationDeepLinkPath(path, successC, errorC)`**
 The addPushNotificationDeepLinkPath method provides app owners with a flexible interface for configuring how deep links are extracted from push notification payloads.
-for more information: https://support.appsflyer.com/hc/en-us/articles/207032126-Android-SDK-integration-for-developers#core-apis-65-configure-push-notification-deep-link-resolution
+for more information: https://support.appsflyer.com/hc/en-us/articles/207032126-Android-SDK-integration-for-developers#core-apis-65-configure-push-notification-deep-link-resolution <br>
+❗Important❗ `addPushNotificationDeepLinkPath` must be called before calling `initSDK`
 
 | parameter | type     | description      |
 | ----------|----------|------------------|
-| path    | strings array   | the host prefix |
+| path    | strings array   | the desired path separated into an array |
 | successC  | function | success callback |
 | errorC  | function | error callback |
 
