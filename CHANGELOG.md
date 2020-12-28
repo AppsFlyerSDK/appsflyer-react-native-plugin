@@ -1,4 +1,10 @@
 # Versions
+## 6.1.30
+- Android SDK 6.1.3
+- iOS SDK 6.1.3
+- setHost API
+- addPushNotificationDeepLinkPath API
+
 ## 6.1.20
 - Unified deep linking
 

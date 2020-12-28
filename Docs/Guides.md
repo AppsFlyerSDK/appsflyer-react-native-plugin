@@ -48,11 +48,11 @@ Since users may or may not have the mobile app installed, there are 3 types of d
 1. Deferred Deep Linking - Serving personalized content to new or former users, directly after the installation. 
 2. Direct Deep Linking - Directly serving personalized content to existing users, which already have the mobile app installed.
 3. Unified deep linking - Unified deep linking sends new and existing users to a specific in-app activity as soon as the app is opened.<br>
-For more info please check out the [OneLink™ Deep Linking Guide](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#Intro).
+For more info please check out the [OneLink™ Deep Linking Guide](https://dev.appsflyer.com/docs/initial-setup-for-deep-linking-and-deferred-deep-linking).
 
 ###  <a id="deferred-deep-linking"> 1. Deferred Deep Linking (Get Conversion Data)
 
-Check out the deferred deep linking guide from the AppFlyer knowledge base [here](https://support.appsflyer.com/hc/en-us/articles/207032096-Accessing-AppsFlyer-Attribution-Conversion-Data-from-the-SDK-Deferred-Deeplinking-#Introduction).
+Check out the deferred deep linking guide from the AppFlyer knowledge base [here](https://dev.appsflyer.com/docs/deferred-deep-linking-new-users-to-specific-content-inside-your-app).
 
 Code Sample to handle the conversion data:
 
@@ -88,7 +88,7 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
 
 ###  <a id="direct-deep-linking"> 2. Direct Deep Linking
     
-When a deep link is clicked on the device the AppsFlyer SDK will return the link in the [onAppOpenAttribution](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#deep-linking-data-the-onappopenattribution-method-) method.
+When a deep link is clicked on the device the AppsFlyer SDK will return the link in the [onAppOpenAttribution](https://dev.appsflyer.com/docs/deep-linking-existing-app-users-to-specific-content) method.
 
 ```javascript
 var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
