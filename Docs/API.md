@@ -821,7 +821,7 @@ const pushPayload = {
 ```
 ---
 
-##### <a id="setHost"> **`setHost(hostPrefix, hostName)`**
+##### <a id="setHost"> **`setHost(hostPrefix, hostName, successC)`**
 
 Set a custom host
 
@@ -829,12 +829,13 @@ Set a custom host
 | ----------|----------|------------------|
 | hostPrefix    | string   | the host prefix |
 | hostName  | string | the host name |
+| successC  | function | success callback |
 
 
 *Example:*
 
 ```javascript
-appsFlyer.setHost('foo', 'bar.appsflyer.com');
+appsFlyer.setHost('foo', 'bar.appsflyer.com', res => console.log(res));
 ```
 ---
 
@@ -853,5 +854,5 @@ for more information: https://support.appsflyer.com/hc/en-us/articles/207032126-
 *Example:*
 
 ```javascript
-appsFlyer.addPushNotificationDeepLinkPath(["deeply", "nested", "deep_link"]);
+appsFlyer.addPushNotificationDeepLinkPath(["deeply", "nested", "deep_link"], res => console.log(res), error => console.log(error));
 ```

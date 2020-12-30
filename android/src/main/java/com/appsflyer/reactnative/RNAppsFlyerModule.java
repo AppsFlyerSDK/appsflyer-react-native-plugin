@@ -679,8 +679,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setHost(String hostPrefix, String hostName) {
+    public void setHost(String hostPrefix, String hostName, Callback successCallback) {
         AppsFlyerLib.getInstance().setHost(hostPrefix, hostName);
+        successCallback.invoke(SUCCESS);
     }
 
     @ReactMethod

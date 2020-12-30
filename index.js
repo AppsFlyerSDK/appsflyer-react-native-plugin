@@ -531,9 +531,10 @@ appsFlyer.sendPushNotificationData = (pushPayload) => {
  * Set a custom host
  * @param hostPrefix
  * @param hostName
+ * @param successC: success callback
  */
-appsFlyer.setHost = (hostPrefix, hostName) => {
-    RNAppsFlyer.setHost(hostPrefix, hostName);
+appsFlyer.setHost = (hostPrefix, hostName, successC) => {
+    RNAppsFlyer.setHost(hostPrefix, hostName, successC);
 }
 
 /**
