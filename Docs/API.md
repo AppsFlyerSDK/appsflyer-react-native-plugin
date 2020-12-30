@@ -29,6 +29,8 @@
 - [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
 - [validateAndLogInAppPurchase](#validateAndLogInAppPurchase)
 - [sendPushNotificationData](#sendPushNotificationData)
+- [setHost](#setHost)
+- [addPushNotificationDeepLinkPath](#addPushNotificationDeepLinkPath)
 
 ---
 
@@ -816,4 +818,41 @@ const pushPayload = {
             }
         };
         appsFlyer.sendPushNotificationData(pushPayload);
+```
+---
+
+##### <a id="setHost"> **`setHost(hostPrefix, hostName, successC)`**
+
+Set a custom host
+
+| parameter | type     | description      |
+| ----------|----------|------------------|
+| hostPrefix    | string   | the host prefix |
+| hostName  | string | the host name |
+| successC  | function | success callback |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setHost('foo', 'bar.appsflyer.com', res => console.log(res));
+```
+---
+
+##### <a id="addPushNotificationDeepLinkPath"> **`addPushNotificationDeepLinkPath(path, successC, errorC)`**
+The addPushNotificationDeepLinkPath method provides app owners with a flexible interface for configuring how deep links are extracted from push notification payloads.
+for more information: https://support.appsflyer.com/hc/en-us/articles/207032126-Android-SDK-integration-for-developers#core-apis-65-configure-push-notification-deep-link-resolution <br>
+❗Important❗ `addPushNotificationDeepLinkPath` must be called before calling `initSDK`
+
+| parameter | type     | description      |
+| ----------|----------|------------------|
+| path    | strings array   | the desired path separated into an array |
+| successC  | function | success callback |
+| errorC  | function | error callback |
+
+
+*Example:*
+
+```javascript
+appsFlyer.addPushNotificationDeepLinkPath(["deeply", "nested", "deep_link"], res => console.log(res), error => console.log(error));
 ```

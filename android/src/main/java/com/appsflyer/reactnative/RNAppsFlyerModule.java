@@ -677,4 +677,27 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void sendPushNotificationData(ReadableMap pushPayload) {
         AppsFlyerLib.getInstance().sendPushNotificationData(getCurrentActivity());
     }
+
+    @ReactMethod
+    public void setHost(String hostPrefix, String hostName, Callback successCallback) {
+        AppsFlyerLib.getInstance().setHost(hostPrefix, hostName);
+        successCallback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void addPushNotificationDeepLinkPath(ReadableArray path, Callback successCallback, Callback errorCallback) {
+        if (path.size() <= 0) {
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            return;
+        }
+        ArrayList<Object> pathList = path.toArrayList();
+        try {
+            String[] params = pathList.toArray(new String[pathList.size()]);
+            AppsFlyerLib.getInstance().addPushNotificationDeepLinkPath(params);
+            successCallback.invoke(SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            errorCallback.invoke(e);
+        }
+    }
 }

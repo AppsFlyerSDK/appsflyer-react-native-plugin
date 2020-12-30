@@ -22,8 +22,8 @@
   
 ### <a id="plugin-build-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v6.1.1**
-- Android AppsFlyerSDK **v6.1.0**
+- iOS AppsFlyerSDK **v6.1.3**
+- Android AppsFlyerSDK **v6.1.3**
 
 ## <a id="v6-breaking-changes"> ❗ v6 Breaking Changes
 
@@ -37,6 +37,7 @@ We have renamed the following APIs:
 | trackCrossPromotionImpression | logCrossPromotionImpression   |
 | trackAndOpenStore             | logCrossPromotionAndOpenStore |
 | setDeviceTrackingDisabled     | anonymizeUser                 |
+| AppsFlyerTracker    | AppsFlyerLib                 |
 
 And removed the following ones:
 

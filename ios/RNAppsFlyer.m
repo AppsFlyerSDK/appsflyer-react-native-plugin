@@ -526,4 +526,15 @@ RCT_EXPORT_METHOD(sendPushNotificationData: (NSDictionary*)pushPayload) {
     [[AppsFlyerLib shared] handlePushNotification:pushPayload];
 }
 
+RCT_EXPORT_METHOD(setHost: (NSString*)hostPrefix hostName: (NSString*)hostName successCallback :(RCTResponseSenderBlock)successCallback) {
+    [[AppsFlyerLib shared] setHost:hostName withHostPrefix:hostPrefix];
+    successCallback(@[SUCCESS]);
+}
+
+RCT_EXPORT_METHOD(addPushNotificationDeepLinkPath: (NSArray*)path successCallback :(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    [[AppsFlyerLib shared] addPushNotificationDeepLinkPath: path];
+    successCallback(@[SUCCESS]);
+}
+
 @end
