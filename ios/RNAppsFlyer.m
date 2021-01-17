@@ -1,18 +1,10 @@
 #import "RNAppsFlyer.h"
 
-#if __has_include(<AppsFlyerLib/AppsFlyerLib.h>) // from Pod
-#import <AppsFlyerLib/AppsFlyerLib.h>
-#else
-#import "AppsFlyerLib.h"
-#endif
-
-@interface RNAppsFlyer() <AppsFlyerLibDelegate>
-
-@end
-
 @implementation RNAppsFlyer
 
 @synthesize bridge = _bridge;
+BOOL oaoaSent = NO;
+NSDictionary* oaoaParams = nil;
 
 RCT_EXPORT_MODULE()
 
@@ -326,7 +318,12 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 }
 
 -(void)onConversionDataSuccess:(NSDictionary*) installData {
-
+    if(oaoaParams != nil){
+        [self sendEventWithName:[oaoaParams objectForKey:@"type"] body:[oaoaParams objectForKey:@"body"]];
+        oaoaSent = NO;
+        oaoaParams = nil;
+    }
+    
     NSDictionary* message = @{
         @"status": afSuccess,
         @"type": afOnInstallConversionDataLoaded,
@@ -352,14 +349,15 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 
 
 - (void) onAppOpenAttribution:(NSDictionary*) attributionData {
-
-    NSDictionary* message = @{
-        @"status": afSuccess,
-        @"type": afOnAppOpenAttribution,
-        @"data": attributionData
-    };
-
-    [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
+        if(!oaoaSent){
+            oaoaSent = YES;
+            NSDictionary* message = @{
+                @"status": afSuccess,
+                @"type": afOnAppOpenAttribution,
+                @"data": attributionData
+            };
+            [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
+        }
 }
 
 - (void) onAppOpenAttributionFailure:(NSError *)_errorMessage {
@@ -415,7 +413,15 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 -(void) reportOnSuccess:(NSString *)data type:(NSString*) type {
     if([type isEqualToString:afOnInstallConversionDataLoaded]){
         [self sendEventWithName:type body:data];
-    } else {
+    } else if([type isEqualToString:afOnAppOpenAttribution]){
+            if(self.bridge == nil){
+                oaoaParams = @{@"type":afOnAppOpenAttribution, @"body":data};
+            }else{
+                [self sendEventWithName:type body:data];
+                oaoaSent = NO;
+            }
+        }
+    else{
         [self sendEventWithName:type body:data];
     }
 }

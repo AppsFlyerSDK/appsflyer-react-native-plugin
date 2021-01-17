@@ -1,4 +1,7 @@
 # Versions
+## 6.1.40
+- fix onAppOpenAttribution on iOS. PLEASE check out the Docs [here](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/blob/releases/6.x.x/6.1.x/6.1.40/Docs/Guides.md#-ios-deep-links---universal-links-and-url-schemes)
+
 ## 6.1.30
 - Android SDK 6.1.3
 - iOS SDK 6.1.3
