@@ -288,6 +288,19 @@ const Home = (props) => {
 In order to record retargeting and use the onAppOpenAttribution callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
 
 #### import
+If using react-native-appsflyer plugin version >= 6.1.40
+```objectivec
+#import <RNAppsFlyer.h>
+```
+And in `didFinishLaunchingWithOptions` method:
+```objectivec
+  if(_AppsFlyerdelegate == nil){
+    _AppsFlyerdelegate = [[RNAppsFlyer alloc] init];
+  }
+  [[AppsFlyerLib shared] setDelegate:_AppsFlyerdelegate];
+```
+
+If using react-native-appsflyer plugin version <= 6.1.30 
 ```objectivec
 #import <React/RCTLinkingManager.h>
 #if __has_include(<AppsFlyerLib/AppsFlyerLib.h>) // from Pod
