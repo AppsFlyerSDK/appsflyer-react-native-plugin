@@ -356,8 +356,6 @@ appsFlyer.onInstallConversionFailure = callback => {
 
 appsFlyer.onAppOpenAttribution = callback => {
 
-    //console.log("onAppOpenAttribution is called" );
-
     const listener = appsFlyerEventEmitter.addListener(
         "onAppOpenAttribution",
         _data => {
@@ -374,6 +372,31 @@ appsFlyer.onAppOpenAttribution = callback => {
 
 
     eventsMap["onAppOpenAttribution"] = listener;
+
+    // unregister listener (suppose should be called from componentWillUnmount() )
+    return function remove() {
+        listener.remove();
+    };
+};
+
+appsFlyer.onAttributionFailure = callback => {
+
+    const listener = appsFlyerEventEmitter.addListener(
+        "onAttributionFailure",
+        _data => {
+            if (callback && typeof callback === typeof Function) {
+                try {
+                    let data = JSON.parse(_data);
+                    callback(data);
+                } catch (_error) {
+                    callback(new AFParseJSONException("Invalid data structure", _data));
+                }
+            }
+        }
+    );
+
+
+    eventsMap["onAttributionFailure"] = listener;
 
     // unregister listener (suppose should be called from componentWillUnmount() )
     return function remove() {

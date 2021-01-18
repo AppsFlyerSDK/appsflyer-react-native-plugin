@@ -323,7 +323,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
         oaoaSent = NO;
         oaoaParams = nil;
     }
-    
+
     NSDictionary* message = @{
         @"status": afSuccess,
         @"type": afOnInstallConversionDataLoaded,
@@ -361,14 +361,15 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 }
 
 - (void) onAppOpenAttributionFailure:(NSError *)_errorMessage {
-
-    NSDictionary* errorMessage = @{
-        @"status": afFailure,
-        @"type": afOnAttributionFailure,
-        @"data": _errorMessage.localizedDescription
-    };
-
-    [self performSelectorOnMainThread:@selector(handleCallback:) withObject:errorMessage waitUntilDone:NO];
+    if(!oaoaSent){
+        oaoaSent = YES;
+        NSDictionary* errorMessage = @{
+            @"status": afFailure,
+            @"type": afOnAttributionFailure,
+            @"data": _errorMessage.localizedDescription
+        };
+        [self performSelectorOnMainThread:@selector(handleCallback:) withObject:errorMessage waitUntilDone:NO];
+    }
 }
 
 
@@ -407,22 +408,49 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 }
 
 -(void) reportOnFailure:(NSString *)errorMessage type:(NSString*) type {
-    [self sendEventWithName:type body:errorMessage];
+    @try {
+        if([type isEqualToString:afOnInstallConversionFailure]){
+            [self sendEventWithName:type body:errorMessage];
+        } else if([type isEqualToString:afOnAttributionFailure]){
+                if(self.bridge == nil){
+                    oaoaParams = @{@"type":afOnAttributionFailure, @"body":errorMessage};
+                }else{
+                    [self sendEventWithName:type body:errorMessage];
+                    oaoaSent = NO;
+                }
+            }
+        else{
+            [self sendEventWithName:type body:errorMessage];
+        }
+    } @catch (NSException *exception) {
+        NSLog(@"AppsFlyer Debug: %@", exception);
+    }
 }
 
 -(void) reportOnSuccess:(NSString *)data type:(NSString*) type {
-    if([type isEqualToString:afOnInstallConversionDataLoaded]){
-        [self sendEventWithName:type body:data];
-    } else if([type isEqualToString:afOnAppOpenAttribution]){
+    @try {
+        if([type isEqualToString:afOnInstallConversionDataLoaded]){
+            [self sendEventWithName:type body:data];
+        } else if([type isEqualToString:afOnAppOpenAttribution]){
             if(self.bridge == nil){
                 oaoaParams = @{@"type":afOnAppOpenAttribution, @"body":data};
             }else{
                 [self sendEventWithName:type body:data];
                 oaoaSent = NO;
             }
+        }else if([type isEqualToString:afOnDeepLinking]){
+            if(self.bridge == nil){
+                oaoaParams = @{@"type":afOnDeepLinking, @"body":data};
+            }else{
+                [self sendEventWithName:type body:data];
+                oaoaSent = NO;
+            }
         }
-    else{
-        [self sendEventWithName:type body:data];
+        else{
+            [self sendEventWithName:type body:data];
+        }
+    } @catch (NSException *exception) {
+        NSLog(@"AppsFlyer Debug: %@", exception);
     }
 }
 
