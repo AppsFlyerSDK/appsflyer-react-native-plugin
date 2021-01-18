@@ -63,6 +63,7 @@ declare module "react-native-appsflyer" {
         onInstallConversionData(callback: (data: ConversionData) => any): () => void;
         onInstallConversionFailure(callback: (data: ConversionData) => any): () => void;
         onAppOpenAttribution(callback: (data: any) => any): () => void;
+        onAttributionFailure(callback: (data: any) => any): () => void;
         onDeepLink(callback: (data: any) => any): () => void;
         initSdk(options: InitSDKOptions): Promise<string>;
         initSdk(options: InitSDKOptions, successC: SuccessCB, errorC: ErrorCB): void;
