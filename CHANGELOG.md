@@ -1,4 +1,8 @@
 # Versions
+## 6.1.41
+- Add onAttributionFailure listener
+- fix event listeners error handling
+
 ## 6.1.40
 - fix onAppOpenAttribution on iOS. PLEASE check out the Docs [here](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/blob/releases/6.x.x/6.1.x/6.1.40/Docs/Guides.md#-ios-deep-links---universal-links-and-url-schemes)
 
