@@ -1,10 +1,9 @@
 #import "RNAppsFlyer.h"
 
 @implementation RNAppsFlyer
-
 @synthesize bridge = _bridge;
-BOOL oaoaSent = NO;
-NSDictionary* oaoaParams = nil;
+BOOL isNewAttributionData = NO;
+NSDictionary* AttributionDataParams = nil;
 
 RCT_EXPORT_MODULE()
 
@@ -292,36 +291,36 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 }
 
 - (void)didResolveDeepLink:(AppsFlyerDeepLinkResult* _Nonnull) result {
-    if(result.status != nil){
+    isNewAttributionData = YES;
     NSString *deepLinkStatus = nil;
-      switch(result.status) {
-          case AFSDKDeepLinkResultStatusFound:
-              deepLinkStatus = @"FOUND";
-              break;
-          case AFSDKDeepLinkResultStatusNotFound:
-              deepLinkStatus = @"NOT_FOUND";
-              break;
-          case AFSDKDeepLinkResultStatusFailure:
-              deepLinkStatus = @"Error";
-              break;
-          default:
-              [NSException raise:NSGenericException format:@"Unexpected FormatType."];
-      }
+    switch(result.status) {
+        case AFSDKDeepLinkResultStatusFound:
+            deepLinkStatus = @"FOUND";
+            break;
+        case AFSDKDeepLinkResultStatusNotFound:
+            deepLinkStatus = @"NOT_FOUND";
+            break;
+        case AFSDKDeepLinkResultStatusFailure:
+            deepLinkStatus = @"Error";
+            break;
+        default:
+            [NSException raise:NSGenericException format:@"Unexpected FormatType."];
+    }
     NSDictionary* message = @{
-        @"status": afSuccess,
+        @"status": [deepLinkStatus isEqual:@"Error"] ? afFailure : afSuccess,
         @"deepLinkStatus": deepLinkStatus,
         @"type": afOnDeepLinking,
-        @"data": result.deepLink.clickEvent
+        @"data": [deepLinkStatus  isEqual: @"Error"] ? result.error.localizedDescription : result.deepLink.clickEvent
+
     };
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
-    }
 }
 
 -(void)onConversionDataSuccess:(NSDictionary*) installData {
-    if(oaoaParams != nil){
-        [self sendEventWithName:[oaoaParams objectForKey:@"type"] body:[oaoaParams objectForKey:@"body"]];
-        oaoaSent = NO;
-        oaoaParams = nil;
+    if(AttributionDataParams != nil && isNewAttributionData == YES){
+        [self sendEventWithName:[AttributionDataParams objectForKey:@"type"] body:[AttributionDataParams objectForKey:@"body"]];
+        isNewAttributionData = NO;
+        AttributionDataParams = nil;
     }
 
     NSDictionary* message = @{
@@ -336,7 +335,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 
 
 -(void)onConversionDataFail:(NSError *) _errorMessage {
-
+    NSLog(@"[DEBUG] AppsFlyer = %@",_errorMessage.localizedDescription);
     NSDictionary* errorMessage = @{
         @"status": afFailure,
         @"type": afOnInstallConversionFailure,
@@ -349,27 +348,23 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 
 
 - (void) onAppOpenAttribution:(NSDictionary*) attributionData {
-        if(!oaoaSent){
-            oaoaSent = YES;
+            isNewAttributionData = YES;
             NSDictionary* message = @{
                 @"status": afSuccess,
                 @"type": afOnAppOpenAttribution,
                 @"data": attributionData
             };
             [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
-        }
 }
 
 - (void) onAppOpenAttributionFailure:(NSError *)_errorMessage {
-    if(!oaoaSent){
-        oaoaSent = YES;
+        isNewAttributionData = YES;
         NSDictionary* errorMessage = @{
             @"status": afFailure,
             @"type": afOnAttributionFailure,
             @"data": _errorMessage.localizedDescription
         };
         [self performSelectorOnMainThread:@selector(handleCallback:) withObject:errorMessage waitUntilDone:NO];
-    }
 }
 
 
@@ -411,16 +406,9 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
     @try {
         if([type isEqualToString:afOnInstallConversionFailure]){
             [self sendEventWithName:type body:errorMessage];
-        } else if([type isEqualToString:afOnAttributionFailure]){
-                if(self.bridge == nil){
-                    oaoaParams = @{@"type":afOnAttributionFailure, @"body":errorMessage};
-                }else{
-                    [self sendEventWithName:type body:errorMessage];
-                    oaoaSent = NO;
-                }
-            }
+        }
         else{
-            [self sendEventWithName:type body:errorMessage];
+            AttributionDataParams = @{@"type":type, @"body":errorMessage};
         }
     } @catch (NSException *exception) {
         NSLog(@"AppsFlyer Debug: %@", exception);
@@ -431,23 +419,9 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
     @try {
         if([type isEqualToString:afOnInstallConversionDataLoaded]){
             [self sendEventWithName:type body:data];
-        } else if([type isEqualToString:afOnAppOpenAttribution]){
-            if(self.bridge == nil){
-                oaoaParams = @{@"type":afOnAppOpenAttribution, @"body":data};
-            }else{
-                [self sendEventWithName:type body:data];
-                oaoaSent = NO;
-            }
-        }else if([type isEqualToString:afOnDeepLinking]){
-            if(self.bridge == nil){
-                oaoaParams = @{@"type":afOnDeepLinking, @"body":data};
-            }else{
-                [self sendEventWithName:type body:data];
-                oaoaSent = NO;
-            }
         }
         else{
-            [self sendEventWithName:type body:data];
+            AttributionDataParams = @{@"type":type, @"body":data};
         }
     } @catch (NSException *exception) {
         NSLog(@"AppsFlyer Debug: %@", exception);
