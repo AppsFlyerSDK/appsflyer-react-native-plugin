@@ -411,7 +411,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 
 -(void) reportOnFailure:(NSString *)errorMessage type:(NSString*) type {
     @try {
-        if([type isEqualToString:afOnInstallConversionDataLoaded]){
+        if([type isEqualToString:afOnInstallConversionFailure]){
             [self sendEventWithName:type body:errorMessage];
         } else if(self.bridge == nil){
             AttributionDataParams = @{@"type":type, @"body":errorMessage};
