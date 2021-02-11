@@ -2,13 +2,13 @@
 
 @implementation RNAppsFlyer
 @synthesize bridge = _bridge;
-NSDictionary* AttributionDataParams = nil;
 
 RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(initSdkWithCallBack: (NSDictionary*)initSdkOptions
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    
 
     NSError* error = nil;
     error = [self callSdkInternal:initSdkOptions];
@@ -32,7 +32,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
 }
 
 -(NSError *) callSdkInternal:(NSDictionary*)initSdkOptions {
-
+    
     NSString* devKey = nil;
     NSString* appId = nil;
     BOOL isDebug = NO;
@@ -48,9 +48,6 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
         appId = (NSString*)[initSdkOptions objectForKey: afAppId];
         interval = (NSNumber*)[initSdkOptions objectForKey: timeToWaitForATTUserAuthorization];
-
-        //handling oaoa/ddl faster then react-native bridge
-        [self performSelectorOnMainThread:@selector(sendSavedAttributionData:) withObject:nil waitUntilDone:NO];
 
         isDebugValue = [initSdkOptions objectForKey: afIsDebug];
         if ([isDebugValue isKindOfClass:[NSNumber class]]) {
@@ -99,20 +96,14 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         [AppsFlyerLib shared].isDebug = isDebug;
         [[AppsFlyerLib shared] start];
 
-
+        //post notification for the deep link object that the bridge is set and he can handle deep link
+        [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
         // Register for background-foreground transitions natively instead of doing this in JavaScript
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(sendLaunch:)
                                                      name:UIApplicationDidBecomeActiveNotification
                                                    object:nil];
         return nil;
-    }
-}
-
--(void) sendSavedAttributionData:(UIApplication *)application{
-    if(AttributionDataParams != nil){
-        [self sendEventWithName:[AttributionDataParams objectForKey:@"type"] body:[AttributionDataParams objectForKey:@"body"]];
-        AttributionDataParams = nil;
     }
 }
 
@@ -206,9 +197,8 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 }
 
 -(void)sendLaunch:(UIApplication *)application {
-        //handling oaoa/ddl faster then react-native bridge
-        [self performSelectorOnMainThread:@selector(sendSavedAttributionData:) withObject:nil waitUntilDone:NO];
-        [[AppsFlyerLib shared] start];
+    [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
+    [[AppsFlyerLib shared] start];
 }
 
 -(NSError *) logEventInternal: (NSString *)eventName eventValues:(NSDictionary *)eventValues {
@@ -411,13 +401,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 
 -(void) reportOnFailure:(NSString *)errorMessage type:(NSString*) type {
     @try {
-        if([type isEqualToString:afOnInstallConversionFailure]){
-            [self sendEventWithName:type body:errorMessage];
-        } else if(self.bridge == nil){
-            AttributionDataParams = @{@"type":type, @"body":errorMessage};
-        }else{
-            [self sendEventWithName:type body:errorMessage];
-        }
+        [self sendEventWithName:type body:errorMessage];
     } @catch (NSException *exception) {
         NSLog(@"AppsFlyer Debug: %@", exception);
     }
@@ -425,13 +409,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 
 -(void) reportOnSuccess:(NSString *)data type:(NSString*) type {
     @try {
-        if([type isEqualToString:afOnInstallConversionDataLoaded]){
-            [self sendEventWithName:type body:data];
-        } else if(self.bridge == nil){
-            AttributionDataParams = @{@"type":type, @"body":data};
-        }else{
-            [self sendEventWithName:type body:data];
-        }
+        [self sendEventWithName:type body:data];
     } @catch (NSException *exception) {
         NSLog(@"AppsFlyer Debug: %@", exception);
     }
@@ -553,5 +531,6 @@ RCT_EXPORT_METHOD(addPushNotificationDeepLinkPath: (NSArray*)path successCallbac
     [[AppsFlyerLib shared] addPushNotificationDeepLinkPath: path];
     successCallback(@[SUCCESS]);
 }
+
 
 @end
