@@ -11,11 +11,12 @@
 
 @interface AppsFlyerAttribution : NSObject
 @property NSUserActivity*_Nullable  userActivity;
-@property NSArray* restorationHandler;
-@property NSURL * url;
-@property NSDictionary * options;
-@property NSString* sourceApplication;
-@property id annotation;
+@property (nonatomic, copy) void (^ _Nullable restorationHandler)(NSArray *_Nullable );
+@property NSURL * _Nullable url;
+@property NSDictionary * _Nullable options;
+@property NSString* _Nullable sourceApplication;
+@property id _Nullable annotation;
+@property BOOL isBridgeReady;
 
 + (AppsFlyerAttribution *)shared;
 - (void) continueUserActivity: (NSUserActivity*_Nullable) userActivity restorationHandler: (void (^_Nullable)(NSArray * _Nullable))restorationHandler;

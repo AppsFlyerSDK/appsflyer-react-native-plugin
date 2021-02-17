@@ -8,7 +8,7 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(initSdkWithCallBack: (NSDictionary*)initSdkOptions
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
-    
+
 
     NSError* error = nil;
     error = [self callSdkInternal:initSdkOptions];
@@ -32,7 +32,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
 }
 
 -(NSError *) callSdkInternal:(NSDictionary*)initSdkOptions {
-    
+
     NSString* devKey = nil;
     NSString* appId = nil;
     BOOL isDebug = NO;
@@ -97,6 +97,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         [[AppsFlyerLib shared] start];
 
         //post notification for the deep link object that the bridge is set and he can handle deep link
+        [AppsFlyerAttribution shared].isBridgeReady = YES;
         [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
         // Register for background-foreground transitions natively instead of doing this in JavaScript
         [[NSNotificationCenter defaultCenter] addObserver:self
