@@ -7,17 +7,18 @@
 #import "RCTBridgeModule.h"
 #import "RCTEventDispatcher.h"
 #endif
-#if __has_include(<AppsFlyerLib/AppsFlyerLib.h>) // from Pod
-#import <AppsFlyerLib/AppsFlyerLib.h>
-#else
-#import "AppsFlyerLib.h"
-#endif
+
+#import "AppsFlyerAttribution.h"
+//#if __has_include(<AppsFlyerLib/AppsFlyerLib.h>) // from Pod
+//#import <AppsFlyerLib/AppsFlyerLib.h>
+//#else
+//#import "AppsFlyerLib.h"
+//#endif
 
 
 
 @interface RNAppsFlyer: RCTEventEmitter <RCTBridgeModule, AppsFlyerLibDelegate, AppsFlyerDeepLinkDelegate>
 @end
-static RNAppsFlyer *_AppsFlyerdelegate;
 
 
 static NSString *const NO_DEVKEY_FOUND              = @"No 'devKey' found or its empty";
@@ -27,7 +28,7 @@ static NSString *const EMPTY_OR_CORRUPTED_LIST      = @"No arguments found or li
 static NSString *const SUCCESS                      = @"Success";
 static NSString *const INVALID_URI                  = @"Invalid URI";
 static NSString *const IOS_14_ONLY                  = @"Feature only supported on iOS 14 and above";
-
+    
   // Appsflyer JS objects
   #define afDevKey                                  @"devKey"
   #define afAppId                                   @"appId"
