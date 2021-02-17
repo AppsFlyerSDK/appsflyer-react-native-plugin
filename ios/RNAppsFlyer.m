@@ -110,30 +110,38 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
 
 RCT_EXPORT_METHOD(logEvent: (NSString *)eventName eventValues:(NSDictionary *)eventValues
                   successCallback :(RCTResponseSenderBlock)successCallback
-                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
-    NSError *error = [self logEventInternal:eventName eventValues:eventValues];
-
-    if(error) {
-        errorCallback(error);
-    } else {
-        //TODO wait callback from SDK
-        successCallback(@[SUCCESS]);
+                  errorCallback:(RCTResponseSenderBlock)errorCallback) {
+    if (!eventName || [eventName isEqualToString:@""]) {
+        NSError *error = [NSError errorWithDomain:NO_EVENT_NAME_FOUND code:2 userInfo:nil];
+        errorCallback(@[error.localizedDescription]);
+        return ;
     }
+
+    [[AppsFlyerLib shared] logEventWithEventName:eventName eventValues:eventValues completionHandler:^(NSDictionary<NSString *,id> * _Nullable dictionary, NSError * _Nullable error) {
+        if(error){
+            errorCallback(@[error.localizedDescription]);
+            return;
+        }
+        successCallback(@[SUCCESS]);
+    }];
 }
 
 RCT_EXPORT_METHOD(logEventWithPromise: (NSString *)eventName eventValues:(NSDictionary *)eventValues
                   logEventWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-
-    NSError *error = [self logEventInternal:eventName eventValues:eventValues];
-
-    if(error){
+    if (!eventName || [eventName isEqualToString:@""]) {
+        NSError *error = [NSError errorWithDomain:NO_EVENT_NAME_FOUND code:2 userInfo:nil];
         reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
+        return ;
     }
-    else{
-        //TODO wait callback from SDK
+
+    [[AppsFlyerLib shared] logEventWithEventName:eventName eventValues:eventValues completionHandler:^(NSDictionary<NSString *,id> * _Nullable dictionary, NSError * _Nullable error) {
+        if(error){
+            reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
+            return;
+        }
         resolve(@[SUCCESS]);
-    }
+    }];
 }
 
 RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback) {
@@ -200,17 +208,6 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 -(void)sendLaunch:(UIApplication *)application {
     [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
     [[AppsFlyerLib shared] start];
-}
-
--(NSError *) logEventInternal: (NSString *)eventName eventValues:(NSDictionary *)eventValues {
-
-    if (!eventName || [eventName isEqualToString:@""]) {
-        NSError *error = [NSError errorWithDomain:NO_EVENT_NAME_FOUND code:2 userInfo:nil];
-        return error;
-    }
-
-    [[AppsFlyerLib shared] logEvent:eventName withValues:eventValues];
-    return nil;
 }
 
 RCT_EXPORT_METHOD(setAdditionalData: (NSDictionary *)additionalData callback:(RCTResponseSenderBlock)callback) {
