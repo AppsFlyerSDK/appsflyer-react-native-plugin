@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import com.appsflyer.attribution.AppsFlyerRequestListener;
 import com.appsflyer.reactnative.RNUtil;
 import com.appsflyer.deeplink.DeepLink;
 import com.appsflyer.deeplink.DeepLinkListener;
@@ -177,7 +178,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                     deepLinkObj.put("status", afSuccess);
                     deepLinkObj.put("deepLinkStatus", deepLinkResult.getStatus());
                     deepLinkObj.put("type", afOnDeepLinking);
-                    deepLinkObj.put("data", deepLinkResult.getDeepLink().toString());
+                    deepLinkObj.put("data", deepLinkResult.getDeepLink().getClickEvent());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -254,41 +255,33 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                 .emit(eventName, params);
     }
 
-
-    private String logEventInternal(final String eventName, ReadableMap eventData) {
-
-        if (eventName.trim().equals("")) {
-            return NO_EVENT_NAME_FOUND;
-        }
-
-        Map<String, Object> data = RNUtil.toMap(eventData);
-
-        if (data == null) { // in case of no values
-            data = new HashMap<>();
-        }
-
-        Activity currentActivity = getCurrentActivity();
-
-        if (currentActivity != null) {
-            AppsFlyerLib.getInstance().logEvent(currentActivity.getBaseContext(), eventName, data);
-        }
-
-        return null;
-    }
-
     @ReactMethod
     public void logEvent(
             final String eventName, ReadableMap eventData,
-            Callback successCallback,
-            Callback errorCallback) {
+            final Callback successCallback,
+            final Callback errorCallback) {
         try {
-            final String errorReason = logEventInternal(eventName, eventData);
+            if (eventName.trim().equals("")) {
+                errorCallback.invoke(NO_EVENT_NAME_FOUND);
+                return;
+            }
+            Map<String, Object> data = RNUtil.toMap(eventData);
+            if (data == null) { // in case of no values
+                data = new HashMap<>();
+            }
+            Activity currentActivity = getCurrentActivity();
+            if (currentActivity != null) {
+                AppsFlyerLib.getInstance().logEvent(getCurrentActivity(), eventName, data, new AppsFlyerRequestListener() {
+                    @Override
+                    public void onSuccess() {
+                        successCallback.invoke(SUCCESS);
+                    }
 
-            if (errorReason != null) {
-                errorCallback.invoke(new Exception(errorReason).getMessage());
-            } else {
-                //TODO: callback should come from SDK
-                successCallback.invoke(SUCCESS);
+                    @Override
+                    public void onError(int i, @NonNull String s) {
+                        errorCallback.invoke(s);
+                    }
+                });
             }
         } catch (Exception e) {
             errorCallback.invoke(e.getMessage());
@@ -298,15 +291,29 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void logEventWithPromise(
-            final String eventName, ReadableMap eventData, Promise promise) {
+            final String eventName, ReadableMap eventData, final Promise promise) {
         try {
-            final String errorReason = logEventInternal(eventName, eventData);
+            if (eventName.trim().equals("")) {
+                promise.reject(NO_EVENT_NAME_FOUND, new Exception(NO_EVENT_NAME_FOUND).getMessage());
+                return;
+            }
+            Map<String, Object> data = RNUtil.toMap(eventData);
+            if (data == null) { // in case of no values
+                data = new HashMap<>();
+            }
+            Activity currentActivity = getCurrentActivity();
+            if (currentActivity != null) {
+                AppsFlyerLib.getInstance().logEvent(getCurrentActivity(), eventName, data, new AppsFlyerRequestListener() {
+                    @Override
+                    public void onSuccess() {
+                        promise.resolve(SUCCESS);
+                    }
 
-            if (errorReason != null) {
-                promise.reject(errorReason, new Exception(errorReason).getMessage());
-            } else {
-                //TODO: callback should come from SDK
-                promise.resolve(SUCCESS);
+                    @Override
+                    public void onError(int i, @NonNull String s) {
+                        promise.reject(s);
+                    }
+                });
             }
         } catch (Exception e) {
             promise.reject(UNKNOWN_ERROR, e);
