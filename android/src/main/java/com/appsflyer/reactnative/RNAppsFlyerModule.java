@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import com.appsflyer.attribution.AppsFlyerRequestListener;
 import com.appsflyer.reactnative.RNUtil;
 import com.appsflyer.deeplink.DeepLink;
 import com.appsflyer.deeplink.DeepLinkListener;
