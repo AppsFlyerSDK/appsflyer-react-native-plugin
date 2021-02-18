@@ -14,5 +14,5 @@ Pod::Spec.new do |s|
   s.platform         = :ios, "8.0"
   s.static_framework = true
   s.dependency 'React'
-  s.dependency 'AppsFlyerFramework', ' 6.1.3'
+  s.dependency 'AppsFlyerFramework', ' 6.2.1'
 end

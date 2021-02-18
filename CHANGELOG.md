@@ -1,4 +1,11 @@
 # Versions
+## 6.2.10
+- Android SDK 6.2.0
+- iOS SDK 6.2.1
+- In-App events callback from the native sdk
+- onDeepLink result data is string instead of an object [Android]
+- `AppsFlyerAttribution` object for handling deep links
+
 ## 6.1.41
 - Add onAttributionFailure listener
 - fix event listeners error handling
