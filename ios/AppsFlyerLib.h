@@ -2,7 +2,7 @@
 //  AppsFlyerLib.h
 //  AppsFlyerLib
 //
-//  AppsFlyer iOS SDK 6.1.3 (43)
+//  AppsFlyer iOS SDK 6.2.1 (61)
 //  Copyright (c) 2012-2020 AppsFlyer Ltd. All rights reserved.
 //
 
@@ -47,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 // In app event parameter names
 #define AFEventParamContent                @"af_content"
-#define AFEventParamAchievenmentId         @"af_achievement_id"
+#define AFEventParamAchievementId          @"af_achievement_id"
 #define AFEventParamLevel                  @"af_level"
 #define AFEventParamScore                  @"af_score"
 #define AFEventParamSuccess                @"af_success"
@@ -78,7 +78,6 @@ NS_ASSUME_NONNULL_BEGIN
 #define AFEventProjectedParamRevenue       @"af_projected_revenue"
 #define AFEventParamReceiptId              @"af_receipt_id"
 #define AFEventParamTutorialId             @"af_tutorial_id"
-#define AFEventParamAchievenmentId         @"af_achievement_id"
 #define AFEventParamVirtualCurrencyName    @"af_virtual_currency_name"
 #define AFEventParamDeepLink               @"af_deep_link"
 #define AFEventParamOldVersion             @"af_old_version"
@@ -186,7 +185,7 @@ NS_SWIFT_NAME(DeepLinkDelegate)
  dictionary.
  @discussion This method replaces all header fields that may have
  existed before this method ESP resolving call.
- To keep default SDK dehavior - return nil;
+ To keep default SDK behavior - return nil;
  */
 - (NSDictionary <NSString *, NSString *> * _Nullable)allHTTPHeaderFieldsForResolveDeepLinkURL:(NSURL *)URL;
 
@@ -390,7 +389,7 @@ NS_SWIFT_NAME(waitForATTUserAuthorization(timeoutInterval:));
 - (void)startWithCompletionHandler:(void (^ _Nullable)(NSDictionary<NSString *, id> * _Nullable dictionary, NSError * _Nullable error))completionHandler;
 
 /**
- Use this method to log an events with mulitple values. See AppsFlyer's documentation for details.
+ Use this method to log an events with multiple values. See AppsFlyer's documentation for details.
  
  Objective-C:
  
@@ -429,7 +428,7 @@ NS_SWIFT_NAME(logEvent(name:values:completionHandler:));
  @param productIdentifier The product identifier
  @param price The product price
  @param currency The product currency
- @param tranactionId The purchase transaction Id
+ @param transactionId The purchase transaction Id
  @param params The additional param, which you want to receive it in the raw reports
  @param successBlock The success callback
  @param failedBlock The failure callback
@@ -437,7 +436,7 @@ NS_SWIFT_NAME(logEvent(name:values:completionHandler:));
 - (void)validateAndLogInAppPurchase:(NSString * _Nullable)productIdentifier
                               price:(NSString * _Nullable)price
                            currency:(NSString * _Nullable)currency
-                      transactionId:(NSString * _Nullable)tranactionId
+                      transactionId:(NSString * _Nullable)transactionId
                additionalParameters:(NSDictionary * _Nullable)params
                             success:(void (^ _Nullable)(NSDictionary * response))successBlock
                             failure:(void (^ _Nullable)(NSError * _Nullable error, id _Nullable reponse))failedBlock NS_AVAILABLE(10_7, 7_0);
@@ -464,7 +463,7 @@ NS_SWIFT_NAME(logEvent(name:values:completionHandler:));
 /**
  In case you want to log deep linking. Does the same as `-handleOpenURL:sourceApplication:withAnnotation`.
  
- @warning Prefered to use `-handleOpenURL:sourceApplication:withAnnotation`.
+ @warning Preferred to use `-handleOpenURL:sourceApplication:withAnnotation`.
  
  @param url The URL that was passed to your AppDelegate.
  @param sourceApplication The sourceApplication that passed to your AppDelegate.
@@ -624,6 +623,16 @@ NS_SWIFT_NAME(appendParametersToDeeplinkURL(contains:parameters:));
  @param deepLinkPath an array of strings which contains keys to search for deeplink in payload.
  */
 - (void)addPushNotificationDeepLinkPath:(NSArray<NSString *> *)deepLinkPath;
+
+/**
+ * Allows sending custom data for partner integration purposes.
+ *
+ * @param partnerId ID of the partner (usually has "_int" suffix)
+ * @param partnerInfo customer data, depends on the integration nature with specific partner
+ */
+
+- (void)setPartnerDataWithPartnerId:(NSString * _Nullable)partnerId partnerInfo:(NSDictionary<NSString *, id> * _Nullable)partnerInfo
+NS_SWIFT_NAME(setPartnerData(partnerId:partnerInfo:));
 
 @end
 

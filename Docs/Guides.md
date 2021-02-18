@@ -288,18 +288,9 @@ const Home = (props) => {
 In order to record retargeting and use the onAppOpenAttribution callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
 
 #### import
-If using react-native-appsflyer plugin version >= 6.1.40
 ```objectivec
 #import <RNAppsFlyer.h>
 ```
-And in `didFinishLaunchingWithOptions` method:
-```objectivec
-  if(_AppsFlyerdelegate == nil){
-    _AppsFlyerdelegate = [[RNAppsFlyer alloc] init];
-  }
-  [[AppsFlyerLib shared] setDelegate:_AppsFlyerdelegate];
-```
-
 If using react-native-appsflyer plugin version <= 6.1.30 
 ```objectivec
 #import <React/RCTLinkingManager.h>
@@ -312,9 +303,13 @@ If using react-native-appsflyer plugin version <= 6.1.30
 
 #### Universal Links (iOS 9 +)
 ```objectivec
-- (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
-  [[AppsFlyerLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
-  return YES;
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nullable))restorationHandler {
+    // version >= 6.2.10
+    [[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
+    
+    // version < 6.2.10
+    [[AppsFlyerLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
+    return YES;
 }
 ```
 
@@ -322,15 +317,22 @@ If using react-native-appsflyer plugin version <= 6.1.30
 ```objectivec
 // Reports app open from deep link from apps which do not support Universal Links (Twitter) and for iOS8 and below
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
- [[AppsFlyerLib shared] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
-return YES;
+    // version >= 6.2.10
+    [[AppsFlyerAttribution shared] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
+ 
+    // version < 6.2.10
+    [[AppsFlyerLib shared] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
+    return YES;
 }
 
 // Reports app open from URL Scheme deep link for iOS 10
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
-options:(NSDictionary *) options {
- [[AppsFlyerLib shared] handleOpenUrl:url options:options];
-return YES;
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary *) options {
+    // version >= 6.2.10
+    [[AppsFlyerAttribution shared] handleOpenUrl:url options:options];
+
+    // version < 6.2.10
+    [[AppsFlyerLib shared] handleOpenUrl:url options:options];
+    return YES;
 }
 ```
 

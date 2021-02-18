@@ -669,16 +669,14 @@ This method may be required if the app needs to redirect users based on the give
 | parameter                   | type     | description                                                                                          |
 | ----------                  |----------|------------------                                                                                    |
 | url                         | string   | String representing the URL that needs to be resolved/returned in the onAppOpenAttribution callback  |
-| callback                    | function | Result callback                                                                                             |
+| success callback                    | function | Result callback                                                                                             |
+| failure callback                    | function | error callback                                                                                             |
 
 
 *Example:*
 
 ```javascript
-        let uriString = "sdktest://test"
-        appsFlyer.performOnAppAttribution(uriString, (res) => {
-            console.log(res);
-        })
+appsFlyer.performOnAppAttribution(url, res => console.log(res) , err => console.error(err));
 ```
 ---
 ##### <a id="setSharingFilterForAllPartners"> **`setSharingFilterForAllPartners()`**
@@ -688,7 +686,7 @@ Used by advertisers to exclude **all** networks/integrated partners from getting
 *Example:*
 
 ```javascript
-        appsFlyer.setSharingFilterForAllPartners()
+appsFlyer.setSharingFilterForAllPartners()
 ```
 ---
 ##### <a id="setSharingFilter"> **`setSharingFilter(partners, sucessC, errorC)`**
@@ -703,8 +701,8 @@ Used by advertisers to exclude **specified** networks/integrated partners from g
 *Example:*
 
 ```javascript
-        let partners = ["facebook_int","googleadwords_int","snapchat_int","doubleclick_int"]
-        appsFlyer.setSharingFilterForAllPartners(partners,
+let partners = ["facebook_int","googleadwords_int","snapchat_int","doubleclick_int"]
+appsFlyer.setSharingFilterForAllPartners(partners,
         (res) => {
             console.log(res);
         }, (error) => {
