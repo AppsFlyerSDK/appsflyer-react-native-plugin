@@ -37,7 +37,7 @@ appsFlyer.initSdk(
 
 
 ##  <a id="deeplinking"> Deep Linking
-    
+
 <img src="https://massets.appsflyer.com/wp-content/uploads/2018/03/21101417/app-installed-Recovered.png"  width="300">
 
 
@@ -45,7 +45,7 @@ appsFlyer.initSdk(
 #### The 3 Deep Linking Types:
 Since users may or may not have the mobile app installed, there are 3 types of deep linking:
 
-1. Deferred Deep Linking - Serving personalized content to new or former users, directly after the installation. 
+1. Deferred Deep Linking - Serving personalized content to new or former users, directly after the installation.
 2. Direct Deep Linking - Directly serving personalized content to existing users, which already have the mobile app installed.
 3. Unified deep linking - Unified deep linking sends new and existing users to a specific in-app activity as soon as the app is opened.<br>
 For more info please check out the [OneLink™ Deep Linking Guide](https://dev.appsflyer.com/docs/initial-setup-for-deep-linking-and-deferred-deep-linking).
@@ -58,12 +58,14 @@ Code Sample to handle the conversion data:
 
 
 ```javascript
-var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+const onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
   (res) => {
-    if (JSON.parse(res.data.is_first_launch) == true) {
+    const isFirstLaunch = res?.data?.is_first_launch;
+
+    if (isFirstLaunch && JSON.parse(isFirstLaunch) === true) {
       if (res.data.af_status === 'Non-organic') {
-        var media_source = res.data.media_source;
-        var campaign = res.data.campaign;
+        const media_source = res.data.media_source;
+        const campaign = res.data.campaign;
         alert('This is first launch and a Non-Organic install. Media source: ' + media_source + ' Campaign: ' + campaign);
       } else if (res.data.af_status === 'Organic') {
         alert('This is first launch and a Organic Install');
@@ -87,11 +89,11 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
 <hr/>
 
 ###  <a id="direct-deep-linking"> 2. Direct Deep Linking
-    
+
 When a deep link is clicked on the device the AppsFlyer SDK will return the link in the [onAppOpenAttribution](https://dev.appsflyer.com/docs/deep-linking-existing-app-users-to-specific-content) method.
 
 ```javascript
-var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
+const onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
   console.log(res);
 });
 
@@ -113,7 +115,7 @@ For more information about this api, please check [OneLink Guide Here](https://d
 
 
 ```javascript
-var onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
+const onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
   console.log('onDeepLinking: ' + JSON.stringify(res));
   console.log('status: '+ res.status);
   console.log('type: '+ res.type);
@@ -150,20 +152,22 @@ The `appsFlyer.onDeepLink` returns function to  unregister this event listener. 
 ```javascript
 import appsFlyer from 'react-native-appsflyer';
 
-var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
+const onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
   console.log(res);
 });
 
-var onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
+const onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
   console.log('onDeepLinking: ' + JSON.stringify(res));
 })
 
-var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+const onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
   (res) => {
-    if (JSON.parse(res.data.is_first_launch) == true) {
+    const isFirstLaunch = res?.data?.is_first_launch;
+
+    if (isFirstLaunch && JSON.parse(isFirstLaunch) === true) {
       if (res.data.af_status === 'Non-organic') {
-        var media_source = res.data.media_source;
-        var campaign = res.data.campaign;
+        const media_source = res.data.media_source;
+        const campaign = res.data.campaign;
         alert('This is first launch and a Non-Organic install. Media source: ' + media_source + ' Campaign: ' + campaign);
       } else if (res.data.af_status === 'Organic') {
         alert('This is first launch and a Organic Install');
@@ -218,12 +222,14 @@ import React, {useEffect, useState} from 'react';
 import {AppState, SafeAreaView, Text, View} from 'react-native';
 import appsFlyer from 'react-native-appsflyer';
 
-var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+const onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
     (res) => {
-        if (JSON.parse(res.data.is_first_launch) == true) {
+        const isFirstLaunch = res?.data?.is_first_launch;
+
+        if (isFirstLaunch && JSON.parse(isFirstLaunch) === true) {
             if (res.data.af_status === 'Non-organic') {
-                var media_source = res.data.media_source;
-                var campaign = res.data.campaign;
+                const media_source = res.data.media_source;
+                const campaign = res.data.campaign;
                 console.log('This is first launch and a Non-Organic install. Media source: ' + media_source + ' Campaign: ' + campaign);
             } else if (res.data.af_status === 'Organic') {
                 console.log('This is first launch and a Organic Install');
@@ -234,7 +240,7 @@ var onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
     },
 );
 
-var onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
+const onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
     console.log(res);
 });
 
@@ -291,7 +297,9 @@ In order to record retargeting and use the onAppOpenAttribution callbacks in iOS
 ```objectivec
 #import <RNAppsFlyer.h>
 ```
+
 If using react-native-appsflyer plugin version <= 6.1.30 
+
 ```objectivec
 #import <React/RCTLinkingManager.h>
 #if __has_include(<AppsFlyerLib/AppsFlyerLib.h>) // from Pod
@@ -337,7 +345,7 @@ If using react-native-appsflyer plugin version <= 6.1.30
 ```
 
 ### <a id="android-deeplinks"> Android Deep Links
-    
+
 On Android, AppsFlyer SDK inspects activity intent object during onResume(). Because of that, for each activity that may be configured or launched with any [non-standard launch mode](https://developer.android.com/guide/topics/manifest/activity-element#lmode) please make sure to add the following code to `MainActivity.java` in `android/app/src/main/java/com...`:
 
 ```
@@ -354,7 +362,7 @@ public class MainActivity extends ReactActivity {
     }
  }
 ```
-This method makes sure that you get the latest deep link data even if the app was initially launched with another deep link. See the [Android developer documentation](https://developer.android.com/reference/android/app/Activity#onNewIntent(android.content.Intent)) for more details. 
+This method makes sure that you get the latest deep link data even if the app was initially launched with another deep link. See the [Android developer documentation](https://developer.android.com/reference/android/app/Activity#onNewIntent(android.content.Intent)) for more details.
 
 ---
 
@@ -362,7 +370,7 @@ This method makes sure that you get the latest deep link data even if the app wa
 
 #### <a id="measure-app-uninstalls-ios"> iOS
 
-#### First method 
+#### First method
 
 AppsFlyer enables you to measure app uninstalls. To handle notifications it requires  to modify your `AppDelegate.m`. Use [didRegisterForRemoteNotificationsWithDeviceToken](https://developer.apple.com/reference/uikit/uiapplicationdelegate) to register to the uninstall feature.
 
@@ -381,7 +389,7 @@ AppsFlyer enables you to measure app uninstalls. To handle notifications it requ
 
 Read more about Uninstall register: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS)
 
-#### Second method 
+#### Second method
 
 Pass the device token to AppsFlyer
 
