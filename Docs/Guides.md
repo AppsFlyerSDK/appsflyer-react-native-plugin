@@ -326,7 +326,7 @@ If using react-native-appsflyer plugin version <= 6.1.30
 // Reports app open from deep link from apps which do not support Universal Links (Twitter) and for iOS8 and below
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
     // version >= 6.2.10
-    [[AppsFlyerAttribution shared] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
+    [[AppsFlyerAttribution shared] handleOpenUrl:url sourceApplication:sourceApplication annotation:annotation];
  
     // version < 6.2.10
     [[AppsFlyerLib shared] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
