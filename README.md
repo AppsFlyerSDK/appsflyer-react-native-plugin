@@ -13,7 +13,7 @@
 
 ## Table of content
 
-- [v6 Breaking changes](#v6-breaking-changes)
+- [Breaking changes](#breaking-changes)
 - [Adding the SDK to your project](#installation)
 - [Add or Remove Strict mode for App-kids](#appKids)
 - [Initializing the SDK](#init-sdk)
@@ -25,9 +25,12 @@
 - iOS AppsFlyerSDK **v6.2.1**
 - Android AppsFlyerSDK **v6.2.0**
 
-## <a id="v6-breaking-changes"> ❗ v6 Breaking Changes
+## <a id="breaking-changes"> ❗ Breaking Changes
 
-We have renamed the following APIs:
+- From version `6.2.30`, `logCrossPromotionAndOpenStore`  api will register as `af_cross_promotion` instead of `af_app_invites` in your dashboard.<br>
+Click on a link that was generated using `generateInviteLink` api will be register as `af_app_invites`.
+
+- We have renamed the following APIs:
 
 | Old API                       | New API                       |
 | ------------------------------|-------------------------------|
