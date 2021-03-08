@@ -530,13 +530,21 @@ Make sure to use the promoted App ID as it appears within the AppsFlyer dashboar
 | ----------      |---------- |------------------         |
 | appId           | string    | promoted application ID   |
 | campaign        | string    | Promoted Campaign         |
-
+| params          | json     | additional parameters     |
 
 
 *Example:*
 
 ```javascript
-appsFlyer.logCrossPromotionImpression("com.myandroid.app", "myCampaign");
+if (Platform.OS == 'ios') {
+    appsFlyer.logCrossPromotionImpression('456789456', 'cross_promotion_and_store', {
+            custom_param: 'just_an_impression',
+        });
+}else{
+    appsFlyer.logCrossPromotionImpression('com.cool.RNApp', 'cross_promotion_and_store', {
+            custom_param: 'just_an_impression',
+        });
+}
 ```
 
 For more details about Cross-Promotion logging please see the relevent doc [here](https://support.appsflyer.com/hc/en-us/articles/115004481946-Cross-Promotion-Tracking).
@@ -557,16 +565,16 @@ Use the following API to attribute the click and launch the app store's app page
 *Example:*
 
 ```javascript
-var crossPromOptions = {
+let crossPromOptions = {
   customerID: '1234',
   myCustomParameter: 'newUser',
 };
+if(Platform.OS == 'ios'){
+    appsFlyer.logCrossPromotionAndOpenStore('456789456', 'myCampaign', crossPromOptions);
+}else {
+    appsFlyer.logCrossPromotionAndOpenStore('com.cool.RNApp', 'myCampaign', crossPromOptions);
+}
 
-appsFlyer.logCrossPromotionAndOpenStore(
-  'com.myandroid.app',
-  'myCampaign',
-  crossPromOptions
-);
 ```
 
 ---

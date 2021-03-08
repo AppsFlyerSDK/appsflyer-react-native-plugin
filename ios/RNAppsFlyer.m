@@ -272,21 +272,13 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
                   campaign:(NSString *)campaign
                   customParams:(NSDictionary *)customParams) {
 
-        [AppsFlyerShareInviteHelper generateInviteUrlWithLinkGenerator:^AppsFlyerLinkGenerator * _Nonnull(AppsFlyerLinkGenerator * _Nonnull generator) {
-            if (campaign != nil && ![campaign isEqualToString:@""]) {
-                [generator setCampaign:campaign];
-            }
-            if (![customParams isKindOfClass:[NSNull class]]) {
-                [generator addParameters:customParams];
-            }
-
-            return generator;
-        } completionHandler: ^(NSURL * _Nullable url) {
-            NSString *appLink = url.absoluteString;
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:appLink] options:@{} completionHandler:^(BOOL success) {
+    [AppsFlyerCrossPromotionHelper logAndOpenStore: appID campaign:campaign parameters:customParams openStore:^(NSURLSession * _Nonnull urlSession, NSURL * _Nonnull clickURL) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[UIApplication sharedApplication] openURL:clickURL options:@{} completionHandler:^(BOOL success) {
+                NSLog(@"AppsFlyer openAppStoreForAppID completionHandler result %d",success);
             }];
-        }];
-
+        });
+    }];
 }
 
 - (void)didResolveDeepLink:(AppsFlyerDeepLinkResult* _Nonnull) result {
