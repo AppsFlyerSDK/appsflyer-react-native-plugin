@@ -1,4 +1,8 @@
 # Versions
+## 6.2.30
+- iOS SDK 6.2.3
+- FIx logAndOpenStore generates user invite link
+
 ## 6.2.10
 - Android SDK 6.2.0
 - iOS SDK 6.2.1
