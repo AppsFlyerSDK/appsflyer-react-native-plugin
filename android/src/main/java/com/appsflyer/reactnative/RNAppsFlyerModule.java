@@ -160,6 +160,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         } else {
             // register for lifecycle with Application (cannot fetch deeplink without access to the Activity,
             // also sending first session manually)
+            instance.logEvent(application, null, null);
             instance.start(application, devKey);
         }
         return null;
@@ -179,6 +180,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                     deepLinkObj.put("deepLinkStatus", deepLinkResult.getStatus());
                     deepLinkObj.put("type", afOnDeepLinking);
                     deepLinkObj.put("data", deepLinkResult.getDeepLink().getClickEvent());
+                    deepLinkObj.put("isDeferred", deepLinkResult.getDeepLink().isDeferred());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
