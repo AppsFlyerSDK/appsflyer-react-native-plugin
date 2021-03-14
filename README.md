@@ -109,8 +109,8 @@ Run `pod install`
 
 ## <a id="init-sdk"> 🚀 Initializing the SDK
 
-Initialize the SDK to enable AppsFlyer to detect installations, sessions (app opens) and updates.  
-
+Initialize the SDK to enable AppsFlyer to detect installations, sessions (app opens) and updates.<br>
+NOTE! for iOS 14.5, we use `timeToWaitForATTUserAuthorization` parameter. please read more [Here](https://support.appsflyer.com/hc/en-us/articles/207032066-iOS-SDK-V6-X-integration-guide-for-developers#additional-apis-configuring-app-tracking-transparency-att-support)
 ```javascript
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View} from 'react-native';
@@ -123,6 +123,7 @@ appsFlyer.initSdk(
     appId: '41*****44',
     onInstallConversionDataListener: true, //Optional
     onDeepLinkListener: true, //Optional
+    timeToWaitForATTUserAuthorization: 10 //for iOS 14.5
   },
   (result) => {
     console.log(result);
@@ -140,6 +141,7 @@ appsFlyer.initSdk(
 | isDebug    | Debug mode - set to `true` for testing only  |
 |onInstallConversionDataListener| Set listener for SDK init response (Optional. default=true) |
 |onDeepLinkListener| Set listener for DDL response (Optional. default=false) |
+|timeToWaitForATTUserAuthorization| Time for the sdk to wait before launch. please read more [Here](https://support.appsflyer.com/hc/en-us/articles/207032066-iOS-SDK-V6-X-integration-guide-for-developers#additional-apis-configuring-app-tracking-transparency-att-support) |
 
 
  ## <a id="guides"> 📖 Guides

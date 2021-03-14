@@ -296,17 +296,18 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
         default:
             [NSException raise:NSGenericException format:@"Unexpected FormatType."];
     }
-    NSMutableDictionary* message = [[NSMutableDictionary alloc] initWithCapacity:4];
-    [message setObject:([deepLinkStatus isEqual:@"Error"] || [deepLinkStatus isEqual:@"NOT_FOUND"]) ? afFailure : afSuccess forKey:@"status"];
-    [message setObject:deepLinkStatus forKey:@"deepLinkStatus"];
-    [message setObject:afOnDeepLinking forKey:@"type"];
-    if([deepLinkStatus  isEqual: @"Error"]){
-        [message setObject:result.error.localizedDescription forKey:@"data"];
-    }else if([deepLinkStatus  isEqual: @"NOT_FOUND"]){
-        [message setObject:@"deep link not found" forKey:@"data"];
-    }else{
-        [message setObject:result.deepLink.clickEvent forKey:@"data"];
-    }
+        NSMutableDictionary* message = [[NSMutableDictionary alloc] initWithCapacity:5];
+        message[@"status"] = ([deepLinkStatus isEqual:@"Error"] || [deepLinkStatus isEqual:@"NOT_FOUND"]) ? afFailure : afSuccess;
+        message[@"deepLinkStatus"] = deepLinkStatus;
+        message[@"type"] = afOnDeepLinking;
+        message[@"isDeffered"] = result.deepLink.isDeferred ? @YES : @NO;
+        if([deepLinkStatus  isEqual: @"Error"]){
+            message[@"data"] = result.error.localizedDescription;
+        }else if([deepLinkStatus  isEqual: @"NOT_FOUND"]){
+            message[@"data"] = @"deep link not found";
+        }else{
+            message[@"data"] = result.deepLink.clickEvent;
+        }
 
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
 }
