@@ -141,6 +141,7 @@ appsFlyer.initSdk(
 | isDebug    | Debug mode - set to `true` for testing only  |
 |onInstallConversionDataListener| Set listener for SDK init response (Optional. default=true) |
 |onDeepLinkListener| Set listener for DDL response (Optional. default=false) |
+|timeToWaitForATTUserAuthorization| Time for the sdk to wait before launch. please read more [Here](https://support.appsflyer.com/hc/en-us/articles/207032066-iOS-SDK-V6-X-integration-guide-for-developers#additional-apis-configuring-app-tracking-transparency-att-support) |
 
 
  ## <a id="guides"> 📖 Guides
