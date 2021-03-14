@@ -1,4 +1,9 @@
 # Versions
+## 6.2.31
+- Update readme for iOS 14.5
+- Send a session manually on launch (Android)
+- Add 'isDeferred' boolean in onDeepLinking
+
 ## 6.2.30
 - iOS SDK 6.2.3
 - FIx logAndOpenStore generates user invite link
