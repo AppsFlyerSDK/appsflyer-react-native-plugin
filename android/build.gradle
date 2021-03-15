@@ -46,5 +46,5 @@ repositories {
 dependencies {
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.1')}"
-    implementation "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.2.3')}"
+    implementation "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.2.0')}"
 }
