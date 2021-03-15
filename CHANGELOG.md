@@ -1,4 +1,8 @@
 # Versions
+## 6.2.40
+- iOS SDK 6.2.4
+- Validate initSdk `isDebug` and `appId`
+
 ## 6.2.31
 - Update readme for iOS 14.5
 - Send a session manually on launch (Android)
