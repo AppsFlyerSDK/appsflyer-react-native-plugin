@@ -7,10 +7,22 @@ const appsFlyerEventEmitter = new NativeEventEmitter(RNAppsFlyer);
 
 
 function initSdkCallback(options, successC, errorC) {
+    if (typeof options.appId !== 'string') {
+        return errorC('appId should be a string!');
+    }
+    if (typeof options.isDebug !== 'boolean') {
+        return errorC('isDebug should be a boolean!');
+    }
     return RNAppsFlyer.initSdkWithCallBack(options, successC, errorC);
 }
 
 function initSdkPromise(options): Promise<string> {
+    if (typeof options.appId !== 'string') {
+        return Promise.reject('appId should be a string!');
+    }
+    if (typeof options.isDebug !== 'boolean') {
+        return Promise.reject('isDebug should be a boolean!');
+    }
     return RNAppsFlyer.initSdkWithPromise(options);
 }
 
