@@ -863,6 +863,7 @@ for more information: https://support.appsflyer.com/hc/en-us/articles/207032126-
 ```javascript
 appsFlyer.addPushNotificationDeepLinkPath(["deeply", "nested", "deep_link"], res => console.log(res), error => console.log(error));
 ```
+---
 
 ##### <a id="disableSKAD"> **`disableSKAD(disableSkad)`**
 
