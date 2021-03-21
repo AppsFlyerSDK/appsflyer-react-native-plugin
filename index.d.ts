@@ -98,6 +98,7 @@ declare module "react-native-appsflyer" {
         disableAdvertisingIdentifier(shouldDisable: boolean): void
         disableCollectASA(shouldDisable: boolean): void
         setUseReceiptValidationSandbox(isSandbox: boolean): void
+        disableSKAD(disableSkad: boolean): void
 
         /**
          * For Android Only

@@ -531,5 +531,14 @@ RCT_EXPORT_METHOD(addPushNotificationDeepLinkPath: (NSArray*)path successCallbac
     successCallback(@[SUCCESS]);
 }
 
+RCT_EXPORT_METHOD(disableSKAD: (BOOL *)b ) {
+    [AppsFlyerLib shared].disableSKAdNetwork = b;
+    if (b){
+        NSLog(@"[DEBUG] AppsFlyer: SKADNetwork is disabled");
+    }else{
+        NSLog(@"[DEBUG] AppsFlyer: SKADNetwork is enabled");
+    }
+}
+
 
 @end
