@@ -583,6 +583,14 @@ appsFlyer.addPushNotificationDeepLinkPath = (path, successC, errorC) => {
     RNAppsFlyer.addPushNotificationDeepLinkPath(path, successC, errorC);
 }
 
+/**
+ * enable or disable SKAD support. set True if you want to disable it!
+ * @param isDisabled
+ */
+appsFlyer.disableSKAD = (disableSkad) => {
+    return RNAppsFlyer.disableSKAD(disableSkad);
+};
+
 function AFParseJSONException(_message, _data) {
     this.message = _message;
     this.data = _data;
