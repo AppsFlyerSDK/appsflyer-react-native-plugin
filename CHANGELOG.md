@@ -1,4 +1,7 @@
 # Versions
+## 6.2.41
+- Fix SKAD rules
+
 ## 6.2.40
 - iOS SDK 6.2.4
 - Validate initSdk `isDebug` and `appId`
