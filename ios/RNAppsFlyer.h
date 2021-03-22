@@ -9,12 +9,13 @@
 #endif
 
 #import "AppsFlyerAttribution.h"
+#import <objc/message.h>
 //#if __has_include(<AppsFlyerLib/AppsFlyerLib.h>) // from Pod
 //#import <AppsFlyerLib/AppsFlyerLib.h>
 //#else
 //#import "AppsFlyerLib.h"
 //#endif
-
+typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
 
 
 @interface RNAppsFlyer: RCTEventEmitter <RCTBridgeModule, AppsFlyerLibDelegate, AppsFlyerDeepLinkDelegate>

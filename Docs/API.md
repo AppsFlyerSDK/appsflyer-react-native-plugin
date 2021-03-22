@@ -31,6 +31,7 @@
 - [sendPushNotificationData](#sendPushNotificationData)
 - [setHost](#setHost)
 - [addPushNotificationDeepLinkPath](#addPushNotificationDeepLinkPath)
+- [disableSKAD](#disableSKAD)
 
 ---
 
@@ -861,4 +862,22 @@ for more information: https://support.appsflyer.com/hc/en-us/articles/207032126-
 
 ```javascript
 appsFlyer.addPushNotificationDeepLinkPath(["deeply", "nested", "deep_link"], res => console.log(res), error => console.log(error));
+```
+---
+
+##### <a id="disableSKAD"> **`disableSKAD(disableSkad)`**
+
+❗Important❗ `disableSKAD` must be called before calling `initSDK` and for iOS ONLY!
+
+| parameter | type     | description      |
+| ----------|----------|------------------|
+| disableSkad    | boolean   | true if you want to disable SKADNetwork |
+
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'ios') {
+    appsFlyer.disableSKAD(true);
+}
 ```
