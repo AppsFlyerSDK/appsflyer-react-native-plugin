@@ -3,6 +3,7 @@
   "version": "6.2.41",
   "description": "React Native Appsflyer plugin",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "demo.ios": "npm run ios-pod; cd SampleApp; react-native run-ios",
     "demo.android": "cd SampleApp; react-native run-android",
