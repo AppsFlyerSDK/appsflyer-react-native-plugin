@@ -1,6 +1,6 @@
 import {NativeEventEmitter, NativeModules} from "react-native";
 
-export const RNAppsFlyer = NativeModules;
+const {RNAppsFlyer} = NativeModules;
 const appsFlyer = {};
 const eventsMap = {};
 const appsFlyerEventEmitter = new NativeEventEmitter(RNAppsFlyer);
@@ -357,7 +357,6 @@ appsFlyer.onInstallConversionFailure = callback => {
 appsFlyer.onAppOpenAttribution = callback => {
 
     //console.log("onAppOpenAttribution is called" );
-
     const listener = appsFlyerEventEmitter.addListener(
         "onAppOpenAttribution",
         _data => {
