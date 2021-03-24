@@ -29,6 +29,9 @@
 - [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
 - [validateAndLogInAppPurchase](#validateAndLogInAppPurchase)
 - [sendPushNotificationData](#sendPushNotificationData)
+- [setHost](#setHost)
+- [addPushNotificationDeepLinkPath](#addPushNotificationDeepLinkPath)
+- [disableSKAD](#disableSKAD)
 
 ---
 
@@ -51,7 +54,7 @@ The dev key is required for all apps and the appID is required only for iOS.<br/
 | appId      | Your iTunes [application ID](https://support.appsflyer.com/hc/en-us/articles/207377436-Adding-a-new-app#available-in-the-app-store-google-play-store-windows-phone-store)  (iOS only)  |
 | isDebug    | Debug mode - set to `true` for testing only  |
 |onInstallConversionDataListener| Set listener for SDK init response (Optional. default=true) |
-
+|onDeepLinkListener| Set listener for DDL response (Optional. default=false) |
 *Example:*
 
 ```javascript
@@ -65,6 +68,7 @@ appsFlyer.initSdk(
     isDebug: false,
     appId: '41*****44',
     onInstallConversionDataListener: false, //Optional
+    onDeepLinkListener: true, //Optional
   },
   (res) => {
     console.log(res);
@@ -527,13 +531,21 @@ Make sure to use the promoted App ID as it appears within the AppsFlyer dashboar
 | ----------      |---------- |------------------         |
 | appId           | string    | promoted application ID   |
 | campaign        | string    | Promoted Campaign         |
-
+| params          | json     | additional parameters     |
 
 
 *Example:*
 
 ```javascript
-appsFlyer.logCrossPromotionImpression("com.myandroid.app", "myCampaign");
+if (Platform.OS == 'ios') {
+    appsFlyer.logCrossPromotionImpression('456789456', 'cross_promotion_and_store', {
+            custom_param: 'just_an_impression',
+        });
+}else{
+    appsFlyer.logCrossPromotionImpression('com.cool.RNApp', 'cross_promotion_and_store', {
+            custom_param: 'just_an_impression',
+        });
+}
 ```
 
 For more details about Cross-Promotion logging please see the relevent doc [here](https://support.appsflyer.com/hc/en-us/articles/115004481946-Cross-Promotion-Tracking).
@@ -554,16 +566,16 @@ Use the following API to attribute the click and launch the app store's app page
 *Example:*
 
 ```javascript
-var crossPromOptions = {
+let crossPromOptions = {
   customerID: '1234',
   myCustomParameter: 'newUser',
 };
+if(Platform.OS == 'ios'){
+    appsFlyer.logCrossPromotionAndOpenStore('456789456', 'myCampaign', crossPromOptions);
+}else {
+    appsFlyer.logCrossPromotionAndOpenStore('com.cool.RNApp', 'myCampaign', crossPromOptions);
+}
 
-appsFlyer.logCrossPromotionAndOpenStore(
-  'com.myandroid.app',
-  'myCampaign',
-  crossPromOptions
-);
 ```
 
 ---
@@ -666,16 +678,14 @@ This method may be required if the app needs to redirect users based on the give
 | parameter                   | type     | description                                                                                          |
 | ----------                  |----------|------------------                                                                                    |
 | url                         | string   | String representing the URL that needs to be resolved/returned in the onAppOpenAttribution callback  |
-| callback                    | function | Result callback                                                                                             |
+| success callback                    | function | Result callback                                                                                             |
+| failure callback                    | function | error callback                                                                                             |
 
 
 *Example:*
 
 ```javascript
-        let uriString = "sdktest://test"
-        appsFlyer.performOnAppAttribution(uriString, (res) => {
-            console.log(res);
-        })
+appsFlyer.performOnAppAttribution(url, res => console.log(res) , err => console.error(err));
 ```
 ---
 ##### <a id="setSharingFilterForAllPartners"> **`setSharingFilterForAllPartners()`**
@@ -685,7 +695,7 @@ Used by advertisers to exclude **all** networks/integrated partners from getting
 *Example:*
 
 ```javascript
-        appsFlyer.setSharingFilterForAllPartners()
+appsFlyer.setSharingFilterForAllPartners()
 ```
 ---
 ##### <a id="setSharingFilter"> **`setSharingFilter(partners, sucessC, errorC)`**
@@ -700,8 +710,8 @@ Used by advertisers to exclude **specified** networks/integrated partners from g
 *Example:*
 
 ```javascript
-        let partners = ["facebook_int","googleadwords_int","snapchat_int","doubleclick_int"]
-        appsFlyer.setSharingFilterForAllPartners(partners,
+let partners = ["facebook_int","googleadwords_int","snapchat_int","doubleclick_int"]
+appsFlyer.setSharingFilterForAllPartners(partners,
         (res) => {
             console.log(res);
         }, (error) => {
@@ -815,4 +825,59 @@ const pushPayload = {
             }
         };
         appsFlyer.sendPushNotificationData(pushPayload);
+```
+---
+
+##### <a id="setHost"> **`setHost(hostPrefix, hostName, successC)`**
+
+Set a custom host
+
+| parameter | type     | description      |
+| ----------|----------|------------------|
+| hostPrefix    | string   | the host prefix |
+| hostName  | string | the host name |
+| successC  | function | success callback |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setHost('foo', 'bar.appsflyer.com', res => console.log(res));
+```
+---
+
+##### <a id="addPushNotificationDeepLinkPath"> **`addPushNotificationDeepLinkPath(path, successC, errorC)`**
+The addPushNotificationDeepLinkPath method provides app owners with a flexible interface for configuring how deep links are extracted from push notification payloads.
+for more information: https://support.appsflyer.com/hc/en-us/articles/207032126-Android-SDK-integration-for-developers#core-apis-65-configure-push-notification-deep-link-resolution <br>
+❗Important❗ `addPushNotificationDeepLinkPath` must be called before calling `initSDK`
+
+| parameter | type     | description      |
+| ----------|----------|------------------|
+| path    | strings array   | the desired path separated into an array |
+| successC  | function | success callback |
+| errorC  | function | error callback |
+
+
+*Example:*
+
+```javascript
+appsFlyer.addPushNotificationDeepLinkPath(["deeply", "nested", "deep_link"], res => console.log(res), error => console.log(error));
+```
+---
+
+##### <a id="disableSKAD"> **`disableSKAD(disableSkad)`**
+
+❗Important❗ `disableSKAD` must be called before calling `initSDK` and for iOS ONLY!
+
+| parameter | type     | description      |
+| ----------|----------|------------------|
+| disableSkad    | boolean   | true if you want to disable SKADNetwork |
+
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'ios') {
+    appsFlyer.disableSKAD(true);
+}
 ```

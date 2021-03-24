@@ -1,4 +1,43 @@
 # Versions
+## 6.2.41
+- Fix SKAD rules
+
+## 6.2.40
+- iOS SDK 6.2.4
+- Validate initSdk `isDebug` and `appId`
+
+## 6.2.31
+- Update readme for iOS 14.5
+- Send a session manually on launch (Android)
+- Add 'isDeferred' boolean in onDeepLinking
+
+## 6.2.30
+- iOS SDK 6.2.3
+- FIx logAndOpenStore generates user invite link
+
+## 6.2.10
+- Android SDK 6.2.0
+- iOS SDK 6.2.1
+- In-App events callback from the native sdk
+- onDeepLink result data is string instead of an object [Android]
+- `AppsFlyerAttribution` object for handling deep links
+
+## 6.1.41
+- Add onAttributionFailure listener
+- fix event listeners error handling
+
+## 6.1.40
+- fix onAppOpenAttribution on iOS. PLEASE check out the Docs [here](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/blob/releases/6.x.x/6.1.x/6.1.40/Docs/Guides.md#-ios-deep-links---universal-links-and-url-schemes)
+
+## 6.1.30
+- Android SDK 6.1.3
+- iOS SDK 6.1.3
+- setHost API
+- addPushNotificationDeepLinkPath API
+
+## 6.1.20
+- Unified deep linking
+
 ## 6.1.10
 - iOS SDK 6.1.1
 - Android SDK 6.1.0

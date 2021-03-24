@@ -1,17 +1,6 @@
 #import "RNAppsFlyer.h"
 
-#if __has_include(<AppsFlyerLib/AppsFlyerLib.h>) // from Pod
-#import <AppsFlyerLib/AppsFlyerLib.h>
-#else
-#import "AppsFlyerLib.h"
-#endif
-
-@interface RNAppsFlyer() <AppsFlyerLibDelegate>
-
-@end
-
 @implementation RNAppsFlyer
-
 @synthesize bridge = _bridge;
 
 RCT_EXPORT_MODULE()
@@ -19,6 +8,7 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(initSdkWithCallBack: (NSDictionary*)initSdkOptions
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
+
 
     NSError* error = nil;
     error = [self callSdkInternal:initSdkOptions];
@@ -47,16 +37,17 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
     NSString* appId = nil;
     BOOL isDebug = NO;
     BOOL isConversionData = YES;
+    BOOL isDeepLinking = NO;
     NSNumber* interval = 0;
 
     if (![initSdkOptions isKindOfClass:[NSNull class]]) {
 
         id isDebugValue = nil;
         id isConversionDataValue = nil;
+        id isDeepLinkingValue = nil;
         devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
         appId = (NSString*)[initSdkOptions objectForKey: afAppId];
         interval = (NSNumber*)[initSdkOptions objectForKey: timeToWaitForATTUserAuthorization];
-
 
         isDebugValue = [initSdkOptions objectForKey: afIsDebug];
         if ([isDebugValue isKindOfClass:[NSNumber class]]) {
@@ -68,8 +59,12 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         if ([isConversionDataValue isKindOfClass:[NSNumber class]]) {
             isConversionData = [(NSNumber*)isConversionDataValue boolValue];
         }
-    }
 
+        isDeepLinkingValue = [initSdkOptions objectForKey: afDeepLink];
+        if ([isDeepLinkingValue isKindOfClass:[NSNumber class]]) {
+            isDeepLinking = [(NSNumber*)isDeepLinkingValue boolValue];
+        }
+}
     NSError* error = nil;
 
     if (!devKey || [devKey isEqualToString:@""]) {
@@ -87,6 +82,9 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         if(isConversionData == YES){
             [AppsFlyerLib shared].delegate = self;
         }
+        if(isDeepLinking == YES){
+            [AppsFlyerLib shared].deepLinkDelegate = self;
+        }
 #ifndef AFSDK_NO_IDFA
         if (interval != 0 && interval != nil){
             double timeoutInterval = [interval doubleValue];
@@ -96,9 +94,19 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         [AppsFlyerLib shared].appleAppID = appId;
         [AppsFlyerLib shared].appsFlyerDevKey = devKey;
         [AppsFlyerLib shared].isDebug = isDebug;
+        // Load SKAD rules
+        SEL SKSel = NSSelectorFromString(@"__willResolveSKRules:");
+        id AppsFlyer = [AppsFlyerLib shared];
+        if ([AppsFlyer respondsToSelector:SKSel]) {
+            bypassDidFinishLaunchingWithOption msgSend = (bypassDidFinishLaunchingWithOption)objc_msgSend;
+            msgSend(AppsFlyer, SKSel, 2);
+        }
+
         [[AppsFlyerLib shared] start];
 
-
+        //post notification for the deep link object that the bridge is set and he can handle deep link
+        [AppsFlyerAttribution shared].isBridgeReady = YES;
+        [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
         // Register for background-foreground transitions natively instead of doing this in JavaScript
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(sendLaunch:)
@@ -107,32 +115,41 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         return nil;
     }
 }
+
 RCT_EXPORT_METHOD(logEvent: (NSString *)eventName eventValues:(NSDictionary *)eventValues
                   successCallback :(RCTResponseSenderBlock)successCallback
-                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
-    NSError *error = [self logEventInternal:eventName eventValues:eventValues];
-
-    if(error) {
-        errorCallback(error);
-    } else {
-        //TODO wait callback from SDK
-        successCallback(@[SUCCESS]);
+                  errorCallback:(RCTResponseSenderBlock)errorCallback) {
+    if (!eventName || [eventName isEqualToString:@""]) {
+        NSError *error = [NSError errorWithDomain:NO_EVENT_NAME_FOUND code:2 userInfo:nil];
+        errorCallback(@[error.localizedDescription]);
+        return ;
     }
+
+    [[AppsFlyerLib shared] logEventWithEventName:eventName eventValues:eventValues completionHandler:^(NSDictionary<NSString *,id> * _Nullable dictionary, NSError * _Nullable error) {
+        if(error){
+            errorCallback(@[error.localizedDescription]);
+            return;
+        }
+        successCallback(@[SUCCESS]);
+    }];
 }
 
 RCT_EXPORT_METHOD(logEventWithPromise: (NSString *)eventName eventValues:(NSDictionary *)eventValues
                   logEventWithPromiseWithResolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-
-    NSError *error = [self logEventInternal:eventName eventValues:eventValues];
-
-    if(error){
+    if (!eventName || [eventName isEqualToString:@""]) {
+        NSError *error = [NSError errorWithDomain:NO_EVENT_NAME_FOUND code:2 userInfo:nil];
         reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
+        return ;
     }
-    else{
-        //TODO wait callback from SDK
+
+    [[AppsFlyerLib shared] logEventWithEventName:eventName eventValues:eventValues completionHandler:^(NSDictionary<NSString *,id> * _Nullable dictionary, NSError * _Nullable error) {
+        if(error){
+            reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
+            return;
+        }
         resolve(@[SUCCESS]);
-    }
+    }];
 }
 
 RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback) {
@@ -197,18 +214,8 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 }
 
 -(void)sendLaunch:(UIApplication *)application {
+    [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
     [[AppsFlyerLib shared] start];
-}
-
--(NSError *) logEventInternal: (NSString *)eventName eventValues:(NSDictionary *)eventValues {
-
-    if (!eventName || [eventName isEqualToString:@""]) {
-        NSError *error = [NSError errorWithDomain:NO_EVENT_NAME_FOUND code:2 userInfo:nil];
-        return error;
-    }
-
-    [[AppsFlyerLib shared] logEvent:eventName withValues:eventValues];
-    return nil;
 }
 
 RCT_EXPORT_METHOD(setAdditionalData: (NSDictionary *)additionalData callback:(RCTResponseSenderBlock)callback) {
@@ -273,25 +280,47 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
                   campaign:(NSString *)campaign
                   customParams:(NSDictionary *)customParams) {
 
-        [AppsFlyerShareInviteHelper generateInviteUrlWithLinkGenerator:^AppsFlyerLinkGenerator * _Nonnull(AppsFlyerLinkGenerator * _Nonnull generator) {
-            if (campaign != nil && ![campaign isEqualToString:@""]) {
-                [generator setCampaign:campaign];
-            }
-            if (![customParams isKindOfClass:[NSNull class]]) {
-                [generator addParameters:customParams];
-            }
-
-            return generator;
-        } completionHandler: ^(NSURL * _Nullable url) {
-            NSString *appLink = url.absoluteString;
-            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:appLink] options:@{} completionHandler:^(BOOL success) {
+    [AppsFlyerCrossPromotionHelper logAndOpenStore: appID campaign:campaign parameters:customParams openStore:^(NSURLSession * _Nonnull urlSession, NSURL * _Nonnull clickURL) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[UIApplication sharedApplication] openURL:clickURL options:@{} completionHandler:^(BOOL success) {
+                NSLog(@"AppsFlyer openAppStoreForAppID completionHandler result %d",success);
             }];
-        }];
+        });
+    }];
+}
 
+- (void)didResolveDeepLink:(AppsFlyerDeepLinkResult* _Nonnull) result {
+    NSString *deepLinkStatus = nil;
+    switch(result.status) {
+        case AFSDKDeepLinkResultStatusFound:
+            deepLinkStatus = @"FOUND";
+            break;
+        case AFSDKDeepLinkResultStatusNotFound:
+            deepLinkStatus = @"NOT_FOUND";
+            break;
+        case AFSDKDeepLinkResultStatusFailure:
+            deepLinkStatus = @"Error";
+            break;
+        default:
+            [NSException raise:NSGenericException format:@"Unexpected FormatType."];
+    }
+        NSMutableDictionary* message = [[NSMutableDictionary alloc] initWithCapacity:5];
+        message[@"status"] = ([deepLinkStatus isEqual:@"Error"] || [deepLinkStatus isEqual:@"NOT_FOUND"]) ? afFailure : afSuccess;
+        message[@"deepLinkStatus"] = deepLinkStatus;
+        message[@"type"] = afOnDeepLinking;
+        message[@"isDeffered"] = result.deepLink.isDeferred ? @YES : @NO;
+        if([deepLinkStatus  isEqual: @"Error"]){
+            message[@"data"] = result.error.localizedDescription;
+        }else if([deepLinkStatus  isEqual: @"NOT_FOUND"]){
+            message[@"data"] = @"deep link not found";
+        }else{
+            message[@"data"] = result.deepLink.clickEvent;
+        }
+
+    [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
 }
 
 -(void)onConversionDataSuccess:(NSDictionary*) installData {
-
     NSDictionary* message = @{
         @"status": afSuccess,
         @"type": afOnInstallConversionDataLoaded,
@@ -299,12 +328,11 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
     };
 
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
-
 }
 
 
 -(void)onConversionDataFail:(NSError *) _errorMessage {
-
+    NSLog(@"[DEBUG] AppsFlyer = %@",_errorMessage.localizedDescription);
     NSDictionary* errorMessage = @{
         @"status": afFailure,
         @"type": afOnInstallConversionFailure,
@@ -317,24 +345,21 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 
 
 - (void) onAppOpenAttribution:(NSDictionary*) attributionData {
-
     NSDictionary* message = @{
         @"status": afSuccess,
         @"type": afOnAppOpenAttribution,
         @"data": attributionData
     };
-
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
 }
 
 - (void) onAppOpenAttributionFailure:(NSError *)_errorMessage {
-
+    NSLog(@"[DEBUG] AppsFlyer = %@",_errorMessage.localizedDescription);
     NSDictionary* errorMessage = @{
         @"status": afFailure,
         @"type": afOnAttributionFailure,
         @"data": _errorMessage.localizedDescription
     };
-
     [self performSelectorOnMainThread:@selector(handleCallback:) withObject:errorMessage waitUntilDone:NO];
 }
 
@@ -370,18 +395,22 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 }
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[afOnAttributionFailure,afOnAppOpenAttribution,afOnInstallConversionFailure, afOnInstallConversionDataLoaded];
+    return @[afOnAttributionFailure,afOnAppOpenAttribution,afOnInstallConversionFailure, afOnInstallConversionDataLoaded, afOnDeepLinking];
 }
 
 -(void) reportOnFailure:(NSString *)errorMessage type:(NSString*) type {
-    [self sendEventWithName:type body:errorMessage];
+    @try {
+        [self sendEventWithName:type body:errorMessage];
+    } @catch (NSException *exception) {
+        NSLog(@"AppsFlyer Debug: %@", exception);
+    }
 }
 
 -(void) reportOnSuccess:(NSString *)data type:(NSString*) type {
-    if([type isEqualToString:afOnInstallConversionDataLoaded]){
+    @try {
         [self sendEventWithName:type body:data];
-    } else {
-        [self sendEventWithName:type body:data];
+    } @catch (NSException *exception) {
+        NSLog(@"AppsFlyer Debug: %@", exception);
     }
 }
 
@@ -490,5 +519,26 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
 RCT_EXPORT_METHOD(sendPushNotificationData: (NSDictionary*)pushPayload) {
     [[AppsFlyerLib shared] handlePushNotification:pushPayload];
 }
+
+RCT_EXPORT_METHOD(setHost: (NSString*)hostPrefix hostName: (NSString*)hostName successCallback :(RCTResponseSenderBlock)successCallback) {
+    [[AppsFlyerLib shared] setHost:hostName withHostPrefix:hostPrefix];
+    successCallback(@[SUCCESS]);
+}
+
+RCT_EXPORT_METHOD(addPushNotificationDeepLinkPath: (NSArray*)path successCallback :(RCTResponseSenderBlock)successCallback
+                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
+    [[AppsFlyerLib shared] addPushNotificationDeepLinkPath: path];
+    successCallback(@[SUCCESS]);
+}
+
+RCT_EXPORT_METHOD(disableSKAD: (BOOL *)b ) {
+    [AppsFlyerLib shared].disableSKAdNetwork = b;
+    if (b){
+        NSLog(@"[DEBUG] AppsFlyer: SKADNetwork is disabled");
+    }else{
+        NSLog(@"[DEBUG] AppsFlyer: SKADNetwork is enabled");
+    }
+}
+
 
 @end

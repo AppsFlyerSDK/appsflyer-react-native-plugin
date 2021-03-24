@@ -8,6 +8,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import com.appsflyer.attribution.AppsFlyerRequestListener;
+import com.appsflyer.reactnative.RNUtil;
+import com.appsflyer.deeplink.DeepLink;
+import com.appsflyer.deeplink.DeepLinkListener;
+import com.appsflyer.deeplink.DeepLinkResult;
 import com.appsflyer.*;
 import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
@@ -38,6 +44,7 @@ import java.util.Iterator;
 import java.util.ArrayList;
 
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
+import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnDeepLinking;
 
 public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
@@ -120,6 +127,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         String devKey;
         boolean isDebug;
         boolean isConversionData;
+        boolean isDeepLinking;
 
         AppsFlyerLib instance = AppsFlyerLib.getInstance();
 
@@ -136,8 +144,13 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         if (isDebug == true) {
             Log.d("AppsFlyer", "Starting SDK");
         }
+        isDeepLinking = options.optBoolean(afDeepLink, false);
+
         instance.init(devKey, (isConversionData == true) ? registerConversionListener() : null, application.getApplicationContext());
 
+        if (isDeepLinking) {
+            instance.subscribeForDeepLink(registerDeepLinkListener());
+        }
         Intent intent = null;
         Activity currentActivity = getCurrentActivity();
 
@@ -147,9 +160,37 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         } else {
             // register for lifecycle with Application (cannot fetch deeplink without access to the Activity,
             // also sending first session manually)
+            instance.logEvent(application, null, null);
             instance.start(application, devKey);
         }
         return null;
+    }
+
+    private DeepLinkListener registerDeepLinkListener() {
+        return new DeepLinkListener() {
+            @Override
+            public void onDeepLinking(@NonNull DeepLinkResult deepLinkResult) {
+                DeepLinkResult.Error dlError = deepLinkResult.getError();
+                if (dlError != null) {
+                    sendEvent(reactContext, afOnDeepLinking, dlError.toString());
+                }
+                JSONObject deepLinkObj = new JSONObject();
+                try {
+                    deepLinkObj.put("status", afSuccess);
+                    deepLinkObj.put("deepLinkStatus", deepLinkResult.getStatus());
+                    deepLinkObj.put("type", afOnDeepLinking);
+                    deepLinkObj.put("data", deepLinkResult.getDeepLink().getClickEvent());
+                    deepLinkObj.put("isDeferred", deepLinkResult.getDeepLink().isDeferred());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    sendEvent(reactContext, afOnDeepLinking,deepLinkObj.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
     }
 
     private AppsFlyerConversionListener registerConversionListener() {
@@ -174,82 +215,75 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             public void onConversionDataFail(String errorMessage) {
                 handleError(afOnInstallConversionFailure, errorMessage);
             }
-
-            private void handleSuccess(String eventType, Map<String, Object> conversionData, Map<String, String> attributionData) {
-                JSONObject obj = new JSONObject();
-
-                try {
-                    JSONObject data = new JSONObject(conversionData == null ? attributionData : conversionData);
-                    obj.put("status", afSuccess);
-                    obj.put("type", eventType);
-                    obj.put("data", data);
-                    if (eventType.equals(afOnInstallConversionDataLoaded)) {
-                        sendEvent(reactContext, afOnInstallConversionDataLoaded, obj.toString());
-                    } else if (eventType.equals(afOnAppOpenAttribution)) {
-                        sendEvent(reactContext, afOnAppOpenAttribution, obj.toString());
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            private void handleError(String eventType, String errorMessage) {
-                JSONObject obj = new JSONObject();
-
-                try {
-                    obj.put("status", afFailure);
-                    obj.put("type", eventType);
-                    obj.put("data", errorMessage);
-                    sendEvent(reactContext, afOnInstallConversionDataLoaded, obj.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            private void sendEvent(ReactContext reactContext,
-                                   String eventName,
-                                   Object params) {
-                reactContext
-                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                        .emit(eventName, params);
-            }
         };
     }
 
-    private String logEventInternal(final String eventName, ReadableMap eventData) {
+    private void handleSuccess(String eventType, Map<String, Object> conversionData, Map<String, String> attributionData) {
+        JSONObject obj = new JSONObject();
 
-        if (eventName.trim().equals("")) {
-            return NO_EVENT_NAME_FOUND;
+        try {
+            JSONObject data = new JSONObject(conversionData == null ? attributionData : conversionData);
+            obj.put("status", afSuccess);
+            obj.put("type", eventType);
+            obj.put("data", data);
+            if (eventType.equals(afOnInstallConversionDataLoaded)) {
+                sendEvent(reactContext, afOnInstallConversionDataLoaded, obj.toString());
+            } else if (eventType.equals(afOnAppOpenAttribution)) {
+                sendEvent(reactContext, afOnAppOpenAttribution, obj.toString());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+    }
 
-        Map<String, Object> data = RNUtil.toMap(eventData);
+    private void handleError(String eventType, String errorMessage) {
+        JSONObject obj = new JSONObject();
 
-        if (data == null) { // in case of no values
-            data = new HashMap<>();
+        try {
+            obj.put("status", afFailure);
+            obj.put("type", eventType);
+            obj.put("data", errorMessage);
+            sendEvent(reactContext, afOnInstallConversionDataLoaded, obj.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+    }
 
-        Activity currentActivity = getCurrentActivity();
-
-        if (currentActivity != null) {
-            AppsFlyerLib.getInstance().logEvent(currentActivity.getBaseContext(), eventName, data);
-        }
-
-        return null;
+    private void sendEvent(ReactContext reactContext,
+                           String eventName,
+                           Object params) {
+        reactContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(eventName, params);
     }
 
     @ReactMethod
     public void logEvent(
             final String eventName, ReadableMap eventData,
-            Callback successCallback,
-            Callback errorCallback) {
+            final Callback successCallback,
+            final Callback errorCallback) {
         try {
-            final String errorReason = logEventInternal(eventName, eventData);
+            if (eventName.trim().equals("")) {
+                errorCallback.invoke(NO_EVENT_NAME_FOUND);
+                return;
+            }
+            Map<String, Object> data = RNUtil.toMap(eventData);
+            if (data == null) { // in case of no values
+                data = new HashMap<>();
+            }
+            Activity currentActivity = getCurrentActivity();
+            if (currentActivity != null) {
+                AppsFlyerLib.getInstance().logEvent(getCurrentActivity(), eventName, data, new AppsFlyerRequestListener() {
+                    @Override
+                    public void onSuccess() {
+                        successCallback.invoke(SUCCESS);
+                    }
 
-            if (errorReason != null) {
-                errorCallback.invoke(new Exception(errorReason).getMessage());
-            } else {
-                //TODO: callback should come from SDK
-                successCallback.invoke(SUCCESS);
+                    @Override
+                    public void onError(int i, @NonNull String s) {
+                        errorCallback.invoke(s);
+                    }
+                });
             }
         } catch (Exception e) {
             errorCallback.invoke(e.getMessage());
@@ -259,15 +293,29 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void logEventWithPromise(
-            final String eventName, ReadableMap eventData, Promise promise) {
+            final String eventName, ReadableMap eventData, final Promise promise) {
         try {
-            final String errorReason = logEventInternal(eventName, eventData);
+            if (eventName.trim().equals("")) {
+                promise.reject(NO_EVENT_NAME_FOUND, new Exception(NO_EVENT_NAME_FOUND).getMessage());
+                return;
+            }
+            Map<String, Object> data = RNUtil.toMap(eventData);
+            if (data == null) { // in case of no values
+                data = new HashMap<>();
+            }
+            Activity currentActivity = getCurrentActivity();
+            if (currentActivity != null) {
+                AppsFlyerLib.getInstance().logEvent(getCurrentActivity(), eventName, data, new AppsFlyerRequestListener() {
+                    @Override
+                    public void onSuccess() {
+                        promise.resolve(SUCCESS);
+                    }
 
-            if (errorReason != null) {
-                promise.reject(errorReason, new Exception(errorReason).getMessage());
-            } else {
-                //TODO: callback should come from SDK
-                promise.resolve(SUCCESS);
+                    @Override
+                    public void onError(int i, @NonNull String s) {
+                        promise.reject(s);
+                    }
+                });
             }
         } catch (Exception e) {
             promise.reject(UNKNOWN_ERROR, e);
@@ -637,5 +685,28 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void sendPushNotificationData(ReadableMap pushPayload) {
         AppsFlyerLib.getInstance().sendPushNotificationData(getCurrentActivity());
+    }
+
+    @ReactMethod
+    public void setHost(String hostPrefix, String hostName, Callback successCallback) {
+        AppsFlyerLib.getInstance().setHost(hostPrefix, hostName);
+        successCallback.invoke(SUCCESS);
+    }
+
+    @ReactMethod
+    public void addPushNotificationDeepLinkPath(ReadableArray path, Callback successCallback, Callback errorCallback) {
+        if (path.size() <= 0) {
+            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            return;
+        }
+        ArrayList<Object> pathList = path.toArrayList();
+        try {
+            String[] params = pathList.toArray(new String[pathList.size()]);
+            AppsFlyerLib.getInstance().addPushNotificationDeepLinkPath(params);
+            successCallback.invoke(SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            errorCallback.invoke(e);
+        }
     }
 }

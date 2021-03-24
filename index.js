@@ -7,10 +7,22 @@ const appsFlyerEventEmitter = new NativeEventEmitter(RNAppsFlyer);
 
 
 function initSdkCallback(options, successC, errorC) {
+    if (typeof options.appId !== 'string') {
+        return errorC('appId should be a string!');
+    }
+    if (typeof options.isDebug !== 'boolean') {
+        return errorC('isDebug should be a boolean!');
+    }
     return RNAppsFlyer.initSdkWithCallBack(options, successC, errorC);
 }
 
 function initSdkPromise(options): Promise<string> {
+    if (typeof options.appId !== 'string') {
+        return Promise.reject('appId should be a string!');
+    }
+    if (typeof options.isDebug !== 'boolean') {
+        return Promise.reject('isDebug should be a boolean!');
+    }
     return RNAppsFlyer.initSdkWithPromise(options);
 }
 
@@ -356,7 +368,6 @@ appsFlyer.onInstallConversionFailure = callback => {
 
 appsFlyer.onAppOpenAttribution = callback => {
 
-    //console.log("onAppOpenAttribution is called" );
     const listener = appsFlyerEventEmitter.addListener(
         "onAppOpenAttribution",
         _data => {
@@ -373,6 +384,56 @@ appsFlyer.onAppOpenAttribution = callback => {
 
 
     eventsMap["onAppOpenAttribution"] = listener;
+
+    // unregister listener (suppose should be called from componentWillUnmount() )
+    return function remove() {
+        listener.remove();
+    };
+};
+
+appsFlyer.onAttributionFailure = callback => {
+
+    const listener = appsFlyerEventEmitter.addListener(
+        "onAttributionFailure",
+        _data => {
+            if (callback && typeof callback === typeof Function) {
+                try {
+                    let data = JSON.parse(_data);
+                    callback(data);
+                } catch (_error) {
+                    callback(new AFParseJSONException("Invalid data structure", _data));
+                }
+            }
+        }
+    );
+
+
+    eventsMap["onAttributionFailure"] = listener;
+
+    // unregister listener (suppose should be called from componentWillUnmount() )
+    return function remove() {
+        listener.remove();
+    };
+};
+
+appsFlyer.onDeepLink = callback => {
+
+    const listener = appsFlyerEventEmitter.addListener(
+        "onDeepLinking",
+        _data => {
+            if (callback && typeof callback === typeof Function) {
+                try {
+                    let data = JSON.parse(_data);
+                    callback(data);
+                } catch (_error) {
+                    callback(new AFParseJSONException("Invalid data structure", _data));
+                }
+            }
+        }
+    );
+
+
+    eventsMap["onDeepLinking"] = listener;
 
     // unregister listener (suppose should be called from componentWillUnmount() )
     return function remove() {
@@ -501,6 +562,34 @@ appsFlyer.sendPushNotificationData = (pushPayload) => {
     return RNAppsFlyer.sendPushNotificationData(pushPayload);
 }
 
+/**
+ * Set a custom host
+ * @param hostPrefix
+ * @param hostName
+ * @param successC: success callback
+ */
+appsFlyer.setHost = (hostPrefix, hostName, successC) => {
+    RNAppsFlyer.setHost(hostPrefix, hostName, successC);
+}
+
+/**
+ * The addPushNotificationDeepLinkPath method provides app owners with a flexible interface for configuring how deep links are extracted from push notification payloads.
+ * for more information: https://support.appsflyer.com/hc/en-us/articles/207032126-Android-SDK-integration-for-developers#core-apis-65-configure-push-notification-deep-link-resolution
+ * @param path: an array of string that represents the path
+ * @param successC: success callback
+ * @param errorC: error callback
+ */
+appsFlyer.addPushNotificationDeepLinkPath = (path, successC, errorC) => {
+    RNAppsFlyer.addPushNotificationDeepLinkPath(path, successC, errorC);
+}
+
+/**
+ * enable or disable SKAD support. set True if you want to disable it!
+ * @param isDisabled
+ */
+appsFlyer.disableSKAD = (disableSkad) => {
+    return RNAppsFlyer.disableSKAD(disableSkad);
+};
 
 function AFParseJSONException(_message, _data) {
     this.message = _message;

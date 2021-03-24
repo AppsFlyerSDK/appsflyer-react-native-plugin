@@ -13,7 +13,7 @@
 [![Coverage](https://img.shields.io/badge/coverage-77%25-yellowgreen)]()
 ## Table of content
 
-- [v6 Breaking changes](#v6-breaking-changes)
+- [Breaking changes](#breaking-changes)
 - [Adding the SDK to your project](#installation)
 - [Add or Remove Strict mode for App-kids](#appKids)
 - [Initializing the SDK](#init-sdk)
@@ -22,12 +22,15 @@
   
 ### <a id="plugin-build-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v6.1.1**
-- Android AppsFlyerSDK **v6.1.0**
+- iOS AppsFlyerSDK **v6.2.4**
+- Android AppsFlyerSDK **v6.2.0**
 
-## <a id="v6-breaking-changes"> ❗ v6 Breaking Changes
+## <a id="breaking-changes"> ❗ Breaking Changes
 
-We have renamed the following APIs:
+- From version `6.2.30`, `logCrossPromotionAndOpenStore`  api will register as `af_cross_promotion` instead of `af_app_invites` in your dashboard.<br>
+Click on a link that was generated using `generateInviteLink` api will be register as `af_app_invites`.
+
+- We have renamed the following APIs:
 
 | Old API                       | New API                       |
 | ------------------------------|-------------------------------|
@@ -37,6 +40,7 @@ We have renamed the following APIs:
 | trackCrossPromotionImpression | logCrossPromotionImpression   |
 | trackAndOpenStore             | logCrossPromotionAndOpenStore |
 | setDeviceTrackingDisabled     | anonymizeUser                 |
+| AppsFlyerTracker    | AppsFlyerLib                 |
 
 And removed the following ones:
 
@@ -105,8 +109,8 @@ Run `pod install`
 
 ## <a id="init-sdk"> 🚀 Initializing the SDK
 
-Initialize the SDK to enable AppsFlyer to detect installations, sessions (app opens) and updates.  
-
+Initialize the SDK to enable AppsFlyer to detect installations, sessions (app opens) and updates.<br>
+NOTE! for iOS 14.5, we use `timeToWaitForATTUserAuthorization` parameter. please read more [Here](https://support.appsflyer.com/hc/en-us/articles/207032066-iOS-SDK-V6-X-integration-guide-for-developers#additional-apis-configuring-app-tracking-transparency-att-support)
 ```javascript
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View} from 'react-native';
@@ -117,7 +121,9 @@ appsFlyer.initSdk(
     devKey: 'K2***********99',
     isDebug: false,
     appId: '41*****44',
-    onInstallConversionDataListener: true,
+    onInstallConversionDataListener: true, //Optional
+    onDeepLinkListener: true, //Optional
+    timeToWaitForATTUserAuthorization: 10 //for iOS 14.5
   },
   (result) => {
     console.log(result);
@@ -134,6 +140,8 @@ appsFlyer.initSdk(
 | appId      | Your iTunes [application ID](https://support.appsflyer.com/hc/en-us/articles/207377436-Adding-a-new-app#available-in-the-app-store-google-play-store-windows-phone-store)  (iOS only)  |
 | isDebug    | Debug mode - set to `true` for testing only  |
 |onInstallConversionDataListener| Set listener for SDK init response (Optional. default=true) |
+|onDeepLinkListener| Set listener for DDL response (Optional. default=false) |
+|timeToWaitForATTUserAuthorization| Time for the sdk to wait before launch. please read more [Here](https://support.appsflyer.com/hc/en-us/articles/207032066-iOS-SDK-V6-X-integration-guide-for-developers#additional-apis-configuring-app-tracking-transparency-att-support) |
 
 
  ## <a id="guides"> 📖 Guides
