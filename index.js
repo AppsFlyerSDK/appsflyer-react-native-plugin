@@ -7,20 +7,20 @@ const appsFlyerEventEmitter = new NativeEventEmitter(RNAppsFlyer);
 
 
 function initSdkCallback(options, successC, errorC) {
-    if (typeof options.appId !== 'string') {
+    if (typeof options.appId !== 'string' && typeof options.appId !== 'undefined') {
         return errorC('appId should be a string!');
     }
-    if (typeof options.isDebug !== 'boolean') {
+    if (typeof options.isDebug !== 'boolean' && typeof options.isDebug !== 'undefined') {
         return errorC('isDebug should be a boolean!');
     }
     return RNAppsFlyer.initSdkWithCallBack(options, successC, errorC);
 }
 
 function initSdkPromise(options): Promise<string> {
-    if (typeof options.appId !== 'string') {
+    if (typeof options.appId !== 'string' && typeof options.appId !== 'undefined') {
         return Promise.reject('appId should be a string!');
     }
-    if (typeof options.isDebug !== 'boolean') {
+    if (typeof options.isDebug !== 'boolean' && typeof options.isDebug !== 'undefined') {
         return Promise.reject('isDebug should be a boolean!');
     }
     return RNAppsFlyer.initSdkWithPromise(options);

@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -185,7 +186,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                     e.printStackTrace();
                 }
                 try {
-                    sendEvent(reactContext, afOnDeepLinking,deepLinkObj.toString());
+                    sendEvent(reactContext, afOnDeepLinking, deepLinkObj.toString());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -684,7 +685,25 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void sendPushNotificationData(ReadableMap pushPayload) {
-        AppsFlyerLib.getInstance().sendPushNotificationData(getCurrentActivity());
+        JSONObject payload = RNUtil.readableMapToJson(pushPayload);
+        if (payload == null) {
+            Log.d("AppsFlyer", "PushNotification payload is null");
+            return;
+        }
+        Bundle bundle = null;
+        try {
+            bundle = RNUtil.jsonToBundle(payload);
+        } catch (JSONException e) {
+            Log.d("AppsFlyer", "Can't parse pushPayload to bundle");
+            e.printStackTrace();
+            return;
+        }
+        Intent intent = new Intent();
+        intent.putExtras(bundle);
+        Activity activity = getCurrentActivity();
+        activity.setIntent(intent);
+
+        AppsFlyerLib.getInstance().sendPushNotificationData(activity);
     }
 
     @ReactMethod

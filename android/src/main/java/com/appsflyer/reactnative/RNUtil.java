@@ -1,5 +1,6 @@
 package com.appsflyer.reactnative;
 
+import android.os.Bundle;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
@@ -320,5 +321,15 @@ public class RNUtil {
             map.put(key, value);
         }
         return map;
+    }
+    public static Bundle jsonToBundle(JSONObject jsonObject) throws JSONException {
+        Bundle bundle = new Bundle();
+        Iterator iter = jsonObject.keys();
+        while (iter.hasNext()) {
+            String key = (String) iter.next();
+            String value = jsonObject.getString(key);
+            bundle.putString(key, value);
+        }
+        return bundle;
     }
 }
