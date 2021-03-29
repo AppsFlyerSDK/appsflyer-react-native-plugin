@@ -10,7 +10,6 @@
 [![npm version](https://badge.fury.io/js/react-native-appsflyer.svg)](https://badge.fury.io/js/react-native-appsflyer) 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) 
 [![Downloads](https://img.shields.io/npm/dm/react-native-appsflyer.svg)](https://www.npmjs.com/package/react-native-appsflyer)
-[![Coverage](https://img.shields.io/badge/coverage-77%25-yellowgreen)]()
 ## Table of content
 
 - [Breaking changes](#breaking-changes)
