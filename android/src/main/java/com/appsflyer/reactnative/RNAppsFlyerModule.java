@@ -5,14 +5,11 @@ import android.app.Application;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import com.appsflyer.attribution.AppsFlyerRequestListener;
-import com.appsflyer.reactnative.RNUtil;
-import com.appsflyer.deeplink.DeepLink;
 import com.appsflyer.deeplink.DeepLinkListener;
 import com.appsflyer.deeplink.DeepLinkResult;
 import com.appsflyer.*;
@@ -38,11 +35,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
-import java.util.ArrayList;
 
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnDeepLinking;

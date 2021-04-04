@@ -20,12 +20,12 @@ buildscript {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 26)
-    buildToolsVersion safeExtGet('buildToolsVersion', '26.0.3')
+    compileSdkVersion safeExtGet('compileSdkVersion', 28)
+    buildToolsVersion safeExtGet('buildToolsVersion', '29.0.2')
 
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 16)
-        targetSdkVersion safeExtGet('targetSdkVersion', 26)
+        targetSdkVersion safeExtGet('targetSdkVersion', 28)
         versionCode 1
         versionName "1.0"
         ndk {
@@ -35,6 +35,9 @@ android {
     }
     lintOptions {
         warning 'InvalidPackage'
+    }
+    testOptions {
+        unitTests.includeAndroidResources = true
     }
 }
 
@@ -47,4 +50,13 @@ dependencies {
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.1')}"
     implementation "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.2.0')}"
+    //-----
+    // Required -- JUnit 4 framework
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'androidx.test.ext:junit-ktx:1.1.2'
+    // Optional -- Robolectric environment
+    testImplementation 'org.robolectric:robolectric:4.4'
+    testImplementation 'androidx.test:core:1.0.0'
+    // Optional -- Mockito framework
+    testImplementation 'org.mockito:mockito-core:1.10.19'
 }
