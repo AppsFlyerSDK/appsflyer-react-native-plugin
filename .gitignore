@@ -50,7 +50,7 @@ android/app/libs
 android/keystores/debug.keystore
 
 
-
+coverage/
 demo2/node_modules/
 demo/node_modules/
 package-lock.json

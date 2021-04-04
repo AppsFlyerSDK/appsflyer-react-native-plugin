@@ -7,20 +7,20 @@ const appsFlyerEventEmitter = new NativeEventEmitter(RNAppsFlyer);
 
 
 function initSdkCallback(options, successC, errorC) {
-    if (typeof options.appId !== 'string') {
+    if (typeof options.appId !== 'string' && typeof options.appId !== 'undefined') {
         return errorC('appId should be a string!');
     }
-    if (typeof options.isDebug !== 'boolean') {
+    if (typeof options.isDebug !== 'boolean' && typeof options.isDebug !== 'undefined') {
         return errorC('isDebug should be a boolean!');
     }
     return RNAppsFlyer.initSdkWithCallBack(options, successC, errorC);
 }
 
 function initSdkPromise(options): Promise<string> {
-    if (typeof options.appId !== 'string') {
+    if (typeof options.appId !== 'string' && typeof options.appId !== 'undefined') {
         return Promise.reject('appId should be a string!');
     }
-    if (typeof options.isDebug !== 'boolean') {
+    if (typeof options.isDebug !== 'boolean' && typeof options.isDebug !== 'undefined') {
         return Promise.reject('isDebug should be a boolean!');
     }
     return RNAppsFlyer.initSdkWithPromise(options);
@@ -52,7 +52,7 @@ function logEvent(eventName, eventValues, success, error): Promise<string> {
         //logEvent is a callback function
         logEventCallback(eventName, eventValues, success, error);
     } else if (!success) {
-        //logEvent is a promise function
+        // logEvent is a promise function
         return logEventPromise(eventName, eventValues);
     }
 }
@@ -544,11 +544,11 @@ appsFlyer.disableCollectASA = (shouldDisable) => {
  * @param errorC Error callback
  */
 appsFlyer.validateAndLogInAppPurchase = (purchaseInfo, successC, errorC) => {
-    RNAppsFlyer.validateAndLogInAppPurchase(purchaseInfo, successC, errorC)
+    return RNAppsFlyer.validateAndLogInAppPurchase(purchaseInfo, successC, errorC)
 }
 
 appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
-    RNAppsFlyer.setUseReceiptValidationSandbox(isSandbox);
+    return RNAppsFlyer.setUseReceiptValidationSandbox(isSandbox);
 }
 
 /**
@@ -559,7 +559,7 @@ appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
  * @param pushPayload
  */
 appsFlyer.sendPushNotificationData = (pushPayload) => {
-    RNAppsFlyer.sendPushNotificationData(pushPayload);
+    return RNAppsFlyer.sendPushNotificationData(pushPayload);
 }
 
 /**

@@ -1,4 +1,9 @@
 # Versions
+## 6.2.42
+- `isDebug` and `appId` optional validation
+- Fix sendPushNotification api [Android]
+- add types to `package.json`
+
 ## 6.2.41
 - Fix SKAD rules
 
