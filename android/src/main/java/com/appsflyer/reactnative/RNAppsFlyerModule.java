@@ -698,7 +698,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             e.printStackTrace();
             return;
         }
-        Intent intent = new Intent();
+        Intent intent = getCurrentActivity().getIntent();
         intent.putExtras(bundle);
         Activity activity = getCurrentActivity();
         activity.setIntent(intent);
