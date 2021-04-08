@@ -38,11 +38,17 @@ android {
     }
     testOptions {
         unitTests.includeAndroidResources = true
+        unitTests.returnDefaultValues = true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 repositories {
     mavenCentral()
+    jcenter()
     maven { url "https://maven.google.com" }
 }
 
@@ -53,10 +59,17 @@ dependencies {
     //-----
     // Required -- JUnit 4 framework
     testImplementation 'junit:junit:4.12'
-    testImplementation 'androidx.test.ext:junit-ktx:1.1.2'
     // Optional -- Robolectric environment
-    testImplementation 'org.robolectric:robolectric:4.4'
     testImplementation 'androidx.test:core:1.0.0'
     // Optional -- Mockito framework
-    testImplementation 'org.mockito:mockito-core:1.10.19'
+    testImplementation('org.mockito:mockito-inline:3.4.0')
+    testImplementation "org.json:json:20140107"
+    testImplementation('org.powermock:powermock-api-mockito:1.6.2') {
+        exclude module: 'hamcrest-core'
+        exclude module: 'objenesis'
+    }
+    testImplementation('org.powermock:powermock-module-junit4:1.6.2') {
+        exclude module: 'hamcrest-core'
+        exclude module: 'objenesis'
+    }
 }

@@ -6,7 +6,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
+
 import android.util.Log;
 
 import com.appsflyer.attribution.AppsFlyerRequestListener;
@@ -128,13 +130,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         boolean isDeepLinking;
 
         AppsFlyerLib instance = AppsFlyerLib.getInstance();
-
         JSONObject options = RNUtil.readableMapToJson(_options);
         devKey = options.optString(afDevKey, "");
         if (devKey.trim().equals("")) {
             return NO_DEVKEY_FOUND;
         }
-
         isDebug = options.optBoolean(afIsDebug, false);
         instance.setDebugLog(isDebug);
 
@@ -145,7 +145,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         isDeepLinking = options.optBoolean(afDeepLink, false);
 
         instance.init(devKey, (isConversionData == true) ? registerConversionListener() : null, application.getApplicationContext());
-
         if (isDeepLinking) {
             instance.subscribeForDeepLink(registerDeepLinkListener());
         }
@@ -552,8 +551,8 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        ArrayList<Object> domainsList = domainsArray.toArrayList();
-//        List<Object> domainsList = RNUtil.toList(domainsArray);
+//        ArrayList<Object> domainsList = domainsArray.toArrayList();
+        List<Object> domainsList = RNUtil.toList(domainsArray);
         try {
             String[] domains = domainsList.toArray(new String[domainsList.size()]);
             AppsFlyerLib.getInstance().setOneLinkCustomDomain(domains);
@@ -571,8 +570,8 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        ArrayList<Object> urlsList = urlsArray.toArrayList();
-//        List<Object> urlsList = RNUtil.toList(urlsArray);
+//        ArrayList<Object> urlsList = urlsArray.toArrayList();
+        List<Object> urlsList = RNUtil.toList(urlsArray);
         try {
             String[] urls = urlsList.toArray(new String[urlsList.size()]);
             AppsFlyerLib.getInstance().setResolveDeepLinkURLs(urls);
@@ -607,8 +606,8 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
             return;
         }
-        ArrayList<Object> partnersList = partnersArray.toArrayList();
-//        List<Object> partnersList = RNUtil.toList(partnersArray);
+//        ArrayList<Object> partnersList = partnersArray.toArrayList();
+        List<Object> partnersList = RNUtil.toList(partnersArray);
         try {
             String[] partners = partnersList.toArray(new String[partnersList.size()]);
             AppsFlyerLib.getInstance().setSharingFilter(partners);
@@ -715,7 +714,8 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
             return;
         }
-        ArrayList<Object> pathList = path.toArrayList();
+//        ArrayList<Object> pathList = path.toArrayList();
+        List<Object> pathList = RNUtil.toList(path);
         try {
             String[] params = pathList.toArray(new String[pathList.size()]);
             AppsFlyerLib.getInstance().addPushNotificationDeepLinkPath(params);

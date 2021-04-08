@@ -1,6 +1,7 @@
 package com.appsflyer.reactnative;
 
 import android.os.Bundle;
+
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
@@ -158,20 +159,16 @@ public class RNUtil {
     @Nullable
     public static JSONObject readableMapToJson(ReadableMap readableMap) {
         JSONObject jsonObject = new JSONObject();
-
         if (readableMap == null) {
             return null;
         }
-
         ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
         if (!iterator.hasNextKey()) {
             return null;
         }
-
         while (iterator.hasNextKey()) {
             String key = iterator.nextKey();
             ReadableType readableType = readableMap.getType(key);
-
             try {
                 switch (readableType) {
                     case Null:
@@ -196,10 +193,8 @@ public class RNUtil {
                         // Do nothing and fail silently
                 }
             } catch (JSONException ex) {
-                // Do nothing and fail silently
             }
         }
-
         return jsonObject;
     }
 
@@ -322,6 +317,7 @@ public class RNUtil {
         }
         return map;
     }
+
     public static Bundle jsonToBundle(JSONObject jsonObject) throws JSONException {
         Bundle bundle = new Bundle();
         Iterator iter = jsonObject.keys();
