@@ -17,7 +17,7 @@ script:
   - npm install --force
   - npm install react-native-appsflyer --save
   - cd ios
-  - pod update
+  - pod install
   - cd ..
-  - detox build --configuration ios
-  - detox test --configuration ios --cleanup
+  - detox build --configuration android
+  - detox test --configuration android --cleanup
