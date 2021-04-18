@@ -1,3 +1,9 @@
+language: android
+dist: trusty
+android:
+  components:
+    - tools
+    - platform-tools-26.0.2
 env:
   global:
     - NODE_VERSION=stable
@@ -5,7 +11,6 @@ os: osx
 install:
   - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
   - export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-  - export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"
   - nvm install $NODE_VERSION
   - nvm use $NODE_VERSION
   - nvm alias default $NODE_VERSION
