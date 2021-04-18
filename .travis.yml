@@ -1,3 +1,4 @@
+- os: osx
 env:
   global:
     - NODE_VERSION=stable
