@@ -1,30 +1,37 @@
-language: android
-dist: trusty
-android:
-  components:
-    - build-tools-26.0.2
-    - android-26
-  licenses:
-    - 'android-sdk-preview-license-52d11cd2'
-    - 'android-sdk-license-.+'
-    - 'google-gdk-license-.+'
-env:
-  global:
-    - NODE_VERSION=stable
-os: osx
-install:
-  - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
-  - export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-  - nvm install $NODE_VERSION
-  - nvm use $NODE_VERSION
-  - nvm alias default $NODE_VERSION
-  - brew tap wix/brew
-  - brew install applesimutils
-  - npm install -g detox-cli
+language: node_js
+node_js: 8
 
-script:
-  - cd SampleApps/DetoxApp
-  - npm install --force
-  - npm install react-native-appsflyer --save
-  - detox build --configuration android
-  - detox test --configuration android --cleanup
+matrix:
+  include:
+    - language: android
+      os: osx
+    android:
+    components:
+      - tools
+      - platform-tools
+      - build-tools-27.0.3
+      - android-26
+      - extra-google-google_play_services
+      - extra-google-m2repository
+      - extra-android-m2repository
+      - sys-img-x86-android-26
+      - sys-img-x86-android-28
+    env:
+      global:
+        - NODE_VERSION=stable
+    install:
+      - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
+      - export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+      - nvm install $NODE_VERSION
+      - nvm use $NODE_VERSION
+      - nvm alias default $NODE_VERSION
+      - brew tap wix/brew
+      - brew install applesimutils
+      - npm install -g detox-cli
+
+    script:
+      - cd SampleApps/DetoxApp
+      - npm install --force
+      - npm install react-native-appsflyer --save
+      - detox build --configuration android
+      - detox test --configuration android --cleanup
