@@ -1,0 +1,1 @@
+../../../../../node_modules/react-native-appsflyer/ios/AppsFlyerDeepLinkResult.h

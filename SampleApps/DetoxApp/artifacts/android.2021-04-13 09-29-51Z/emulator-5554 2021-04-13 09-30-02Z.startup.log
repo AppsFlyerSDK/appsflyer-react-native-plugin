@@ -1,0 +1,183 @@
+--------- beginning of main
+04-13 12:29:58.717 26887 26887 W com.detoxtest: Unexpected CPU variant for X86 using defaults: x86
+04-13 12:29:58.722 26887 26887 E com.detoxtest: Not starting debugger since process cannot load the jdwp agent.
+--------- beginning of system
+04-13 12:29:58.739 26887 26887 W ActivityThread: Package uses different ABI(s) than its instrumentation: package[com.detoxtest]: x86, null instrumentation[com.detoxtest.test]: null, null
+04-13 12:29:58.742 26887 26887 I com.detoxtest: The ClassLoaderContext is a special shared library.
+04-13 12:29:58.744 26887 26887 I chatty  : uid=10298(com.detoxtest) identical 2 lines
+04-13 12:29:58.745 26887 26887 I com.detoxtest: The ClassLoaderContext is a special shared library.
+04-13 12:29:58.784 26887 26887 W com.detoxtest: ClassLoaderContext classpath size mismatch. expected=0, found=4 (PCL[]{PCL[/system/framework/android.test.base.jar*84046222]} | PCL[/system/framework/android.test.runner.jar*2838042966:/system/framework/android.test.mock.jar*2353512044:/system/framework/android.test.base.jar*84046222:/data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/base.apk*3736732199]{PCL[/system/framework/android.test.base.jar*84046222]})
+04-13 12:29:58.796 26887 26887 I com.detoxtest: The ClassLoaderContext is a special shared library.
+04-13 12:29:58.800 26887 26887 I chatty  : uid=10298(com.detoxtest) identical 3 lines
+04-13 12:29:58.800 26887 26887 I com.detoxtest: The ClassLoaderContext is a special shared library.
+04-13 12:29:58.841 26887 26887 W com.detoxtest: ClassLoaderContext classpath size mismatch. expected=0, found=4 (PCL[]{PCL[/system/framework/android.test.base.jar*84046222]} | PCL[/system/framework/android.test.runner.jar*2838042966:/system/framework/android.test.mock.jar*2353512044:/system/framework/android.test.base.jar*84046222:/data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/base.apk*3736732199]{PCL[/system/framework/android.test.base.jar*84046222]#PCL[/system/framework/android.test.mock.jar*2353512044]{PCL[/system/framework/android.test.base.jar*84046222]}#PCL[/system/framework/android.test.runner.jar*2838042966]{PCL[/system/framework/android.test.base.jar*84046222]#PCL[/system/framework/android.test.mock.jar*2353512044]{PCL[/system/framework/android.test.base.jar*84046222]}}};PCL[/system/framework/android.test.runner.jar*2838042966:/system/framework/android.test.mock.jar*2353512044:/system/framework/android.test.base.jar*84046222:/data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/base.apk*3736732199:/data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/base.apk*4000934944]{PCL[/system/framework/android.test.base.jar*84046222]})
+04-13 12:29:58.841 26887 26887 W com.detoxtest: Found duplicate classes, falling back to extracting from APK : /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/base.apk
+04-13 12:29:58.841 26887 26887 W com.detoxtest: NOTE: This wastes RAM and hurts startup performance.
+04-13 12:29:58.841 26887 26887 W com.detoxtest: Found duplicated class when checking oat files: 'Landroid/support/v4/app/INotificationSideChannel$Stub$Proxy;' in /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/base.apk and /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/base.apk
+04-13 12:29:58.841 26887 26887 W com.detoxtest: 
+04-13 12:29:58.917 26887 26887 D NetworkSecurityConfig: Using Network Security Config from resource network_security_config debugBuild: false
+04-13 12:29:58.918 26887 26887 D NetworkSecurityConfig: Using Network Security Config from resource network_security_config debugBuild: false
+04-13 12:29:58.927 26887 26887 I MonitoringInstr: Instrumentation started!
+04-13 12:29:58.931 26887 26887 I MonitoringInstr: Setting context classloader to 'dalvik.system.PathClassLoader[DexPathList[[zip file "/system/framework/android.test.runner.jar", zip file "/system/framework/android.test.mock.jar", zip file "/system/framework/android.test.base.jar", zip file "/data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/base.apk", zip file "/data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/base.apk"],nativeLibraryDirectories=[/data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/lib/x86, /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/lib/x86, /data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/base.apk!/lib/x86, /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/base.apk!/lib/x86, /system/lib, /system_ext/lib, /product/lib]]]', Original: 'dalvik.system.PathClassLoader[DexPathList[[zip file "/system/framework/android.test.runner.jar", zip file "/system/framework/android.test.mock.jar", zip file "/system/framework/android.test.base.jar", zip file "/data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/base.apk", zip file "/data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/base.apk"],nativeLibraryDirectories=[/data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/lib/x86, /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/lib/x86, /data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/base.apk!/lib/x86, /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/base.apk!/lib/x86, /system/lib, /system_ext/lib, /product/lib]]]'
+04-13 12:29:58.935 26887 26887 D SoLoader: init start
+04-13 12:29:58.935 26887 26887 D SoLoader: adding system library source: /vendor/lib
+04-13 12:29:58.936 26887 26887 D SoLoader: adding system library source: /system/lib
+04-13 12:29:58.936 26887 26887 D SoLoader: adding application source: com.facebook.soloader.DirectorySoSource[root = /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/lib/x86 flags = 0]
+04-13 12:29:58.937 26887 26887 D SoLoader: adding backup source from : com.facebook.soloader.ApkSoSource[root = /data/user/0/com.detoxtest/lib-main flags = 1]
+04-13 12:29:58.937 26887 26887 D SoLoader: Preparing SO source: com.facebook.soloader.DirectorySoSource[root = /system/lib flags = 2]
+04-13 12:29:58.937 26887 26887 D SoLoader: Preparing SO source: com.facebook.soloader.DirectorySoSource[root = /vendor/lib flags = 2]
+04-13 12:29:58.937 26887 26887 D SoLoader: Preparing SO source: com.facebook.soloader.DirectorySoSource[root = /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/lib/x86 flags = 0]
+04-13 12:29:58.937 26887 26887 D SoLoader: Preparing SO source: com.facebook.soloader.ApkSoSource[root = /data/user/0/com.detoxtest/lib-main flags = 1]
+04-13 12:29:58.939 26887 26887 V fb-UnpackingSoSource: locked dso store /data/user/0/com.detoxtest/lib-main
+04-13 12:29:58.940 26887 26887 V fb-UnpackingSoSource: deps mismatch on deps store: regenerating
+04-13 12:29:58.940 26887 26887 V fb-UnpackingSoSource: so store dirty: regenerating
+04-13 12:29:58.959 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libc++_shared.so: deferring to libdir
+04-13 12:29:58.959 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libfb.so: deferring to libdir
+04-13 12:29:58.959 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libfbjni.so: deferring to libdir
+04-13 12:29:58.959 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libfolly_futures.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libfolly_json.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libglog.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libglog_init.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libhermes-executor-debug.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libhermes-executor-release.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libhermes-inspector.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libimagepipeline.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libjsc.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libjscexecutor.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libjsijniprofiler.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libjsinspector.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libnative-filters.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libnative-imagetranscoder.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libreactnativeblob.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libreactnativejni.so: deferring to libdir
+04-13 12:29:58.960 26887 26887 D ApkSoSource: not allowing consideration of lib/x86/libyoga.so: deferring to libdir
+04-13 12:29:58.961 26887 26887 V fb-UnpackingSoSource: regenerating DSO store com.facebook.soloader.ApkSoSource
+04-13 12:29:58.961 26887 26887 V fb-UnpackingSoSource: Finished regenerating DSO store com.facebook.soloader.ApkSoSource
+04-13 12:29:58.962 26887 26887 V fb-UnpackingSoSource: starting syncer worker
+04-13 12:29:58.970 26887 26887 V fb-UnpackingSoSource: releasing dso store lock for /data/user/0/com.detoxtest/lib-main (from syncer thread)
+04-13 12:29:58.971 26887 26887 V fb-UnpackingSoSource: not releasing dso store lock for /data/user/0/com.detoxtest/lib-main (syncer thread started)
+04-13 12:29:58.971 26887 26887 D SoLoader: init finish: 4 SO sources prepared
+04-13 12:29:58.971 26887 26887 D SoLoader: init exiting
+04-13 12:29:58.972 26887 26887 D SoLoader: init exiting
+04-13 12:29:58.972 26887 26887 D SoLoader: About to load: libjscexecutor.so
+04-13 12:29:58.973 26887 26887 D SoLoader: libjscexecutor.so not found on /data/user/0/com.detoxtest/lib-main
+04-13 12:29:58.973 26887 26887 D SoLoader: libjscexecutor.so found on /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/lib/x86
+04-13 12:29:58.973 26887 26887 D SoLoader: Not resolving dependencies for libjscexecutor.so
+04-13 12:29:58.977 26887 26887 D JavaScriptCore.Version: 245459.0.0
+04-13 12:29:58.978 26887 26887 D SoLoader: Loaded: libjscexecutor.so
+04-13 12:29:58.978 26887 26887 D SoLoader: init exiting
+04-13 12:29:58.981 26887 26887 I MonitoringInstr: No JSBridge.
+04-13 12:29:58.985 26887 26911 I MonitoringInstr: Setting context classloader to 'dalvik.system.PathClassLoader[DexPathList[[zip file "/system/framework/android.test.runner.jar", zip file "/system/framework/android.test.mock.jar", zip file "/system/framework/android.test.base.jar", zip file "/data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/base.apk", zip file "/data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/base.apk"],nativeLibraryDirectories=[/data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/lib/x86, /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/lib/x86, /data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/base.apk!/lib/x86, /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/base.apk!/lib/x86, /system/lib, /system_ext/lib, /product/lib]]]', Original: 'dalvik.system.PathClassLoader[DexPathList[[zip file "/system/framework/android.test.runner.jar", zip file "/system/framework/android.test.mock.jar", zip file "/system/framework/android.test.base.jar", zip file "/data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/base.apk", zip file "/data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/base.apk"],nativeLibraryDirectories=[/data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/lib/x86, /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/lib/x86, /data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/base.apk!/lib/x86, /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/base.apk!/lib/x86, /system/lib, /system_ext/lib, /product/lib]]]'
+04-13 12:29:59.001 26887 26911 I UsageTrackerFacilitator: Usage tracking enabled
+04-13 12:29:59.007 26887 26911 I TestRequestBuilder: Scanning classpath to find tests in paths [/data/app/~~J7r3lNE-BGUCQ_qfBv9kJw==/com.detoxtest.test-vOEXxjhxOLYklV1Zk-O8Zw==/base.apk]
+04-13 12:29:59.008 26887 26911 W com.detoxtest: Opening an oat file without a class loader. Are you using the deprecated DexFile APIs?
+04-13 12:29:59.165 26887 26911 D TestExecutor: Adding listener androidx.test.internal.runner.listener.LogRunListener
+04-13 12:29:59.166 26887 26911 D TestExecutor: Adding listener androidx.test.internal.runner.listener.InstrumentationResultPrinter
+04-13 12:29:59.166 26887 26911 D TestExecutor: Adding listener androidx.test.internal.runner.listener.ActivityFinisherRunListener
+04-13 12:29:59.167 26887 26911 I TestRunner: run started: 1 tests
+04-13 12:29:59.171 26887 26911 I TestRunner: started: runDetoxTests(com.detoxtest.DetoxTest)
+04-13 12:29:59.174 26887 26887 I MonitoringInstr: Activities that are still in CREATED to STOPPED: 0
+04-13 12:29:59.210 26887 26911 D EventInjectionStrategy: Creating injection strategy with input manager.
+04-13 12:29:59.290 26887 26925 D libEGL  : loaded /vendor/lib/egl/libEGL_emulation.so
+04-13 12:29:59.292 26887 26925 D libEGL  : loaded /vendor/lib/egl/libGLESv1_CM_emulation.so
+04-13 12:29:59.299 26887 26925 D libEGL  : loaded /vendor/lib/egl/libGLESv2_emulation.so
+04-13 12:29:59.299 26887 26887 D LifecycleMonitor: Lifecycle status change: com.detoxtest.MainActivity@d952f0b in: PRE_ON_CREATE
+04-13 12:29:59.319 26887 26928 D SoLoader: About to load: libreactnativejni.so
+04-13 12:29:59.320 26887 26928 D SoLoader: libreactnativejni.so not found on /data/user/0/com.detoxtest/lib-main
+04-13 12:29:59.320 26887 26928 D SoLoader: libreactnativejni.so found on /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/lib/x86
+04-13 12:29:59.320 26887 26928 D SoLoader: Not resolving dependencies for libreactnativejni.so
+04-13 12:29:59.324 26887 26928 D SoLoader: Loaded: libreactnativejni.so
+04-13 12:29:59.325 26887 26928 D SoLoader: About to load: libfbjni.so
+04-13 12:29:59.325 26887 26928 D SoLoader: libfbjni.so not found on /data/user/0/com.detoxtest/lib-main
+04-13 12:29:59.325 26887 26928 D SoLoader: libfbjni.so found on /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/lib/x86
+04-13 12:29:59.325 26887 26928 D SoLoader: Not resolving dependencies for libfbjni.so
+04-13 12:29:59.328 26887 26928 D SoLoader: Loaded: libfbjni.so
+04-13 12:29:59.335 26887 26887 D LifecycleMonitor: Lifecycle status change: com.detoxtest.MainActivity@d952f0b in: CREATED
+04-13 12:29:59.340 26887 26887 D LifecycleMonitor: Lifecycle status change: com.detoxtest.MainActivity@d952f0b in: STARTED
+04-13 12:29:59.343 26887 26887 D LifecycleMonitor: Lifecycle status change: com.detoxtest.MainActivity@d952f0b in: RESUMED
+04-13 12:29:59.353 26887 26930 E ReactNativeJNI: logMarker CREATE_REACT_CONTEXT_END
+04-13 12:29:59.354 26887 26928 E unknown:ReactNative: ReactInstanceManager.createReactContext: mJSIModulePackage null
+04-13 12:29:59.357 26887 26930 E ReactNativeJNI: logMarker RUN_JS_BUNDLE_START
+04-13 12:29:59.359 26887 26931 E unknown:ReactNative: ReactInstanceManager.attachRootViewToInstance()
+04-13 12:29:59.365 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTGroupViewManager
+04-13 12:29:59.366 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTGroupShadowNode
+04-13 12:29:59.367 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTShapeViewManager
+04-13 12:29:59.367 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTShapeShadowNode
+04-13 12:29:59.367 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTTextViewManager
+04-13 12:29:59.367 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTTextShadowNode
+04-13 12:29:59.369 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.checkbox.ReactCheckBoxManager
+04-13 12:29:59.370 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.uimanager.LayoutShadowNode
+04-13 12:29:59.371 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.picker.ReactDialogPickerManager
+04-13 12:29:59.372 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.drawer.ReactDrawerLayoutManager
+04-13 12:29:59.373 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.picker.ReactDropdownPickerManager
+04-13 12:29:59.374 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.scroll.ReactHorizontalScrollViewManager
+04-13 12:29:59.375 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.scroll.ReactHorizontalScrollContainerViewManager
+04-13 12:29:59.377 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.progressbar.ReactProgressBarViewManager
+04-13 12:29:59.377 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.progressbar.ProgressBarShadowNode
+04-13 12:29:59.378 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.scroll.ReactScrollViewManager
+04-13 12:29:59.379 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.slider.ReactSliderManager
+04-13 12:29:59.380 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.slider.ReactSliderManager$ReactSliderShadowNode
+04-13 12:29:59.380 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.switchview.ReactSwitchManager
+04-13 12:29:59.383 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.switchview.ReactSwitchManager$ReactSwitchShadowNode
+04-13 12:29:59.383 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.swiperefresh.SwipeRefreshLayoutManager
+04-13 12:29:59.385 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTSurfaceViewManager
+04-13 12:29:59.385 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTSurfaceViewShadowNode
+04-13 12:29:59.387 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.frescosupport.FrescoBasedReactTextInlineImageViewManager
+04-13 12:29:59.387 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.frescosupport.FrescoBasedReactTextInlineImageShadowNode
+04-13 12:29:59.393 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.image.ReactImageManager
+04-13 12:29:59.393 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.modal.ReactModalHostManager
+04-13 12:29:59.394 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.modal.ModalHostShadowNode
+04-13 12:29:59.394 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactRawTextManager
+04-13 12:29:59.394 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactRawTextShadowNode
+04-13 12:29:59.395 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.textinput.ReactTextInputManager
+04-13 12:29:59.396 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.textinput.ReactTextInputShadowNode
+04-13 12:29:59.397 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactTextViewManager
+04-13 12:29:59.397 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactTextShadowNode
+04-13 12:29:59.397 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.view.ReactViewManager
+04-13 12:29:59.400 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.viewpager.ReactViewPagerManager
+04-13 12:29:59.401 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactVirtualTextViewManager
+04-13 12:29:59.405 26887 26931 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactVirtualTextShadowNode
+04-13 12:29:59.409 26887 26931 D SoLoader: About to load: libyoga.so
+04-13 12:29:59.410 26887 26931 D SoLoader: libyoga.so not found on /data/user/0/com.detoxtest/lib-main
+04-13 12:29:59.410 26887 26931 D SoLoader: libyoga.so found on /data/app/~~dZOr9eh_C5n6kBpxS2RdUQ==/com.detoxtest-RuGRHXwkoZhy__Q6Y4KXeg==/lib/x86
+04-13 12:29:59.410 26887 26931 D SoLoader: Not resolving dependencies for libyoga.so
+04-13 12:29:59.411 26887 26931 D SoLoader: Loaded: libyoga.so
+04-13 12:29:59.414 26887 26931 E unknown:ReactRootView: runApplication: call AppRegistry.runApplication
+04-13 12:29:59.423 26887 26923 D HostConnection: HostConnection::get() New Host Connection established 0xe9914770, tid 26923
+04-13 12:29:59.439 26887 26923 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_YUV_Cache ANDROID_EMU_async_unmap_buffer GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_gles_max_version_3_0 
+04-13 12:29:59.444 26887 26923 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+04-13 12:29:59.445 26887 26923 D EGL_emulation: eglCreateContext: 0xe9739cf0: maj 3 min 0 rcv 3
+04-13 12:29:59.461 26887 26930 E ReactNativeJNI: logMarker RUN_JS_BUNDLE_END
+04-13 12:29:59.462 26887 26930 I ReactNativeJS: Running "detoxTest" with {"rootTag":1}
+04-13 12:29:59.468 26887 26923 D EGL_emulation: eglMakeCurrent: 0xe9739cf0: ver 3 0 (tinfo 0xe9a7e650)
+04-13 12:29:59.469 26887 26931 D SoLoader: init exiting
+04-13 12:29:59.476 26887 26931 W unknown:ReactNative: Tried to update non-existent root tag: 0
+04-13 12:29:59.484 26887 26923 I Gralloc4: mapper 4.x is not supported
+04-13 12:29:59.491 26887 26923 D HostConnection: createUnique: call
+04-13 12:29:59.491 26887 26923 D HostConnection: HostConnection::get() New Host Connection established 0xe9913db0, tid 26923
+04-13 12:29:59.491 26887 26923 D eglCodecCommon: allocate: Ask for block of size 0x100
+04-13 12:29:59.491 26887 26923 D eglCodecCommon: allocate: ioctl allocate returned offset 0x3fc0ff000 size 0x2000
+04-13 12:29:59.507 26887 26923 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_YUV_Cache ANDROID_EMU_async_unmap_buffer GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_gles_max_version_3_0 
+04-13 12:29:59.512 26887 26923 D EGL_emulation: eglMakeCurrent: 0xe9739cf0: ver 3 0 (tinfo 0xe9a7e650)
+04-13 12:29:59.542 26887 26887 E unknown:ReactNative: Unable to launch logbox because react was unable to create the root view
+04-13 12:29:59.556 26887 26937 I Detox   : Detox thread starting (com.wix.detox.manager)
+04-13 12:29:59.573 26887 26937 I DetoxManager: DetoxServerUrl: ws://localhost:49230
+04-13 12:29:59.573 26887 26937 I DetoxManager: DetoxSessionId: c4e346bf-88b2-c7cf-61ee-309beb05fe4e
+04-13 12:29:59.579 26887 26887 D DetoxRNLoading: Got new RN-context directly and immediately
+04-13 12:29:59.581 26887 26937 I DetoxRNIdleRes: Setting up Espresso Idling Resources for React Native.
+04-13 12:29:59.644 26887 26937 D AsyncStorageIR: Checking whether a custom IR for Async-Storage is required... (legacy=false)
+04-13 12:29:59.644 26887 26937 D DetoxRNHelpers: Native module not resolved: no such class
+04-13 12:29:59.644 26887 26937 D AsyncStorageIR: Checking whether a custom IR for Async-Storage is required... (legacy=true)
+04-13 12:29:59.644 26887 26937 D AsyncStorageIR: IR for Async-Storage is required! (legacy=true)
+04-13 12:29:59.647 26887 26887 D AsyncStorageIRLegacy: Async-storage is busy!
+04-13 12:29:59.650 26887 26937 I WebSocketClient: At connectToServer
+04-13 12:29:59.670 26887 26947 I WebSocketClient: At onOpen
+04-13 12:29:59.670 26887 26947 I WebSocketClient: At sendAction
+04-13 12:29:59.670 26887 26947 D WebSocketClient: Detox Action Sent: login
+04-13 12:29:59.806 26887 26887 I Detox   : Wait is over: app is now idle!
+04-13 12:29:59.811 26887 26947 I WebSocketClient: At sendAction
+04-13 12:29:59.812 26887 26947 D WebSocketClient: Detox Action Sent: ready
+04-13 12:29:59.815 26887 26947 I WebSocketClient: At onMessage
+04-13 12:29:59.815 26887 26947 I WebSocketClient: At receiveAction
+04-13 12:29:59.815 26887 26947 D WebSocketClient: Detox Action Received: loginSuccess
+04-13 12:29:59.816 26887 26947 I DetoxManager: onAction: type: loginSuccess params: {"testerConnected":true,"appConnected":true}

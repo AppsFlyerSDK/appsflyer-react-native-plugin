@@ -1,0 +1,115 @@
+--------- beginning of main
+04-13 11:34:52.049 21736 21736 I Detox   : Wait is over: app is now idle!
+04-13 11:34:52.058 21736 21788 I WebSocketClient: At sendAction
+04-13 11:34:52.060 21736 21788 D WebSocketClient: Detox Action Sent: ready
+04-13 11:34:52.064 21736 21788 I WebSocketClient: At onMessage
+04-13 11:34:52.064 21736 21788 I WebSocketClient: At receiveAction
+04-13 11:34:52.064 21736 21788 D WebSocketClient: Detox Action Received: loginSuccess
+04-13 11:34:52.064 21736 21788 I DetoxManager: onAction: type: loginSuccess params: {"testerConnected":true,"appConnected":true}
+04-13 11:34:52.069 21736 21788 I WebSocketClient: At onMessage
+04-13 11:34:52.070 21736 21788 I WebSocketClient: At receiveAction
+04-13 11:34:52.070 21736 21788 D WebSocketClient: Detox Action Received: isReady
+04-13 11:34:52.071 21736 21788 I DetoxManager: onAction: type: isReady params: {}
+04-13 11:34:52.075 21736 21736 I Detox   : Wait is over: app is now idle!
+04-13 11:34:52.075 21736 21786 I WebSocketClient: At sendAction
+04-13 11:34:52.076 21736 21786 D WebSocketClient: Detox Action Sent: ready
+04-13 11:34:52.119 21736 21788 I WebSocketClient: At onMessage
+04-13 11:34:52.120 21736 21788 I WebSocketClient: At receiveAction
+04-13 11:34:52.120 21736 21788 D WebSocketClient: Detox Action Received: reactNativeReload
+04-13 11:34:52.120 21736 21788 I DetoxManager: onAction: type: reactNativeReload params: {}
+04-13 11:34:52.125 21736 21786 I DetoxRNExt: Reloading React Native
+04-13 11:34:52.155 21736 21801 E unknown:ReactNative: ReactInstanceManager.createReactContext: mJSIModulePackage null
+04-13 11:34:52.155 21736 21802 E ReactNativeJNI: logMarker CREATE_REACT_CONTEXT_END
+04-13 11:34:52.164 21736 21802 E ReactNativeJNI: logMarker RUN_JS_BUNDLE_START
+04-13 11:34:52.165 21736 21804 E unknown:ReactNative: ReactInstanceManager.attachRootViewToInstance()
+04-13 11:34:52.166 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTGroupViewManager
+04-13 11:34:52.167 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTGroupShadowNode
+04-13 11:34:52.167 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTShapeViewManager
+04-13 11:34:52.167 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTShapeShadowNode
+04-13 11:34:52.167 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTTextViewManager
+04-13 11:34:52.167 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTTextShadowNode
+04-13 11:34:52.168 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.checkbox.ReactCheckBoxManager
+04-13 11:34:52.168 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.uimanager.LayoutShadowNode
+04-13 11:34:52.169 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.picker.ReactDialogPickerManager
+04-13 11:34:52.170 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.drawer.ReactDrawerLayoutManager
+04-13 11:34:52.171 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.picker.ReactDropdownPickerManager
+04-13 11:34:52.171 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.scroll.ReactHorizontalScrollViewManager
+04-13 11:34:52.172 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.scroll.ReactHorizontalScrollContainerViewManager
+04-13 11:34:52.172 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.progressbar.ReactProgressBarViewManager
+04-13 11:34:52.173 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.progressbar.ProgressBarShadowNode
+04-13 11:34:52.173 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.scroll.ReactScrollViewManager
+04-13 11:34:52.175 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.slider.ReactSliderManager
+04-13 11:34:52.175 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.slider.ReactSliderManager$ReactSliderShadowNode
+04-13 11:34:52.176 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.switchview.ReactSwitchManager
+04-13 11:34:52.176 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.switchview.ReactSwitchManager$ReactSwitchShadowNode
+04-13 11:34:52.176 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.swiperefresh.SwipeRefreshLayoutManager
+04-13 11:34:52.177 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTSurfaceViewManager
+04-13 11:34:52.177 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTSurfaceViewShadowNode
+04-13 11:34:52.177 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.frescosupport.FrescoBasedReactTextInlineImageViewManager
+04-13 11:34:52.177 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.frescosupport.FrescoBasedReactTextInlineImageShadowNode
+04-13 11:34:52.177 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.image.ReactImageManager
+04-13 11:34:52.178 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.modal.ReactModalHostManager
+04-13 11:34:52.178 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.modal.ModalHostShadowNode
+04-13 11:34:52.178 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactRawTextManager
+04-13 11:34:52.179 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactRawTextShadowNode
+04-13 11:34:52.180 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.textinput.ReactTextInputManager
+04-13 11:34:52.181 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.textinput.ReactTextInputShadowNode
+04-13 11:34:52.182 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactTextViewManager
+04-13 11:34:52.183 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactTextShadowNode
+04-13 11:34:52.184 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.view.ReactViewManager
+04-13 11:34:52.185 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.viewpager.ReactViewPagerManager
+04-13 11:34:52.185 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactVirtualTextViewManager
+04-13 11:34:52.185 21736 21804 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactVirtualTextShadowNode
+04-13 11:34:52.187 21736 21804 E unknown:ReactRootView: runApplication: call AppRegistry.runApplication
+04-13 11:34:52.187 21736 21736 I DetoxRNLoading: Got new RN-context async'ly through listener
+04-13 11:34:52.187 21736 21786 I DetoxRNIdleRes: Setting up Espresso Idling Resources for React Native.
+04-13 11:34:52.191 21736 21786 D AsyncStorageIR: Checking whether a custom IR for Async-Storage is required... (legacy=false)
+04-13 11:34:52.191 21736 21786 D DetoxRNHelpers: Native module not resolved: no such class
+04-13 11:34:52.191 21736 21786 D AsyncStorageIR: Checking whether a custom IR for Async-Storage is required... (legacy=true)
+04-13 11:34:52.191 21736 21786 D AsyncStorageIR: IR for Async-Storage is required! (legacy=true)
+04-13 11:34:52.193 21736 21736 I Detox   : UIManagerModule is busy
+04-13 11:34:52.193 21736 21736 D AsyncStorageIRLegacy: Async-storage is busy!
+04-13 11:34:52.195 21736 21786 I WebSocketClient: At sendAction
+04-13 11:34:52.195 21736 21786 D WebSocketClient: Detox Action Sent: ready
+04-13 11:34:52.201 21736 21788 I WebSocketClient: At onMessage
+04-13 11:34:52.202 21736 21788 I WebSocketClient: At receiveAction
+04-13 11:34:52.202 21736 21788 D WebSocketClient: Detox Action Received: invoke
+04-13 11:34:52.202 21736 21788 I DetoxManager: onAction: type: invoke params: {"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]}
+04-13 11:34:52.222 21736 21786 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForTestId, [successInitButton]
+04-13 11:34:52.240 21736 21736 E unknown:ReactNative: Unable to launch logbox because react was unable to create the root view
+04-13 11:34:52.247 21736 21786 D Detox   : class androidx.test.espresso.Espresso, onView, [(with tag value: is "successInitButton" and view has effective visibility=VISIBLE)]
+04-13 11:34:52.248 21736 21786 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForSufficientlyVisible, []
+04-13 11:34:52.249 21736 21786 D Detox   : class com.wix.detox.espresso.DetoxAssertion, assertMatcher, [androidx.test.espresso.ViewInteraction@f616ae, at least 75 percent of the view's area is displayed to the user.]
+04-13 11:34:52.257 21736 21802 E ReactNativeJNI: logMarker RUN_JS_BUNDLE_END
+04-13 11:34:52.260 21736 21802 I ReactNativeJS: Running "detoxTest" with {"rootTag":11}
+04-13 11:34:52.539 21736 21736 I ViewInteraction: Checking 'MatchesViewAssertion(Detox){viewMatcher=at least 75 percent of the view's area is displayed to the user.}' assertion on view (with tag value: is "successInitButton" and view has effective visibility=VISIBLE)
+04-13 11:34:52.541 21736 21786 I WebSocketClient: At sendAction
+04-13 11:34:52.541 21736 21786 D WebSocketClient: Detox Action Sent: invokeResult
+04-13 11:34:52.545 21736 21788 I WebSocketClient: At onMessage
+04-13 11:34:52.545 21736 21788 I WebSocketClient: At receiveAction
+04-13 11:34:52.546 21736 21788 D WebSocketClient: Detox Action Received: invoke
+04-13 11:34:52.546 21736 21788 I DetoxManager: onAction: type: invoke params: {"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]}
+04-13 11:34:52.546 21736 21786 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForTestId, [successInitButton]
+04-13 11:34:52.546 21736 21786 D Detox   : class androidx.test.espresso.Espresso, onView, [(with tag value: is "successInitButton" and view has effective visibility=VISIBLE)]
+04-13 11:34:52.547 21736 21786 D Detox   : class com.wix.detox.espresso.DetoxViewActions, click, []
+04-13 11:34:52.555 21736 21786 D Detox   : class com.wix.detox.espresso.EspressoDetox, perform, [androidx.test.espresso.ViewInteraction@6fa485b, com.wix.detox.espresso.action.RNClickAction@bfeb8f8]
+04-13 11:34:52.559 21736 21736 I ViewInteraction: Performing 'com.wix.detox.espresso.action.detoxsingletap@fa081d1 click' action on view (with tag value: is "successInitButton" and view has effective visibility=VISIBLE)
+04-13 11:34:52.721 21736 21804 D AppsFlyer_6.2.0: Initializing AppsFlyer SDK: (v6.2.0.91)
+04-13 11:34:52.877 21736 21812 I TetheringManager: registerTetheringEventCallback:com.detoxtest
+04-13 11:34:52.922 21736 21812 I com.detoxtest: Waiting for a blocking GC ClassLinker
+04-13 11:34:52.926 21736 21816 I com.detoxtest: Waiting for a blocking GC ClassLinker
+04-13 11:34:52.957 21736 21812 I com.detoxtest: WaitForGcToComplete blocked ClassLinker on ClassLinker for 34.865ms
+04-13 11:34:52.957 21736 21816 I com.detoxtest: WaitForGcToComplete blocked ClassLinker on ClassLinker for 31.183ms
+04-13 11:34:52.993 21736 21786 I WebSocketClient: At sendAction
+04-13 11:34:52.993 21736 21786 D WebSocketClient: Detox Action Sent: invokeResult
+04-13 11:34:52.997 21736 21788 I WebSocketClient: At onMessage
+04-13 11:34:52.997 21736 21788 I WebSocketClient: At receiveAction
+04-13 11:34:52.997 21736 21788 D WebSocketClient: Detox Action Received: invoke
+04-13 11:34:52.997 21736 21788 I DetoxManager: onAction: type: invoke params: {"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitResult"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForText","args":["Success"]}}]}
+04-13 11:34:52.997 21736 21786 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForTestId, [successInitResult]
+04-13 11:34:52.997 21736 21786 D Detox   : class androidx.test.espresso.Espresso, onView, [(with tag value: is "successInitResult" and view has effective visibility=VISIBLE)]
+04-13 11:34:52.997 21736 21786 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForText, [Success]
+04-13 11:34:52.998 21736 21786 D Detox   : class com.wix.detox.espresso.DetoxAssertion, assertMatcher, [androidx.test.espresso.ViewInteraction@2d07517, (with text: is "Success" and view has effective visibility=VISIBLE)]
+04-13 11:34:53.005 21736 21736 I ViewInteraction: Checking 'MatchesViewAssertion(Detox){viewMatcher=(with text: is "Success" and view has effective visibility=VISIBLE)}' assertion on view (with tag value: is "successInitResult" and view has effective visibility=VISIBLE)
+04-13 11:34:53.005 21736 21786 I WebSocketClient: At sendAction
+04-13 11:34:53.005 21736 21786 D WebSocketClient: Detox Action Sent: invokeResult
