@@ -14,7 +14,7 @@ install:
 
 script:
   - cd SampleApps/DetoxApp
-  - npm install
+  - npm install --force
   - npm install git://github.com/AppsFlyerSDK/appsflyer-react-native-plugin.git#TRAVIS_PULL_REQUEST_BRANCH --save
   - cd ios
   - pod update
