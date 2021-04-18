@@ -16,8 +16,5 @@ script:
   - cd SampleApps/DetoxApp
   - npm install --force
   - npm install react-native-appsflyer --save
-  - cd ios
-  - pod install
-  - cd ..
   - detox build --configuration android
   - detox test --configuration android --cleanup
