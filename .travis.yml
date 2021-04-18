@@ -10,12 +10,9 @@ install:
   - nvm alias default $NODE_VERSION
   - brew tap wix/brew
   - brew install applesimutils
-  - npm install -g react-native-cli
   - npm install -g detox-cli
-  - npm install -g yarn
 
 script:
-  - echo lalalalalal
   - cd SampleApps/DetoxApp
   - npm install
   - npm install git://github.com/AppsFlyerSDK/appsflyer-react-native-plugin.git#TRAVIS_PULL_REQUEST_BRANCH --save
