@@ -8,18 +8,19 @@ install:
   - nvm install $NODE_VERSION
   - nvm use $NODE_VERSION
   - nvm alias default $NODE_VERSION
-
+  - brew tap wix/brew
+  - brew install applesimutils
   - npm install -g react-native-cli
   - npm install -g detox-cli
   - npm install -g yarn
 
-matrix:
-  include:
-    - os: osx
-      osx_image: xcode11.3
-      language: objective-c
-      before_install:
-        - brew tap wix/brew
-        - brew install applesimutils
-      script:
-        - echo $TRAVIS_PULL_REQUEST_BRANCH
+script:
+  - echo lalalalalal
+  - cd SampleApps/DetoxApp
+  - npm install
+  - npm install git://github.com/AppsFlyerSDK/appsflyer-react-native-plugin.git#TRAVIS_PULL_REQUEST_BRANCH --save
+  - cd ios
+  - pod update
+  - cd ..
+  - detox build --configuration ios
+  - detox test --configuration ios --cleanup
