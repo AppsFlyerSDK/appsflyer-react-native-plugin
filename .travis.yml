@@ -13,7 +13,6 @@ matrix:
         - brew install applesimutils
         - npm install -g detox-cli
         - npm install -g react-native-cli
-        - npm install -g npx
       script:
         - cd SampleApps/DetoxApp
         - npm install --force
