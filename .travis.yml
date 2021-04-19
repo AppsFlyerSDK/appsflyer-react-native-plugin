@@ -8,7 +8,9 @@ matrix:
       env:
         global:
           - NODE_VERSION=stable
-
+      before_install:
+        - gem install cocoapods
+        - gem update concurrent-ruby
       install:
         - brew tap wix/brew
         - brew install applesimutils
