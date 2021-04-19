@@ -3,21 +3,12 @@ node_js: 8
 
 matrix:
   include:
-    - language: android
-      os: osx
-      env:
+    language: objective-c
+    osx_image: xcode11.5
+    env:
+      global:
         - NODE_VERSION=stable
-      android:
-      components:
-        - tools
-        - platform-tools
-        - build-tools-27.0.3
-        - android-26
-        - extra-google-google_play_services
-        - extra-google-m2repository
-        - extra-android-m2repository
-        - sys-img-x86-android-26
-        - sys-img-x86-android-28
+
       install:
         - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
         - export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
@@ -27,6 +18,7 @@ matrix:
         - brew tap wix/brew
         - brew install applesimutils
         - npm install -g detox-cli
+        - npm install -g react-native-cli
       script:
         - cd SampleApps/DetoxApp
         - npm install --force
