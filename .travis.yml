@@ -1,5 +1,6 @@
 language: node_js
 node_js: 8
+os: osx
 matrix:
   include:
     - language: objective-c
@@ -13,7 +14,6 @@ matrix:
         - npm install -g detox-cli
         - npm install -g react-native-cli
       script:
-        - applesimutils --list
         - cd SampleApps/DetoxApp
         - npm install --force
         - npm install react-native-appsflyer --save
