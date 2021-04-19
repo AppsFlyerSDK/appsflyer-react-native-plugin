@@ -18,5 +18,6 @@ matrix:
         - cd SampleApps/DetoxApp
         - npm install --force
         - npm install react-native-appsflyer --save
-        - detox build --configuration android
-        - detox test --configuration android --cleanup
+        - cd ios; pod install; cd -;
+        - detox build --configuration ios
+        - detox test --configuration ios --cleanup
