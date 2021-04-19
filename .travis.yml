@@ -3,11 +3,11 @@ node_js: 8
 
 matrix:
   include:
-    language: objective-c
-    osx_image: xcode11.5
-    env:
-      global:
-        - NODE_VERSION=stable
+    - language: objective-c
+      osx_image: xcode11
+      env:
+        global:
+          - NODE_VERSION=stable
 
       install:
         - curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
