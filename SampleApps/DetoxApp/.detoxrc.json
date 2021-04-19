@@ -17,7 +17,7 @@
     "simulator": {
       "type": "ios.simulator",
       "device": {
-        "type": "iPhone X"
+        "type": "iPhone 12"
       }
     },
     "amit-device": {
