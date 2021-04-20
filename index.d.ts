@@ -12,10 +12,26 @@ declare module "react-native-appsflyer" {
             | "onAttributionFailure"
             | "onInstallConversionFailure"
         data: {
-            is_first_launch: "true" | "false";
-            media_source: string;
-            campaign: string;
-            af_status: "Organic" | "Non-organic";
+            is_first_launch: "true" | "false",
+            media_source: string,
+            campaign: string,
+            af_status: "Organic" | "Non-organic",
+            af_dp: string,
+            deep_link_value: string,
+            link: string,
+            [key: string]: any;
+        }
+    }
+
+    export type onDeepLinkData = {
+        deepLinkStatus: "FOUND" | "NOT_FOUND" | "Error" | any,
+        isDeferred: boolean,
+        status: "success" | "failure",
+        type: "onDeepLinking",
+        data: {
+            campaign: string,
+            deep_link_value: string,
+            media_source: string,
             [key: string]: any;
         }
     }
@@ -62,9 +78,9 @@ declare module "react-native-appsflyer" {
     const appsFlyer: {
         onInstallConversionData(callback: (data: ConversionData) => any): () => void;
         onInstallConversionFailure(callback: (data: ConversionData) => any): () => void;
-        onAppOpenAttribution(callback: (data: any) => any): () => void;
-        onAttributionFailure(callback: (data: any) => any): () => void;
-        onDeepLink(callback: (data: any) => any): () => void;
+        onAppOpenAttribution(callback: (data: ConversionData) => any): () => void;
+        onAttributionFailure(callback: (data: ConversionData) => any): () => void;
+        onDeepLink(callback: (data: onDeepLinkData) => any): () => void;
         initSdk(options: InitSDKOptions): Promise<string>;
         initSdk(options: InitSDKOptions, successC: SuccessCB, errorC: ErrorCB): void;
         logEvent(eventName: string, eventValues: object): Promise<string>;
@@ -82,11 +98,11 @@ declare module "react-native-appsflyer" {
         anonymizeUser(shouldAnonymize: boolean, successC?: SuccessCB): void
         setOneLinkCustomDomains(domains: string[], successC: SuccessCB, errorC: ErrorCB): void
         setResolveDeepLinkURLs(urls: string[], successC: SuccessCB, errorC: ErrorCB): void
-        performOnAppAttribution(urlString, successC: SuccessCB, errorC: ErrorCB): void
+        performOnAppAttribution(urlString: string, successC: SuccessCB, errorC: ErrorCB): void
         setSharingFilterForAllPartners(): void
-        setSharingFilter(partners, successC, errorC): void
+        setSharingFilter(partners: string[], successC: SuccessCB, errorC: ErrorCB): void
         logLocation(longitude: number, latitude: number, successC?: SuccessCB): void
-        validateAndLogInAppPurchase(purchaseInfo: InAppPurchase, successC, errorC): Response<string>
+        validateAndLogInAppPurchase(purchaseInfo: InAppPurchase, successC: SuccessCB, errorC: ErrorCB): Response<string>
         updateServerUninstallToken(token: string, successC?: SuccessCB): void
         sendPushNotificationData(pushPayload: object): void
         setHost(hostPrefix: string, hostName: string, success: SuccessCB): void
