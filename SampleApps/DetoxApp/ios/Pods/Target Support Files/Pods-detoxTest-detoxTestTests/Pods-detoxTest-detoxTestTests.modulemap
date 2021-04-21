@@ -1,6 +1,0 @@
-module Pods_detoxTest_detoxTestTests {
-  umbrella header "Pods-detoxTest-detoxTestTests-umbrella.h"
-
-  export *
-  module * { export * }
-}
