@@ -11,7 +11,7 @@ target 'detoxTest' do
     # to enable hermes on iOS, change `false` to `true` and then install pods
     :hermes_enabled => false
   )
-  use_flipper!({ 'Flipper-Folly' => '2.3.0' })
+  # use_flipper!({ 'Flipper-Folly' => '2.3.0' })
 
   target 'detoxTestTests' do
     inherit! :complete
