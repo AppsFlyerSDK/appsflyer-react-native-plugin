@@ -9,14 +9,16 @@ matrix:
         - gem install cocoapods
         - gem update concurrent-ruby
       install:
-        - brew tap wix/brew
-        - brew install applesimutils
-        - brew install node
-        - brew install watchman
-        - npm install -g detox-cli
+        #- brew tap wix/brew
+        #- brew install applesimutils
+        #- brew install node
+        #- brew install watchman
+        #- npm install -g detox-cli
       script:
-        - cd SampleApps/DetoxApp
-        - npm install --force
-        - npm install react-native-appsflyer --save
-        - detox build --configuration ios
-        - detox test --configuration ios --cleanup
+        - echo $TRAVIS_BRANCH
+        - echo $TRAVIS_PULL_REQUEST_BRANCH
+        #- cd SampleApps/DetoxApp
+        #- npm install --force
+        #- npm install react-native-appsflyer --save
+        #- detox build --configuration ios
+        #- detox test --configuration ios --cleanup
