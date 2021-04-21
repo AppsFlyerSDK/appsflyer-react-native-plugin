@@ -5,7 +5,7 @@
     "ios": {
       "type": "ios.app",
       "binaryPath": "ios/build/Build/Products/Release-iphonesimulator/detoxTest.app",
-      "build": "cd ios && pod install ; xcodebuild -workspace detoxTest.xcworkspace -scheme detoxTest -configuration Release -sdk iphonesimulator -derivedDataPath build"
+      "build": "cd ios && pod install ; xcodebuild -workspace detoxTest.xcworkspace -scheme detoxTest -configuration Release -sdk iphonesimulator -derivedDataPath build -quiet"
     },
     "android": {
       "type": "android.apk",
