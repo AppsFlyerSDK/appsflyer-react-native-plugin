@@ -4,15 +4,16 @@ os: osx
 matrix:
   include:
     - language: objective-c
-      osx_image: xcode12.3
+      osx_image: xcode12.4
       before_install:
         - gem install cocoapods
         - gem update concurrent-ruby
       install:
         - brew tap wix/brew
         - brew install applesimutils
+        - brew install node
+          brew install watchman
         - npm install -g detox-cli
-        - npm install -g react-native-cli
       script:
         - cd SampleApps/DetoxApp
         - npm install --force

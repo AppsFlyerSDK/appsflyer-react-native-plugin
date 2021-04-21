@@ -56,5 +56,7 @@ package-lock.json
 # Detox App
 SampleApps/DetoxApp/ios/Podfile.lock
 SampleApps/DetoxApp/ios/build
+SampleApps/DetoxApp/ios/Pods
+SampleApps/DetoxApp/ios/detoxTest.xcworkspace
 SampleApps/DetoxApp/android/app/build
 
