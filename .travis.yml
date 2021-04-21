@@ -12,7 +12,7 @@ matrix:
         - brew tap wix/brew
         - brew install applesimutils
         - brew install node
-          brew install watchman
+        - brew install watchman
         - npm install -g detox-cli
       script:
         - cd SampleApps/DetoxApp
