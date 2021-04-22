@@ -11,8 +11,6 @@ matrix:
       before_install:
         - gem install cocoapods
         - gem update concurrent-ruby
-        - brew install node
-        - brew install watchman
       install:
         - brew tap wix/brew
         - brew install applesimutils
