@@ -34,7 +34,6 @@ ios/Podfile.lock
 .gradle
 local.properties
 android/gradlew.bat
-android/gradle
 
 # node.js
 #
