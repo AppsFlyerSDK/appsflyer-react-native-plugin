@@ -1,12 +1,10 @@
 import android.app.Activity;
 import android.app.Application;
 
-import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
 import com.appsflyer.reactnative.RNAppsFlyerModule;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
-import com.facebook.react.bridge.PromiseImpl;
 import com.facebook.react.bridge.ReactApplicationContext;
 
 import org.junit.After;
@@ -16,11 +14,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.reflect.Whitebox;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +32,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 public class PluginNativeTests {
 
     RNAppsFlyerModule appsFlyer;
-    @Mock
+    @Spy
     AppsFlyerLib appsFlyerLib;
     @Mock
     ReactApplicationContext RNContext;
