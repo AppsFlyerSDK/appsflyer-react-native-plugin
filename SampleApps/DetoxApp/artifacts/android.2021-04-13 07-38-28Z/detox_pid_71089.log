@@ -1,0 +1,35 @@
+detox[71089] TRACE: [DETOX_CREATE] created a Detox instance with config:
+{"artifactsConfig":{"rootDir":"artifacts/android.2021-04-13 07-38-28Z","plugins":{"log":{"enabled":true,"keepOnlyFailedTestsArtifacts":false},"screenshot":{"enabled":true,"shouldTakeAutomaticSnapshots":false,"keepOnlyFailedTestsArtifacts":false},"video":{"enabled":false,"keepOnlyFailedTestsArtifacts":false},"instruments":{"enabled":false,"keepOnlyFailedTestsArtifacts":false},"timeline":{"enabled":false},"uiHierarchy":{"enabled":false,"keepOnlyFailedTestsArtifacts":false}},"pathBuilder":{"_rootDir":"artifacts/android.2021-04-13 07-38-28Z"}},"appsConfig":{"default":{"type":"android.apk","binaryPath":"android/app/build/outputs/apk/release/app-release.apk","build":"cd android ; ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release ; cd .."}},"behaviorConfig":{"init":{"reinstallApp":true,"exposeGlobals":true},"cleanup":{"shutdownDevice":false},"launchApp":"auto"},"cliConfig":{"recordLogs":"all","configuration":"android","forceAdbInstall":"false","useCustomLogger":"true"},"deviceConfig":{"type":"android.emulator","device":{"avdName":"emulator-5554"}},"runnerConfig":{"testRunner":"jest","runnerConfig":"e2e/config.json","specs":"e2e"},"sessionConfig":{"autoStart":true,"server":"ws://localhost:58371","sessionId":"4cdb6491-3590-4423-d53b-c2d005fa2b1b","debugSynchronization":10000},"errorComposer":{"configurationName":"android","filepath":"/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/.detoxrc.json","contents":{"testRunner":"jest","runnerConfig":"e2e/config.json","apps":{"ios":{"type":"ios.app","binaryPath":"SPECIFY_PATH_TO_YOUR_APP_BINARY"},"android":{"type":"android.apk","binaryPath":"android/app/build/outputs/apk/release/app-release.apk","build":"cd android ; ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release ; cd .."}},"devices":{"simulator":{"type":"ios.simulator","device":{"type":"iPhone 11"}},"amit-device":{"type":"android.emulator","device":{"avdName":"emulator-5554"}}},"configurations":{"ios":{"device":"simulator","app":"ios"},"android":{"device":"amit-device","app":"android"}}},"_extends":false}}
+detox[71089] DEBUG: [DetoxServer.js] Detox server listening on localhost:58371...
+detox[71089] TRACE: [WS_OPEN] opened web socket to: ws://localhost:58371
+detox[71089] TRACE: [WS_SEND] {"type":"login","params":{"sessionId":"4cdb6491-3590-4423-d53b-c2d005fa2b1b","role":"tester"},"messageId":0}
+detox[71089] TRACE: [GET_FROM, #58372] {"type":"login","params":{"sessionId":"4cdb6491-3590-4423-d53b-c2d005fa2b1b","role":"tester"},"messageId":0}
+detox[71089] TRACE: [SESSION_CREATED] created session 4cdb6491-3590-4423-d53b-c2d005fa2b1b
+detox[71089] TRACE: [SEND_TO, #tester] {"type":"loginSuccess","params":{"testerConnected":true,"appConnected":false},"messageId":0}
+detox[71089] TRACE: [SESSION_JOINED] tester joined session 4cdb6491-3590-4423-d53b-c2d005fa2b1b
+detox[71089] TRACE: [WS_MESSAGE] {"type":"loginSuccess","params":{"testerConnected":true,"appConnected":false},"messageId":0}
+ 
+detox[71089] DEBUG: [EXEC_CMD, #0] "/Users/amitkremer/Library/Android/sdk/emulator/emulator" -list-avds --verbose
+detox[71089] TRACE: [EXEC_SUCCESS, #0] Nexus_5
+
+detox[71089] ERROR: Cannot boot Android Emulator with the name: 'emulator-5554'
+
+HINT: Make sure you choose one of the available emulators: Nexus_5
+detox[71089] INFO:  [97mExample[39m is assigned to [91mundefined[39m
+detox[71089] INFO:  [1m[37mExample: [39m[22m[90mshould have welcome screen[39m
+detox[71089] INFO:  [1m[37mExample: [39m[22m[90mshould have welcome screen[39m[90m [[33mSKIPPED[90m][39m
+detox[71089] INFO:  [1m[37mExample: [39m[22m[90mshould show hello screen after tap[39m
+detox[71089] INFO:  [1m[37mExample: [39m[22m[90mshould show hello screen after tap[39m[90m [[33mSKIPPED[90m][39m
+detox[71089] INFO:  [1m[37mExample: [39m[22m[90mshould show world screen after tap[39m
+detox[71089] INFO:  [1m[37mExample: [39m[22m[90mshould show world screen after tap[39m[90m [[33mSKIPPED[90m][39m
+detox[71089] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeCleanup()
+detox[71089] TRACE: [ARTIFACT_START] starting FileArtifact
+detox[71089] TRACE: [ARTIFACT_STOP] stopping FileArtifact
+detox[71089] TRACE: [ARTIFACT_SAVE] saving FileArtifact to: artifacts/android.2021-04-13 07-38-28Z/detox_pid_71089.json.log { append: true }
+detox[71089] TRACE: [ARTIFACT_START] starting FileArtifact
+detox[71089] TRACE: [ARTIFACT_STOP] stopping FileArtifact
+detox[71089] TRACE: [ARTIFACT_SAVE] saving FileArtifact to: artifacts/android.2021-04-13 07-38-28Z/detox_pid_71089.log { append: true }
+detox[71089] DEBUG: [MOVE_FILE] moving "/private/var/folders/hh/9zq41fns7kbbqgb6q6pqk0z80000gp/T/bf92b2ea-a5c8-4ed8-bdf3-983041dcc5d5.detox.log" to artifacts/android.2021-04-13 07-38-28Z/detox_pid_71089.json.log
+detox[71089] DEBUG: [MOVE_FILE] moving "/private/var/folders/hh/9zq41fns7kbbqgb6q6pqk0z80000gp/T/2ae206d6-a3c2-43b6-91db-08e936057a69.detox.log" to artifacts/android.2021-04-13 07-38-28Z/detox_pid_71089.log
+detox[71089] DEBUG: [SERVER_CLOSE] Detox server has been closed gracefully
+detox[71089] TRACE: [SESSION_TORN] tester exited session 4cdb6491-3590-4423-d53b-c2d005fa2b1b

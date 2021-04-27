@@ -94,13 +94,6 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         [AppsFlyerLib shared].appleAppID = appId;
         [AppsFlyerLib shared].appsFlyerDevKey = devKey;
         [AppsFlyerLib shared].isDebug = isDebug;
-        // Load SKAD rules
-        SEL SKSel = NSSelectorFromString(@"__willResolveSKRules:");
-        id AppsFlyer = [AppsFlyerLib shared];
-        if ([AppsFlyer respondsToSelector:SKSel]) {
-            bypassDidFinishLaunchingWithOption msgSend = (bypassDidFinishLaunchingWithOption)objc_msgSend;
-            msgSend(AppsFlyer, SKSel, 2);
-        }
 
         [[AppsFlyerLib shared] start];
 

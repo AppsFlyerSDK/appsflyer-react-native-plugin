@@ -1,0 +1,14 @@
+--------- beginning of main
+04-13 11:45:18.107 23314 23364 I WebSocketClient: At sendAction
+04-13 11:45:18.108 23314 23364 D WebSocketClient: Detox Action Sent: invokeResult
+04-13 11:45:18.111 23314 23366 I WebSocketClient: At onMessage
+04-13 11:45:18.111 23314 23366 I WebSocketClient: At receiveAction
+04-13 11:45:18.111 23314 23366 D WebSocketClient: Detox Action Received: invoke
+04-13 11:45:18.111 23314 23366 I DetoxManager: onAction: type: invoke params: {"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyInitResult"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForText","args":["No 'devKey' found or its empty"]}}]}
+04-13 11:45:18.112 23314 23364 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForTestId, [noDevKeyInitResult]
+04-13 11:45:18.112 23314 23364 D Detox   : class androidx.test.espresso.Espresso, onView, [(with tag value: is "noDevKeyInitResult" and view has effective visibility=VISIBLE)]
+04-13 11:45:18.112 23314 23364 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForText, [No 'devKey' found or its empty]
+04-13 11:45:18.112 23314 23364 D Detox   : class com.wix.detox.espresso.DetoxAssertion, assertMatcher, [androidx.test.espresso.ViewInteraction@82f9aa0, (with text: is "No 'devKey' found or its empty" and view has effective visibility=VISIBLE)]
+04-13 11:45:18.114 23314 23314 I ViewInteraction: Checking 'MatchesViewAssertion(Detox){viewMatcher=(with text: is "No 'devKey' found or its empty" and view has effective visibility=VISIBLE)}' assertion on view (with tag value: is "noDevKeyInitResult" and view has effective visibility=VISIBLE)
+04-13 11:45:18.116 23314 23364 I WebSocketClient: At sendAction
+04-13 11:45:18.116 23314 23364 D WebSocketClient: Detox Action Sent: invokeResult
