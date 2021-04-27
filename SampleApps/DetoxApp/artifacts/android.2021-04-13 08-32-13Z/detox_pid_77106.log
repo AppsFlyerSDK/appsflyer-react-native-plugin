@@ -1,0 +1,331 @@
+detox[77106] TRACE: [DETOX_CREATE] created a Detox instance with config:
+{"artifactsConfig":{"rootDir":"artifacts/android.2021-04-13 08-32-13Z","plugins":{"log":{"enabled":true,"keepOnlyFailedTestsArtifacts":false},"screenshot":{"enabled":true,"shouldTakeAutomaticSnapshots":false,"keepOnlyFailedTestsArtifacts":false},"video":{"enabled":false,"keepOnlyFailedTestsArtifacts":false},"instruments":{"enabled":false,"keepOnlyFailedTestsArtifacts":false},"timeline":{"enabled":false},"uiHierarchy":{"enabled":false,"keepOnlyFailedTestsArtifacts":false}},"pathBuilder":{"_rootDir":"artifacts/android.2021-04-13 08-32-13Z"}},"appsConfig":{"default":{"type":"android.apk","binaryPath":"android/app/build/outputs/apk/release/app-release.apk","build":"cd android ; ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release ; cd .."}},"behaviorConfig":{"init":{"reinstallApp":true,"exposeGlobals":true},"cleanup":{"shutdownDevice":false},"launchApp":"auto"},"cliConfig":{"recordLogs":"all","configuration":"android","forceAdbInstall":"false","useCustomLogger":"true"},"deviceConfig":{"type":"android.emulator","device":{"avdName":"Nexus_5"}},"runnerConfig":{"testRunner":"jest","runnerConfig":"e2e/config.json","specs":"e2e"},"sessionConfig":{"autoStart":true,"server":"ws://localhost:61485","sessionId":"16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b","debugSynchronization":10000},"errorComposer":{"configurationName":"android","filepath":"/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/.detoxrc.json","contents":{"testRunner":"jest","runnerConfig":"e2e/config.json","apps":{"ios":{"type":"ios.app","binaryPath":"SPECIFY_PATH_TO_YOUR_APP_BINARY"},"android":{"type":"android.apk","binaryPath":"android/app/build/outputs/apk/release/app-release.apk","build":"cd android ; ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release ; cd .."}},"devices":{"simulator":{"type":"ios.simulator","device":{"type":"iPhone 11"}},"amit-device":{"type":"android.emulator","device":{"avdName":"Nexus_5"}}},"configurations":{"ios":{"device":"simulator","app":"ios"},"android":{"device":"amit-device","app":"android"}}},"_extends":false}}
+detox[77106] DEBUG: [DetoxServer.js] Detox server listening on localhost:61485...
+detox[77106] TRACE: [WS_OPEN] opened web socket to: ws://localhost:61485
+detox[77106] TRACE: [WS_SEND] {"type":"login","params":{"sessionId":"16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b","role":"tester"},"messageId":0}
+detox[77106] TRACE: [GET_FROM, #61486] {"type":"login","params":{"sessionId":"16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b","role":"tester"},"messageId":0}
+detox[77106] TRACE: [SESSION_CREATED] created session 16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b
+detox[77106] TRACE: [SEND_TO, #tester] {"type":"loginSuccess","params":{"testerConnected":true,"appConnected":false},"messageId":0}
+detox[77106] TRACE: [SESSION_JOINED] tester joined session 16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b
+detox[77106] TRACE: [WS_MESSAGE] {"type":"loginSuccess","params":{"testerConnected":true,"appConnected":false},"messageId":0}
+ 
+detox[77106] DEBUG: [EXEC_CMD, #0] "/Users/amitkremer/Library/Android/sdk/emulator/emulator" -list-avds --verbose
+detox[77106] TRACE: [EXEC_SUCCESS, #0] Nexus_5
+
+detox[77106] DEBUG: [EXEC_CMD, #1] "/Users/amitkremer/Library/Android/sdk/emulator/emulator" -version 
+detox[77106] TRACE: [EXEC_SUCCESS, #1] Android emulator version 30.1.5.0 (build_id 6855416) (CL:N/A)
+Copyright (C) 2006-2017 The Android Open Source Project and many others.
+This program is a derivative of the QEMU CPU emulator (www.qemu.org).
+
+  This software is licensed under the terms of the GNU General Public
+  License version 2, as published by the Free Software Foundation, and
+  may be copied, distributed, and modified under those terms.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+
+detox[77106] DEBUG: [EMU_BIN_VERSION_DETECT] Detected emulator binary version { major: 30, minor: 1, patch: 5, toString: [Function: toString] }
+detox[77106] DEBUG: [ALLOCATE_DEVICE] Trying to allocate a device based on "Nexus_5"
+detox[77106] DEBUG: [EXEC_CMD, #2] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb"  devices
+detox[77106] DEBUG: [EXEC_SUCCESS, #2] List of devices attached
+emulator-5554	device
+
+
+detox[77106] TRACE: [TELNET_CONNECTING] port: 5554, host: localhost
+detox[77106] DEBUG: [DEVICE_LOOKUP] Found a matching & free device emulator-5554
+detox[77106] DEBUG: [ALLOCATE_DEVICE] Settled on emulator-5554
+detox[77106] DEBUG: [EXEC_CMD, #3] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "getprop dev.bootcomplete"
+detox[77106] TRACE: [EXEC_SUCCESS, #3] 1
+
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBootDevice({ coldBoot: false, deviceId: 'emulator-5554', type: 'Nexus_5' })
+detox[77106] DEBUG: [EXEC_CMD, #4] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "getprop ro.build.version.sdk"
+detox[77106] TRACE: [EXEC_SUCCESS, #4] 29
+
+detox[77106] DEBUG: [EXEC_CMD, #5] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "settings put global animator_duration_scale 0"
+detox[77106] TRACE: [EXEC_SUCCESS, #5] 
+detox[77106] DEBUG: [EXEC_CMD, #6] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "settings put global window_animation_scale 0"
+detox[77106] TRACE: [EXEC_SUCCESS, #6] 
+detox[77106] DEBUG: [EXEC_CMD, #7] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "settings put global transition_animation_scale 0"
+detox[77106] TRACE: [EXEC_SUCCESS, #7] 
+detox[77106] DEBUG: [EXEC_CMD, #8] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "dumpsys power | grep \"^[ ]*m[UW].*=\""
+detox[77106] TRACE: [EXEC_SUCCESS, #8]   mWakefulness=Awake
+  mWakefulnessChanging=false
+  mWakeLockSummary=0x1
+  mUserActivitySummary=0x1
+  mWakeUpWhenPluggedOrUnpluggedConfig=false
+  mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig=false
+  mUserActivityTimeoutOverrideFromWindowManager=-1
+  mUserInactiveOverrideFromWindowManager=false
+  mUserId=0
+
+detox[77106] DEBUG: [EXEC_CMD, #9] "/Users/amitkremer/Library/Android/sdk/build-tools/30.0.3/aapt" dump badging "/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/release/app-release.apk" | grep -e "package: name="
+detox[77106] TRACE: [EXEC_SUCCESS, #9] package: name='com.detoxtest' versionCode='1' versionName='1.0' compileSdkVersion='29' compileSdkVersionCodename='10'
+
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeTerminateApp({ deviceId: 'emulator-5554', bundleId: 'com.detoxtest' })
+detox[77106] DEBUG: [EXEC_CMD, #10] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "am force-stop com.detoxtest"
+detox[77106] TRACE: [EXEC_SUCCESS, #10] 
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTerminateApp({ deviceId: 'emulator-5554', bundleId: 'com.detoxtest' })
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeUninstallApp({ deviceId: 'emulator-5554', bundleId: 'com.detoxtest' })
+detox[77106] DEBUG: [EXEC_CMD, #11] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "pm list packages com.detoxtest"
+detox[77106] TRACE: [EXEC_SUCCESS, #11] package:com.detoxtest
+package:com.detoxtest.test
+
+detox[77106] DEBUG: [EXEC_CMD, #12] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 uninstall com.detoxtest
+detox[77106] TRACE: [EXEC_SUCCESS, #12] Success
+
+detox[77106] DEBUG: [EXEC_CMD, #13] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "pm list packages com.detoxtest.test"
+detox[77106] TRACE: [EXEC_SUCCESS, #13] package:com.detoxtest.test
+
+detox[77106] DEBUG: [EXEC_CMD, #14] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 uninstall com.detoxtest.test
+detox[77106] TRACE: [EXEC_SUCCESS, #14] Success
+
+detox[77106] DEBUG: [EXEC_CMD, #15] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "rm -fr /data/local/tmp/detox"
+detox[77106] TRACE: [EXEC_SUCCESS, #15] 
+detox[77106] DEBUG: [EXEC_CMD, #16] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "mkdir -p /data/local/tmp/detox"
+detox[77106] TRACE: [EXEC_SUCCESS, #16] 
+detox[77106] DEBUG: [EXEC_CMD, #17] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 push "/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/release/app-release.apk" "/data/local/tmp/detox/Application.apk"
+detox[77106] TRACE: [EXEC_SUCCESS, #17] /Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/release/app-release.apk: 1 file pushed, 0 skipped. 106.6 MB/s (26409698 bytes in 0.236s)
+
+detox[77106] DEBUG: [EXEC_CMD, #18] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "pm install -r -g -t /data/local/tmp/detox/Application.apk"
+detox[77106] TRACE: [EXEC_SUCCESS, #18] Success
+
+detox[77106] DEBUG: [EXEC_CMD, #19] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 push "/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk" "/data/local/tmp/detox/Test.apk"
+detox[77106] TRACE: [EXEC_SUCCESS, #19] /Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk: 1 file pushed, 0 skipped. 228.9 MB/s (1330433 bytes in 0.006s)
+
+detox[77106] DEBUG: [EXEC_CMD, #20] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "pm install -r -g -t /data/local/tmp/detox/Test.apk"
+detox[77106] TRACE: [EXEC_SUCCESS, #20] Success
+
+ROOT_DESCRIBE_BLOCK[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onRunDescribeStart({ name: 'ROOT_DESCRIBE_BLOCK' })
+Example[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onRunDescribeStart({ name: 'Example' })
+detox[77106] INFO:  [97mExample[39m is assigned to [94memulator-5554 (Nexus_5)[39m
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeTerminateApp({ deviceId: 'emulator-5554', bundleId: 'com.detoxtest' })
+detox[77106] DEBUG: [EXEC_CMD, #21] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "am force-stop com.detoxtest"
+detox[77106] TRACE: [EXEC_SUCCESS, #21] 
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTerminateApp({ deviceId: 'emulator-5554', bundleId: 'com.detoxtest' })
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeLaunchApp({
+  deviceId: 'emulator-5554',
+  bundleId: 'com.detoxtest',
+  launchArgs: {
+    detoxServer: 'ws://localhost:61485',
+    detoxSessionId: '16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b'
+  }
+})
+detox[77106] DEBUG: [EXEC_CMD, #22] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "date +\"%m-%d %T.000\""
+detox[77106] TRACE: [EXEC_SUCCESS, #22] 04-13 11:32:18.000
+
+detox[77106] DEBUG: [EXEC_CMD, #23] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 reverse tcp:61485 tcp:61485
+detox[77106] TRACE: [EXEC_SUCCESS, #23] 61485
+
+detox[77106] DEBUG: [EXEC_CMD, #24] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "pm list instrumentation"
+detox[77106] TRACE: [EXEC_SUCCESS, #24] instrumentation:com.appsflyer.reactnative.test/android.test.InstrumentationTestRunner (target=com.appsflyer.reactnative.test)
+instrumentation:com.detoxtest.test/androidx.test.runner.AndroidJUnitRunner (target=com.detoxtest)
+
+detox[77106] DEBUG: [SPAWN_CMD, #77147] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell am instrument -w -r -e detoxServer ws://localhost:61485 -e detoxSessionId 16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b -e debug false com.detoxtest.test/androidx.test.runner.AndroidJUnitRunner
+detox[77106] DEBUG: [EXEC_CMD, #25] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "ps | grep \"com\.detoxtest$\""
+detox[77106] TRACE: [EXEC_SUCCESS, #25] u0_a256       21138    359 1292020 107300 0                   0 S com.detoxtest
+
+detox[21138] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onLaunchApp({
+  deviceId: 'emulator-5554',
+  bundleId: 'com.detoxtest',
+  launchArgs: {
+    detoxServer: 'ws://localhost:61485',
+    detoxSessionId: '16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b'
+  },
+  pid: 21138
+})
+detox[77106] TRACE: [ARTIFACT_START] starting ADBLogcatRecording
+detox[77106] DEBUG: [SPAWN_CMD, #77149] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell "logcat -T \"04-13 11:32:18.000\" --pid=21138 -f /sdcard/113214648_0.log"
+detox[77106] TRACE: [SPAWN_STDOUT, #77147] INSTRUMENTATION_STATUS: class=com.detoxtest.DetoxTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.detoxtest.DetoxTest:
+INSTRUMENTATION_STATUS: test=runDetoxTests
+INSTRUMENTATION_STATUS_CODE: 1
+
+detox[77106] DEBUG: [EXEC_CMD, #26] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell du /sdcard/113214648_0.log
+detox[77106] TRACE: [EXEC_SUCCESS, #26] 4	/sdcard/113214648_0.log
+
+detox[77106] TRACE: [GET_FROM, #61567] {"messageId":0,"type":"login","params":{"role":"app","sessionId":"16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b"}}
+detox[77106] TRACE: [SEND_TO, #app] {"messageId":0,"type":"loginSuccess","params":{"testerConnected":true,"appConnected":true}}
+detox[77106] TRACE: [SESSION_JOINED] app joined session 16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b
+detox[77106] TRACE: [SEND_TO, #tester] {"type":"appConnected"}
+detox[77106] TRACE: [GET_FROM, #app] {"messageId":-1000,"type":"ready","params":{}}
+detox[77106] TRACE: [SEND_TO, #tester] {"messageId":-1000,"type":"ready","params":{}}
+detox[77106] TRACE: [WS_MESSAGE] {"type":"appConnected"}
+ 
+detox[77106] TRACE: [WS_MESSAGE] {"messageId":-1000,"type":"ready","params":{}}
+ 
+detox[21138] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onAppReady({ deviceId: 'emulator-5554', bundleId: 'com.detoxtest', pid: 21138 })
+detox[77106] INFO:  [1m[37mExample: [39m[22m[90minitSdk should return  success[39m
+detox[77106] TRACE: [DETOX_BEFORE_EACH] running test: "Example initSdk should return  success"
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTestStart({
+  title: 'initSdk should return  success',
+  fullName: 'Example initSdk should return  success',
+  status: 'running',
+  invocations: 1
+})
+detox[77106] TRACE: [ARTIFACT_STOP] stopping ADBLogcatRecording
+detox[77106] DEBUG: [EXEC_CMD, #27] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "date +\"%m-%d %T.000\""
+detox[77106] TRACE: [EXEC_SUCCESS, #27] 04-13 11:32:20.000
+
+detox[77106] TRACE: [SPAWN_KILL, #77149] sending SIGINT to: /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell logcat -T "04-13 11:32:18.000" --pid=21138 -f /sdcard/113214648_0.log
+detox[77106] DEBUG: [SPAWN_END, #77149] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell "logcat -T \"04-13 11:32:18.000\" --pid=21138 -f /sdcard/113214648_0.log" terminated with SIGINT
+detox[77106] TRACE: [ARTIFACT_START] starting ADBLogcatRecording
+detox[77106] DEBUG: [SPAWN_CMD, #77154] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell "logcat -T \"04-13 11:32:20.000\" --pid=21138 -f /sdcard/113214648_1.log"
+detox[77106] TRACE: [WS_SEND] {"type":"reactNativeReload","params":{},"messageId":-1000}
+detox[77106] TRACE: [GET_FROM, #tester] {"type":"reactNativeReload","params":{},"messageId":-1000}
+detox[77106] TRACE: [SEND_TO, #app] {"type":"reactNativeReload","params":{},"messageId":-1000}
+detox[77106] TRACE: [GET_FROM, #app] {"messageId":-1000,"type":"ready","params":{}}
+detox[77106] TRACE: [SEND_TO, #tester] {"messageId":-1000,"type":"ready","params":{}}
+detox[77106] TRACE: [WS_MESSAGE] {"messageId":-1000,"type":"ready","params":{}}
+ 
+detox[77106] TRACE: [WS_SEND] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]},"messageId":1}
+detox[77106] TRACE: [GET_FROM, #tester] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]},"messageId":1}
+detox[77106] TRACE: [SEND_TO, #app] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]},"messageId":1}
+detox[77106] DEBUG: [EXEC_CMD, #28] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell du /sdcard/113214648_1.log
+detox[77106] TRACE: [EXEC_SUCCESS, #28] 4	/sdcard/113214648_1.log
+
+detox[77106] TRACE: [GET_FROM, #app] {"messageId":1,"type":"invokeResult","params":{"result":null}}
+detox[77106] TRACE: [SEND_TO, #tester] {"messageId":1,"type":"invokeResult","params":{"result":null}}
+detox[77106] TRACE: [WS_MESSAGE] {"messageId":1,"type":"invokeResult","params":{"result":null}}
+ 
+detox[77106] TRACE: [WS_SEND] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]},"messageId":2}
+detox[77106] TRACE: [GET_FROM, #tester] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]},"messageId":2}
+detox[77106] TRACE: [SEND_TO, #app] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]},"messageId":2}
+detox[77106] TRACE: [GET_FROM, #app] {"messageId":2,"type":"invokeResult","params":{"result":null}}
+detox[77106] TRACE: [SEND_TO, #tester] {"messageId":2,"type":"invokeResult","params":{"result":null}}
+detox[77106] TRACE: [WS_MESSAGE] {"messageId":2,"type":"invokeResult","params":{"result":null}}
+ 
+detox[77106] TRACE: [WS_SEND] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitResult"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForText","args":["Success"]}}]},"messageId":3}
+detox[77106] TRACE: [GET_FROM, #tester] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitResult"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForText","args":["Success"]}}]},"messageId":3}
+detox[77106] TRACE: [SEND_TO, #app] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitResult"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForText","args":["Success"]}}]},"messageId":3}
+detox[77106] TRACE: [GET_FROM, #app] {"messageId":3,"type":"invokeResult","params":{"result":null}}
+detox[77106] TRACE: [SEND_TO, #tester] {"messageId":3,"type":"invokeResult","params":{"result":null}}
+detox[77106] TRACE: [WS_MESSAGE] {"messageId":3,"type":"invokeResult","params":{"result":null}}
+ 
+detox[77106] TRACE: [DETOX_AFTER_EACH] passed test: "Example initSdk should return  success"
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTestDone({
+  title: 'initSdk should return  success',
+  fullName: 'Example initSdk should return  success',
+  status: 'passed',
+  invocations: 1,
+  timedOut: false
+})
+detox[77106] TRACE: [ARTIFACT_STOP] stopping ADBLogcatRecording
+detox[77106] DEBUG: [EXEC_CMD, #29] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "date +\"%m-%d %T.000\""
+detox[77106] TRACE: [EXEC_SUCCESS, #29] 04-13 11:32:21.000
+
+detox[77106] TRACE: [SPAWN_KILL, #77154] sending SIGINT to: /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell logcat -T "04-13 11:32:20.000" --pid=21138 -f /sdcard/113214648_1.log
+detox[77106] DEBUG: [SPAWN_END, #77154] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell "logcat -T \"04-13 11:32:20.000\" --pid=21138 -f /sdcard/113214648_1.log" terminated with SIGINT
+detox[77106] INFO:  [1m[37mExample: [39m[22m[90minitSdk should return  success[39m[90m [[32mOK[90m][39m
+detox[77106] INFO:  [1m[37mExample: [39m[22m[90minitSdk should return 'No 'devKey' found or its empty'[39m
+detox[77106] TRACE: [DETOX_BEFORE_EACH] running test: "Example initSdk should return 'No 'devKey' found or its empty'"
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTestStart({
+  title: "initSdk should return 'No 'devKey' found or its empty'",
+  fullName: "Example initSdk should return 'No 'devKey' found or its empty'",
+  status: 'running',
+  invocations: 1
+})
+detox[77106] TRACE: [ARTIFACT_START] starting ADBLogcatRecording
+detox[77106] DEBUG: [SPAWN_CMD, #77158] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell "logcat -T \"04-13 11:32:21.000\" --pid=21138 -f /sdcard/113214648_2.log"
+detox[77106] TRACE: [WS_SEND] {"type":"reactNativeReload","params":{},"messageId":-1000}
+detox[77106] TRACE: [GET_FROM, #tester] {"type":"reactNativeReload","params":{},"messageId":-1000}
+detox[77106] TRACE: [SEND_TO, #app] {"type":"reactNativeReload","params":{},"messageId":-1000}
+detox[77106] TRACE: [ARTIFACT_SAVE] saving ADBLogcatRecording to: artifacts/android.2021-04-13 08-32-13Z/✓ Example initSdk should return  success/process.log
+detox[77106] DEBUG: [EXEC_CMD, #30] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 pull "/sdcard/113214648_1.log" "artifacts/android.2021-04-13 08-32-13Z/✓ Example initSdk should return  success/process.log"
+detox[77106] TRACE: [EXEC_SUCCESS, #30] /sdcard/113214648_1.log: 1 file pulled, 0 skipped. 3.4 MB/s (17227 bytes in 0.005s)
+
+detox[77106] DEBUG: [EXEC_CMD, #31] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "rm  \"/sdcard/113214648_1.log\""
+detox[77106] TRACE: [GET_FROM, #app] {"messageId":-1000,"type":"ready","params":{}}
+detox[77106] TRACE: [SEND_TO, #tester] {"messageId":-1000,"type":"ready","params":{}}
+detox[77106] TRACE: [WS_MESSAGE] {"messageId":-1000,"type":"ready","params":{}}
+ 
+detox[77106] TRACE: [WS_SEND] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]},"messageId":4}
+detox[77106] TRACE: [GET_FROM, #tester] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]},"messageId":4}
+detox[77106] TRACE: [SEND_TO, #app] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]},"messageId":4}
+detox[77106] TRACE: [EXEC_SUCCESS, #31] 
+detox[77106] TRACE: [ARTIFACT_SAVE] saving ADBLogcatRecording to: artifacts/android.2021-04-13 08-32-13Z/emulator-5554 2021-04-13 08-32-23Z.startup.log
+detox[77106] DEBUG: [EXEC_CMD, #32] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 pull "/sdcard/113214648_0.log" "artifacts/android.2021-04-13 08-32-13Z/emulator-5554 2021-04-13 08-32-23Z.startup.log"
+detox[77106] TRACE: [EXEC_SUCCESS, #32] /sdcard/113214648_0.log: 1 file pulled, 0 skipped. 5.8 MB/s (27176 bytes in 0.004s)
+
+detox[77106] DEBUG: [EXEC_CMD, #33] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "rm  \"/sdcard/113214648_0.log\""
+detox[77106] TRACE: [EXEC_SUCCESS, #33] 
+detox[77106] DEBUG: [EXEC_CMD, #34] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell du /sdcard/113214648_2.log
+detox[77106] TRACE: [EXEC_SUCCESS, #34] 4	/sdcard/113214648_2.log
+
+detox[77106] TRACE: [GET_FROM, #app] {"messageId":4,"type":"invokeResult","params":{"result":null}}
+detox[77106] TRACE: [SEND_TO, #tester] {"messageId":4,"type":"invokeResult","params":{"result":null}}
+detox[77106] TRACE: [WS_MESSAGE] {"messageId":4,"type":"invokeResult","params":{"result":null}}
+ 
+detox[77106] TRACE: [WS_SEND] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["initButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]},"messageId":5}
+detox[77106] TRACE: [GET_FROM, #tester] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["initButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]},"messageId":5}
+detox[77106] TRACE: [SEND_TO, #app] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["initButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]},"messageId":5}
+detox[77106] TRACE: [GET_FROM, #app] {"messageId":5,"type":"testFailed","params":{"details":"No views in hierarchy found matching: (with tag value: is \"initButton\" and view has effective visibility=VISIBLE)\n","viewHierarchy":"+>DecorView{id=-1, visibility=VISIBLE, width=1080, height=1920, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params={(0,0)(fillxfill) sim={adjust=resize} ty=BASE_APPLICATION wanim=0x10302ff\n  fl=LAYOUT_IN_SCREEN FORCE_NOT_FULLSCREEN LAYOUT_INSET_DECOR SPLIT_TOUCH HARDWARE_ACCELERATED DRAWS_SYSTEM_BAR_BACKGROUNDS\n  pfl=FORCE_DRAW_STATUS_BAR_BACKGROUND FIT_INSETS_CONTROLLED\n  fitSides=}, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=3} \n|\n+->LinearLayout{id=-1, visibility=VISIBLE, width=1080, height=1776, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@10ffdbc, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=2} \n|\n+-->ViewStub{id=16908714, res-name=action_mode_bar_stub, visibility=GONE, width=0, height=0, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=true, is-selected=false, layout-params=android.widget.LinearLayout$LayoutParams@e868145, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0} \n|\n+-->FrameLayout{id=-1, visibility=VISIBLE, width=1080, height=1704, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.LinearLayout$LayoutParams@a749dcb, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=72.0, child-count=1} \n|\n+--->FitWindowsLinearLayout{id=2131165199, res-name=action_bar_root, visibility=VISIBLE, width=1080, height=1704, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@b77cc66, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=2} \n|\n+---->ViewStubCompat{id=2131165210, res-name=action_mode_bar_stub, visibility=GONE, width=0, height=0, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=true, is-selected=false, layout-params=android.widget.LinearLayout$LayoutParams@f2d4ba7, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0} \n|\n+---->ContentFrameLayout{id=16908290, res-name=content, visibility=VISIBLE, width=1080, height=1704, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.LinearLayout$LayoutParams@d804854, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+----->ReactRootView{id=21, visibility=VISIBLE, width=1080, height=1704, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@62448f2, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+------>ReactScrollView{id=33, visibility=VISIBLE, width=1080, height=492, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=true, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@9c395c0, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+------->ReactViewGroup{id=29, visibility=VISIBLE, width=1080, height=492, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@26772f9, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+-------->ReactViewGroup{id=27, visibility=VISIBLE, width=1080, height=492, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@aa023e, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=4} \n|\n+--------->ReactViewGroup{id=7, visibility=VISIBLE, width=1080, height=105, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=true, is-enabled=true, is-focused=false, is-focusable=true, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@f06089f, tag=successInitButton, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+---------->ReactTextView{id=5, visibility=VISIBLE, width=1032, height=57, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@12345b5, tag=null, root-is-layout-requested=false, has-input-connection=false, x=24.0, y=24.0, text=SUCCESS INITSDK, input-type=0, ime-target=false, has-links=false} \n|\n+--------->ReactTextView{id=13, visibility=VISIBLE, width=1020, height=81, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@a40044a, tag=successInitResult, root-is-layout-requested=false, has-input-connection=false, x=30.0, y=135.0, text=Not clicked yet, input-type=0, ime-target=false, has-links=false} \n|\n+--------->ReactViewGroup{id=19, visibility=VISIBLE, width=1080, height=105, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=true, is-enabled=true, is-focused=false, is-focusable=true, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@9cc8fbb, tag=noDevKeyButton, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=246.0, child-count=1} \n|\n+---------->ReactTextView{id=17, visibility=VISIBLE, width=1032, height=57, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@5865cd8, tag=null, root-is-layout-requested=false, has-input-connection=false, x=24.0, y=24.0, text=NO DEVKEY INITSDK, input-type=0, ime-target=false, has-links=false} \n|\n+--------->ReactTextView{id=25, visibility=VISIBLE, width=1020, height=81, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@18f8831, tag=noDevKeyInitResult, root-is-layout-requested=false, has-input-connection=false, x=30.0, y=381.0, text=Not clicked yet, input-type=0, ime-target=false, has-links=false} \n|\n+->View{id=16908336, res-name=navigationBarBackground, visibility=VISIBLE, width=1080, height=144, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@c821b16, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=1776.0} \n|\n+->View{id=16908335, res-name=statusBarBackground, visibility=VISIBLE, width=1080, height=72, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@aa6c97, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0} \n|"}}
+detox[77106] TRACE: [SEND_TO, #tester] {"messageId":5,"type":"testFailed","params":{"details":"No views in hierarchy found matching: (with tag value: is \"initButton\" and view has effective visibility=VISIBLE)\n","viewHierarchy":"+>DecorView{id=-1, visibility=VISIBLE, width=1080, height=1920, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params={(0,0)(fillxfill) sim={adjust=resize} ty=BASE_APPLICATION wanim=0x10302ff\n  fl=LAYOUT_IN_SCREEN FORCE_NOT_FULLSCREEN LAYOUT_INSET_DECOR SPLIT_TOUCH HARDWARE_ACCELERATED DRAWS_SYSTEM_BAR_BACKGROUNDS\n  pfl=FORCE_DRAW_STATUS_BAR_BACKGROUND FIT_INSETS_CONTROLLED\n  fitSides=}, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=3} \n|\n+->LinearLayout{id=-1, visibility=VISIBLE, width=1080, height=1776, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@10ffdbc, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=2} \n|\n+-->ViewStub{id=16908714, res-name=action_mode_bar_stub, visibility=GONE, width=0, height=0, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=true, is-selected=false, layout-params=android.widget.LinearLayout$LayoutParams@e868145, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0} \n|\n+-->FrameLayout{id=-1, visibility=VISIBLE, width=1080, height=1704, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.LinearLayout$LayoutParams@a749dcb, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=72.0, child-count=1} \n|\n+--->FitWindowsLinearLayout{id=2131165199, res-name=action_bar_root, visibility=VISIBLE, width=1080, height=1704, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@b77cc66, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=2} \n|\n+---->ViewStubCompat{id=2131165210, res-name=action_mode_bar_stub, visibility=GONE, width=0, height=0, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=true, is-selected=false, layout-params=android.widget.LinearLayout$LayoutParams@f2d4ba7, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0} \n|\n+---->ContentFrameLayout{id=16908290, res-name=content, visibility=VISIBLE, width=1080, height=1704, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.LinearLayout$LayoutParams@d804854, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+----->ReactRootView{id=21, visibility=VISIBLE, width=1080, height=1704, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@62448f2, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+------>ReactScrollView{id=33, visibility=VISIBLE, width=1080, height=492, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=true, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@9c395c0, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+------->ReactViewGroup{id=29, visibility=VISIBLE, width=1080, height=492, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@26772f9, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+-------->ReactViewGroup{id=27, visibility=VISIBLE, width=1080, height=492, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@aa023e, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=4} \n|\n+--------->ReactViewGroup{id=7, visibility=VISIBLE, width=1080, height=105, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=true, is-enabled=true, is-focused=false, is-focusable=true, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@f06089f, tag=successInitButton, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+---------->ReactTextView{id=5, visibility=VISIBLE, width=1032, height=57, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@12345b5, tag=null, root-is-layout-requested=false, has-input-connection=false, x=24.0, y=24.0, text=SUCCESS INITSDK, input-type=0, ime-target=false, has-links=false} \n|\n+--------->ReactTextView{id=13, visibility=VISIBLE, width=1020, height=81, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@a40044a, tag=successInitResult, root-is-layout-requested=false, has-input-connection=false, x=30.0, y=135.0, text=Not clicked yet, input-type=0, ime-target=false, has-links=false} \n|\n+--------->ReactViewGroup{id=19, visibility=VISIBLE, width=1080, height=105, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=true, is-enabled=true, is-focused=false, is-focusable=true, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@9cc8fbb, tag=noDevKeyButton, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=246.0, child-count=1} \n|\n+---------->ReactTextView{id=17, visibility=VISIBLE, width=1032, height=57, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@5865cd8, tag=null, root-is-layout-requested=false, has-input-connection=false, x=24.0, y=24.0, text=NO DEVKEY INITSDK, input-type=0, ime-target=false, has-links=false} \n|\n+--------->ReactTextView{id=25, visibility=VISIBLE, width=1020, height=81, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@18f8831, tag=noDevKeyInitResult, root-is-layout-requested=false, has-input-connection=false, x=30.0, y=381.0, text=Not clicked yet, input-type=0, ime-target=false, has-links=false} \n|\n+->View{id=16908336, res-name=navigationBarBackground, visibility=VISIBLE, width=1080, height=144, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@c821b16, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=1776.0} \n|\n+->View{id=16908335, res-name=statusBarBackground, visibility=VISIBLE, width=1080, height=72, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@aa6c97, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0} \n|"}}
+detox[77106] TRACE: [WS_MESSAGE] {"messageId":5,"type":"testFailed","params":{"details":"No views in hierarchy found matching: (with tag value: is \"initButton\" and view has effective visibility=VISIBLE)\n","viewHierarchy":"+>DecorView{id=-1, visibility=VISIBLE, width=1080, height=1920, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params={(0,0)(fillxfill) sim={adjust=resize} ty=BASE_APPLICATION wanim=0x10302ff\n  fl=LAYOUT_IN_SCREEN FORCE_NOT_FULLSCREEN LAYOUT_INSET_DECOR SPLIT_TOUCH HARDWARE_ACCELERATED DRAWS_SYSTEM_BAR_BACKGROUNDS\n  pfl=FORCE_DRAW_STATUS_BAR_BACKGROUND FIT_INSETS_CONTROLLED\n  fitSides=}, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=3} \n|\n+->LinearLayout{id=-1, visibility=VISIBLE, width=1080, height=1776, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@10ffdbc, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=2} \n|\n+-->ViewStub{id=16908714, res-name=action_mode_bar_stub, visibility=GONE, width=0, height=0, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=true, is-selected=false, layout-params=android.widget.LinearLayout$LayoutParams@e868145, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0} \n|\n+-->FrameLayout{id=-1, visibility=VISIBLE, width=1080, height=1704, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.LinearLayout$LayoutParams@a749dcb, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=72.0, child-count=1} \n|\n+--->FitWindowsLinearLayout{id=2131165199, res-name=action_bar_root, visibility=VISIBLE, width=1080, height=1704, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@b77cc66, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=2} \n|\n+---->ViewStubCompat{id=2131165210, res-name=action_mode_bar_stub, visibility=GONE, width=0, height=0, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=true, is-selected=false, layout-params=android.widget.LinearLayout$LayoutParams@f2d4ba7, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0} \n|\n+---->ContentFrameLayout{id=16908290, res-name=content, visibility=VISIBLE, width=1080, height=1704, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.LinearLayout$LayoutParams@d804854, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+----->ReactRootView{id=21, visibility=VISIBLE, width=1080, height=1704, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@62448f2, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+------>ReactScrollView{id=33, visibility=VISIBLE, width=1080, height=492, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=true, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@9c395c0, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+------->ReactViewGroup{id=29, visibility=VISIBLE, width=1080, height=492, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@26772f9, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+-------->ReactViewGroup{id=27, visibility=VISIBLE, width=1080, height=492, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@aa023e, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=4} \n|\n+--------->ReactViewGroup{id=7, visibility=VISIBLE, width=1080, height=105, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=true, is-enabled=true, is-focused=false, is-focusable=true, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@f06089f, tag=successInitButton, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0, child-count=1} \n|\n+---------->ReactTextView{id=5, visibility=VISIBLE, width=1032, height=57, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@12345b5, tag=null, root-is-layout-requested=false, has-input-connection=false, x=24.0, y=24.0, text=SUCCESS INITSDK, input-type=0, ime-target=false, has-links=false} \n|\n+--------->ReactTextView{id=13, visibility=VISIBLE, width=1020, height=81, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@a40044a, tag=successInitResult, root-is-layout-requested=false, has-input-connection=false, x=30.0, y=135.0, text=Not clicked yet, input-type=0, ime-target=false, has-links=false} \n|\n+--------->ReactViewGroup{id=19, visibility=VISIBLE, width=1080, height=105, has-focus=false, has-focusable=true, has-window-focus=true, is-clickable=true, is-enabled=true, is-focused=false, is-focusable=true, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@9cc8fbb, tag=noDevKeyButton, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=246.0, child-count=1} \n|\n+---------->ReactTextView{id=17, visibility=VISIBLE, width=1032, height=57, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@5865cd8, tag=null, root-is-layout-requested=false, has-input-connection=false, x=24.0, y=24.0, text=NO DEVKEY INITSDK, input-type=0, ime-target=false, has-links=false} \n|\n+--------->ReactTextView{id=25, visibility=VISIBLE, width=1020, height=81, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.view.ViewGroup$LayoutParams@18f8831, tag=noDevKeyInitResult, root-is-layout-requested=false, has-input-connection=false, x=30.0, y=381.0, text=Not clicked yet, input-type=0, ime-target=false, has-links=false} \n|\n+->View{id=16908336, res-name=navigationBarBackground, visibility=VISIBLE, width=1080, height=144, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@c821b16, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=1776.0} \n|\n+->View{id=16908335, res-name=statusBarBackground, visibility=VISIBLE, width=1080, height=72, has-focus=false, has-focusable=false, has-window-focus=true, is-clickable=false, is-enabled=true, is-focused=false, is-focusable=false, is-layout-requested=false, is-selected=false, layout-params=android.widget.FrameLayout$LayoutParams@aa6c97, tag=null, root-is-layout-requested=false, has-input-connection=false, x=0.0, y=0.0} \n|"}}
+ 
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTestFnFailure({
+  error: Error: Test Failed: No views in hierarchy found matching: (with tag value: is "initButton" and view has effective visibility=VISIBLE)
+  
+  TIP: To print view hierarchy on failed actions/matches, use log-level verbose or higher.
+      at _callee5$ (/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/e2e/firstTest.e2e.js:22:44)
+      at tryCatch (/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/node_modules/regenerator-runtime/runtime.js:63:40)
+      at Generator.invoke [as _invoke] (/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/node_modules/regenerator-runtime/runtime.js:293:22)
+      at Generator.next (/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/node_modules/regenerator-runtime/runtime.js:118:21)
+      at tryCatch (/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/node_modules/regenerator-runtime/runtime.js:63:40)
+      at invoke (/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/node_modules/regenerator-runtime/runtime.js:154:20)
+      at /Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/node_modules/regenerator-runtime/runtime.js:164:13
+      at processTicksAndRejections (node:internal/process/task_queues:94:5)
+})
+detox[77106] TRACE: [DETOX_AFTER_EACH] failed test: "Example initSdk should return 'No 'devKey' found or its empty'"
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTestDone({
+  title: "initSdk should return 'No 'devKey' found or its empty'",
+  fullName: "Example initSdk should return 'No 'devKey' found or its empty'",
+  status: 'failed',
+  invocations: 1,
+  timedOut: false
+})
+detox[77106] TRACE: [ARTIFACT_STOP] stopping ADBLogcatRecording
+detox[77106] DEBUG: [EXEC_CMD, #35] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "date +\"%m-%d %T.000\""
+detox[77106] TRACE: [EXEC_SUCCESS, #35] 04-13 11:32:22.000
+
+detox[77106] TRACE: [SPAWN_KILL, #77158] sending SIGINT to: /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell logcat -T "04-13 11:32:21.000" --pid=21138 -f /sdcard/113214648_2.log
+detox[77106] DEBUG: [SPAWN_END, #77158] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell "logcat -T \"04-13 11:32:21.000\" --pid=21138 -f /sdcard/113214648_2.log" terminated with SIGINT
+detox[77106] INFO:  [1m[37mExample: [39m[22m[90minitSdk should return 'No 'devKey' found or its empty'[39m[90m [[31mFAIL[90m][39m
+Example[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onRunDescribeFinish({ name: 'Example' })
+ROOT_DESCRIBE_BLOCK[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onRunDescribeFinish({ name: 'ROOT_DESCRIBE_BLOCK' })
+detox[77106] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeCleanup()
+detox[77106] TRACE: [ARTIFACT_SAVE] saving ADBLogcatRecording to: artifacts/android.2021-04-13 08-32-13Z/✗ Example initSdk should return 'No 'devKey' found or its empty'/process.log
+detox[77106] DEBUG: [EXEC_CMD, #36] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 pull "/sdcard/113214648_2.log" "artifacts/android.2021-04-13 08-32-13Z/✗ Example initSdk should return 'No 'devKey' found or its empty'/process.log"
+detox[77106] TRACE: [EXEC_SUCCESS, #36] /sdcard/113214648_2.log: 1 file pulled, 0 skipped. 4.7 MB/s (28656 bytes in 0.006s)
+
+detox[77106] DEBUG: [EXEC_CMD, #37] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "rm  \"/sdcard/113214648_2.log\""
+detox[77106] TRACE: [EXEC_SUCCESS, #37] 
+detox[77106] TRACE: [ARTIFACT_START] starting FileArtifact
+detox[77106] TRACE: [ARTIFACT_STOP] stopping FileArtifact
+detox[77106] TRACE: [ARTIFACT_SAVE] saving FileArtifact to: artifacts/android.2021-04-13 08-32-13Z/detox_pid_77106.json.log { append: true }
+detox[77106] TRACE: [ARTIFACT_START] starting FileArtifact
+detox[77106] TRACE: [ARTIFACT_STOP] stopping FileArtifact
+detox[77106] TRACE: [ARTIFACT_SAVE] saving FileArtifact to: artifacts/android.2021-04-13 08-32-13Z/detox_pid_77106.log { append: true }
+detox[77106] DEBUG: [MOVE_FILE] moving "/private/var/folders/hh/9zq41fns7kbbqgb6q6pqk0z80000gp/T/98aca6d7-4d2c-4147-a949-1de0a62aecbb.detox.log" to artifacts/android.2021-04-13 08-32-13Z/detox_pid_77106.json.log
+detox[77106] DEBUG: [MOVE_FILE] moving "/private/var/folders/hh/9zq41fns7kbbqgb6q6pqk0z80000gp/T/e6f7b6ea-6638-478d-b081-606c206e5663.detox.log" to artifacts/android.2021-04-13 08-32-13Z/detox_pid_77106.log
+detox[77106] TRACE: [WS_SEND] {"type":"cleanup","params":{"stopRunner":false},"messageId":-49642}
+detox[77106] TRACE: [GET_FROM, #tester] {"type":"cleanup","params":{"stopRunner":false},"messageId":-49642}
+detox[77106] TRACE: [SEND_TO, #app] {"type":"cleanup","params":{"stopRunner":false},"messageId":-49642}
+detox[77106] TRACE: [GET_FROM, #app] {"messageId":-49642,"type":"cleanupDone","params":{}}
+detox[77106] TRACE: [SEND_TO, #tester] {"messageId":-49642,"type":"cleanupDone","params":{}}
+detox[77106] TRACE: [WS_MESSAGE] {"messageId":-49642,"type":"cleanupDone","params":{}}
+ 
+detox[77106] TRACE: [SESSION_TORN] tester exited session 16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b
+detox[77106] TRACE: [SEND_TO, #app] {"type":"testerDisconnected","messageId":-1}
+detox[77106] TRACE: [SPAWN_KILL, #77147] sending SIGINT to: /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell am instrument -w -r -e detoxServer ws://localhost:61485 -e detoxSessionId 16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b -e debug false com.detoxtest.test/androidx.test.runner.AndroidJUnitRunner
+detox[77106] DEBUG: [SPAWN_END, #77147] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell am instrument -w -r -e detoxServer ws://localhost:61485 -e detoxSessionId 16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b -e debug false com.detoxtest.test/androidx.test.runner.AndroidJUnitRunner terminated with SIGINT
+detox[77106] DEBUG: [EXEC_CMD, #38] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 reverse --remove tcp:61485
+detox[77106] DEBUG: [SERVER_CLOSE] Detox server has been closed gracefully
+detox[77106] TRACE: [SESSION_TORN] app exited session 16dc1e3d-e499-7766-9a5f-5e62ef5e5b5b
+detox[77106] TRACE: [EXEC_SUCCESS, #38] 

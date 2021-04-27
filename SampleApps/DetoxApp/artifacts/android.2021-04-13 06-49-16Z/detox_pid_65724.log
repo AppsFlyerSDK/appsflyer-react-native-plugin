@@ -1,0 +1,316 @@
+detox[65724] TRACE: [DETOX_CREATE] created a Detox instance with config:
+{"artifactsConfig":{"rootDir":"artifacts/android.2021-04-13 06-49-16Z","plugins":{"log":{"enabled":true,"keepOnlyFailedTestsArtifacts":false},"screenshot":{"enabled":true,"shouldTakeAutomaticSnapshots":false,"keepOnlyFailedTestsArtifacts":false},"video":{"enabled":false,"keepOnlyFailedTestsArtifacts":false},"instruments":{"enabled":false,"keepOnlyFailedTestsArtifacts":false},"timeline":{"enabled":false},"uiHierarchy":{"enabled":false,"keepOnlyFailedTestsArtifacts":false}},"pathBuilder":{"_rootDir":"artifacts/android.2021-04-13 06-49-16Z"}},"appsConfig":{"default":{"type":"android.apk","binaryPath":"android/app/build/outputs/apk/release/app-release.apk","build":"cd android ; ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release ; cd .."}},"behaviorConfig":{"init":{"reinstallApp":true,"exposeGlobals":true},"cleanup":{"shutdownDevice":false},"launchApp":"auto"},"cliConfig":{"recordLogs":"all","configuration":"android","forceAdbInstall":"false","useCustomLogger":"true"},"deviceConfig":{"type":"android.attached","device":{"adbName":"Z9LZ4LMZOBFMRS5S"}},"runnerConfig":{"testRunner":"jest","runnerConfig":"e2e/config.json","specs":"e2e"},"sessionConfig":{"autoStart":true,"server":"ws://localhost:57582","sessionId":"7d1cde57-f8c2-d1c2-58a0-650abced322d","debugSynchronization":10000},"errorComposer":{"configurationName":"android","filepath":"/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/.detoxrc.json","contents":{"testRunner":"jest","runnerConfig":"e2e/config.json","apps":{"ios":{"type":"ios.app","binaryPath":"SPECIFY_PATH_TO_YOUR_APP_BINARY"},"android":{"type":"android.apk","binaryPath":"android/app/build/outputs/apk/release/app-release.apk","build":"cd android ; ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release ; cd .."}},"devices":{"simulator":{"type":"ios.simulator","device":{"type":"iPhone 11"}},"amit-device":{"type":"android.attached","device":{"adbName":"Z9LZ4LMZOBFMRS5S"}}},"configurations":{"ios":{"device":"simulator","app":"ios"},"android":{"device":"amit-device","app":"android"}}},"_extends":false}}
+detox[65724] DEBUG: [DetoxServer.js] Detox server listening on localhost:57582...
+detox[65724] TRACE: [WS_OPEN] opened web socket to: ws://localhost:57582
+detox[65724] TRACE: [WS_SEND] {"type":"login","params":{"sessionId":"7d1cde57-f8c2-d1c2-58a0-650abced322d","role":"tester"},"messageId":0}
+detox[65724] TRACE: [GET_FROM, #57583] {"type":"login","params":{"sessionId":"7d1cde57-f8c2-d1c2-58a0-650abced322d","role":"tester"},"messageId":0}
+detox[65724] TRACE: [SESSION_CREATED] created session 7d1cde57-f8c2-d1c2-58a0-650abced322d
+detox[65724] TRACE: [SEND_TO, #tester] {"type":"loginSuccess","params":{"testerConnected":true,"appConnected":false},"messageId":0}
+detox[65724] TRACE: [SESSION_JOINED] tester joined session 7d1cde57-f8c2-d1c2-58a0-650abced322d
+detox[65724] TRACE: [WS_MESSAGE] {"type":"loginSuccess","params":{"testerConnected":true,"appConnected":false},"messageId":0}
+ 
+detox[65724] DEBUG: [EXEC_CMD, #0] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb"  devices
+detox[65724] DEBUG: [EXEC_SUCCESS, #0] List of devices attached
+Z9LZ4LMZOBFMRS5S	device
+
+
+detox[65724] DEBUG: [DEVICE_LOOKUP] Found a matching & free device Z9LZ4LMZOBFMRS5S
+detox[65724] DEBUG: [EXEC_CMD, #1] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S shell "getprop ro.build.version.sdk"
+detox[65724] TRACE: [EXEC_SUCCESS, #1] 23
+
+detox[65724] DEBUG: [EXEC_CMD, #2] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S shell "dumpsys power | grep \"^[ ]*m[UW].*=\""
+detox[65724] TRACE: [EXEC_SUCCESS, #2]   mWakefulness=Awake
+  mWakefulnessChanging=false
+  mWakeLockSummary=0x0
+  mUserActivitySummary=0x2
+  mWakeUpWhenPluggedOrUnpluggedConfig=true
+  mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig=false
+  mUserActivityTimeoutOverrideFromWindowManager=-1
+
+detox[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBootDevice({ coldBoot: false, deviceId: 'Z9LZ4LMZOBFMRS5S', type: 'device' })
+detox[65724] DEBUG: [EXEC_CMD, #3] "/Users/amitkremer/Library/Android/sdk/build-tools/30.0.3/aapt" dump badging "/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/release/app-release.apk" | grep -e "package: name="
+detox[65724] TRACE: [EXEC_SUCCESS, #3] package: name='com.detoxtest' versionCode='1' versionName='1.0' compileSdkVersion='29' compileSdkVersionCodename='10'
+
+detox[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeTerminateApp({ deviceId: 'Z9LZ4LMZOBFMRS5S', bundleId: 'com.detoxtest' })
+detox[65724] DEBUG: [EXEC_CMD, #4] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S shell "am force-stop com.detoxtest"
+detox[65724] TRACE: [EXEC_SUCCESS, #4] 
+detox[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTerminateApp({ deviceId: 'Z9LZ4LMZOBFMRS5S', bundleId: 'com.detoxtest' })
+detox[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeUninstallApp({ deviceId: 'Z9LZ4LMZOBFMRS5S', bundleId: 'com.detoxtest' })
+detox[65724] DEBUG: [EXEC_CMD, #5] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S shell "pm list packages com.detoxtest"
+detox[65724] TRACE: [EXEC_SUCCESS, #5] package:com.detoxtest
+package:com.detoxtest.test
+
+detox[65724] DEBUG: [EXEC_CMD, #6] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S uninstall com.detoxtest
+detox[65724] TRACE: [EXEC_SUCCESS, #6] Success
+
+detox[65724] DEBUG: [EXEC_CMD, #7] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S shell "pm list packages com.detoxtest.test"
+detox[65724] TRACE: [EXEC_SUCCESS, #7] package:com.detoxtest.test
+
+detox[65724] DEBUG: [EXEC_CMD, #8] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S uninstall com.detoxtest.test
+detox[65724] TRACE: [EXEC_SUCCESS, #8] Success
+
+detox[65724] DEBUG: [EXEC_CMD, #9] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S install -rg "/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/release/app-release.apk"
+detox[65724] TRACE: [EXEC_SUCCESS, #9] Performing Push Install
+/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/release/app-release.apk: 1 file pushed, 0 skipped. 9.0 MB/s (27488218 bytes in 2.919s)
+	pkg: /data/local/tmp/app-release.apk
+Success
+
+detox[65724] DEBUG: [EXEC_CMD, #10] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S install -rg "/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk"
+detox[65724] TRACE: [EXEC_SUCCESS, #10] Performing Push Install
+/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk: 1 file pushed, 0 skipped. 8.8 MB/s (1328869 bytes in 0.144s)
+	pkg: /data/local/tmp/app-release-androidTest.apk
+Success
+
+ROOT_DESCRIBE_BLOCK[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onRunDescribeStart({ name: 'ROOT_DESCRIBE_BLOCK' })
+Example[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onRunDescribeStart({ name: 'Example' })
+detox[65724] INFO:  [97mExample[39m is assigned to [94mZ9LZ4LMZOBFMRS5S[39m
+detox[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeTerminateApp({ deviceId: 'Z9LZ4LMZOBFMRS5S', bundleId: 'com.detoxtest' })
+detox[65724] DEBUG: [EXEC_CMD, #11] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S shell "am force-stop com.detoxtest"
+detox[65724] TRACE: [EXEC_SUCCESS, #11] 
+detox[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTerminateApp({ deviceId: 'Z9LZ4LMZOBFMRS5S', bundleId: 'com.detoxtest' })
+detox[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeLaunchApp({
+  deviceId: 'Z9LZ4LMZOBFMRS5S',
+  bundleId: 'com.detoxtest',
+  launchArgs: {
+    detoxServer: 'ws://localhost:57582',
+    detoxSessionId: '7d1cde57-f8c2-d1c2-58a0-650abced322d'
+  }
+})
+detox[65724] DEBUG: [EXEC_CMD, #12] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S shell "date +\"%m-%d %T.000\""
+detox[65724] TRACE: [EXEC_SUCCESS, #12] 04-13 09:49:43.000
+
+detox[65724] DEBUG: [EXEC_CMD, #13] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S reverse tcp:57582 tcp:57582
+detox[65724] TRACE: [EXEC_SUCCESS, #13] 
+detox[65724] DEBUG: [EXEC_CMD, #14] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S shell "pm list instrumentation"
+detox[65724] TRACE: [EXEC_SUCCESS, #14] instrumentation:com.detoxtest.test/androidx.test.runner.AndroidJUnitRunner (target=com.detoxtest)
+instrumentation:com.microsoft.office.excel/android.test.InstrumentationTestRunner (target=com.microsoft.office.msohttp.tests)
+instrumentation:com.microsoft.office.powerpoint/android.test.InstrumentationTestRunner (target=com.microsoft.office.msohttp.tests)
+
+detox[65724] DEBUG: [SPAWN_CMD, #65782] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s Z9LZ4LMZOBFMRS5S shell am instrument -w -r -e detoxServer ws://localhost:57582 -e detoxSessionId 7d1cde57-f8c2-d1c2-58a0-650abced322d -e debug false com.detoxtest.test/androidx.test.runner.AndroidJUnitRunner
+detox[65724] DEBUG: [EXEC_CMD, #15] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S shell "ps | grep \"com\.detoxtest$\""
+detox[65724] TRACE: [EXEC_SUCCESS, #15] u0_a545   32511 534   1719320 38936            0000000000 R com.detoxtest
+
+detox[32511] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onLaunchApp({
+  deviceId: 'Z9LZ4LMZOBFMRS5S',
+  bundleId: 'com.detoxtest',
+  launchArgs: {
+    detoxServer: 'ws://localhost:57582',
+    detoxSessionId: '7d1cde57-f8c2-d1c2-58a0-650abced322d'
+  },
+  pid: 32511
+})
+detox[65724] TRACE: [ARTIFACT_START] starting ADBLogcatRecording
+detox[65724] DEBUG: [SPAWN_CMD, #65784] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s Z9LZ4LMZOBFMRS5S shell "logcat -T \"04-13 09:49:43.000\" -v brief | grep \"(32511):\" >> /sdcard/94917636_0.log"
+detox[65724] DEBUG: [EXEC_CMD, #16] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S shell du /sdcard/94917636_0.log
+detox[65724] TRACE: [EXEC_SUCCESS, #16] 0	/sdcard/94917636_0.log
+
+detox[65724] TRACE: [SPAWN_STDOUT, #65782] INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.detoxtest.DetoxTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=runDetoxTests
+INSTRUMENTATION_STATUS: class=com.detoxtest.DetoxTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+
+detox[65724] TRACE: [SPAWN_STDOUT, #65782] INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+Error in runDetoxTests(com.detoxtest.DetoxTest):
+java.lang.RuntimeException: Could not launch intent Intent { act=android.intent.action.MAIN flg=0x14000000 cmp=com.detoxtest/.MainActivity (has extras) } within 45 seconds. Perhaps the main thread has not gone idle within a reasonable amount of time? There could be an animation or something constantly repainting the screen. Or the activity is doing network calls on creation? See the threaddump logs. For your reference the last time the event queue was idle before your activity launch request was 1618296585264 and now the last time the queue went idle was: 1618296585264. If these numbers are the same your activity might be hogging the event queue.
+	at androidx.test.runner.MonitoringInstrumentation.startActivitySync(MonitoringInstrumentation.java:481)
+	at androidx.test.rule.ActivityTestRule.launchActivity(ActivityTestRule.java:358)
+	at com.wix.detox.Detox.runTests(Detox.java:201)
+	at com.wix.detox.Detox.runTests(Detox.java:132)
+	at com.detoxtest.DetoxTest.runDetoxTests(DetoxTest.java:29)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at androidx.test.rule.ActivityTestRule$ActivityStatement.evaluate(ActivityTestRule.java:531)
+	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at androidx.test.ext.junit.runners.AndroidJUnit4.run(AndroidJUnit4.java:104)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:56)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:392)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:1893)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=runDetoxTests
+INSTRUMENTATION_STATUS: class=com.detoxtest.DetoxTest
+INSTRUMENTATION_STATUS: stack=java.lang.RuntimeException: Could not launch intent Intent { act=android.intent.action.MAIN flg=0x14000000 cmp=com.detoxtest/.MainActivity (has extras) } within 45 seconds. Perhaps the main thread has not gone idle within a reasonable amount of time? There could be an animation or something constantly repainting the screen. Or the activity is doing network calls on creation? See the threaddump logs. For your reference the last time the event queue was idle before your activity launch request was 1618296585264 and now the last time the queue went idle was: 1618296585264. If these numbers are the same your activity might be hogg
+detox[65724] TRACE: [SPAWN_STDOUT, #65782] ing the event queue.
+	at androidx.test.runner.MonitoringInstrumentation.startActivitySync(MonitoringInstrumentation.java:481)
+	at androidx.test.rule.ActivityTestRule.launchActivity(ActivityTestRule.java:358)
+	at com.wix.detox.Detox.runTests(Detox.java:201)
+	at com.wix.detox.Detox.runTests(Detox.java:132)
+	at com.detoxtest.DetoxTest.runDetoxTests(DetoxTest.java:29)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at androidx.test.rule.ActivityTestRule$ActivityStatement.evaluate(ActivityTestRule.java:531)
+	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at androidx.test.ext.junit.runners.AndroidJUnit4.run(AndroidJUnit4.java:104)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:56)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:392)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:1893)
+
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: -2
+
+detox[65724] TRACE: [SPAWN_STDOUT, #65782] INSTRUMENTATION_RESULT: stream=
+
+Time: 45.056
+There was 1 failure:
+1) runDetoxTests(com.detoxtest.DetoxTest)
+java.lang.RuntimeException: Could not launch intent Intent { act=android.intent.action.MAIN flg=0x14000000 cmp=com.detoxtest/.MainActivity (has extras) } within 45 seconds. Perhaps the main thread has not gone idle within a reasonable amount of time? There could be an animation or something constantly repainting the screen. Or the activity is doing network calls on creation? See the threaddump logs. For your reference the last time the event queue was idle before your activity launch request was 1618296585264 and now the last time the queue went idle was: 1618296585264. If these numbers are the same your activity might be hogging the event queue.
+	at androidx.test.runner.MonitoringInstrumentation.startActivitySync(MonitoringInstrumentation.java:481)
+	at androidx.test.rule.ActivityTestRule.launchActivity(ActivityTestRule.java:358)
+	at com.wix.detox.Detox.runTests(Detox.java:201)
+	at com.wix.detox.Detox.runTests(Detox.java:132)
+	at com.detoxtest.DetoxTest.runDetoxTests(DetoxTest.java:29)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at androidx.test.rule.ActivityTestRule$ActivityStatement.evaluate(ActivityTestRule.java:531)
+	at org.junit.rules.RunRules.evaluate(RunRules.java:20)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at androidx.test.ext.junit.runners.AndroidJUnit4.run(AndroidJUnit4.java:104)
+	at org.junit.runners.Suite.runChild(Suite.java:128)
+	at org.junit.runners.Suite.runChild(Suite.java:27)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at androidx.test.internal.runner.TestExecutor.execute(TestExecutor.java:56)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:392)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:1893)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1
+
+detox[65724] DEBUG: [SPAWN_END, #65782] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s Z9LZ4LMZOBFMRS5S shell am instrument -w -r -e detoxServer ws://localhost:57582 -e detoxSessionId 7d1cde57-f8c2-d1c2-58a0-650abced322d -e debug false com.detoxtest.test/androidx.test.runner.AndroidJUnitRunner finished with code = 0
+detox[65724] DEBUG: [EXEC_CMD, #17] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S reverse --remove tcp:57582
+detox[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onHookFailure({
+  error: DetoxRuntimeError: Failed to run application on the device
+  
+  HINT: Most likely, your tests have timed out and called detox.cleanup() while it was waiting for "ready" message (over WebSocket) from the instrumentation process.
+      at MonitoredInstrumentation._getInstrumentationCrashError (/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/node_modules/detox/src/devices/drivers/android/tools/MonitoredInstrumentation.js:68:12)
+      at MonitoredInstrumentation._rejectPendingCrashPromise (/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/node_modules/detox/src/devices/drivers/android/tools/MonitoredInstrumentation.js:56:37)
+      at MonitoredInstrumentation._onInstrumentationTerminated (/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/node_modules/detox/src/devices/drivers/android/tools/MonitoredInstrumentation.js:51:10)
+      at Instrumentation._onTerminated (/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/node_modules/detox/src/devices/drivers/android/tools/Instrumentation.js:52:18),
+  hook: 'beforeAll'
+})
+detox[65724] INFO:  [1m[37mExample: [39m[22m[90mshould have welcome screen[39m
+detox[65724] INFO:  [1m[37mExample: [39m[22m[90mshould have welcome screen[39m[90m [[31mFAIL[90m][39m
+detox[65724] INFO:  [1m[37mExample: [39m[22m[90mshould show hello screen after tap[39m
+detox[65724] INFO:  [1m[37mExample: [39m[22m[90mshould show hello screen after tap[39m[90m [[31mFAIL[90m][39m
+detox[65724] INFO:  [1m[37mExample: [39m[22m[90mshould show world screen after tap[39m
+detox[65724] INFO:  [1m[37mExample: [39m[22m[90mshould show world screen after tap[39m[90m [[31mFAIL[90m][39m
+Example[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onRunDescribeFinish({ name: 'Example' })
+ROOT_DESCRIBE_BLOCK[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onRunDescribeFinish({ name: 'ROOT_DESCRIBE_BLOCK' })
+detox[65724] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeCleanup()
+detox[65724] TRACE: [EXEC_SUCCESS, #17] 
+detox[65724] TRACE: [ARTIFACT_SAVE] saving ADBLogcatRecording to: artifacts/android.2021-04-13 06-49-16Z/Z9LZ4LMZOBFMRS5S 2021-04-13 06-50-31Z.startup.log
+detox[65724] TRACE: [ARTIFACT_STOP] stopping ADBLogcatRecording
+detox[65724] DEBUG: [EXEC_CMD, #18] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S shell "date +\"%m-%d %T.000\""
+detox[65724] TRACE: [EXEC_SUCCESS, #18] 04-13 09:50:31.000
+
+detox[65724] TRACE: [SPAWN_KILL, #65784] sending SIGINT to: /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s Z9LZ4LMZOBFMRS5S shell logcat -T "04-13 09:49:43.000" -v brief | grep "(32511):" >> /sdcard/94917636_0.log
+detox[65724] DEBUG: [SPAWN_END, #65784] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s Z9LZ4LMZOBFMRS5S shell "logcat -T \"04-13 09:49:43.000\" -v brief | grep \"(32511):\" >> /sdcard/94917636_0.log" terminated with SIGINT
+detox[65724] DEBUG: [EXEC_CMD, #19] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S pull "/sdcard/94917636_0.log" "artifacts/android.2021-04-13 06-49-16Z/Z9LZ4LMZOBFMRS5S 2021-04-13 06-50-31Z.startup.log"
+detox[65724] TRACE: [EXEC_SUCCESS, #19] /sdcard/94917636_0.log: 1 file pulled, 0 skipped. 7.2 MB/s (28672 bytes in 0.004s)
+
+detox[65724] DEBUG: [EXEC_CMD, #20] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s Z9LZ4LMZOBFMRS5S shell "rm  \"/sdcard/94917636_0.log\""
+detox[65724] TRACE: [EXEC_SUCCESS, #20] 
+detox[65724] TRACE: [ARTIFACT_START] starting FileArtifact
+detox[65724] TRACE: [ARTIFACT_STOP] stopping FileArtifact
+detox[65724] TRACE: [ARTIFACT_SAVE] saving FileArtifact to: artifacts/android.2021-04-13 06-49-16Z/detox_pid_65724.json.log { append: true }
+detox[65724] TRACE: [ARTIFACT_START] starting FileArtifact
+detox[65724] TRACE: [ARTIFACT_STOP] stopping FileArtifact
+detox[65724] TRACE: [ARTIFACT_SAVE] saving FileArtifact to: artifacts/android.2021-04-13 06-49-16Z/detox_pid_65724.log { append: true }
+detox[65724] DEBUG: [MOVE_FILE] moving "/private/var/folders/hh/9zq41fns7kbbqgb6q6pqk0z80000gp/T/2d7fdf9c-2237-4364-9b02-4ff1cedf9301.detox.log" to artifacts/android.2021-04-13 06-49-16Z/detox_pid_65724.json.log
+detox[65724] DEBUG: [MOVE_FILE] moving "/private/var/folders/hh/9zq41fns7kbbqgb6q6pqk0z80000gp/T/cc7e2e8e-e6b9-4934-82c1-a2a394d62446.detox.log" to artifacts/android.2021-04-13 06-49-16Z/detox_pid_65724.log
+detox[65724] ERROR: [APP_UNREACHABLE] Failed to reach the app over the web socket connection.
+
+HINT: 
+
+1. If you don't see your app running on the device, there's a chance
+   that your app has crashed prematurely. To get the crash details,
+   you can run Detox tests with "--record-logs all" CLI option
+   and then inspect the device logs in the artifacts folder.
+
+2. If your app IS running on the device, yet you see this message:
+a) The native part of Detox failed to connect to the Detox server over
+   web sockets. If this is the case, the device's logs should contain
+   messages about those failed connection attempts.
+
+b) The app is running without Detox native code injected.
+   Make sure you don't launch it manually. If you don't, examine the logs
+   from the device. If you see a crash related to Detox native code, you
+   are welcome to report it on our GitHub tracker.
+   In case if you are debugging your native code integration with Detox,
+   these guides may prove helpful:
+
+   * https://github.com/wix/Detox/blob/master/docs/Guide.DebuggingInAndroidStudio.md
+   * https://github.com/wix/Detox/blob/master/docs/Guide.DebuggingInXcode.md
+
+
+detox[65724] DEBUG: [SERVER_CLOSE] Detox server has been closed gracefully
+detox[65724] TRACE: [SESSION_TORN] tester exited session 7d1cde57-f8c2-d1c2-58a0-650abced322d

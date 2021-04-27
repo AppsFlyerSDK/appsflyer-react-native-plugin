@@ -1,0 +1,43 @@
+--------- beginning of main
+04-13 11:53:14.123 23872 23872 I Detox   : Wait is over: app is now idle!
+04-13 11:53:14.128 23872 23925 I WebSocketClient: At sendAction
+04-13 11:53:14.130 23872 23925 D WebSocketClient: Detox Action Sent: ready
+04-13 11:53:14.134 23872 23925 I WebSocketClient: At onMessage
+04-13 11:53:14.134 23872 23925 I WebSocketClient: At receiveAction
+04-13 11:53:14.134 23872 23925 D WebSocketClient: Detox Action Received: loginSuccess
+04-13 11:53:14.134 23872 23925 I DetoxManager: onAction: type: loginSuccess params: {"testerConnected":true,"appConnected":true}
+04-13 11:53:14.186 23872 23925 I WebSocketClient: At onMessage
+04-13 11:53:14.186 23872 23925 I WebSocketClient: At receiveAction
+04-13 11:53:14.186 23872 23925 D WebSocketClient: Detox Action Received: invoke
+04-13 11:53:14.187 23872 23925 I DetoxManager: onAction: type: invoke params: {"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]}
+04-13 11:53:14.203 23872 23921 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForTestId, [successInitButton]
+04-13 11:53:14.228 23872 23921 D Detox   : class androidx.test.espresso.Espresso, onView, [(with tag value: is "successInitButton" and view has effective visibility=VISIBLE)]
+04-13 11:53:14.229 23872 23921 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForSufficientlyVisible, []
+04-13 11:53:14.230 23872 23921 D Detox   : class com.wix.detox.espresso.DetoxAssertion, assertMatcher, [androidx.test.espresso.ViewInteraction@a74700a, at least 75 percent of the view's area is displayed to the user.]
+04-13 11:53:14.250 23872 23872 I ViewInteraction: Checking 'MatchesViewAssertion(Detox){viewMatcher=at least 75 percent of the view's area is displayed to the user.}' assertion on view (with tag value: is "successInitButton" and view has effective visibility=VISIBLE)
+04-13 11:53:14.252 23872 23921 I WebSocketClient: At sendAction
+04-13 11:53:14.253 23872 23921 D WebSocketClient: Detox Action Sent: invokeResult
+04-13 11:53:14.258 23872 23925 I WebSocketClient: At onMessage
+04-13 11:53:14.258 23872 23925 I WebSocketClient: At receiveAction
+04-13 11:53:14.259 23872 23925 D WebSocketClient: Detox Action Received: invoke
+04-13 11:53:14.259 23872 23925 I DetoxManager: onAction: type: invoke params: {"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]}
+04-13 11:53:14.259 23872 23921 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForTestId, [successInitButton]
+04-13 11:53:14.259 23872 23921 D Detox   : class androidx.test.espresso.Espresso, onView, [(with tag value: is "successInitButton" and view has effective visibility=VISIBLE)]
+04-13 11:53:14.259 23872 23921 D Detox   : class com.wix.detox.espresso.DetoxViewActions, click, []
+04-13 11:53:14.268 23872 23921 D Detox   : class com.wix.detox.espresso.EspressoDetox, perform, [androidx.test.espresso.ViewInteraction@3580e98, com.wix.detox.espresso.action.RNClickAction@280b6f1]
+04-13 11:53:14.271 23872 23872 I ViewInteraction: Performing 'com.wix.detox.espresso.action.detoxsingletap@7f182d6 click' action on view (with tag value: is "successInitButton" and view has effective visibility=VISIBLE)
+04-13 11:53:14.430 23872 23915 D AppsFlyer_6.2.0: Initializing AppsFlyer SDK: (v6.2.0.91)
+04-13 11:53:14.640 23872 23944 I TetheringManager: registerTetheringEventCallback:com.detoxtest
+04-13 11:53:14.702 23872 23921 I WebSocketClient: At sendAction
+04-13 11:53:14.703 23872 23921 D WebSocketClient: Detox Action Sent: invokeResult
+04-13 11:53:14.707 23872 23925 I WebSocketClient: At onMessage
+04-13 11:53:14.707 23872 23925 I WebSocketClient: At receiveAction
+04-13 11:53:14.707 23872 23925 D WebSocketClient: Detox Action Received: invoke
+04-13 11:53:14.707 23872 23925 I DetoxManager: onAction: type: invoke params: {"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitResult"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForText","args":["Success"]}}]}
+04-13 11:53:14.707 23872 23921 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForTestId, [successInitResult]
+04-13 11:53:14.707 23872 23921 D Detox   : class androidx.test.espresso.Espresso, onView, [(with tag value: is "successInitResult" and view has effective visibility=VISIBLE)]
+04-13 11:53:14.707 23872 23921 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForText, [Success]
+04-13 11:53:14.708 23872 23921 D Detox   : class com.wix.detox.espresso.DetoxAssertion, assertMatcher, [androidx.test.espresso.ViewInteraction@30b0f37, (with text: is "Success" and view has effective visibility=VISIBLE)]
+04-13 11:53:14.715 23872 23872 I ViewInteraction: Checking 'MatchesViewAssertion(Detox){viewMatcher=(with text: is "Success" and view has effective visibility=VISIBLE)}' assertion on view (with tag value: is "successInitResult" and view has effective visibility=VISIBLE)
+04-13 11:53:14.715 23872 23921 I WebSocketClient: At sendAction
+04-13 11:53:14.716 23872 23921 D WebSocketClient: Detox Action Sent: invokeResult

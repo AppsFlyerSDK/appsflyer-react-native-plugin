@@ -1,0 +1,126 @@
+--------- beginning of main
+04-13 10:39:00.181 16783 16783 I Detox   : Wait is over: app is now idle!
+04-13 10:39:00.190 16783 16836 I WebSocketClient: At sendAction
+04-13 10:39:00.192 16783 16836 D WebSocketClient: Detox Action Sent: ready
+04-13 10:39:00.196 16783 16836 I WebSocketClient: At onMessage
+04-13 10:39:00.197 16783 16836 I WebSocketClient: At receiveAction
+04-13 10:39:00.197 16783 16836 D WebSocketClient: Detox Action Received: loginSuccess
+04-13 10:39:00.197 16783 16836 I DetoxManager: onAction: type: loginSuccess params: {"testerConnected":true,"appConnected":true}
+04-13 10:39:00.261 16783 16836 I WebSocketClient: At onMessage
+04-13 10:39:00.261 16783 16836 I WebSocketClient: At receiveAction
+04-13 10:39:00.261 16783 16836 D WebSocketClient: Detox Action Received: reactNativeReload
+04-13 10:39:00.262 16783 16836 I DetoxManager: onAction: type: reactNativeReload params: {}
+04-13 10:39:00.266 16783 16834 I DetoxRNExt: Reloading React Native
+04-13 10:39:00.284 16783 16858 E unknown:ReactNative: ReactInstanceManager.createReactContext: mJSIModulePackage null
+04-13 10:39:00.284 16783 16859 E ReactNativeJNI: logMarker CREATE_REACT_CONTEXT_END
+04-13 10:39:00.289 16783 16859 E ReactNativeJNI: logMarker RUN_JS_BUNDLE_START
+04-13 10:39:00.290 16783 16860 E unknown:ReactNative: ReactInstanceManager.attachRootViewToInstance()
+04-13 10:39:00.292 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTGroupViewManager
+04-13 10:39:00.292 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTGroupShadowNode
+04-13 10:39:00.292 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTShapeViewManager
+04-13 10:39:00.292 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTShapeShadowNode
+04-13 10:39:00.293 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTTextViewManager
+04-13 10:39:00.293 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTTextShadowNode
+04-13 10:39:00.293 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.checkbox.ReactCheckBoxManager
+04-13 10:39:00.294 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.uimanager.LayoutShadowNode
+04-13 10:39:00.295 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.picker.ReactDialogPickerManager
+04-13 10:39:00.295 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.drawer.ReactDrawerLayoutManager
+04-13 10:39:00.296 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.picker.ReactDropdownPickerManager
+04-13 10:39:00.296 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.scroll.ReactHorizontalScrollViewManager
+04-13 10:39:00.297 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.scroll.ReactHorizontalScrollContainerViewManager
+04-13 10:39:00.297 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.progressbar.ReactProgressBarViewManager
+04-13 10:39:00.298 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.progressbar.ProgressBarShadowNode
+04-13 10:39:00.299 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.scroll.ReactScrollViewManager
+04-13 10:39:00.300 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.slider.ReactSliderManager
+04-13 10:39:00.301 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.slider.ReactSliderManager$ReactSliderShadowNode
+04-13 10:39:00.301 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.switchview.ReactSwitchManager
+04-13 10:39:00.302 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.switchview.ReactSwitchManager$ReactSwitchShadowNode
+04-13 10:39:00.302 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.swiperefresh.SwipeRefreshLayoutManager
+04-13 10:39:00.303 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTSurfaceViewManager
+04-13 10:39:00.303 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.art.ARTSurfaceViewShadowNode
+04-13 10:39:00.303 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.frescosupport.FrescoBasedReactTextInlineImageViewManager
+04-13 10:39:00.303 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.frescosupport.FrescoBasedReactTextInlineImageShadowNode
+04-13 10:39:00.303 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.image.ReactImageManager
+04-13 10:39:00.304 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.modal.ReactModalHostManager
+04-13 10:39:00.304 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.modal.ModalHostShadowNode
+04-13 10:39:00.305 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactRawTextManager
+04-13 10:39:00.305 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactRawTextShadowNode
+04-13 10:39:00.305 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.textinput.ReactTextInputManager
+04-13 10:39:00.309 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.textinput.ReactTextInputShadowNode
+04-13 10:39:00.319 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactTextViewManager
+04-13 10:39:00.320 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactTextShadowNode
+04-13 10:39:00.320 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.view.ReactViewManager
+04-13 10:39:00.321 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.viewpager.ReactViewPagerManager
+04-13 10:39:00.322 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactVirtualTextViewManager
+04-13 10:39:00.322 16783 16860 W unknown:ViewManagerPropertyUpdater: Could not find generated setter for class com.facebook.react.views.text.ReactVirtualTextShadowNode
+04-13 10:39:00.325 16783 16860 E unknown:ReactRootView: runApplication: call AppRegistry.runApplication
+04-13 10:39:00.326 16783 16783 I DetoxRNLoading: Got new RN-context async'ly through listener
+04-13 10:39:00.326 16783 16834 I DetoxRNIdleRes: Setting up Espresso Idling Resources for React Native.
+04-13 10:39:00.331 16783 16834 D AsyncStorageIR: Checking whether a custom IR for Async-Storage is required... (legacy=false)
+04-13 10:39:00.331 16783 16834 D DetoxRNHelpers: Native module not resolved: no such class
+04-13 10:39:00.331 16783 16834 D AsyncStorageIR: Checking whether a custom IR for Async-Storage is required... (legacy=true)
+04-13 10:39:00.331 16783 16834 D AsyncStorageIR: IR for Async-Storage is required! (legacy=true)
+04-13 10:39:00.333 16783 16783 I Detox   : UIManagerModule is busy
+04-13 10:39:00.333 16783 16783 D AsyncStorageIRLegacy: Async-storage is busy!
+04-13 10:39:00.337 16783 16834 I WebSocketClient: At sendAction
+04-13 10:39:00.340 16783 16834 D WebSocketClient: Detox Action Sent: ready
+04-13 10:39:00.348 16783 16836 I WebSocketClient: At onMessage
+04-13 10:39:00.348 16783 16836 I WebSocketClient: At receiveAction
+04-13 10:39:00.350 16783 16836 D WebSocketClient: Detox Action Received: invoke
+04-13 10:39:00.350 16783 16836 I DetoxManager: onAction: type: invoke params: {"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["welcome"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]}
+04-13 10:39:00.375 16783 16834 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForTestId, [welcome]
+04-13 10:39:00.404 16783 16783 E unknown:ReactNative: Unable to launch logbox because react was unable to create the root view
+04-13 10:39:00.404 16783 16834 D Detox   : class androidx.test.espresso.Espresso, onView, [(with tag value: is "welcome" and view has effective visibility=VISIBLE)]
+04-13 10:39:00.405 16783 16834 D Detox   : class com.wix.detox.espresso.DetoxMatcher, matcherForSufficientlyVisible, []
+04-13 10:39:00.407 16783 16834 D Detox   : class com.wix.detox.espresso.DetoxAssertion, assertMatcher, [androidx.test.espresso.ViewInteraction@4579d3a, at least 75 percent of the view's area is displayed to the user.]
+04-13 10:39:00.413 16783 16859 E ReactNativeJNI: logMarker RUN_JS_BUNDLE_END
+04-13 10:39:00.414 16783 16859 I ReactNativeJS: Running "detoxTest" with {"rootTag":11}
+04-13 10:39:00.844 16783 16783 I ViewInteraction: Checking 'MatchesViewAssertion(Detox){viewMatcher=at least 75 percent of the view's area is displayed to the user.}' assertion on view (with tag value: is "welcome" and view has effective visibility=VISIBLE)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: Test exception
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: java.lang.reflect.InvocationTargetException
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at java.lang.reflect.Method.invoke(Native Method)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at org.apache.commons.lang3.reflect.MethodUtils.invokeStaticMethod(MethodUtils.java:443)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at org.apache.commons.lang3.reflect.MethodUtils.invokeStaticMethod(MethodUtils.java:405)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at com.wix.invoke.types.ClassTarget.execute(ClassTarget.java:23)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at com.wix.invoke.types.Target.invoke(Target.java:59)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at com.wix.invoke.MethodInvocation.invoke(MethodInvocation.java:35)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at com.wix.invoke.MethodInvocation.invoke(MethodInvocation.java:26)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at com.wix.invoke.MethodInvocation.invoke(MethodInvocation.java:20)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at com.wix.detox.InvokeActionHandler.handle(DetoxActionHandlers.kt:55)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at com.wix.detox.DetoxManager$4.run(DetoxManager.java:116)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at android.os.Handler.handleCallback(Handler.java:907)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at android.os.Handler.dispatchMessage(Handler.java:99)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at android.os.Looper.loop(Looper.java:223)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at com.wix.detox.Detox$1.run(Detox.java:214)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at java.lang.Thread.run(Thread.java:923)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: Caused by: androidx.test.espresso.base.DefaultFailureHandler$AssertionFailedWithCauseError: 'at least 75 percent of the view's area is displayed to the user.' doesn't match the selected view.
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: Expected: at least 75 percent of the view's area is displayed to the user.
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers:      Got: null
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at dalvik.system.VMStack.getThreadStackTrace(Native Method)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at java.lang.Thread.getStackTrace(Thread.java:1736)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at androidx.test.espresso.base.DefaultFailureHandler.getUserFriendlyError(DefaultFailureHandler.java:96)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at androidx.test.espresso.base.DefaultFailureHandler.handle(DefaultFailureHandler.java:59)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at androidx.test.espresso.ViewInteraction.waitForAndHandleInteractionResults(ViewInteraction.java:324)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at androidx.test.espresso.ViewInteraction.check(ViewInteraction.java:306)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at com.wix.detox.espresso.DetoxAssertion.assertMatcher(DetoxAssertion.java:32)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	... 15 more
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: Caused by: junit.framework.AssertionFailedError: 'at least 75 percent of the view's area is displayed to the user.' doesn't match the selected view.
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: Expected: at least 75 percent of the view's area is displayed to the user.
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers:      Got: null
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at androidx.test.espresso.matcher.ViewMatchers.assertThat(ViewMatchers.java:540)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at com.wix.detox.espresso.assertion.ViewAssertions$MatchesViewAssertion.check(ViewAssertions.java:52)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at androidx.test.espresso.ViewInteraction$SingleExecutionViewAssertion.check(ViewInteraction.java:425)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at androidx.test.espresso.ViewInteraction$2.call(ViewInteraction.java:288)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at androidx.test.espresso.ViewInteraction$2.call(ViewInteraction.java:272)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at android.os.Handler.handleCallback(Handler.java:907)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at android.os.Handler.dispatchMessage(Handler.java:99)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at android.os.Looper.loop(Looper.java:223)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at android.app.ActivityThread.main(ActivityThread.java:7478)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at java.lang.reflect.Method.invoke(Native Method)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:549)
+04-13 10:39:00.849 16783 16834 I DetoxActionHandlers: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:941)
+04-13 10:39:00.873 16783 16834 I WebSocketClient: At sendAction
+04-13 10:39:00.874 16783 16834 D WebSocketClient: Detox Action Sent: testFailed

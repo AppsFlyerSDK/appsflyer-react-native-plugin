@@ -1,0 +1,319 @@
+detox[83568] TRACE: [DETOX_CREATE] created a Detox instance with config:
+{"artifactsConfig":{"rootDir":"artifacts/android.2021-04-13 09-12-58Z","plugins":{"log":{"enabled":true,"keepOnlyFailedTestsArtifacts":false},"screenshot":{"enabled":true,"shouldTakeAutomaticSnapshots":false,"keepOnlyFailedTestsArtifacts":false},"video":{"enabled":false,"keepOnlyFailedTestsArtifacts":false},"instruments":{"enabled":false,"keepOnlyFailedTestsArtifacts":false},"timeline":{"enabled":false},"uiHierarchy":{"enabled":false,"keepOnlyFailedTestsArtifacts":false}},"pathBuilder":{"_rootDir":"artifacts/android.2021-04-13 09-12-58Z"}},"appsConfig":{"default":{"type":"android.apk","binaryPath":"android/app/build/outputs/apk/release/app-release.apk","build":"cd android ; ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release ; cd .."}},"behaviorConfig":{"init":{"reinstallApp":true,"exposeGlobals":true},"cleanup":{"shutdownDevice":false},"launchApp":"auto"},"cliConfig":{"recordLogs":"all","configuration":"android","forceAdbInstall":"false","useCustomLogger":"true"},"deviceConfig":{"type":"android.emulator","device":{"avdName":"Nexus_5"}},"runnerConfig":{"testRunner":"jest","runnerConfig":"e2e/config.json","specs":"e2e"},"sessionConfig":{"autoStart":true,"server":"ws://localhost:65061","sessionId":"52055f8c-d73c-5661-1cbc-b0ab7f65d365","debugSynchronization":10000},"errorComposer":{"configurationName":"android","filepath":"/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/.detoxrc.json","contents":{"testRunner":"jest","runnerConfig":"e2e/config.json","apps":{"ios":{"type":"ios.app","binaryPath":"SPECIFY_PATH_TO_YOUR_APP_BINARY","build":""},"android":{"type":"android.apk","binaryPath":"android/app/build/outputs/apk/release/app-release.apk","build":"cd android ; ./gradlew assembleRelease assembleAndroidTest -DtestBuildType=release ; cd .."}},"devices":{"simulator":{"type":"ios.simulator","device":{"type":"iPhone 12"}},"amit-device":{"type":"android.emulator","device":{"avdName":"Nexus_5"}}},"configurations":{"ios":{"device":"simulator","app":"ios"},"android":{"device":"amit-device","app":"android"}}},"_extends":false}}
+detox[83568] DEBUG: [DetoxServer.js] Detox server listening on localhost:65061...
+detox[83568] TRACE: [WS_OPEN] opened web socket to: ws://localhost:65061
+detox[83568] TRACE: [WS_SEND] {"type":"login","params":{"sessionId":"52055f8c-d73c-5661-1cbc-b0ab7f65d365","role":"tester"},"messageId":0}
+detox[83568] TRACE: [GET_FROM, #65062] {"type":"login","params":{"sessionId":"52055f8c-d73c-5661-1cbc-b0ab7f65d365","role":"tester"},"messageId":0}
+detox[83568] TRACE: [SESSION_CREATED] created session 52055f8c-d73c-5661-1cbc-b0ab7f65d365
+detox[83568] TRACE: [SEND_TO, #tester] {"type":"loginSuccess","params":{"testerConnected":true,"appConnected":false},"messageId":0}
+detox[83568] TRACE: [SESSION_JOINED] tester joined session 52055f8c-d73c-5661-1cbc-b0ab7f65d365
+detox[83568] TRACE: [WS_MESSAGE] {"type":"loginSuccess","params":{"testerConnected":true,"appConnected":false},"messageId":0}
+ 
+detox[83568] DEBUG: [EXEC_CMD, #0] "/Users/amitkremer/Library/Android/sdk/emulator/emulator" -list-avds --verbose
+detox[83568] TRACE: [EXEC_SUCCESS, #0] Nexus_5
+
+detox[83568] DEBUG: [EXEC_CMD, #1] "/Users/amitkremer/Library/Android/sdk/emulator/emulator" -version 
+detox[83568] TRACE: [EXEC_SUCCESS, #1] Android emulator version 30.1.5.0 (build_id 6855416) (CL:N/A)
+Copyright (C) 2006-2017 The Android Open Source Project and many others.
+This program is a derivative of the QEMU CPU emulator (www.qemu.org).
+
+  This software is licensed under the terms of the GNU General Public
+  License version 2, as published by the Free Software Foundation, and
+  may be copied, distributed, and modified under those terms.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+
+detox[83568] DEBUG: [EMU_BIN_VERSION_DETECT] Detected emulator binary version { major: 30, minor: 1, patch: 5, toString: [Function: toString] }
+detox[83568] DEBUG: [ALLOCATE_DEVICE] Trying to allocate a device based on "Nexus_5"
+detox[83568] DEBUG: [EXEC_CMD, #2] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb"  devices
+detox[83568] DEBUG: [EXEC_SUCCESS, #2] List of devices attached
+emulator-5554	device
+
+
+detox[83568] TRACE: [TELNET_CONNECTING] port: 5554, host: localhost
+detox[83568] DEBUG: [DEVICE_LOOKUP] Found a matching & free device emulator-5554
+detox[83568] DEBUG: [ALLOCATE_DEVICE] Settled on emulator-5554
+detox[83568] DEBUG: [EXEC_CMD, #3] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "getprop dev.bootcomplete"
+detox[83568] TRACE: [EXEC_SUCCESS, #3] 1
+
+detox[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBootDevice({ coldBoot: false, deviceId: 'emulator-5554', type: 'Nexus_5' })
+detox[83568] DEBUG: [EXEC_CMD, #4] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "getprop ro.build.version.sdk"
+detox[83568] TRACE: [EXEC_SUCCESS, #4] 29
+
+detox[83568] DEBUG: [EXEC_CMD, #5] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "settings put global animator_duration_scale 0"
+detox[83568] TRACE: [EXEC_SUCCESS, #5] 
+detox[83568] DEBUG: [EXEC_CMD, #6] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "settings put global window_animation_scale 0"
+detox[83568] TRACE: [EXEC_SUCCESS, #6] 
+detox[83568] DEBUG: [EXEC_CMD, #7] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "settings put global transition_animation_scale 0"
+detox[83568] TRACE: [EXEC_SUCCESS, #7] 
+detox[83568] DEBUG: [EXEC_CMD, #8] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "dumpsys power | grep \"^[ ]*m[UW].*=\""
+detox[83568] TRACE: [EXEC_SUCCESS, #8]   mWakefulness=Awake
+  mWakefulnessChanging=false
+  mWakeLockSummary=0x1
+  mUserActivitySummary=0x1
+  mWakeUpWhenPluggedOrUnpluggedConfig=false
+  mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig=false
+  mUserActivityTimeoutOverrideFromWindowManager=-1
+  mUserInactiveOverrideFromWindowManager=false
+  mUserId=0
+
+detox[83568] DEBUG: [EXEC_CMD, #9] "/Users/amitkremer/Library/Android/sdk/build-tools/30.0.3/aapt" dump badging "/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/release/app-release.apk" | grep -e "package: name="
+detox[83568] TRACE: [EXEC_SUCCESS, #9] package: name='com.detoxtest' versionCode='1' versionName='1.0' compileSdkVersion='29' compileSdkVersionCodename='10'
+
+detox[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeTerminateApp({ deviceId: 'emulator-5554', bundleId: 'com.detoxtest' })
+detox[83568] DEBUG: [EXEC_CMD, #10] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "am force-stop com.detoxtest"
+detox[83568] TRACE: [EXEC_SUCCESS, #10] 
+detox[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTerminateApp({ deviceId: 'emulator-5554', bundleId: 'com.detoxtest' })
+detox[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeUninstallApp({ deviceId: 'emulator-5554', bundleId: 'com.detoxtest' })
+detox[83568] DEBUG: [EXEC_CMD, #11] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "pm list packages com.detoxtest"
+detox[83568] TRACE: [EXEC_SUCCESS, #11] package:com.detoxtest
+package:com.detoxtest.test
+
+detox[83568] DEBUG: [EXEC_CMD, #12] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 uninstall com.detoxtest
+detox[83568] TRACE: [EXEC_SUCCESS, #12] Success
+
+detox[83568] DEBUG: [EXEC_CMD, #13] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "pm list packages com.detoxtest.test"
+detox[83568] TRACE: [EXEC_SUCCESS, #13] package:com.detoxtest.test
+
+detox[83568] DEBUG: [EXEC_CMD, #14] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 uninstall com.detoxtest.test
+detox[83568] TRACE: [EXEC_SUCCESS, #14] Success
+
+detox[83568] DEBUG: [EXEC_CMD, #15] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "rm -fr /data/local/tmp/detox"
+detox[83568] TRACE: [EXEC_SUCCESS, #15] 
+detox[83568] DEBUG: [EXEC_CMD, #16] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "mkdir -p /data/local/tmp/detox"
+detox[83568] TRACE: [EXEC_SUCCESS, #16] 
+detox[83568] DEBUG: [EXEC_CMD, #17] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 push "/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/release/app-release.apk" "/data/local/tmp/detox/Application.apk"
+detox[83568] TRACE: [EXEC_SUCCESS, #17] /Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/release/app-release.apk: 1 file pushed, 0 skipped. 105.8 MB/s (26409698 bytes in 0.238s)
+
+detox[83568] DEBUG: [EXEC_CMD, #18] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "pm install -r -g -t /data/local/tmp/detox/Application.apk"
+detox[83568] TRACE: [EXEC_SUCCESS, #18] Success
+
+detox[83568] DEBUG: [EXEC_CMD, #19] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 push "/Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk" "/data/local/tmp/detox/Test.apk"
+detox[83568] TRACE: [EXEC_SUCCESS, #19] /Users/amitkremer/AppsFlyer/projects/REACT-NATIVE/detoxTest/android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk: 1 file pushed, 0 skipped. 339.7 MB/s (1330433 bytes in 0.004s)
+
+detox[83568] DEBUG: [EXEC_CMD, #20] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "pm install -r -g -t /data/local/tmp/detox/Test.apk"
+detox[83568] TRACE: [EXEC_SUCCESS, #20] Success
+
+ROOT_DESCRIBE_BLOCK[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onRunDescribeStart({ name: 'ROOT_DESCRIBE_BLOCK' })
+React-Native AppsFlyer Plugin[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onRunDescribeStart({ name: 'React-Native AppsFlyer Plugin' })
+detox[83568] INFO:  [97mReact-Native AppsFlyer Plugin[39m is assigned to [94memulator-5554 (Nexus_5)[39m
+detox[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeTerminateApp({ deviceId: 'emulator-5554', bundleId: 'com.detoxtest' })
+detox[83568] DEBUG: [EXEC_CMD, #21] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "am force-stop com.detoxtest"
+detox[83568] TRACE: [EXEC_SUCCESS, #21] 
+detox[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTerminateApp({ deviceId: 'emulator-5554', bundleId: 'com.detoxtest' })
+detox[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeLaunchApp({
+  deviceId: 'emulator-5554',
+  bundleId: 'com.detoxtest',
+  launchArgs: {
+    detoxServer: 'ws://localhost:65061',
+    detoxSessionId: '52055f8c-d73c-5661-1cbc-b0ab7f65d365'
+  }
+})
+detox[83568] DEBUG: [EXEC_CMD, #22] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "date +\"%m-%d %T.000\""
+detox[83568] TRACE: [EXEC_SUCCESS, #22] 04-13 12:13:03.000
+
+detox[83568] DEBUG: [EXEC_CMD, #23] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 reverse tcp:65061 tcp:65061
+detox[83568] TRACE: [EXEC_SUCCESS, #23] 65061
+
+detox[83568] DEBUG: [EXEC_CMD, #24] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "pm list instrumentation"
+detox[83568] TRACE: [EXEC_SUCCESS, #24] instrumentation:com.appsflyer.reactnative.test/android.test.InstrumentationTestRunner (target=com.appsflyer.reactnative.test)
+instrumentation:com.detoxtest.test/androidx.test.runner.AndroidJUnitRunner (target=com.detoxtest)
+
+detox[83568] DEBUG: [SPAWN_CMD, #83611] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell am instrument -w -r -e detoxServer ws://localhost:65061 -e detoxSessionId 52055f8c-d73c-5661-1cbc-b0ab7f65d365 -e debug false com.detoxtest.test/androidx.test.runner.AndroidJUnitRunner
+detox[83568] DEBUG: [EXEC_CMD, #25] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "ps | grep \"com\.detoxtest$\""
+detox[83568] TRACE: [EXEC_SUCCESS, #25] u0_a296       26586    359 1924260  80412 0                   0 R com.detoxtest
+
+detox[26586] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onLaunchApp({
+  deviceId: 'emulator-5554',
+  bundleId: 'com.detoxtest',
+  launchArgs: {
+    detoxServer: 'ws://localhost:65061',
+    detoxSessionId: '52055f8c-d73c-5661-1cbc-b0ab7f65d365'
+  },
+  pid: 26586
+})
+detox[83568] TRACE: [ARTIFACT_START] starting ADBLogcatRecording
+detox[83568] DEBUG: [SPAWN_CMD, #83613] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell "logcat -T \"04-13 12:13:03.000\" --pid=26586 -f /sdcard/121259591_0.log"
+detox[83568] DEBUG: [EXEC_CMD, #26] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell du /sdcard/121259591_0.log
+detox[83568] TRACE: [EXEC_SUCCESS, #26] 4	/sdcard/121259591_0.log
+
+detox[83568] TRACE: [SPAWN_STDOUT, #83611] INSTRUMENTATION_STATUS: class=com.detoxtest.DetoxTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+
+detox[83568] TRACE: [SPAWN_STDOUT, #83611] INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.detoxtest.DetoxTest:
+INSTRUMENTATION_STATUS: test=runDetoxTests
+INSTRUMENTATION_STATUS_CODE: 1
+
+detox[83568] TRACE: [GET_FROM, #65146] {"messageId":0,"type":"login","params":{"role":"app","sessionId":"52055f8c-d73c-5661-1cbc-b0ab7f65d365"}}
+detox[83568] TRACE: [SEND_TO, #app] {"messageId":0,"type":"loginSuccess","params":{"testerConnected":true,"appConnected":true}}
+detox[83568] TRACE: [SESSION_JOINED] app joined session 52055f8c-d73c-5661-1cbc-b0ab7f65d365
+detox[83568] TRACE: [SEND_TO, #tester] {"type":"appConnected"}
+detox[83568] TRACE: [WS_MESSAGE] {"type":"appConnected"}
+ 
+detox[83568] TRACE: [WS_SEND] {"type":"isReady","params":{},"messageId":-1000}
+detox[83568] TRACE: [GET_FROM, #app] {"messageId":-1000,"type":"ready","params":{}}
+detox[83568] TRACE: [SEND_TO, #tester] {"messageId":-1000,"type":"ready","params":{}}
+detox[83568] TRACE: [GET_FROM, #tester] {"type":"isReady","params":{},"messageId":-1000}
+detox[83568] TRACE: [SEND_TO, #app] {"type":"isReady","params":{},"messageId":-1000}
+detox[83568] TRACE: [WS_MESSAGE] {"messageId":-1000,"type":"ready","params":{}}
+ 
+detox[26586] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onAppReady({ deviceId: 'emulator-5554', bundleId: 'com.detoxtest', pid: 26586 })
+detox[83568] INFO:  [1m[37mReact-Native AppsFlyer Plugin: [39m[22m[90minitSdk should return Success[39m
+detox[83568] TRACE: [DETOX_BEFORE_EACH] running test: "React-Native AppsFlyer Plugin initSdk should return Success"
+detox[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTestStart({
+  title: 'initSdk should return Success',
+  fullName: 'React-Native AppsFlyer Plugin initSdk should return Success',
+  status: 'running',
+  invocations: 1
+})
+detox[83568] TRACE: [ARTIFACT_STOP] stopping ADBLogcatRecording
+detox[83568] DEBUG: [EXEC_CMD, #27] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "date +\"%m-%d %T.000\""
+detox[83568] TRACE: [GET_FROM, #app] {"messageId":-1000,"type":"ready","params":{}}
+detox[83568] TRACE: [SEND_TO, #tester] {"messageId":-1000,"type":"ready","params":{}}
+detox[83568] TRACE: [WS_MESSAGE] {"messageId":-1000,"type":"ready","params":{}}
+ 
+detox[83568] TRACE: [EXEC_SUCCESS, #27] 04-13 12:13:05.000
+
+detox[83568] TRACE: [SPAWN_KILL, #83613] sending SIGINT to: /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell logcat -T "04-13 12:13:03.000" --pid=26586 -f /sdcard/121259591_0.log
+detox[83568] DEBUG: [SPAWN_END, #83613] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell "logcat -T \"04-13 12:13:03.000\" --pid=26586 -f /sdcard/121259591_0.log" terminated with SIGINT
+detox[83568] TRACE: [ARTIFACT_START] starting ADBLogcatRecording
+detox[83568] DEBUG: [SPAWN_CMD, #83619] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell "logcat -T \"04-13 12:13:05.000\" --pid=26586 -f /sdcard/121259591_1.log"
+detox[83568] TRACE: [WS_SEND] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]},"messageId":1}
+detox[83568] TRACE: [GET_FROM, #tester] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]},"messageId":1}
+detox[83568] TRACE: [SEND_TO, #app] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]},"messageId":1}
+detox[83568] TRACE: [GET_FROM, #app] {"messageId":1,"type":"invokeResult","params":{"result":null}}
+detox[83568] TRACE: [SEND_TO, #tester] {"messageId":1,"type":"invokeResult","params":{"result":null}}
+detox[83568] TRACE: [WS_MESSAGE] {"messageId":1,"type":"invokeResult","params":{"result":null}}
+ 
+detox[83568] TRACE: [WS_SEND] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]},"messageId":2}
+detox[83568] TRACE: [GET_FROM, #tester] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]},"messageId":2}
+detox[83568] TRACE: [SEND_TO, #app] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]},"messageId":2}
+detox[83568] DEBUG: [EXEC_CMD, #28] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell du /sdcard/121259591_1.log
+detox[83568] TRACE: [EXEC_SUCCESS, #28] 4	/sdcard/121259591_1.log
+
+detox[83568] TRACE: [GET_FROM, #app] {"messageId":2,"type":"invokeResult","params":{"result":null}}
+detox[83568] TRACE: [SEND_TO, #tester] {"messageId":2,"type":"invokeResult","params":{"result":null}}
+detox[83568] TRACE: [WS_MESSAGE] {"messageId":2,"type":"invokeResult","params":{"result":null}}
+ 
+detox[83568] TRACE: [WS_SEND] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitResult"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForText","args":["Success"]}}]},"messageId":3}
+detox[83568] TRACE: [GET_FROM, #tester] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitResult"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForText","args":["Success"]}}]},"messageId":3}
+detox[83568] TRACE: [SEND_TO, #app] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["successInitResult"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForText","args":["Success"]}}]},"messageId":3}
+detox[83568] TRACE: [GET_FROM, #app] {"messageId":3,"type":"invokeResult","params":{"result":null}}
+detox[83568] TRACE: [SEND_TO, #tester] {"messageId":3,"type":"invokeResult","params":{"result":null}}
+detox[83568] TRACE: [WS_MESSAGE] {"messageId":3,"type":"invokeResult","params":{"result":null}}
+ 
+detox[83568] TRACE: [DETOX_AFTER_EACH] passed test: "React-Native AppsFlyer Plugin initSdk should return Success"
+detox[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTestDone({
+  title: 'initSdk should return Success',
+  fullName: 'React-Native AppsFlyer Plugin initSdk should return Success',
+  status: 'passed',
+  invocations: 1,
+  timedOut: false
+})
+detox[83568] TRACE: [ARTIFACT_STOP] stopping ADBLogcatRecording
+detox[83568] DEBUG: [EXEC_CMD, #29] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "date +\"%m-%d %T.000\""
+detox[83568] TRACE: [EXEC_SUCCESS, #29] 04-13 12:13:06.000
+
+detox[83568] TRACE: [SPAWN_KILL, #83619] sending SIGINT to: /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell logcat -T "04-13 12:13:05.000" --pid=26586 -f /sdcard/121259591_1.log
+detox[83568] DEBUG: [SPAWN_END, #83619] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell "logcat -T \"04-13 12:13:05.000\" --pid=26586 -f /sdcard/121259591_1.log" terminated with SIGINT
+detox[83568] INFO:  [1m[37mReact-Native AppsFlyer Plugin: [39m[22m[90minitSdk should return Success[39m[90m [[32mOK[90m][39m
+detox[83568] INFO:  [1m[37mReact-Native AppsFlyer Plugin: [39m[22m[90minitSdk should return 'No 'devKey' found or its empty'[39m
+detox[83568] TRACE: [DETOX_BEFORE_EACH] running test: "React-Native AppsFlyer Plugin initSdk should return 'No 'devKey' found or its empty'"
+detox[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTestStart({
+  title: "initSdk should return 'No 'devKey' found or its empty'",
+  fullName: "React-Native AppsFlyer Plugin initSdk should return 'No 'devKey' found or its empty'",
+  status: 'running',
+  invocations: 1
+})
+detox[83568] TRACE: [ARTIFACT_START] starting ADBLogcatRecording
+detox[83568] DEBUG: [SPAWN_CMD, #83622] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell "logcat -T \"04-13 12:13:06.000\" --pid=26586 -f /sdcard/121259591_2.log"
+detox[83568] TRACE: [WS_SEND] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]},"messageId":4}
+detox[83568] TRACE: [GET_FROM, #tester] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]},"messageId":4}
+detox[83568] TRACE: [SEND_TO, #app] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForSufficientlyVisible","args":[]}}]},"messageId":4}
+detox[83568] TRACE: [ARTIFACT_SAVE] saving ADBLogcatRecording to: artifacts/android.2021-04-13 09-12-58Z/✓ React-Native AppsFlyer Plugin initSdk should return Success/process.log
+detox[83568] DEBUG: [EXEC_CMD, #30] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 pull "/sdcard/121259591_1.log" "artifacts/android.2021-04-13 09-12-58Z/✓ React-Native AppsFlyer Plugin initSdk should return Success/process.log"
+detox[83568] TRACE: [GET_FROM, #app] {"messageId":4,"type":"invokeResult","params":{"result":null}}
+detox[83568] TRACE: [SEND_TO, #tester] {"messageId":4,"type":"invokeResult","params":{"result":null}}
+detox[83568] TRACE: [WS_MESSAGE] {"messageId":4,"type":"invokeResult","params":{"result":null}}
+ 
+detox[83568] TRACE: [WS_SEND] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]},"messageId":5}
+detox[83568] TRACE: [GET_FROM, #tester] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]},"messageId":5}
+detox[83568] TRACE: [SEND_TO, #app] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.EspressoDetox"},"method":"perform","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyButton"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxViewActions"},"method":"click","args":[]}}]},"messageId":5}
+detox[83568] TRACE: [EXEC_SUCCESS, #30] /sdcard/121259591_1.log: 1 file pulled, 0 skipped. 2.2 MB/s (18260 bytes in 0.008s)
+
+detox[83568] DEBUG: [EXEC_CMD, #31] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "rm  \"/sdcard/121259591_1.log\""
+detox[83568] TRACE: [EXEC_SUCCESS, #31] 
+detox[83568] TRACE: [ARTIFACT_SAVE] saving ADBLogcatRecording to: artifacts/android.2021-04-13 09-12-58Z/emulator-5554 2021-04-13 09-13-07Z.startup.log
+detox[83568] DEBUG: [EXEC_CMD, #32] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 pull "/sdcard/121259591_0.log" "artifacts/android.2021-04-13 09-12-58Z/emulator-5554 2021-04-13 09-13-07Z.startup.log"
+detox[83568] TRACE: [EXEC_SUCCESS, #32] /sdcard/121259591_0.log: 1 file pulled, 0 skipped. 3.0 MB/s (27777 bytes in 0.009s)
+
+detox[83568] DEBUG: [EXEC_CMD, #33] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "rm  \"/sdcard/121259591_0.log\""
+detox[83568] TRACE: [EXEC_SUCCESS, #33] 
+detox[83568] DEBUG: [EXEC_CMD, #34] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell du /sdcard/121259591_2.log
+detox[83568] TRACE: [EXEC_SUCCESS, #34] 4	/sdcard/121259591_2.log
+
+detox[83568] TRACE: [GET_FROM, #app] {"messageId":5,"type":"invokeResult","params":{"result":null}}
+detox[83568] TRACE: [SEND_TO, #tester] {"messageId":5,"type":"invokeResult","params":{"result":null}}
+detox[83568] TRACE: [WS_MESSAGE] {"messageId":5,"type":"invokeResult","params":{"result":null}}
+ 
+detox[83568] TRACE: [WS_SEND] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyInitResult"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForText","args":["No 'devKey' found or its empty"]}}]},"messageId":6}
+detox[83568] TRACE: [GET_FROM, #tester] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyInitResult"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForText","args":["No 'devKey' found or its empty"]}}]},"messageId":6}
+detox[83568] TRACE: [SEND_TO, #app] {"type":"invoke","params":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxAssertion"},"method":"assertMatcher","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"androidx.test.espresso.Espresso"},"method":"onView","args":[{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForTestId","args":["noDevKeyInitResult"]}}]}},{"type":"Invocation","value":{"target":{"type":"Class","value":"com.wix.detox.espresso.DetoxMatcher"},"method":"matcherForText","args":["No 'devKey' found or its empty"]}}]},"messageId":6}
+detox[83568] TRACE: [GET_FROM, #app] {"messageId":6,"type":"invokeResult","params":{"result":null}}
+detox[83568] TRACE: [SEND_TO, #tester] {"messageId":6,"type":"invokeResult","params":{"result":null}}
+detox[83568] TRACE: [WS_MESSAGE] {"messageId":6,"type":"invokeResult","params":{"result":null}}
+ 
+detox[83568] TRACE: [DETOX_AFTER_EACH] passed test: "React-Native AppsFlyer Plugin initSdk should return 'No 'devKey' found or its empty'"
+detox[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onTestDone({
+  title: "initSdk should return 'No 'devKey' found or its empty'",
+  fullName: "React-Native AppsFlyer Plugin initSdk should return 'No 'devKey' found or its empty'",
+  status: 'passed',
+  invocations: 1,
+  timedOut: false
+})
+detox[83568] TRACE: [ARTIFACT_STOP] stopping ADBLogcatRecording
+detox[83568] DEBUG: [EXEC_CMD, #35] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "date +\"%m-%d %T.000\""
+detox[83568] TRACE: [EXEC_SUCCESS, #35] 04-13 12:13:06.000
+
+detox[83568] TRACE: [SPAWN_KILL, #83622] sending SIGINT to: /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell logcat -T "04-13 12:13:06.000" --pid=26586 -f /sdcard/121259591_2.log
+detox[83568] DEBUG: [SPAWN_END, #83622] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell "logcat -T \"04-13 12:13:06.000\" --pid=26586 -f /sdcard/121259591_2.log" terminated with SIGINT
+detox[83568] INFO:  [1m[37mReact-Native AppsFlyer Plugin: [39m[22m[90minitSdk should return 'No 'devKey' found or its empty'[39m[90m [[32mOK[90m][39m
+React-Native AppsFlyer Plugin[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onRunDescribeFinish({ name: 'React-Native AppsFlyer Plugin' })
+ROOT_DESCRIBE_BLOCK[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onRunDescribeFinish({ name: 'ROOT_DESCRIBE_BLOCK' })
+detox[83568] TRACE: [ARTIFACTS_LIFECYCLE] artifactsManager.onBeforeCleanup()
+detox[83568] TRACE: [ARTIFACT_SAVE] saving ADBLogcatRecording to: artifacts/android.2021-04-13 09-12-58Z/✓ React-Native AppsFlyer Plugin initSdk should return 'No 'devKey' found or its empty'/process.log
+detox[83568] DEBUG: [EXEC_CMD, #36] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 pull "/sdcard/121259591_2.log" "artifacts/android.2021-04-13 09-12-58Z/✓ React-Native AppsFlyer Plugin initSdk should return 'No 'devKey' found or its empty'/process.log"
+detox[83568] TRACE: [EXEC_SUCCESS, #36] /sdcard/121259591_2.log: 1 file pulled, 0 skipped. 1.3 MB/s (7779 bytes in 0.006s)
+
+detox[83568] DEBUG: [EXEC_CMD, #37] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 shell "rm  \"/sdcard/121259591_2.log\""
+detox[83568] TRACE: [EXEC_SUCCESS, #37] 
+detox[83568] TRACE: [ARTIFACT_START] starting FileArtifact
+detox[83568] TRACE: [ARTIFACT_STOP] stopping FileArtifact
+detox[83568] TRACE: [ARTIFACT_SAVE] saving FileArtifact to: artifacts/android.2021-04-13 09-12-58Z/detox_pid_83568.json.log { append: true }
+detox[83568] TRACE: [ARTIFACT_START] starting FileArtifact
+detox[83568] TRACE: [ARTIFACT_STOP] stopping FileArtifact
+detox[83568] TRACE: [ARTIFACT_SAVE] saving FileArtifact to: artifacts/android.2021-04-13 09-12-58Z/detox_pid_83568.log { append: true }
+detox[83568] DEBUG: [MOVE_FILE] moving "/private/var/folders/hh/9zq41fns7kbbqgb6q6pqk0z80000gp/T/de54ae77-b3bf-44ae-a2e4-397cbf7701e0.detox.log" to artifacts/android.2021-04-13 09-12-58Z/detox_pid_83568.json.log
+detox[83568] DEBUG: [MOVE_FILE] moving "/private/var/folders/hh/9zq41fns7kbbqgb6q6pqk0z80000gp/T/63ab3056-9508-40c8-959b-60c1d57f6e2c.detox.log" to artifacts/android.2021-04-13 09-12-58Z/detox_pid_83568.log
+detox[83568] TRACE: [WS_SEND] {"type":"cleanup","params":{"stopRunner":true},"messageId":-49642}
+detox[83568] TRACE: [GET_FROM, #tester] {"type":"cleanup","params":{"stopRunner":true},"messageId":-49642}
+detox[83568] TRACE: [SEND_TO, #app] {"type":"cleanup","params":{"stopRunner":true},"messageId":-49642}
+detox[83568] TRACE: [GET_FROM, #app] {"messageId":-49642,"type":"cleanupDone","params":{}}
+detox[83568] TRACE: [SEND_TO, #tester] {"messageId":-49642,"type":"cleanupDone","params":{}}
+detox[83568] TRACE: [WS_MESSAGE] {"messageId":-49642,"type":"cleanupDone","params":{}}
+ 
+detox[83568] TRACE: [SESSION_TORN] tester exited session 52055f8c-d73c-5661-1cbc-b0ab7f65d365
+detox[83568] TRACE: [SEND_TO, #app] {"type":"testerDisconnected","messageId":-1}
+detox[83568] TRACE: [SPAWN_KILL, #83611] sending SIGINT to: /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell am instrument -w -r -e detoxServer ws://localhost:65061 -e detoxSessionId 52055f8c-d73c-5661-1cbc-b0ab7f65d365 -e debug false com.detoxtest.test/androidx.test.runner.AndroidJUnitRunner
+detox[83568] DEBUG: [SPAWN_END, #83611] /Users/amitkremer/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell am instrument -w -r -e detoxServer ws://localhost:65061 -e detoxSessionId 52055f8c-d73c-5661-1cbc-b0ab7f65d365 -e debug false com.detoxtest.test/androidx.test.runner.AndroidJUnitRunner terminated with SIGINT
+detox[83568] DEBUG: [EXEC_CMD, #38] "/Users/amitkremer/Library/Android/sdk/platform-tools/adb" -s emulator-5554 reverse --remove tcp:65061
+detox[83568] DEBUG: [SERVER_CLOSE] Detox server has been closed gracefully
+detox[83568] TRACE: [SESSION_TORN] app exited session 52055f8c-d73c-5661-1cbc-b0ab7f65d365
+detox[83568] TRACE: [EXEC_SUCCESS, #38] 

@@ -15,7 +15,6 @@
 //#else
 //#import "AppsFlyerLib.h"
 //#endif
-typedef void (*bypassDidFinishLaunchingWithOption)(id, SEL, NSInteger);
 
 
 @interface RNAppsFlyer: RCTEventEmitter <RCTBridgeModule, AppsFlyerLibDelegate, AppsFlyerDeepLinkDelegate>
@@ -29,7 +28,7 @@ static NSString *const EMPTY_OR_CORRUPTED_LIST      = @"No arguments found or li
 static NSString *const SUCCESS                      = @"Success";
 static NSString *const INVALID_URI                  = @"Invalid URI";
 static NSString *const IOS_14_ONLY                  = @"Feature only supported on iOS 14 and above";
-    
+
   // Appsflyer JS objects
   #define afDevKey                                  @"devKey"
   #define afAppId                                   @"appId"
