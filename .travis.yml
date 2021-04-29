@@ -8,7 +8,7 @@ matrix:
       before_script:
         - export WORK_BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
         - PLUGIN_INSTALL_CMD='npm install git://github.com/AppsFlyerSDK/appsflyer-react-native-plugin.git#${WORK_BRANCH} --save'
-        - CONFIG_PLUGIN_INSTALL='npm install react-native-config --save'
+        - CONFIG_PLUGIN_INSTALL='npm install react-native-config --save --force'
       before_install:
         - gem install cocoapods
         - gem update concurrent-ruby
