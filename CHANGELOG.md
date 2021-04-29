@@ -1,4 +1,8 @@
 # Versions
+## 6.2.60
+- iOS SDK 6.2.6
+- Remove get SKAD rules manually
+
 ## 6.2.42
 - `isDebug` and `appId` optional validation
 - Fix sendPushNotification api [Android]
