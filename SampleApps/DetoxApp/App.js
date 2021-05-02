@@ -3,7 +3,7 @@
  * https://github.com/facebook/react-native
  */
 
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import type {Node} from 'react';
 import appsFlyer from 'react-native-appsflyer';
 import {
@@ -15,22 +15,38 @@ import {
     Button,
     View,
     Platform,
+    Alert,
 } from 'react-native';
 
 import {
     Colors,
 } from 'react-native/Libraries/NewAppScreen';
+import Config from 'react-native-config';
 
 const App: () => Node = () => {
-    const [initResult, setInitResult] = useState('Not clicked yet');
-    const [noDevKeyResult, setNoDevKeyResult] = useState('Not clicked yet');
-    const successInit = () => {
+    const [testResult, setTestResult] = useState('No test results');
+
+    useEffect(() => {
+        let gcdListener = appsFlyer.onInstallConversionData(res => {
+            console.log(JSON.stringify(res));
+            setTestResult(JSON.stringify(res));
+        });
+        let oaoaListener = appsFlyer.onAppOpenAttribution(res => {
+            console.log(JSON.stringify(res));
+            Alert.alert('Alert', JSON.stringify(res));
+        });
+        return (() => {
+            gcdListener();
+            oaoaListener();
+        });
+    }, []);
+
+    const successOrganicGCD = () => {
         appsFlyer.initSdk({
-            devKey: 'Us********ed',
-            appId: '123456789',
-            onInstallConversionDataListener: false,
+            devKey: Config.DEV_KEY,
+            appId: '741993991',
+            onInstallConversionDataListener: true,
         }, result => {
-            setInitResult(result);
         }, error => {
         });
     };
@@ -38,38 +54,54 @@ const App: () => Node = () => {
         appsFlyer.initSdk({devKey: '', appId: '123456789', onInstallConversionDataListener: false}, result => {
         }, error => {
             if (Platform.OS == 'ios') {
-                setNoDevKeyResult(error['domain']);
+                setTestResult(error['domain']);
             } else {
-                setNoDevKeyResult(error);
+                setTestResult(error);
             }
 
         });
     };
 
+    const logEventSuccess = () => {
+        const eventName = 'test';
+        const eventValues = {af_revenue: '10'};
+        appsFlyer.logEvent(eventName, eventValues, result => {
+            console.log(JSON.stringify(result));
+            Alert.alert('Alert', result);
+        }, error => console.log(error));
+    };
+
     return (
         <SafeAreaView>
             <StatusBar/>
-            <ScrollView
-                contentInsetAdjustmentBehavior="automatic">
+            <View style={styles.responseView}>
+                <Text testID='testResult' style={styles.welcome}>{testResult}</Text>
+            </View>
+            <ScrollView contentInsetAdjustmentBehavior="automatic">
                 <View style={styles.body}>
-                    <Button
-                        testID='successInitButton'
-                        onPress={successInit}
-                        title="Success initSDK"
-                        color="#009688"
-                    />
-                    <Text testID='successInitResult' style={styles.welcome}>{initResult}</Text>
                     <Button
                         testID='noDevKeyButton'
                         onPress={noDevKeyInit}
                         title="No devKey initSDK"
                         color="#009688"
                     />
-                    <Text testID='noDevKeyInitResult' style={styles.welcome}>{noDevKeyResult}</Text>
+                    <Button
+                        testID='successOrganicGCDButton'
+                        onPress={successOrganicGCD}
+                        title="Success initSDK"
+                        color="#009688"
+                    />
+                    <Button
+                        testID='logEventSuccessButton'
+                        onPress={logEventSuccess}
+                        title="Success logEvent"
+                        color="#009688"
+                    />
                 </View>
             </ScrollView>
         </SafeAreaView>
-    );
+    )
+        ;
 };
 
 const styles = StyleSheet.create({
@@ -96,6 +128,16 @@ const styles = StyleSheet.create({
         fontSize: 20,
         textAlign: 'center',
         margin: 10,
+    },
+    responseView: {
+        height: '40%',
+        padding: 20,
+        borderRadius: 50,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: 'black',
+        margin: 20,
+
     },
 });
 
