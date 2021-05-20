@@ -21,10 +21,12 @@
   
 ### <a id="plugin-build-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v6.2.6**
-- Android AppsFlyerSDK **v6.2.0**
+- iOS AppsFlyerSDK **v6.3.0**
+- Android AppsFlyerSDK **v6.3.0**
 
 ## <a id="breaking-changes"> ❗ Breaking Changes
+
+- From version `6.3.0`, we use `xcframework` for iOS platform, then you need to use cocoapods version >= 1.10
 
 - From version `6.2.30`, `logCrossPromotionAndOpenStore`  api will register as `af_cross_promotion` instead of `af_app_invites` in your dashboard.<br>
 Click on a link that was generated using `generateInviteLink` api will be register as `af_app_invites`.
