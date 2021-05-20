@@ -1,4 +1,8 @@
 # Versions
+## 6.3.0
+- iOS SDK 6.3.0
+- Android SDK 6.3.0
+
 ## 6.2.60
 - iOS SDK 6.2.6
 - Remove get SKAD rules manually
