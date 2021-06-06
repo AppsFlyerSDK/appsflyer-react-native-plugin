@@ -111,7 +111,7 @@ The `appsFlyer.onAppOpenAttribution` returns function to  unregister this event 
 ###  <a id="Unified-deep-linking"> 3. Unified deep linking
 In order to use the unified deep link you need to send the `onDeepLinkListener: true` flag inside the object that sent to the sdk.<br>
 **NOTE:** when sending this flag, the sdk will ignore `onAppOpenAttribution`!<br>
-For more information about this api, please check [OneLink Guide Here](https://dev.appsflyer.com/docs/android-unified-deep-linking)
+For more information about this api, please check [OneLink Guide Here](https://dev.appsflyer.com/hc/docs/unified-deep-linking-udl)
 
 
 ```javascript
