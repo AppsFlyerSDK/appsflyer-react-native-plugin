@@ -76,38 +76,36 @@ If your app does not support autolinking, check out the Installation Guide [here
 
 ## <a id="appKids"> 👨‍👩‍👧‍👦 Add or Remove Strict mode for App-kids
 
-Starting from version **6.1.10** iOS SDK comes in two variants: **Strict** mode and **Regular** mode. Please read more [here](https://support.appsflyer.com/hc/en-us/articles/207032066#integration-strict-mode-sdk)
+Starting from version **6.1.10** iOS SDK comes in two variants: **Strict** mode and **Regular** mode. Please read more [here](https://support.appsflyer.com/hc/en-us/articles/207032066#integration-strict-mode-sdk) <br>
+
+***Version <= 6.3.0: *** read this section of the README.md in branch: `releases/6.x.x/6.3.x/6.3.0` <br>
 
 ***Change to Strict mode***<br>
-After you [installed](#installation) the AppsFlyer plugin, go to the `react-native-appsflyer` folder inside the `node_modules` folder:
+After you [installed](#installation) the AppsFlyer plugin, add `$RNAppsFlyerStrictMode=true` in the project's Podfile:
 ```
-cd node_modules/react-native-appsflyer
+//MyRNApp/ios/Podfile
+...
+use_frameworks!
+  $RNAppsFlyerStrictMode=true
+
+  # Pods for MyRNApp
+...
+
 ```
-Run the script `changeMode.sh strict`
-```
-./changeMode.sh strict
-```
-Go to the `ios` folder in your `root` project
-```
-cd ../../ios
-```
-Run `pod install`
+In the `ios` folder of your `root` project Run `pod install`
 
 ***Change to Regular mode***<br>
-Go to the `react-native-appsflyer` folder inside the `node_modules` folder:
+Remove `$RNAppsFlyerStrictMode=true` from the project's Podfile or set it to `false`:
 ```
-cd node_modules/react-native-appsflyer
-```
-Run the script `changeMode.sh` (WITHOUT `strict`)
-```
-./changeMode.sh
-```
-Go to the `ios` folder in your `root` project
-```
-cd ../../ios
-```
-Run `pod install`
+//MyRNApp/ios/Podfile
+...
+use_frameworks!
+  $RNAppsFlyerStrictMode=false //OR remove this line
 
+  # Pods for MyRNApp
+...
+```
+In the `ios` folder of your `root` project Run `pod install`
 ## <a id="init-sdk"> 🚀 Initializing the SDK
 
 Initialize the SDK to enable AppsFlyer to detect installations, sessions (app opens) and updates.<br>
