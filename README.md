@@ -77,9 +77,7 @@ If your app does not support autolinking, check out the Installation Guide [here
 ## <a id="appKids"> 👨‍👩‍👧‍👦 Add or Remove Strict mode for App-kids
 
 Starting from version **6.1.10** iOS SDK comes in two variants: **Strict** mode and **Regular** mode. Please read more [here](https://support.appsflyer.com/hc/en-us/articles/207032066#integration-strict-mode-sdk) <br>
-
-***Version <= 6.3.0: *** read this section of the README.md in branch: `releases/6.x.x/6.3.x/6.3.0` <br>
-
+***Version <= 6.3.0:*** read this section of the README.md in branch: `releases/6.x.x/6.3.x/6.3.0`<br>
 ***Change to Strict mode***<br>
 After you [installed](#installation) the AppsFlyer plugin, add `$RNAppsFlyerStrictMode=true` in the project's Podfile:
 ```
