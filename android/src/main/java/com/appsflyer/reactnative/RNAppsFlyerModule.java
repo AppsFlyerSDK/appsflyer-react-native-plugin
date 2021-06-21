@@ -725,4 +725,9 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             errorCallback.invoke(e);
         }
     }
+
+    @ReactMethod
+    public void disableAdvertisingIdentifier(Boolean isDisabled) {
+        AppsFlyerLib.getInstance().setDisableAdvertisingIdentifiers(isDisabled);
+    }
 }
