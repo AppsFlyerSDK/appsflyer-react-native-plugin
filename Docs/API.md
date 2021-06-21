@@ -741,21 +741,17 @@ appsFlyer.disableCollectASA(true);
 ---
 
 ##### <a id="disableAdvertisingIdentifier"> **`disableAdvertisingIdentifier(shouldDisable)`**
-  
-❗(iOS only)
 
-Disables IDFA collecting
+Disables IDFA collection in iOS and Advertising ID in Android. should be called before `initSdk`.
 
 | parameter                   | type     | description                                                |
 | ----------                  |----------|------------------                                          |
-| shouldDisable               | boolean  | Flag to disable/enable IDFA collection    |
+| isDisable               | boolean  | Flag to disable/enable IDFA/Advertising ID collection    |
 
 *Example:*
 
 ```javascript
-if (Platform.OS == 'ios') {
 appsFlyer.disableAdvertisingIdentifier(true);
-}
 ```
 
 ---
