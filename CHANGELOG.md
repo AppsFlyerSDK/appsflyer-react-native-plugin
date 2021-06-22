@@ -1,4 +1,10 @@
 # Versions
+## 6.3.20
+- iOS SDK 6.3.2
+- Android SDK 6.3.2
+- Fix exception in UDL-android first launch callback parsing
+- Add disableAdvertisingIdentifier api in android
+
 ## 6.3.0
 - iOS SDK 6.3.0
 - Android SDK 6.3.0
