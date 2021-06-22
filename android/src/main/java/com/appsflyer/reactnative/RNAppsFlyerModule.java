@@ -176,8 +176,13 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                     deepLinkObj.put("status", afSuccess);
                     deepLinkObj.put("deepLinkStatus", deepLinkResult.getStatus());
                     deepLinkObj.put("type", afOnDeepLinking);
-                    deepLinkObj.put("data", deepLinkResult.getDeepLink().getClickEvent());
-                    deepLinkObj.put("isDeferred", deepLinkResult.getDeepLink().isDeferred());
+                    if (deepLinkResult.getStatus() == DeepLinkResult.Status.FOUND) {
+                        deepLinkObj.put("data", deepLinkResult.getDeepLink().getClickEvent());
+                        deepLinkObj.put("isDeferred", deepLinkResult.getDeepLink().isDeferred());
+                    }else{
+                        deepLinkObj.put("data", "");
+                        deepLinkObj.put("isDeferred", "");
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -724,5 +729,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             e.printStackTrace();
             errorCallback.invoke(e);
         }
+    }
+
+    @ReactMethod
+    public void disableAdvertisingIdentifier(Boolean isDisabled) {
+        AppsFlyerLib.getInstance().setDisableAdvertisingIdentifiers(isDisabled);
     }
 }

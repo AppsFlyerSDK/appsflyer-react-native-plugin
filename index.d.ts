@@ -91,11 +91,11 @@ declare module "react-native-appsflyer" {
         sendPushNotificationData(pushPayload: object): void
         setHost(hostPrefix: string, hostName: string, success: SuccessCB): void
         addPushNotificationDeepLinkPath(path: string[], successC: SuccessCB, errorC: ErrorCB): void
+        disableAdvertisingIdentifier(isDisable: boolean): void
 
         /**
          * For iOS Only
          * */
-        disableAdvertisingIdentifier(shouldDisable: boolean): void
         disableCollectASA(shouldDisable: boolean): void
         setUseReceiptValidationSandbox(isSandbox: boolean): void
         disableSKAD(disableSkad: boolean): void
