@@ -301,7 +301,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
         message[@"status"] = ([deepLinkStatus isEqual:@"Error"] || [deepLinkStatus isEqual:@"NOT_FOUND"]) ? afFailure : afSuccess;
         message[@"deepLinkStatus"] = deepLinkStatus;
         message[@"type"] = afOnDeepLinking;
-        message[@"isDeffered"] = result.deepLink.isDeferred ? @YES : @NO;
+        message[@"isDeferred"] = result.deepLink.isDeferred ? @YES : @NO;
         if([deepLinkStatus  isEqual: @"Error"]){
             message[@"data"] = result.error.localizedDescription;
         }else if([deepLinkStatus  isEqual: @"NOT_FOUND"]){
