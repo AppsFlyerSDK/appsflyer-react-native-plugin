@@ -2,7 +2,7 @@
 //  AppsFlyerLib.h
 //  AppsFlyerLib
 //
-//  AppsFlyer iOS SDK 6.3.2 (17)
+//  AppsFlyer iOS SDK 6.3.5 (24)
 //  Copyright (c) 2012-2020 AppsFlyer Ltd. All rights reserved.
 //
 
@@ -350,6 +350,22 @@ NS_SWIFT_NAME(waitForATTUserAuthorization(timeoutInterval:));
  To disable app's vendor identifier(IDFV), set disableIDFVCollection to true
  */
 @property(nonatomic) BOOL disableIDFVCollection;
+
+/**
+ Set the language of the device. The data will be displayed in Raw Data Reports
+ Objective-C:
+ 
+ <pre>
+ [[AppsFlyerLib shared] setCurrentDeviceLanguage:@"EN"]
+ </pre>
+ 
+ Swift:
+ 
+ <pre>
+ AppsFlyerLib.shared().currentDeviceLanguage("EN")
+ </pre>
+ */
+@property(nonatomic, nullable) NSString *currentDeviceLanguage;
 
 /**
  Enable the collection of Facebook Deferred AppLinks

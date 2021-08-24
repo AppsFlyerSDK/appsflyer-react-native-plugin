@@ -99,6 +99,7 @@ declare module "react-native-appsflyer" {
         disableCollectASA(shouldDisable: boolean): void
         setUseReceiptValidationSandbox(isSandbox: boolean): void
         disableSKAD(disableSkad: boolean): void
+        setCurrentDeviceLanguage(language: string): void
 
         /**
          * For Android Only

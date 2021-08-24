@@ -32,6 +32,7 @@
 - [setHost](#setHost)
 - [addPushNotificationDeepLinkPath](#addPushNotificationDeepLinkPath)
 - [disableSKAD](#disableSKAD)
+- [setCurrentDeviceLanguage](#setCurrentDeviceLanguage)
 
 ---
 
@@ -875,5 +876,23 @@ appsFlyer.addPushNotificationDeepLinkPath(["deeply", "nested", "deep_link"], res
 ```javascript
 if (Platform.OS == 'ios') {
     appsFlyer.disableSKAD(true);
+}
+```
+
+##### <a id="setCurrentDeviceLanguage"> **`setCurrentDeviceLanguage(language)`**
+
+Set the language of the device. The data will be displayed in Raw Data Reports<br>
+If you want to clear this property, set an empty string. ("")
+
+| parameter | type     | description      |
+| ----------|----------|------------------|
+| language    | string   | language of the device |
+
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'ios') {
+    appsFlyer.setCurrentDeviceLanguage("EN");
 }
 ```
