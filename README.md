@@ -1,5 +1,5 @@
 
-<img src="https://www.appsflyer.com/wp-content/uploads/2016/11/logo-1.svg"  width="450">
+<img src="https://raw.githubusercontent.com/AppsFlyerSDK/appsflyer-capacitor-plugin/main/assets/AFLogo_primary.png"  width="450">
 
 # React Native AppsFlyer plugin for Android and iOS.
 
