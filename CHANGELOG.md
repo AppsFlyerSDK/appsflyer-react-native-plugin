@@ -1,3 +1,7 @@
+## 6.3.50
+- iOS SDK 6.3.5
+- `setCurrentDeviceLanguage` api for iOS
+
 ## 6.3.20
 ### *Bug*
 - RN Android >> Exception in UDL callback parsing 

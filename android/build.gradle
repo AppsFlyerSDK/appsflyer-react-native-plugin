@@ -56,20 +56,4 @@ dependencies {
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.1')}"
     implementation "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.3.2')}"
-    //-----
-    // Required -- JUnit 4 framework
-    testImplementation 'junit:junit:4.12'
-    // Optional -- Robolectric environment
-    testImplementation 'androidx.test:core:1.0.0'
-    // Optional -- Mockito framework
-    testImplementation('org.mockito:mockito-inline:3.4.0')
-    testImplementation "org.json:json:20140107"
-    testImplementation('org.powermock:powermock-api-mockito:1.6.2') {
-        exclude module: 'hamcrest-core'
-        exclude module: 'objenesis'
-    }
-    testImplementation('org.powermock:powermock-module-junit4:1.6.2') {
-        exclude module: 'hamcrest-core'
-        exclude module: 'objenesis'
-    }
 }

@@ -533,5 +533,8 @@ RCT_EXPORT_METHOD(disableSKAD: (BOOL *)b ) {
     }
 }
 
+RCT_EXPORT_METHOD(setCurrentDeviceLanguage: (NSString *)language ) {
+    [[AppsFlyerLib shared] setCurrentDeviceLanguage:language];
+}
 
 @end

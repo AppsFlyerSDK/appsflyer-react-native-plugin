@@ -590,6 +590,16 @@ appsFlyer.disableSKAD = (disableSkad) => {
     return RNAppsFlyer.disableSKAD(disableSkad);
 };
 
+/**
+ * Set the language of the device. The data will be displayed in Raw Data Reports
+ * @param language
+ */
+appsFlyer.setCurrentDeviceLanguage = (language) => {
+    if (typeof language === 'string'){
+        return RNAppsFlyer.setCurrentDeviceLanguage(language);
+    }
+};
+
 function AFParseJSONException(_message, _data) {
     this.message = _message;
     this.data = _data;
