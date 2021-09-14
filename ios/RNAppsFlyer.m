@@ -455,16 +455,10 @@ RCT_EXPORT_METHOD(performOnAppAttribution:(NSString *) urlString
     }
 }
 
-RCT_EXPORT_METHOD(setSharingFilterForAllPartners) {
-    [[AppsFlyerLib shared] setSharingFilterForAllPartners];
+RCT_EXPORT_METHOD(setSharingFilterForPartners:(NSArray *)partners) {
+    [[AppsFlyerLib shared] setSharingFilterForPartners:partners];
 }
 
-RCT_EXPORT_METHOD(setSharingFilter:(NSArray *)partners
-                  successCallback:(RCTResponseSenderBlock)successCallback
-                  errorCallback:(RCTResponseErrorBlock)errorCallback) {
-    [[AppsFlyerLib shared] setSharingFilter:partners];
-    successCallback(@[SUCCESS]);
-}
 #ifndef AFSDK_NO_IDFA
 RCT_EXPORT_METHOD(disableAdvertisingIdentifier:(BOOL)shouldDisable) {
     [AppsFlyerLib shared].disableAdvertisingIdentifier = shouldDisable;

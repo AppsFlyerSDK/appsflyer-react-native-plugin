@@ -7,8 +7,8 @@
 
 *When submitting an issue please specify your AppsFlyer sign-up (account) email , your app ID , production steps, logs, code snippets and any additional relevant information.*
 
-[![npm version](https://badge.fury.io/js/react-native-appsflyer.svg)](https://badge.fury.io/js/react-native-appsflyer) 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) 
+[![npm version](https://badge.fury.io/js/react-native-appsflyer.svg)](https://badge.fury.io/js/react-native-appsflyer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Downloads](https://img.shields.io/npm/dm/react-native-appsflyer.svg)](https://www.npmjs.com/package/react-native-appsflyer)
 ## Table of content
 
@@ -17,12 +17,12 @@
 - [Add or Remove Strict mode for App-kids](#appKids)
 - [Initializing the SDK](#init-sdk)
 - [Guides](#guides)
-- [API](#api) 
-  
+- [API](#api)
+
 ### <a id="plugin-build-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v6.3.5**
-- Android AppsFlyerSDK **v6.3.2**
+- iOS AppsFlyerSDK **v6.4.0**
+- Android AppsFlyerSDK **v6.4.0**
 
 ## <a id="breaking-changes"> ❗ Breaking Changes
 
@@ -53,7 +53,7 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 
 ## <a id="installation"> 📲 Adding the SDK to your project
 
-**Production** version from npm: 
+**Production** version from npm:
 ```
 $ npm install react-native-appsflyer --save
 ```
@@ -152,6 +152,5 @@ Great installation and setup guides can be viewed [here](/Docs/Guides.md).
 
 
 ## <a id="api"> 📑 API
-  
-See the full [API](/Docs/API.md) available for this plugin.
 
+See the full [API](/Docs/API.md) available for this plugin.

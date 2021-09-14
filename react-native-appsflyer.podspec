@@ -18,11 +18,11 @@ Pod::Spec.new do |s|
   # AppsFlyerFramework
   if defined?($RNAppsFlyerStrictMode)
     Pod::UI.puts "#{s.name}: Using AppsFlyerFramework/Strict mode"
-    s.dependency 'AppsFlyerFramework/Strict', '6.3.5'
+    s.dependency 'AppsFlyerFramework/Strict', '6.4.0'
     s.xcconfig = {'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) AFSDK_NO_IDFA=1' }
   else
     Pod::UI.puts "#{s.name}: Using default AppsFlyerFramework.You may require App Tracking Transparency. Not allowed for Kids apps."
     Pod::UI.puts "#{s.name}: You may set variable `$RNAppsFlyerStrictMode=true` in Podfile to use strict mode for kids apps."
-    s.dependency 'AppsFlyerFramework', ' 6.3.5'
+    s.dependency 'AppsFlyerFramework', ' 6.4.0'
   end
 end
