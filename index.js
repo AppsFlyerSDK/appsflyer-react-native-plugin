@@ -498,15 +498,17 @@ appsFlyer.performOnAppAttribution = (urlString, successC, errorC) => {
 }
 
 /**
+ * @deprecated starting SDK version 6.4.0, please use setSharingFilterForPartners()
  * Used by advertisers to exclude **all** networks/integrated partners from getting data.
  * Learn more - https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data
  */
 
 appsFlyer.setSharingFilterForAllPartners = () => {
-    return RNAppsFlyer.setSharingFilterForAllPartners();
+    return appsFlyer.setSharingFilterForPartners(['all']);
 }
 
 /**
+ * @deprecated starting SDK version 6.4.0, please use setSharingFilterForPartners()
  * Used by advertisers to exclude specified networks/integrated partners from getting data.
  * Learn more - https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data
  * @param partners Comma separated array of partners that need to be excluded
@@ -515,7 +517,7 @@ appsFlyer.setSharingFilterForAllPartners = () => {
  */
 
 appsFlyer.setSharingFilter = (partners, successC, errorC) => {
-    return RNAppsFlyer.setSharingFilter(partners, successC, errorC);
+    return appsFlyer.setSharingFilterForPartners(partners);
 }
 
 /**
@@ -599,6 +601,13 @@ appsFlyer.setCurrentDeviceLanguage = (language) => {
         return RNAppsFlyer.setCurrentDeviceLanguage(language);
     }
 };
+
+/**
+*  Used by advertisers to exclude specified networks/integrated partners from getting data.
+*/
+appsFlyer.setSharingFilterForPartners = (partners) => {
+  return RNAppsFlyer.setSharingFilterForPartners(partners);
+}
 
 function AFParseJSONException(_message, _data) {
     this.message = _message;
