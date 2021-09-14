@@ -92,6 +92,7 @@ declare module "react-native-appsflyer" {
         setHost(hostPrefix: string, hostName: string, success: SuccessCB): void
         addPushNotificationDeepLinkPath(path: string[], successC: SuccessCB, errorC: ErrorCB): void
         disableAdvertisingIdentifier(isDisable: boolean): void
+        setSharingFilterForPartners(partners: string[]): void
 
         /**
          * For iOS Only

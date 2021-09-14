@@ -2,29 +2,29 @@
 
 - [initSdk](#initSdk)
 - [appId](#appId)
-- [onInstallConversionData](#onInstallConversionData) 
-- [onAppOpenAttribution](#onAppOpenAttribution) 
+- [onInstallConversionData](#onInstallConversionData)
+- [onAppOpenAttribution](#onAppOpenAttribution)
 - [logEvent](#logEvent)
-- [setCustomerUserId](#setCustomerUserId) 
-- [getAppsFlyerUID](#getAppsFlyerUID) 
-- [stop](#stop) 
-- [logLocation](#logLocation) 
-- [setUserEmails](#setUserEmails) 
+- [setCustomerUserId](#setCustomerUserId)
+- [getAppsFlyerUID](#getAppsFlyerUID)
+- [stop](#stop)
+- [logLocation](#logLocation)
+- [setUserEmails](#setUserEmails)
 - [setAdditionalData](#setAdditionalData)  
-- [updateServerUninstallToken](#updateServerUninstallToken) 
-- [setCollectIMEI](#setCollectIMEI) 
-- [setCollectAndroidID](#setCollectAndroidID) 
-- [setAppInviteOneLinkID](#setAppInviteOneLinkID) 
-- [generateInviteLink](#generateInviteLink) 
-- [logCrossPromotionImpression](#logCrossPromotionImpression) 
-- [logCrossPromotionAndOpenStore](#logCrossPromotionAndOpenStore) 
-- [setCurrencyCode](#setCurrencyCode) 
+- [updateServerUninstallToken](#updateServerUninstallToken)
+- [setCollectIMEI](#setCollectIMEI)
+- [setCollectAndroidID](#setCollectAndroidID)
+- [setAppInviteOneLinkID](#setAppInviteOneLinkID)
+- [generateInviteLink](#generateInviteLink)
+- [logCrossPromotionImpression](#logCrossPromotionImpression)
+- [logCrossPromotionAndOpenStore](#logCrossPromotionAndOpenStore)
+- [setCurrencyCode](#setCurrencyCode)
 - [anonymizeUser](#anonymizeUser)
 - [setOneLinkCustomDomains](#setOneLinkCustomDomains)
 - [setResolveDeepLinkURLs](#setResolveDeepLinkURLs)
 - [performOnAppAttribution](#performOnAppAttribution)
-- [setSharingFilterForAllPartners](#setSharingFilterForAllPartners)
-- [setSharingFilter](#setSharingFilter)
+- [setSharingFilterForAllPartners](#setSharingFilterForAllPartners) Deprecated!
+- [setSharingFilter](#setSharingFilter)Deprecated!
 - [disableCollectASA](#disableCollectASA)
 - [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
 - [validateAndLogInAppPurchase](#validateAndLogInAppPurchase)
@@ -33,6 +33,7 @@
 - [addPushNotificationDeepLinkPath](#addPushNotificationDeepLinkPath)
 - [disableSKAD](#disableSKAD)
 - [setCurrentDeviceLanguage](#setCurrentDeviceLanguage)
+- [setSharingFilterForPartners](#setSharingFilterForPartners)
 
 ---
 
@@ -366,7 +367,7 @@ appsFlyer.setUserEmails(
 
 ##### <a id="setAdditionalData"> **`setAdditionalData(additionalData, callback)`**
 
-The setAdditionalData API is required to integrate on the SDK level with several external partner platforms, including Segment, Adobe and Urban Airship. Use this API only if the integration article of the platform specifically states setAdditionalData API is needed. 
+The setAdditionalData API is required to integrate on the SDK level with several external partner platforms, including Segment, Adobe and Urban Airship. Use this API only if the integration article of the platform specifically states setAdditionalData API is needed.
 
 | parameter       | type     | description               |
 | ----------      |----------|------------------         |
@@ -392,11 +393,11 @@ appsFlyer.setAdditionalData(
 ---
 
 ##### <a id="updateServerUninstallToken"> **`updateServerUninstallToken(token, callback)`**
-  
+
 (Android only)
 
 Manually pass the Firebase / GCM Device Token for Uninstall measurement.
-  
+
 | parameter       | type     | description               |
 | ----------      |----------|------------------         |
 | token           | string   | FCM Token                 |
@@ -414,7 +415,7 @@ appsFlyer.updateServerUninstallToken('token', (res) => {
 ---
 
 ##### <a id="setCollectIMEI"> **`setCollectIMEI(isCollect, callback)`**
-  
+
 ❗(Android only)
 
 Opt-out of collection of IMEI.<br/>
@@ -440,7 +441,7 @@ appsFlyer.setCollectIMEI(false, (res) => {
 ---
 
 ##### <a id="setCollectAndroidID"> **`setCollectAndroidID(isCollect, callback)`**
-  
+
 ❗(Android only)
 
 Opt-out of collection of Android ID.<br/>
@@ -466,7 +467,7 @@ appsFlyer.setCollectAndroidID(true, (res) => {
 ---
 
 ##### <a id="setAppInviteOneLinkID"> **`setAppInviteOneLinkID(oneLinkID, callback)`**
-  
+
 Set the OneLink ID that should be used for User-Invite-API.<br/>
 The link that is generated for the user invite will use this OneLink ID as the base link ID.
 
@@ -625,7 +626,7 @@ appsFlyer.anonymizeUser(true, () => {});
  Set Onelink custom/branded domains<br/>
  Use this API during the SDK Initialization to indicate branded domains.<br/>
  For more information please refer to the [documentation](https://support.appsflyer.com/hc/en-us/articles/360002329137-Implementing-Branded-Links)
- 
+
 | parameter                   | type     | description                                                |
 | ----------                  |----------|------------------                                          |
 | domains                     | array    | Comma separated array of branded domains                   |
@@ -690,7 +691,7 @@ appsFlyer.performOnAppAttribution(url, res => console.log(res) , err => console.
 ```
 ---
 ##### <a id="setSharingFilterForAllPartners"> **`setSharingFilterForAllPartners()`**
-
+##### Deprecated! Start from version 6.4.0 please use [setSharingFilterForPartners](#setSharingFilterForPartners)
 Used by advertisers to exclude **all** networks/integrated partners from getting data. Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data)
 
 *Example:*
@@ -700,7 +701,7 @@ appsFlyer.setSharingFilterForAllPartners()
 ```
 ---
 ##### <a id="setSharingFilter"> **`setSharingFilter(partners, sucessC, errorC)`**
-
+##### Deprecated! Start from version 6.4.0 please use [setSharingFilterForPartners](#setSharingFilterForPartners)
 Used by advertisers to exclude **specified** networks/integrated partners from getting data. Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data)
 
 | parameter                   | type     | description                                                |
@@ -722,7 +723,7 @@ appsFlyer.setSharingFilterForAllPartners(partners,
 ---
 
 ##### <a id="disableCollectASA"> **`disableCollectASA(shouldDisable)`**
-  
+
 ❗(iOS only)
 
 Disables Apple Search Ads collecting
@@ -896,3 +897,24 @@ if (Platform.OS == 'ios') {
     appsFlyer.setCurrentDeviceLanguage("EN");
 }
 ```
+---
+##### <a id="setSharingFilterForPartners"> **`setSharingFilterForPartners(partners)`**
+
+Used by advertisers to exclude networks/integrated partners from getting data.
+
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| partners                    | array    | Comma separated array of partners that need to be excluded |
+
+*Example:*
+
+```javascript
+appsFlyer.setSharingFilterForPartners([]);        // Reset list (default)
+appsFlyer.setSharingFilterForPartners(null);      // Reset list (default)
+appsFlyer.setSharingFilterForPartners(['facebook_int']);      // Single partner
+appsFlyer.setSharingFilterForPartners(['facebook_int', 'googleadwords_int']);     // Multiple partners
+appsFlyer.setSharingFilterForPartners(['all']);     // All partners
+appsFlyer.setSharingFilterForPartners(['googleadwords_int', 'all']);      // All partners
+```
+---
