@@ -23,8 +23,8 @@
 - [setOneLinkCustomDomains](#setOneLinkCustomDomains)
 - [setResolveDeepLinkURLs](#setResolveDeepLinkURLs)
 - [performOnAppAttribution](#performOnAppAttribution)
-- [setSharingFilterForAllPartners](#setSharingFilterForAllPartners) Deprecated!
-- [setSharingFilter](#setSharingFilter)Deprecated!
+- [setSharingFilterForAllPartners](#setSharingFilterForAllPartners)   Deprecated!
+- [setSharingFilter](#setSharingFilter)   Deprecated!
 - [disableCollectASA](#disableCollectASA)
 - [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
 - [validateAndLogInAppPurchase](#validateAndLogInAppPurchase)
@@ -910,11 +910,11 @@ Used by advertisers to exclude networks/integrated partners from getting data.
 *Example:*
 
 ```javascript
-appsFlyer.setSharingFilterForPartners([]);        // Reset list (default)
-appsFlyer.setSharingFilterForPartners(null);      // Reset list (default)
-appsFlyer.setSharingFilterForPartners(['facebook_int']);      // Single partner
+appsFlyer.setSharingFilterForPartners([]);                                        // Reset list (default)
+appsFlyer.setSharingFilterForPartners(null);                                      // Reset list (default)
+appsFlyer.setSharingFilterForPartners(['facebook_int']);                          // Single partner
 appsFlyer.setSharingFilterForPartners(['facebook_int', 'googleadwords_int']);     // Multiple partners
-appsFlyer.setSharingFilterForPartners(['all']);     // All partners
-appsFlyer.setSharingFilterForPartners(['googleadwords_int', 'all']);      // All partners
+appsFlyer.setSharingFilterForPartners(['all']);                                   // All partners
+appsFlyer.setSharingFilterForPartners(['googleadwords_int', 'all']);              // All partners
 ```
 ---
