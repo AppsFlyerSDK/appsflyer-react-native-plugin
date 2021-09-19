@@ -15,6 +15,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import appsFlyer from 'react-native-appsflyer';
 import {AFInit, AFLogEvent, AF_clickOnItem, AF_addedToCart, AF_removedFromCart, AF_checkout, AF_viewCart} from './AppsFlyer.js'
 import Product from './Product.js'
+import WelcomeModal from './WelcomeModal.js'
 
 const HomeScreen = ({navigation}) => {
    const products = [
@@ -167,6 +168,7 @@ const HomeScreen = ({navigation}) => {
    }, [itemsInCart]);
 
    return (<View style={styles.container}>
+     <WelcomeModal isFirstLaunch={isFirstLaunch} dismissOverlay={() => setIsFirstLaunch(false)}/>
       <ScrollView>
          {
             products.map((product, index) => {
