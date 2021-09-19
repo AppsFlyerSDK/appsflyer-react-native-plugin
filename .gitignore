@@ -53,10 +53,8 @@ android/keystores/debug.keystore
 coverage/
 package-lock.json
 
-# Detox App
-SampleApps/DetoxApp/ios/Podfile.lock
-SampleApps/DetoxApp/ios/build
-SampleApps/DetoxApp/ios/Pods
-SampleApps/DetoxApp/ios/detoxTest.xcworkspace
-SampleApps/DetoxApp/android/app/build
-
+# Sample App
+SampleApps/AppsFlyerExample/.DS_Store
+SampleApps/AppsFlyerExample/node_modules
+SampleApps/AppsFlyerExample/ios/Podfile.lock
+SampleApps/AppsFlyerExample/ios/Pods
