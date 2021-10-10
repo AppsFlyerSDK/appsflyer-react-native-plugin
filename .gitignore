@@ -54,7 +54,7 @@ coverage/
 package-lock.json
 
 # Sample App
-SampleApps/AppsFlyerExample/.DS_Store
-SampleApps/AppsFlyerExample/node_modules
-SampleApps/AppsFlyerExample/ios/Podfile.lock
-SampleApps/AppsFlyerExample/ios/Pods
+demos/appsflyer-react-native-app/.DS_Store
+demos/appsflyer-react-native-app/node_modules
+demos/appsflyer-react-native-app/ios/Podfile.lock
+demos/appsflyer-react-native-app/ios/Pods
