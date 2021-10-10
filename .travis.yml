@@ -1,0 +1,27 @@
+language: node_js
+node_js: 8
+os: osx
+matrix:
+  include:
+    - language: objective-c
+      osx_image: xcode12.4
+      before_script:
+        - export WORK_BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+        - PLUGIN_INSTALL_CMD='npm install git://github.com/AppsFlyerSDK/appsflyer-react-native-plugin.git#${WORK_BRANCH} --save'
+        - CONFIG_PLUGIN_INSTALL='npm install react-native-config --save --force'
+      before_install:
+        - gem install cocoapods
+        - gem update concurrent-ruby
+      install:
+        - brew tap wix/brew
+        - brew install applesimutils
+        - npm install -g detox-cli
+      script:
+        - cd SampleApps/DetoxApp
+        - echo ‘DEV_KEY=$DEV_KEY’ >> .env
+        - npm install --force
+        - eval $PLUGIN_INSTALL_CMD
+        - eval $CONFIG_PLUGIN_INSTALL
+        - detox build --configuration ios
+        - detox test --configuration ios --cleanup
+

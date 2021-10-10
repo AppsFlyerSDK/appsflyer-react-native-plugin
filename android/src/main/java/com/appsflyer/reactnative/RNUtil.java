@@ -1,12 +1,11 @@
 package com.appsflyer.reactnative;
 
-import com.facebook.react.bridge.ReadableMapKeySetIterator;
+import android.os.Bundle;
+
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
-
-
-
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
@@ -16,11 +15,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Iterator;
-
-
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -61,8 +58,9 @@ public class RNUtil {
 
     /**
      * Attempts to pull the ReadableMap's attribute out as the proper type
+     *
      * @param readableMap The Facebook ReadableMap to parse
-     * @param key The map key to attempt to read from the readableMap
+     * @param key         The map key to attempt to read from the readableMap
      * @return the converted attribute from the map if available
      */
     public static Object toObject(@Nullable ReadableMap readableMap, String key) {
@@ -106,6 +104,7 @@ public class RNUtil {
 
     /**
      * Converts a ReadableArray into a Java List<>
+     *
      * @param readableArray the ReadableArray to parse
      * @return a Java List<> if applicable
      */
@@ -160,20 +159,16 @@ public class RNUtil {
     @Nullable
     public static JSONObject readableMapToJson(ReadableMap readableMap) {
         JSONObject jsonObject = new JSONObject();
-
         if (readableMap == null) {
             return null;
         }
-
         ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
         if (!iterator.hasNextKey()) {
             return null;
         }
-
         while (iterator.hasNextKey()) {
             String key = iterator.nextKey();
             ReadableType readableType = readableMap.getType(key);
-
             try {
                 switch (readableType) {
                     case Null:
@@ -198,10 +193,8 @@ public class RNUtil {
                         // Do nothing and fail silently
                 }
             } catch (JSONException ex) {
-                // Do nothing and fail silently
             }
         }
-
         return jsonObject;
     }
 
@@ -286,7 +279,7 @@ public class RNUtil {
             return null;
         }
 
-        for (int i = 0 ; i < jsonArray.length(); i++) {
+        for (int i = 0; i < jsonArray.length(); i++) {
             try {
                 Object value = jsonArray.get(i);
                 if (value == null) {
@@ -312,4 +305,27 @@ public class RNUtil {
         return writableArray;
     }
 
+    @Nullable
+    public static Map<String, String> jsonObjectToMap(JSONObject object) throws JSONException {
+        Map<String, String> map = new HashMap<String, String>();
+
+        Iterator<String> keysItr = object.keys();
+        while (keysItr.hasNext()) {
+            String key = keysItr.next();
+            String value = (String) object.get(key);
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    public static Bundle jsonToBundle(JSONObject jsonObject) throws JSONException {
+        Bundle bundle = new Bundle();
+        Iterator iter = jsonObject.keys();
+        while (iter.hasNext()) {
+            String key = (String) iter.next();
+            String value = jsonObject.getString(key);
+            bundle.putString(key, value);
+        }
+        return bundle;
+    }
 }

@@ -4,7 +4,7 @@
 # OSX
 #
 .DS_Store
-
+*.DS_Store
 # Xcode
 #
 build/
@@ -33,11 +33,15 @@ ios/Podfile.lock
 .idea
 .gradle
 local.properties
+android/gradlew.bat
+.vscode
+android/gradle
 
 # node.js
 #
 node_modules/
 npm-debug.log
+yarn.lock
 
 # BUCK
 buck-out/
@@ -46,7 +50,11 @@ android/app/libs
 android/keystores/debug.keystore
 
 
-
-
-demo/node_modules/
+coverage/
 package-lock.json
+
+# Sample App
+SampleApps/AppsFlyerExample/.DS_Store
+SampleApps/AppsFlyerExample/node_modules
+SampleApps/AppsFlyerExample/ios/Podfile.lock
+SampleApps/AppsFlyerExample/ios/Pods

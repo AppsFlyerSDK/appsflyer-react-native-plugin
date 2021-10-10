@@ -1,6 +1,0 @@
-#use_frameworks!
-platform :ios, '9.0'
-target 'demo' do
-  pod 'React', :path => '../node_modules/react-native'
-  pod 'react-native-appsflyer',:path => '../node_modules/react-native-appsflyer'
-end
