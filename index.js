@@ -607,13 +607,22 @@ appsFlyer.setCurrentDeviceLanguage = (language) => {
 */
 appsFlyer.setSharingFilterForPartners = (partners) => {
   return RNAppsFlyer.setSharingFilterForPartners(partners);
-}
+
+/**
+ * Allows sending custom data for partner integration purposes.
+ * @param partnerId: ID of the partner (usually suffixed with "_int").
+ * @param partnerData: Customer data, depends on the integration configuration with the specific partner.
+ */
+appsFlyer.setPartnerData = (partnerId, partnerData) => {
+	if (typeof partnerId === 'string' && typeof partnerData === 'object') {
+		return RNAppsFlyer.setPartnerData(partnerId, partnerData);
+	}
+};
 
 function AFParseJSONException(_message, _data) {
-    this.message = _message;
-    this.data = _data;
+	this.message = _message;
+	this.data = _data;
     this.name = "AFParseJSONException";
 }
-
 
 export default appsFlyer;

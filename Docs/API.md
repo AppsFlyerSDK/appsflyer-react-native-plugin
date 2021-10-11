@@ -34,6 +34,7 @@
 - [disableSKAD](#disableSKAD)
 - [setCurrentDeviceLanguage](#setCurrentDeviceLanguage)
 - [setSharingFilterForPartners](#setSharingFilterForPartners)
+- [setPartnerData](#setPartnerData)
 
 ---
 
@@ -916,5 +917,27 @@ appsFlyer.setSharingFilterForPartners(['facebook_int']);                        
 appsFlyer.setSharingFilterForPartners(['facebook_int', 'googleadwords_int']);     // Multiple partners
 appsFlyer.setSharingFilterForPartners(['all']);                                   // All partners
 appsFlyer.setSharingFilterForPartners(['googleadwords_int', 'all']);              // All partners
+```
+---
+##### <a id="setPartnerData"> **`setPartnerData(partnerId, partnerData)`**
+
+Allows sending custom data for partner integration purposes.
+
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| partnerId                    | string    | ID of the partner (usually suffixed with "_int") |
+| partnerData                    | object    | Customer data, depends on the integration configuration with the specific partner |
+
+*Example:*
+
+```javascript
+let partnerId = 'fb_int';
+let partnerData = {
+  param1: 'foo',
+  param2: {price: 10, nickName: 'bar'},
+  param3: 'bar',
+};
+    appsFlyer.setPartnerData(partnerId, partnerData);
 ```
 ---

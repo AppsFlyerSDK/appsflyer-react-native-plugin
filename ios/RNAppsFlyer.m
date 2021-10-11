@@ -531,4 +531,7 @@ RCT_EXPORT_METHOD(setCurrentDeviceLanguage: (NSString *)language ) {
     [[AppsFlyerLib shared] setCurrentDeviceLanguage:language];
 }
 
+RCT_EXPORT_METHOD(setPartnerData:(NSString *)partnerId partnerData:(NSDictionary *)partnerData) {
+    [[AppsFlyerLib shared] setPartnerDataWithPartnerId:partnerId partnerInfo:partnerData];
+}
 @end
