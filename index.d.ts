@@ -8,9 +8,9 @@ declare module "react-native-appsflyer" {
     export type ConversionData = {
         status: "success" | "failure",
         type: "onAppOpenAttribution"
-            | "onInstallConversionDataLoaded"
-            | "onAttributionFailure"
-            | "onInstallConversionFailure"
+        | "onInstallConversionDataLoaded"
+        | "onAttributionFailure"
+        | "onInstallConversionFailure"
         data: {
             is_first_launch: "true" | "false";
             media_source: string;
@@ -93,6 +93,7 @@ declare module "react-native-appsflyer" {
         addPushNotificationDeepLinkPath(path: string[], successC: SuccessCB, errorC: ErrorCB): void
         disableAdvertisingIdentifier(isDisable: boolean): void
         setSharingFilterForPartners(partners: string[]): void
+        setPartnerData(partnerId: string, partnerData: object): void
 
         /**
          * For iOS Only

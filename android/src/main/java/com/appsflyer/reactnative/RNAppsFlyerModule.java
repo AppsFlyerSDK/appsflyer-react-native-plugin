@@ -727,4 +727,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void disableAdvertisingIdentifier(Boolean isDisabled) {
         AppsFlyerLib.getInstance().setDisableAdvertisingIdentifiers(isDisabled);
     }
+
+    @ReactMethod
+    public void setPartnerData(String partnerId, ReadableMap partnerData) {
+        Map partnerDataAsMap = RNUtil.toMap(partnerData);
+        AppsFlyerLib.getInstance().setPartnerData(partnerId, partnerDataAsMap);
+    }
 }
