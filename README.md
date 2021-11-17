@@ -21,8 +21,8 @@
 
 ### <a id="plugin-build-for"> This plugin is built for
 
-- iOS AppsFlyerSDK **v6.4.0**
-- Android AppsFlyerSDK **v6.4.0**
+- iOS AppsFlyerSDK **v6.4.+**(latest)
+- Android AppsFlyerSDK **v6.4.+**(latest)
 
 ## <a id="breaking-changes"> ❗ Breaking Changes
 
@@ -79,7 +79,7 @@ If your app does not support autolinking, check out the Installation Guide [here
 Starting from version **6.1.10** iOS SDK comes in two variants: **Strict** mode and **Regular** mode. Please read more [here](https://support.appsflyer.com/hc/en-us/articles/207032066#integration-strict-mode-sdk) <br>
 ***Version <= 6.3.0:*** read this section of the README.md in branch: `releases/6.x.x/6.3.x/6.3.0`<br>
 ***Change to Strict mode***<br>
-After you [installed](#installation) the AppsFlyer plugin, add `$RNAppsFlyerStrictMode=true` in the project's Podfile:
+1. After you [installed](#installation) the AppsFlyer plugin, add `$RNAppsFlyerStrictMode=true` in the project's Podfile:
 ```
 //MyRNApp/ios/Podfile
 ...
@@ -90,20 +90,12 @@ use_frameworks!
 ...
 
 ```
-In the `ios` folder of your `root` project Run `pod install`
+2. In the `ios` folder of your `root` project Run `pod install`
 
 ***Change to Regular mode***<br>
-Remove `$RNAppsFlyerStrictMode=true` from the project's Podfile or set it to `false`:
-```
-//MyRNApp/ios/Podfile
-...
-use_frameworks!
-  $RNAppsFlyerStrictMode=false //OR remove this line
+1. Remove `$RNAppsFlyerStrictMode=true` from the project's Podfile
 
-  # Pods for MyRNApp
-...
-```
-In the `ios` folder of your `root` project Run `pod install`
+2. In the `ios` folder of your `root` project Run `pod install`
 ## <a id="init-sdk"> 🚀 Initializing the SDK
 
 Initialize the SDK to enable AppsFlyer to detect installations, sessions (app opens) and updates.<br>

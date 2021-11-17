@@ -1,3 +1,8 @@
+## 6.4.3
+- Change Android build.gradle to use the latest Android SDK.
+- Change podspec to use the latest iOS SDK.
+- new setPartnerData api
+
 ## 6.4.0
 - Android SDK 6.4.0
 - iOS SDK 6.4.0
