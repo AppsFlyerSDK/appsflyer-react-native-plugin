@@ -93,7 +93,7 @@ use_frameworks!
 2. In the `ios` folder of your `root` project Run `pod install`
 
 ***Change to Regular mode***<br>
-1. Remove `$RNAppsFlyerStrictMode=true` from the project's Podfile
+1. Remove `$RNAppsFlyerStrictMode=true` from the project's Podfile or set it to `$RNAppsFlyerStrictMode=false`
 
 2. In the `ios` folder of your `root` project Run `pod install`
 ## <a id="init-sdk"> 🚀 Initializing the SDK

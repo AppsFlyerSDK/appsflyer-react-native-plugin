@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.dependency 'React'
 
   # AppsFlyerFramework
-  if defined?($RNAppsFlyerStrictMode)
+  if defined?($RNAppsFlyerStrictMode) && ($RNAppsFlyerStrictMode == true)
     Pod::UI.puts "#{s.name}: Using AppsFlyerFramework/Strict mode"
     s.dependency 'AppsFlyerFramework/Strict', '~> 6.4.0'
     s.xcconfig = {'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) AFSDK_NO_IDFA=1' }
