@@ -5,7 +5,7 @@
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "test": "jest  __tests__/appsflyer.test.js --config jest.config.js",
+    "test": "jest --silent --coverage",
     "demo.ios": "npm run ios-pod; cd SampleApps/AppsFlyerExample; npm run ios",
     "demo.android": "cd SampleApps/AppsFlyerExample; npm run android",
     "ios-pod": "cd SampleApps/AppsFlyerExample/ios; pod install; cd ../"
@@ -32,9 +32,28 @@
   "devDependencies": {
     "@babel/preset-env": "^7.12.7",
     "babel-jest": "^26.6.3",
-    "jest": "^26.6.3",
-    "ts-jest": "^26.4.4",
+    "jest": "27.3.1",
+    "react": "16.11.0",
+    "react-native": "0.62.3",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.2"
+  },
+  "resolutions": {
+    "react-native/@jest/create-cache-key-function": "^27.0.2"
+  },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "<rootDir>/demos/"
+    ],
+    "testMatch": [
+      "<rootDir>/__tests__/index.test.js?(x)"
+    ],
+    "preset": "react-native",
+    "transform": {
+      "^.+\\.js$": "<rootDir>/node_modules/react-native/jest/preprocessor.js"
+    },
+    "setupFiles": [
+      "<rootDir>/__tests__/setup.js"
+    ]
   }
 }
