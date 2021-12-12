@@ -4,7 +4,7 @@ def safeExtGet(prop, fallback) {
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
         maven {
             url 'https://maven.google.com/'
             name 'Google'
@@ -48,12 +48,11 @@ android {
 
 repositories {
     mavenCentral()
-    jcenter()
     maven { url "https://maven.google.com" }
 }
 
 dependencies {
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.1')}"
-    implementation "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.4.0')}"
+    implementation "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.4.3')}"
 }

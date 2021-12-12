@@ -1,3 +1,11 @@
+## 6.4.40
+Release date: *2021-December-12*
+
+- React Native Plugin - add support for the setPartnerData API
+- React Native > fix WARN new NativeEventEmitter() for RN 0.66
+- React Native > Update native sdk to 6.4.4
+- React Native > remove jCenter from build.gradle
+
 ## 6.4.0
 - Android SDK 6.4.0
 - iOS SDK 6.4.0
