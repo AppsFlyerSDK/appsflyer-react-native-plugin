@@ -1,7 +1,7 @@
 # Adding   react-native-appsflyer to your project
 
 - [Installation using CLI](#installation-using-cli)
-- [Manual installation](#manual-installation)
+- Manual installation
   - [iOS](#manual-installation-ios)
   - [Android](#manual-installation-android)
 
@@ -30,8 +30,6 @@ pod 'react-native-appsflyer',
 ```
 
 This assumes your `Podfile` is located in `ios` directory.
-
-You must also have the React dependencies defined in the Podfile as described [here](https://facebook.github.io/react-native/docs/next/troubleshooting.html#missing-libraries-for-react).
 
 #### <a id="sample_podfile"> Sample pod file:
 ```
