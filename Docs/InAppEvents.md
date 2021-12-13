@@ -16,7 +16,7 @@ Find more info about recording events [here](https://support.appsflyer.com/hc/en
 | eventValues  | json     | The event values that are sent with the event 
 | success      | function | success callback                              
 | error        | function | success callback                              
-|
+
 
 *Example:*
 ```javascript
