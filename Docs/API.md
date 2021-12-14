@@ -23,10 +23,10 @@ The list of available methods for this plugin is described below.
     - [setSharingFilterForPartners](#setSharingFilterForPartners)
     - [validateAndLogInAppPurchase](#validateAndLogInAppPurchase)
     - [updateServerUninstallToken](#updateServerUninstallToken)
+    - [sendPushNotificationData](#sendPushNotificationData)
 - [Android Only API](#androidOnly)
     - [setCollectAndroidID](#setCollectAndroidID)
     - [setCollectIMEI](#setCollectIMEI)
-    - [sendPushNotificationData](#sendPushNotificationData)
 - [iOS Only API](#iOSOnly)
     - [disableCollectASA](#disableCollectASA)
     - [setUseReceiptValidationSandbox](#setUseReceiptValidationSandbox)
@@ -576,6 +576,36 @@ appsFlyer.updateServerUninstallToken('token', (res) => {
 
 ---
 
+##### <a id="sendPushNotificationData"> **`sendPushNotificationData(pushPayload): void`**
+Push-notification campaigns are used to create fast re-engagements with existing users.
+AppsFlyer supplies an open-for-all solution, that enables measuring the success of push-notification campaigns, for both iOS and Android platforms.<br>
+Learn more - https://support.appsflyer.com/hc/en-us/articles/207364076-Measuring-Push-Notification-Re-Engagement-Campaigns
+
+| parameter       | type     | description                      |
+| ----------      |----------|------------------                |
+| pushPayload      | json     | push notification payload      |
+
+
+*Example:*
+
+```javascript
+const pushPayload = {
+            af:{
+                c:"test_campaign",
+                is_retargeting:true,
+                pid:"push_provider_int",
+            },
+            aps:{
+                alert:"Get 5000 Coins",
+                badge:"37",
+                sound:"default"
+            }
+        };
+        appsFlyer.sendPushNotificationData(pushPayload);
+```
+
+---
+
 ## <a id="androidOnly"> Android Only API
 ---
 
@@ -623,36 +653,6 @@ appsFlyer.setCollectIMEI(false, (res) => {
    //...
 });
 }
-```
-
----
-
-##### <a id="sendPushNotificationData"> **`sendPushNotificationData(pushPayload): void`**
-Push-notification campaigns are used to create fast re-engagements with existing users.
-AppsFlyer supplies an open-for-all solution, that enables measuring the success of push-notification campaigns, for both iOS and Android platforms.<br>
-Learn more - https://support.appsflyer.com/hc/en-us/articles/207364076-Measuring-Push-Notification-Re-Engagement-Campaigns
-
-| parameter       | type     | description                      |
-| ----------      |----------|------------------                |
-| pushPayload      | json     | push notification payload      |
-
-
-*Example:*
-
-```javascript
-const pushPayload = {
-            af:{
-                c:"test_campaign",
-                is_retargeting:true,
-                pid:"push_provider_int",
-            },
-            aps:{
-                alert:"Get 5000 Coins",
-                badge:"37",
-                sound:"default"
-            }
-        };
-        appsFlyer.sendPushNotificationData(pushPayload);
 ```
 
 ---
