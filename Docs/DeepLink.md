@@ -22,7 +22,37 @@ Check out the deferred deeplinkg guide from the AppFlyer knowledge base [here](h
 
 Code Sample to handle the conversion data:
 
-✏️✏️
+
+```javascript
+const onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+  (res) => {
+    const isFirstLaunch = res?.data?.is_first_launch;
+
+    if (isFirstLaunch && JSON.parse(isFirstLaunch) === true) {
+      if (res.data.af_status === 'Non-organic') {
+        const media_source = res.data.media_source;
+        const campaign = res.data.campaign;
+        alert('This is first launch and a Non-Organic install. Media source: ' + media_source + ' Campaign: ' + campaign);
+      } else if (res.data.af_status === 'Organic') {
+        alert('This is first launch and a Organic Install');
+      }
+    } else {
+      alert('This is not first launch');
+    }
+  }
+);
+
+appsFlyer.initSdk(/*...*/);
+```
+**Note:** The code implementation for `onInstallConversionData` must be made **prior to the initialization** code of the SDK.
+
+<hr/>
+
+**Important**
+
+The `appsFlyer.onInstallConversionData` returns function to  unregister this event listener. If you want to remove the listener for any reason (Component unmount), you can simply call `onInstallConversionDataCanceller()`. This function will call `NativeAppEventEmitter.remove()`.
+
+<hr/>
 
 ###  <a id="handle-deeplinking"> 2. Direct Deeplinking
     
@@ -30,7 +60,27 @@ When a deeplink is clicked on the device the AppsFlyer SDK will return the resol
 
 Code Sample to handle OnAppOpenAttribution:
 
-✏️✏️
+```javascript
+const onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
+        console.log(`status: ${res.status}`);
+        console.log(`campaign: ${res.data.campaign}`);
+        console.log(`af_dp: ${res.data.af_dp}`);
+        console.log(`link: ${res.data.link}`);
+        console.log(`DL value: ${res.data.deep_link_value}`);
+        console.log(`media source: ${res.data.media_source}`);
+});
+
+appsFlyer.initSdk(/*...*/);
+```
+**Note:** The code implementation for `onAppOpenAttribution` must be made **prior to the initialization** code of the SDK.
+
+<hr/>
+
+**Important**
+
+The `appsFlyer.onAppOpenAttribution` returns function to  unregister this event listener. If you want to remove the listener for any reason (Component unmount), you can simply call `onAppOpenAttributionCanceller()`. This function will call `NativeAppEventEmitter.remove()`.
+
+<hr/>
 
 ###  <a id="unified-deeplinking"> 3. Unified deep linking
 
@@ -49,23 +99,39 @@ Considerations:
 * Does not support SRN campaigns.
 * Does not provide af_dp in the API response.
 * onAppOpenAttribution will not be called. All code should migrate to `OnDeepLinkReceived`.
-* OnDeepLinkReceived must be called **after** `initSDK`.
-* AppsFlyer.cs **must** be attached to the game object.
 
 Implementation:
 
-✏️✏️
+* The code implementation for `onDeepLink` must be made **prior to the initialization** code of the SDK.
 
 Example:
 
-✏️✏️
+```javascript
+const onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
+  if (res?.deepLinkStatus !== 'NOT_FOUND') {
+        const DLValue = res?.data.deep_link_value;
+        const mediaSrc = res?.data.media_source;
+        const param1 = res?.data.af_sub1;
+        console.log(JSON.stringify(res?.data, null, 2));
+      }
+})
 
-
-Parsing deeplink object example:
-
-✏️✏️
-
-
+appsFlyer.initSdk(
+  {
+    devKey: 'K2***********99',
+    isDebug: false,
+    appId: '41*****44',
+    onInstallConversionDataListener: true,
+    onDeepLinkListener: true
+  },
+  (result) => {
+    console.log(result);
+  },
+  (error) => {
+    console.error(error);
+  }
+);
+```
 ---
     
 # <a id="setup"> Set-up
