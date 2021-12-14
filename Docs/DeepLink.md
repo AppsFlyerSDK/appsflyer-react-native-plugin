@@ -88,8 +88,8 @@ The flow works as follows:
 
 1. User clicks the OneLink short URL.
 2. The iOS Universal Links/ Android App Links (for deep linking) or the deferred deep link, trigger the SDK.
-3. The SDK triggers the didResolveDeepLink method, and passes the deep link result object to the user.
-4. The OnDeepLinkReceived method uses the deep link result object that includes the deep_link_value and other parameters to create the personalized experience for the users, which is the main goal of OneLink.
+3. The SDK triggers the onDeepLink listener, and passes the deep link result object to the user.
+4. The onDeepLink listener uses the deep link result object that includes the deep_link_value and other parameters to create the personalized experience for the users, which is the main goal of OneLink.
 
 > Check out the Unified Deep Linking docs for [Android](https://dev.appsflyer.com/docs/android-unified-deep-linking) and [iOS](https://dev.appsflyer.com/docs/ios-unified-deep-linking).
 
@@ -98,7 +98,7 @@ Considerations:
 * Requires AppsFlyer Android SDK V6.1.3 or later.
 * Does not support SRN campaigns.
 * Does not provide af_dp in the API response.
-* onAppOpenAttribution will not be called. All code should migrate to `OnDeepLinkReceived`.
+* onAppOpenAttribution will not be called. All code should migrate to `onDeepLink`.
 
 Implementation:
 
