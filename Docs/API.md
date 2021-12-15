@@ -1,4 +1,4 @@
-# 📑 API
+# 📑 APIs
 <img src="https://massets.appsflyer.com/wp-content/uploads/2018/06/20092440/static-ziv_1TP.png"  width="400" >
 
 The list of available methods for this plugin is described below.
@@ -796,7 +796,7 @@ appsFlyer.initSdk(/*...*/);
 
 ##### <a id="onAppOpenAttribution"> **`onAppOpenAttribution(callback) : function:unregister`**
 
-this API related to DeepLinks. Please read more [Here](/DeepLink.md)
+this API related to DeepLinks. Please read more [Here](Docs/DeepLink.md)
  
 | parameter    | type     | description                               |
 | -----------  |----------|------------------------------------------ |
@@ -816,7 +816,7 @@ appsFlyer.initSdk(/*...*/);
 
 ##### <a id="onAttributionFailure"> **`onAttributionFailure(callback) : function:unregister`**
 
-this API related to DeepLinks. Please read more [Here](/DeepLink.md)
+this API related to DeepLinks. Please read more [Here](Docs/DeepLink.md)
  
 | parameter    | type     | description                               |
 | -----------  |----------|------------------------------------------ |
@@ -836,7 +836,7 @@ appsFlyer.initSdk(/*...*/);
 
 ##### <a id="onDeepLink"> **`onDeepLink(callback) : function:unregister`**
  
- this API related to DeepLinks. Please read more [Here](/DeepLink.md)
+ this API related to DeepLinks. Please read more [Here](Docs/DeepLink.md)
 
 | parameter    | type     | description                               |
 | -----------  |----------|------------------------------------------ |
