@@ -1,8 +1,12 @@
 # Deep linking
-
 - [Deep linking types and their implementation](#Deep-Linking)
 - [Android and iOS set-up](#setup)
 
+Deep Linking vs Deferred Deep Linking:
+
+A deep link is a special URL that routes to a specific spot, whether that’s on a website or in an app. A “mobile deep link” then, is a link that contains all the information needed to take a user directly into an app or a particular location within an app instead of just launching the app’s home page.
+
+If the app is installed on the user's device - the deep link routes them to the correct location in the app. But what if the app isn't installed? This is where Deferred Deep Linking is used.When the app isn't installed, clicking on the link routes the user to the store to download the app. Deferred Deep linking defer or delay the deep linking process until after the app has been downloaded, and ensures that after they install, the user gets to the right location in the app.
 
 ![alt text](https://massets.appsflyer.com/wp-content/uploads/2018/03/21101417/app-installed-Recovered.png "")
 
@@ -137,8 +141,23 @@ appsFlyer.initSdk(
 # <a id="setup"> Set-up
 
 ###  <a id="android-deeplink"> Android Deeplink Setup
-    
-    
+
+AppsFlyer SDK inspects activity intent object during onResume(). Because of that, for each activity that may be configured or launched with any [non-standard launch mode](https://developer.android.com/guide/topics/manifest/activity-element#lmode) please make sure to add the following code to `MainActivity.java` in `android/app/src/main/java/com...`:
+
+```
+...
+import android.content.Intent;
+...
+
+public class MainActivity extends ReactActivity {
+...
+    @Override
+    public void onNewIntent(Intent intent) {
+         super.onNewIntent(intent);
+         setIntent(intent);
+    }
+ }
+```
     
 #### <a id="uri-scheme"> URI Scheme
 In your app’s manifest add the following intent-filter to your relevant activity:
@@ -157,6 +176,31 @@ For more on App Links check out the guide [here](https://support.appsflyer.com/h
 
 ###  <a id="ios-deeplink"> iOS Deeplink Setup
 For more on Universal Links check out the guide [here](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#setups-universal-links).
+
+In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
+
+#### import
+```objectivec
+#import <RNAppsFlyer.h>
+```
+```objectivec
+// Deep linking
+// Open URI-scheme for iOS 9 and above
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary *) options {
+  [[AppsFlyerAttribution shared] handleOpenUrl:url options:options];
+    return YES;
+}
+// Open URI-scheme for iOS 8 and below
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
+  [[AppsFlyerAttribution shared] handleOpenUrl:url sourceApplication:sourceApplication annotation:annotation];
+  return YES;
+}
+// Open Universal Links
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nullable))restorationHandler {
+    [[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
+    return YES;
+}
+```
     
 Essentially, the Universal Links method links between an iOS mobile app and an associate website/domain, such as AppsFlyer’s OneLink domain (xxx.onelink.me). To do so, it is required to:
 
