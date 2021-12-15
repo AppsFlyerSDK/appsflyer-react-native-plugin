@@ -37,13 +37,7 @@ The list of available methods for this plugin is described below.
     - [onInstallConversionFailure](#onInstallConversionFailure)
     - [onAppOpenAttribution](#onAppOpenAttribution)
     - [onAttributionFailure](#onAttributionFailure)
-- [AppsFlyerUserInvite](#AppsFlyerUserInvite)
-    - [onInviteLinkGenerated](#onInviteLinkGenerated)
-    - [onInviteLinkGeneratedFailure](#onInviteLinkGeneratedFailure)
-    - [onOpenStoreLinkGenerated](#onOpenStoreLinkGenerated)
-- [AppsFlyerValidateReceipt](IAppsFlyerValidateReceipt)
-    - [didFinishValidateReceipt](#didFinishValidateReceipt)
-    - [didFinishValidateReceiptWithError](#didFinishValidateReceiptWithError)
+    - [onDeepLink](#onDeepLink)
 ---
 
 ##### <a id="initSDK"> **`initSdk(options, success, error)`**
@@ -544,13 +538,7 @@ let info = {
         transactionId: '1000000614252747',
         additionalParameters: {'foo': 'bar'},
     };
-if (Platform.OS == 'android') {
-    
-} else if (Platform.OS == 'ios') {
-     info = {
-         
-     };
-}
+
 appsFlyer.validateAndLogInAppPurchase(info, res => console.log(res), err => console.log(err));
 ```
 
@@ -605,7 +593,6 @@ const pushPayload = {
 ```
 
 ## <a id="androidOnly"> Android Only APIs
----
 
 ##### <a id="setCollectAndroidID"> **`setCollectAndroidID(isCollect, callback)`**
 
@@ -654,7 +641,6 @@ appsFlyer.setCollectIMEI(false, (res) => {
 ```
 
 ## <a id="iOSOnly"> iOS Only APIs
----
 
 ##### <a id="disableCollectASA"> **`disableCollectASA(shouldDisable)`**
 
@@ -727,4 +713,148 @@ if (Platform.OS == 'ios') {
     appsFlyer.setCurrentDeviceLanguage("EN");
 }
 ```
+
+## <a id="AppsFlyerConversionData"> AppsFlyerConversionData
+##### <a id="onInstallConversionData"> **`onInstallConversionData(callback) : function:unregister`**
+
+Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking).<br/>
+
+The code implementation for the conversion listener must be made prior to the initialization code of the SDK.
+
+
+| parameter    | type     | description                               |
+| -----------  |----------|------------------------------------------ |
+| callback     | function | conversion data result                    |
+
+*Example:*
+
+```javascript
+const onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+  (res) => {
+    if (JSON.parse(res.data.is_first_launch) == true) {
+      if (res.data.af_status === 'Non-organic') {
+        var media_source = res.data.media_source;
+        var campaign = res.data.campaign;
+        alert('This is first launch and a Non-Organic install. Media source: ' + media_source + ' Campaign: ' + campaign);
+      } else if (res.data.af_status === 'Organic') {
+        alert('This is first launch and a Organic Install');
+      }
+    } else {
+      alert('This is not first launch');
+    }
+  }
+);
+
+appsFlyer.initSdk(/*...*/);
+```
+
+*Example onInstallConversionData:*
+
+```javascript
+{
+  "data": {
+    "af_message": "organic install",
+    "af_status": "Organic",
+    "is_first_launch": "true"
+  },
+  "status": "success",
+  "type": "onInstallConversionDataLoaded"
+}
+```
+
+> **Note** is_first_launch will be "true" (string) on Android and true (boolean) on iOS. To solve this issue wrap is_first_launch with JSON.parse(res.data.is_first_launch) as in the example above.
+
+`appsFlyer.onInstallConversionData` returns a function the will allow us to call `NativeAppEventEmitter.remove()`.<br/>
+
+---
+
+##### <a id="onInstallConversionFailure"> **`onInstallConversionFailure(callback) : function:unregister`**
+ 
+
+| parameter    | type     | description                               |
+| -----------  |----------|------------------------------------------ |
+| callback     | function | Failed conversion data result                    |
+
+
+*Example:*
+
+```javascript
+    const onInstallGCDFailure = appsFlyer.onInstallConversionFailure(res => {
+      console.log(JSON.stringify(res, null, 2));
+    });
+```
+*Example onInstallConversionFailure:*
+
+```javascript
+{
+  "status": "failure",
+  "type": "onInstallConversionFailure",
+  "data": "DevKey is incorrect"
+}
+```
+---
+
+##### <a id="onAppOpenAttribution"> **`onAppOpenAttribution(callback) : function:unregister`**
+
+this API related to DeepLinks. Please read more [Here](../DeepLink.md)
+ 
+| parameter    | type     | description                               |
+| -----------  |----------|------------------------------------------ |
+| callback     | function | onAppOpenAttribution data result                    |
+
+*Example:*
+
+```javascript
+const onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
+  console.log(res);
+});
+
+appsFlyer.initSdk(/*...*/);
+```
+
+---
+
+##### <a id="onAttributionFailure"> **`onAttributionFailure(callback) : function:unregister`**
+
+this API related to DeepLinks. Please read more [Here](../DeepLink.md)
+ 
+| parameter    | type     | description                               |
+| -----------  |----------|------------------------------------------ |
+| callback     | function | onAppOpenAttribution data error                    |
+
+*Example:*
+
+```javascript
+const onAppOpenAttributionCanceller = appsFlyer.onAttributionFailure((res) => {
+  console.log(res);
+});
+
+appsFlyer.initSdk(/*...*/);
+```
+
+---
+
+##### <a id="onDeepLink"> **`onDeepLink(callback) : function:unregister`**
+ 
+ this API related to DeepLinks. Please read more [Here](../DeepLink.md)
+
+| parameter    | type     | description                               |
+| -----------  |----------|------------------------------------------ |
+| callback     | function | UDL data error                    |
+
+*Example:*
+
+```javascript
+const onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
+  if (res?.deepLinkStatus !== 'NOT_FOUND') {
+        const DLValue = res?.data.deep_link_value;
+        const mediaSrc = res?.data.media_source;
+        const param1 = res?.data.af_sub1;
+        console.log(JSON.stringify(res?.data, null, 2));
+      }
+})
+
+appsFlyer.initSdk(/*...*/);
+```
+
 ---

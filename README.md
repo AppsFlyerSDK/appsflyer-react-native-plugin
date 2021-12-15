@@ -50,5 +50,5 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [Deep Linking](/Docs/DeepLink.md)
 - [Advanced APIs](/Docs/AdvancedAPI.md)
 - [Testing the integration](/Docs/Testing.md)
-- [API](/Docs/API.md)
+- [APIs](/Docs/API.md)
 
