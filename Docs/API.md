@@ -24,10 +24,10 @@ The list of available methods for this plugin is described below.
     - [validateAndLogInAppPurchase](#validateAndLogInAppPurchase)
     - [updateServerUninstallToken](#updateServerUninstallToken)
     - [sendPushNotificationData](#sendPushNotificationData)
-- [Android Only API](#androidOnly)
+- [Android Only APIs](#androidOnly)
     - [setCollectAndroidID](#setCollectAndroidID)
     - [setCollectIMEI](#setCollectIMEI)
-- [iOS Only API](#iOSOnly)
+- [iOS Only APIs](#iOSOnly)
     - [disableCollectASA](#disableCollectASA)
     - [setUseReceiptValidationSandbox](#setUseReceiptValidationSandbox)
     - [disableSKAD](#disableSKAD)
@@ -604,9 +604,7 @@ const pushPayload = {
         appsFlyer.sendPushNotificationData(pushPayload);
 ```
 
----
-
-## <a id="androidOnly"> Android Only API
+## <a id="androidOnly"> Android Only APIs
 ---
 
 ##### <a id="setCollectAndroidID"> **`setCollectAndroidID(isCollect, callback)`**
@@ -655,9 +653,7 @@ appsFlyer.setCollectIMEI(false, (res) => {
 }
 ```
 
----
-
-## <a id="iOSOnly"> iOS Only API
+## <a id="iOSOnly"> iOS Only APIs
 ---
 
 ##### <a id="disableCollectASA"> **`disableCollectASA(shouldDisable)`**
