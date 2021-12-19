@@ -65,8 +65,17 @@
 
 }
 
-- (void) receiveBridgeReadyNotification:(NSNotification *) notification
-{
+- (void) receiveBridgeReadyNotification:(NSNotification *) notification {
+    // RD-69546
+    // start - We added this code because sometimes the SDK automatically resolves deeplinks on `applicationDidFinishLaunching`, and then when calling `continueUserActivity` on the same deeplink
+    // it skips them.
+    id AppsFlyer = [AppsFlyerLib shared];
+    SEL setSkipNextUniversalLinkAttribution = NSSelectorFromString(@"setSkipNextUniversalLinkAttribution:");
+    if ([AppsFlyer respondsToSelector:setSkipNextUniversalLinkAttribution]) {
+        ((void ( *) (id, SEL, BOOL))[AppsFlyer methodForSelector:setSkipNextUniversalLinkAttribution])(AppsFlyer, setSkipNextUniversalLinkAttribution, NO);
+    }
+    // end
+
     NSLog (@"AppsFlyer Debug: handle deep link");
     if(self.url && self.sourceApplication && self.annotation){
         [[AppsFlyerLib shared] handleOpenURL:self.url sourceApplication:self.sourceApplication withAnnotation:self.annotation];
@@ -77,7 +86,7 @@
         [[AppsFlyerLib shared] handleOpenUrl:self.url options:self.options];
         self.options = nil;
         self.url = nil;
-    }else if(self.userActivity && self.restorationHandler){
+    }else if(self.userActivity){
         [[AppsFlyerLib shared] continueUserActivity:self.userActivity restorationHandler:self.restorationHandler];
         self.userActivity = nil;
         self.restorationHandler = nil;
