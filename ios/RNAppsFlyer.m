@@ -95,16 +95,15 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         [AppsFlyerLib shared].appsFlyerDevKey = devKey;
         [AppsFlyerLib shared].isDebug = isDebug;
 
-        [[AppsFlyerLib shared] start];
-
-        //post notification for the deep link object that the bridge is set and he can handle deep link
-        [AppsFlyerAttribution shared].isBridgeReady = YES;
-        [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
+        //post notification for the deep link object that the bridge is initialized and he can handle deep link
+        [[AppsFlyerAttribution shared] setRNAFBridgeReady:YES];
+        [[NSNotificationCenter defaultCenter] postNotificationName:RNAFBridgeInitializedNotification object:self];
         // Register for background-foreground transitions natively instead of doing this in JavaScript
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(sendLaunch:)
                                                      name:UIApplicationDidBecomeActiveNotification
                                                    object:nil];
+        [[AppsFlyerLib shared] start];
         return nil;
     }
 }
@@ -207,7 +206,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 }
 
 -(void)sendLaunch:(UIApplication *)application {
-    [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:RNAFBridgeInitializedNotification object:self];
     [[AppsFlyerLib shared] start];
 }
 
