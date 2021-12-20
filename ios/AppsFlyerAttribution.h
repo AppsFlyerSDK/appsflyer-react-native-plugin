@@ -13,8 +13,9 @@
 @property BOOL RNAFBridgeReady;
 
 + (instancetype _Nonnull )shared;
-- (void) continueUserActivity: (NSUserActivity*_Nullable) userActivity restorationHandler: (void (^_Nullable)(NSArray * _Nullable))restorationHandler;
-- (void) handleOpenUrl:(NSURL*_Nullable)url options:(NSDictionary*_Nullable) options;
+- (void) continueUserActivity:(NSUserActivity*_Nullable)userActivity restorationHandler:(void (^_Nullable)(NSArray * _Nullable))restorationHandler;
+- (void) handleOpenUrl:(NSURL*_Nullable)url options:(NSDictionary*_Nullable)options;
+- (void) handleOpenUrl:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation;
 
 @end
 

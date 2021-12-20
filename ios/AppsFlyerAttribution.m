@@ -27,9 +27,9 @@
 - (id)init {
     if (self = [super init]) {
         _url = nil;
-        _options = nil;
         _userActivity = nil;
         _sourceApplication = nil;
+        _options = nil;
         _RNAFBridgeReady = NO;
 
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -42,7 +42,7 @@
 
 #pragma mark - AppDelegate methods
 
-- (void) continueUserActivity: (NSUserActivity*_Nullable) userActivity restorationHandler: (void (^_Nullable)(NSArray * _Nullable))restorationHandler{
+- (void)continueUserActivity:(NSUserActivity*_Nullable)userActivity restorationHandler:(void (^_Nullable)(NSArray * _Nullable))restorationHandler{
     if(_RNAFBridgeReady == YES){
         [[AppsFlyerLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
     }else{
@@ -50,7 +50,7 @@
     }
 }
 
-- (void) handleOpenUrl:(NSURL *)url options:(NSDictionary *)options{
+- (void)handleOpenUrl:(NSURL *)url options:(NSDictionary *)options{
     if(_RNAFBridgeReady == YES){
         [[AppsFlyerLib shared] handleOpenUrl:url options:options];
     }else{
@@ -59,9 +59,18 @@
     }
 }
 
+- (void)handleOpenUrl:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation{
+    if(_RNAFBridgeReady == YES){
+        [[AppsFlyerLib shared] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
+    }else{
+        _url = url;
+        _sourceApplication = sourceApplication;
+    }
+}
+
 #pragma mark - Bridge initialized notification
 
-- (void) receiveBridgeReadyNotification:(NSNotification *) notification {
+- (void)receiveBridgeReadyNotification:(NSNotification *)notification {
     // RD-69546
     // start - We added this code because sometimes the SDK automatically resolves deeplinks on `applicationDidFinishLaunching`, and then when calling `continueUserActivity` on the same deeplink
     // it skips them.
@@ -76,9 +85,10 @@
         [[AppsFlyerLib shared] handleOpenURL:_url sourceApplication:_sourceApplication withAnnotation:nil];
         _url = nil;
         _sourceApplication = nil;
-    }else if(_url){
-        [[AppsFlyerLib shared] handleOpenUrl:_url options:nil];
+    }else if(_url && _options){
+        [[AppsFlyerLib shared] handleOpenUrl:_url options:_options];
         _url = nil;
+        _options = nil;
     }else if(_userActivity){
         [[AppsFlyerLib shared] continueUserActivity:_userActivity restorationHandler:nil];
         _userActivity = nil;
