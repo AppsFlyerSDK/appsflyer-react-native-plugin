@@ -18,7 +18,7 @@ jobs:
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
-            👋 Hi @${{ github.actor }} and Thank you for reaching out to us.
+            👋 Hi @${{ github.event.issue.user.login }} and Thank you for reaching out to us.
             In order for us to provide optimal support, please submit a ticket to our support team at support@appsflyer.com.
             When submitting the ticket, please specify:
             - ✅ your AppsFlyer sign-up (account) email
