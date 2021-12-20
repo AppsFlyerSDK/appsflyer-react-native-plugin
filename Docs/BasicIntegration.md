@@ -1,6 +1,5 @@
 # 🚀 Basic integration of the SDK
 Initialize the SDK to enable AppsFlyer to detect installations, sessions (app opens) and updates.<br>
-NOTE! for iOS 14.5, we use `timeToWaitForATTUserAuthorization` parameter. Please read more [here](https://support.appsflyer.com/hc/en-us/articles/207032066-iOS-SDK-V6-X-integration-guide-for-developers#integration-33-configuring-app-tracking-transparency-att-support)
 
 ```javascript
 import React, {Component} from 'react';
@@ -32,4 +31,4 @@ appsFlyer.initSdk(
 | isDebug    | Debug mode - set to `true` for testing only  |
 |onInstallConversionDataListener| Set listener for [GCD](https://dev.appsflyer.com/hc/docs/conversion-data) response (Optional. default=true) |
 |onDeepLinkListener| Set listener for [UDL](https://dev.appsflyer.com/hc/docs/unified-deep-linking-udl) response (Optional. default=false) |
-|timeToWaitForATTUserAuthorization| Waits for request user authorization to access app-related data. please read more [Here](https://dev.appsflyer.com/hc/docs/ios-sdk-reference-appsflyerlib#waitforattuserauthorization) |
+|timeToWaitForATTUserAuthorization| Waits for request user authorization to access app-related data. please read more [here](https://support.appsflyer.com/hc/en-us/articles/207032066-iOS-SDK-V6-X-integration-guide-for-developers#configure-app-tracking-transparency-att-support) |

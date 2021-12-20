@@ -18,7 +18,7 @@
 
 ## <a id="breaking-changes"> 	❗❗ Breaking changes when updating to v6.x.x❗❗
 
-- From version `6.3.0`, we use `xcframework` for iOS platform, then you need to use cocoapods version >= 1.10
+- From version `6.3.0`, we use `xcframework` for iOS platform. Then you need to use cocoapods version >= 1.10
 
 - From version `6.2.30`, `logCrossPromotionAndOpenStore`  api will register as `af_cross_promotion` instead of `af_app_invites` in your dashboard.<br>
 Click on a link that was generated using `generateInviteLink` api will be register as `af_app_invites`.
