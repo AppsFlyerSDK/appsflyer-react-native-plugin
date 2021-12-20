@@ -1,44 +1,46 @@
-# API
+# 📑 APIs
+<img src="https://massets.appsflyer.com/wp-content/uploads/2018/06/20092440/static-ziv_1TP.png"  width="400" >
 
-- [initSdk](#initSdk)
-- [appId](#appId)
-- [onInstallConversionData](#onInstallConversionData)
-- [onAppOpenAttribution](#onAppOpenAttribution)
-- [logEvent](#logEvent)
-- [setCustomerUserId](#setCustomerUserId)
-- [getAppsFlyerUID](#getAppsFlyerUID)
-- [stop](#stop)
-- [logLocation](#logLocation)
-- [setUserEmails](#setUserEmails)
-- [setAdditionalData](#setAdditionalData)  
-- [updateServerUninstallToken](#updateServerUninstallToken)
-- [setCollectIMEI](#setCollectIMEI)
-- [setCollectAndroidID](#setCollectAndroidID)
-- [setAppInviteOneLinkID](#setAppInviteOneLinkID)
-- [generateInviteLink](#generateInviteLink)
-- [logCrossPromotionImpression](#logCrossPromotionImpression)
-- [logCrossPromotionAndOpenStore](#logCrossPromotionAndOpenStore)
-- [setCurrencyCode](#setCurrencyCode)
-- [anonymizeUser](#anonymizeUser)
-- [setOneLinkCustomDomains](#setOneLinkCustomDomains)
-- [setResolveDeepLinkURLs](#setResolveDeepLinkURLs)
-- [performOnAppAttribution](#performOnAppAttribution)
-- [setSharingFilterForAllPartners](#setSharingFilterForAllPartners)   Deprecated!
-- [setSharingFilter](#setSharingFilter)   Deprecated!
-- [disableCollectASA](#disableCollectASA)
-- [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
-- [validateAndLogInAppPurchase](#validateAndLogInAppPurchase)
-- [sendPushNotificationData](#sendPushNotificationData)
-- [setHost](#setHost)
-- [addPushNotificationDeepLinkPath](#addPushNotificationDeepLinkPath)
-- [disableSKAD](#disableSKAD)
-- [setCurrentDeviceLanguage](#setCurrentDeviceLanguage)
-- [setSharingFilterForPartners](#setSharingFilterForPartners)
-- [setPartnerData](#setPartnerData)
-
+The list of available methods for this plugin is described below.
+- [Android & iOS APIs](#allAPI)
+    - [initSDK](#initSDK)
+    - [logEvent](#logEvent)
+    - [setCustomerUserId](#setCustomerUserId)
+    - [stop](#stop)
+    - [setAppInviteOneLinkID](#setAppInviteOneLinkID)
+    - [setAdditionalData](#setAdditionalData)
+    - [setResolveDeepLinkURLs](#setResolveDeepLinkURLs)
+    - [setOneLinkCustomDomain](#setOneLinkCustomDomain)
+    - [setCurrencyCode](#setCurrencyCode)
+    - [logLocation](#logLocation)
+    - [anonymizeUser](#anonymizeUser)
+    - [getAppsFlyerUID](#getAppsFlyerUID)
+    - [setHost](#setHost)
+    - [setUserEmails](#setUserEmails)
+    - [generateInviteLink](#generateInviteLink)
+    - [setSharingFilterForAllPartners](#setSharingFilterForAllPartners)[Deprecated]
+    - [setSharingFilter](#setSharingFilter)[Deprecated]
+    - [setSharingFilterForPartners](#setSharingFilterForPartners)
+    - [validateAndLogInAppPurchase](#validateAndLogInAppPurchase)
+    - [updateServerUninstallToken](#updateServerUninstallToken)
+    - [sendPushNotificationData](#sendPushNotificationData)
+- [Android Only APIs](#androidOnly)
+    - [setCollectAndroidID](#setCollectAndroidID)
+    - [setCollectIMEI](#setCollectIMEI)
+- [iOS Only APIs](#iOSOnly)
+    - [disableCollectASA](#disableCollectASA)
+    - [setUseReceiptValidationSandbox](#setUseReceiptValidationSandbox)
+    - [disableSKAD](#disableSKAD)
+    - [setCurrentDeviceLanguage](#setCurrentDeviceLanguage)
+- [AppsFlyerConversionData](#AppsFlyerConversionData)
+    - [onInstallConversionData](#onInstallConversionData)
+    - [onInstallConversionFailure](#onInstallConversionFailure)
+    - [onAppOpenAttribution](#onAppOpenAttribution)
+    - [onAttributionFailure](#onAttributionFailure)
+    - [onDeepLink](#onDeepLink)
 ---
 
-##### <a id="initSdk"> **`initSdk(options, success, error)`**
+##### <a id="initSDK"> **`initSdk(options, success, error)`**
 
 Initialize the AppsFlyer SDK with the devKey and appID.<br/>
 The dev key is required for all apps and the appID is required only for iOS.<br/>
@@ -51,13 +53,14 @@ The dev key is required for all apps and the appID is required only for iOS.<br/
 | error        | function | error callback                          |
 
 
-| Option  | Description   |
+| Setting  | Description   |
 | -------- | ------------- |
-| devKey   | Your application [devKey](https://support.appsflyer.com/hc/en-us/articles/211719806-Global-app-settings-#sdk-dev-key) provided by AppsFlyer (required)  |
-| appId      | Your iTunes [application ID](https://support.appsflyer.com/hc/en-us/articles/207377436-Adding-a-new-app#available-in-the-app-store-google-play-store-windows-phone-store)  (iOS only)  |
+| devKey   | Your application [devKey](https://support.appsflyer.com/hc/en-us/articles/207032066-Basic-SDK-integration-guide#retrieving-the-dev-key) provided by AppsFlyer (required)  |
+| appId      | [App ID](https://support.appsflyer.com/hc/en-us/articles/207377436-Adding-a-new-app#available-in-the-app-store-google-play-store-windows-phone-store)  (iOS only) you configured in your AppsFlyer dashboard  |
 | isDebug    | Debug mode - set to `true` for testing only  |
-|onInstallConversionDataListener| Set listener for SDK init response (Optional. default=true) |
-|onDeepLinkListener| Set listener for DDL response (Optional. default=false) |
+|onInstallConversionDataListener| Set listener for [GCD](https://dev.appsflyer.com/hc/docs/conversion-data) response (Optional. default=true) |
+|onDeepLinkListener| Set listener for [UDL](https://dev.appsflyer.com/hc/docs/unified-deep-linking-udl) response (Optional. default=false) |
+|timeToWaitForATTUserAuthorization| Waits for request user authorization to access app-related data. please read more [Here](https://dev.appsflyer.com/hc/docs/ios-sdk-reference-appsflyerlib#waitforattuserauthorization) |
 *Example:*
 
 ```javascript
@@ -72,6 +75,7 @@ appsFlyer.initSdk(
     appId: '41*****44',
     onInstallConversionDataListener: false, //Optional
     onDeepLinkListener: true, //Optional
+    timeToWaitForATTUserAuthorization: 10 //for iOS 14.5
   },
   (res) => {
     console.log(res);
@@ -81,115 +85,6 @@ appsFlyer.initSdk(
   }
 );
 ```
-
-With Promise:
-```javascript
-try {
-  var res = await appsFlyer.initSdk(options);
-} catch (err) {}
-```
----
-
-##### <a id="appId"> **`appId`**
-
-AppsFlyer app ID property populated from `options` passed in the `initSdk` function. Can be used to read appId back later in the app
-
-*Example:*
-
-```javascript
-var appId = appsFlyer.appId;
-```
-
----
-##### <a id="onInstallConversionData"> **`onInstallConversionData(callback) : function:unregister`**
-
-Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking).<br/>
-
-The code implementation for the conversion listener must be made prior to the initialization code of the SDK.
-
-
-| parameter    | type     | description                               |
-| -----------  |----------|------------------------------------------ |
-| callback     | function | conversion data result                    |
-
-*Example:*
-
-```javascript
-this.onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
-  (res) => {
-    if (JSON.parse(res.data.is_first_launch) == true) {
-      if (res.data.af_status === 'Non-organic') {
-        var media_source = res.data.media_source;
-        var campaign = res.data.campaign;
-        alert('This is first launch and a Non-Organic install. Media source: ' + media_source + ' Campaign: ' + campaign);
-      } else if (res.data.af_status === 'Organic') {
-        alert('This is first launch and a Organic Install');
-      }
-    } else {
-      alert('This is not first launch');
-    }
-  }
-);
-
-appsFlyer.initSdk(/*...*/);
-```
-
-*Example onInstallConversionData:*
-
-```javascript
-{
-  "data": {
-    "af_message": "organic install",
-    "af_status": "Organic",
-    "is_first_launch": "true"
-  },
-  "status": "success",
-  "type": "onInstallConversionDataLoaded"
-}
-```
-
-> **Note** is_first_launch will be "true" (string) on Android and true (boolean) on iOS. To solve this issue wrap is_first_launch with JSON.parse(res.data.is_first_launch) as in the example above.
-
-`appsFlyer.onInstallConversionData` returns a function the will allow us to call `NativeAppEventEmitter.remove()`.<br/>
-Therefore it is required to call the canceller method in the next [appStateChange](https://facebook.github.io/react-native/docs/appstate.html) callback. <br/>This is required for both the `onInstallConversionData` and `onAppOpenAttribution` callbacks.
-
-*Example:*
-
-```javascript
- _handleAppStateChange = (nextAppState) => {
-    if (this.state.appState.match(/active|foreground/) && nextAppState === 'background') {
-      if (this.onInstallConversionDataCanceller) {
-        this.onInstallConversionDataCanceller();
-        this.onInstallConversionDataCanceller = null;
-      }
-      if (this.onAppOpenAttributionCanceller) {
-        this.onAppOpenAttributionCanceller();
-        this.onAppOpenAttributionCanceller = null;
-      }
-    }
-```
-
-
-
----
-
-##### <a id="onAppOpenAttribution"> **`onAppOpenAttribution(callback) : function:unregister`**
-
-
-| parameter    | type     | description                               |
-| -----------  |----------|------------------------------------------ |
-| callback     | function | deeplink data result                    |
-
-*Example:*
-
-```javascript
-this.onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
-  console.log(res);
-});
-
-appsFlyer.initSdk(/*...*/);
-```
-
 ---
 
 ##### <a id="logEvent"> **`logEvent(eventName, eventValues, success, error)`**
@@ -252,30 +147,6 @@ appsFlyer.setCustomerUserId('some_user_id', (res) => {
 
 ---
 
-##### <a id="getAppsFlyerUID"> **`getAppsFlyerUID(callback)`**
-
-AppsFlyer's unique device ID is created for every new install of an app. Use the following API to obtain AppsFlyer’s Unique ID.
-
-
-| parameter | type     | description                     |
-| ----------|----------|------------------               |
-| callback  | function | returns `(error, appsFlyerUID)` |
-
-
-*Example:*
-
-```javascript
-appsFlyer.getAppsFlyerUID((err, appsFlyerUID) => {
-  if (err) {
-    console.error(err);
-  } else {
-    console.log('on getAppsFlyerUID: ' + appsFlyerUID);
-  }
-});
-```
-
----
-
 ##### <a id="stop"> **`stop(isStopped, callback)`**
 
 In some extreme cases you might want to shut down all SDK functions due to legal and privacy compliance. This can be achieved with the stopSDK API. Once this API is invoked, our SDK no longer communicates with our servers and stops functioning.
@@ -296,6 +167,126 @@ In any event, the SDK can be reactivated by calling the same API, by passing fal
 appsFlyer.stop(true, (res) => {
   //...
 });
+```
+
+---
+
+##### <a id="setAppInviteOneLinkID"> **`setAppInviteOneLinkID(oneLinkID, callback)`**
+
+Set the OneLink ID that should be used for User-Invite-API.<br/>
+The link that is generated for the user invite will use this OneLink ID as the base link ID.
+
+| parameter       | type     | description               |
+| ----------      |----------|------------------         |
+| oneLinkID       | string   | oneLinkID                 |
+| callback        | function | success callback          |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setAppInviteOneLinkID('abcd', (res) => {
+  //...
+});
+```
+
+---
+
+##### <a id="setAdditionalData"> **`setAdditionalData(additionalData, callback)`**
+
+The setAdditionalData API is required to integrate on the SDK level with several external partner platforms, including Segment, Adobe and Urban Airship. Use this API only if the integration article of the platform specifically states setAdditionalData API is needed.
+
+| parameter       | type     | description               |
+| ----------      |----------|------------------         |
+| additionalData  | json     | additional data           |
+| callback        | function | success callback          |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setAdditionalData(
+  {
+    val1: 'data1',
+    val2: false,
+    val3: 23,
+  },
+  (res) => {
+    //...
+  }
+);
+```
+
+---
+
+##### <a id="setResolveDeepLinkURLs"> **`setResolveDeepLinkURLs(urls, successC, errorC)`**
+
+Set domains used by ESP when wrapping your deeplinks.<br/>
+Use this API during the SDK Initialization to indicate that links from certain domains should be resolved in order to get original deeplink<br/>
+For more information please refer to the [documentation](https://support.appsflyer.com/hc/en-us/articles/360001409618-Email-service-provider-challenges-with-iOS-Universal-links) <br/>
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| urls                        | array    | Comma separated array of ESP domains requiring resolving   |
+| successC                    | function | success callback                                           |
+| errorC                      | function | error callback                                             |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setResolveDeepLinkURLs(["click.esp-domain.com"],
+    (res) => {
+        console.log(res);
+    }, (error) => {
+        console.log(error);
+    });
+```
+
+---
+
+##### <a id="setOneLinkCustomDomains"> **`setOneLinkCustomDomains(domains, successC, errorC)`**
+
+ Set Onelink custom/branded domains<br/>
+ Use this API during the SDK Initialization to indicate branded domains.<br/>
+ For more information please refer to the [documentation](https://support.appsflyer.com/hc/en-us/articles/360002329137-Implementing-Branded-Links)
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| domains                     | array    | Comma separated array of branded domains                   |
+| successC                    | function | success callback                                           |
+| errorC                      | function | error callback                                             |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setOneLinkCustomDomains(["click.mybrand.com"],
+    (res) => {
+        console.log(res);
+    }, (error) => {
+        console.log(error);
+    });
+```
+
+---
+
+##### <a id="setCurrencyCode"> **`setCurrencyCode(currencyCode, callback)`**
+
+Setting user local currency code for in-app purchases.<br/>
+The currency code should be a 3 character ISO 4217 code. (default is USD).<br/>
+You can set the currency code for all events by calling the following method.<br/>
+
+| parameter       | type     | description               |
+| ----------      |----------|------------------         |
+| currencyCode    | string   | currencyCode              |
+| callback        | function | success callback          |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setCurrencyCode(currencyCode, () => {});
 ```
 
 ---
@@ -326,6 +317,68 @@ appsFlyer.logLocation(longitude, latitude, (err, coords) => {
 });
 ```
 
+---
+
+##### <a id="anonymizeUser"> **`anonymizeUser(shouldAnonymize, callback)`**
+
+It is possible to anonymize specific user identifiers within AppsFlyer analytics.<br/>
+This complies with both the latest privacy requirements (GDPR, COPPA) and Facebook's data and privacy policies.<br/>
+To anonymize an app user:<br/>
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| shouldAnonymize             | boolean  | True if want Anonymize user Data (default value is false). |
+| callback                    | function | success callback                                           |
+
+
+*Example:*
+
+```javascript
+appsFlyer.anonymizeUser(true, () => {});
+```
+
+---
+
+##### <a id="getAppsFlyerUID"> **`getAppsFlyerUID(callback)`**
+
+AppsFlyer's unique device ID is created for every new install of an app. Use the following API to obtain AppsFlyer’s Unique ID.
+
+
+| parameter | type     | description                     |
+| ----------|----------|------------------               |
+| callback  | function | returns `(error, appsFlyerUID)` |
+
+
+*Example:*
+
+```javascript
+appsFlyer.getAppsFlyerUID((err, appsFlyerUID) => {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log('on getAppsFlyerUID: ' + appsFlyerUID);
+  }
+});
+```
+
+---
+
+##### <a id="setHost"> **`setHost(hostPrefix, hostName, successC)`**
+
+Set a custom host
+
+| parameter | type     | description      |
+| ----------|----------|------------------|
+| hostPrefix    | string   | the host prefix |
+| hostName  | string | the host name |
+| successC  | function | success callback |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setHost('foo', 'bar.appsflyer.com', res => console.log(res));
+```
 ---
 
 ##### <a id="setUserEmails"> **`setUserEmails(options, success, error)`**
@@ -362,128 +415,6 @@ appsFlyer.setUserEmails(
     console.error(err);
   }
 );
-```
-
----
-
-##### <a id="setAdditionalData"> **`setAdditionalData(additionalData, callback)`**
-
-The setAdditionalData API is required to integrate on the SDK level with several external partner platforms, including Segment, Adobe and Urban Airship. Use this API only if the integration article of the platform specifically states setAdditionalData API is needed.
-
-| parameter       | type     | description               |
-| ----------      |----------|------------------         |
-| additionalData  | json     | additional data           |
-| callback        | function | success callback          |
-
-
-*Example:*
-
-```javascript
-appsFlyer.setAdditionalData(
-  {
-    val1: 'data1',
-    val2: false,
-    val3: 23,
-  },
-  (res) => {
-    //...
-  }
-);
-```
-
----
-
-##### <a id="updateServerUninstallToken"> **`updateServerUninstallToken(token, callback)`**
-
-(Android only)
-
-Manually pass the Firebase / GCM Device Token for Uninstall measurement.
-
-| parameter       | type     | description               |
-| ----------      |----------|------------------         |
-| token           | string   | FCM Token                 |
-| callback        | function | success callback          |
-
-
-*Example:*
-
-```javascript
-appsFlyer.updateServerUninstallToken('token', (res) => {
-  //...
-});
-```
-
----
-
-##### <a id="setCollectIMEI"> **`setCollectIMEI(isCollect, callback)`**
-
-❗(Android only)
-
-Opt-out of collection of IMEI.<br/>
-If the app does NOT contain Google Play Services, device IMEI is collected by the SDK.<br/>
-However, apps with Google play services should avoid IMEI collection as this is in violation of the Google Play policy.<br/>
-
-| parameter       | type     | description               |
-| ----------      |----------|------------------         |
-| isCollect       | boolean  | opt-in boolean            |
-| callback        | function | success callback          |
-
-
-*Example:*
-
-```javascript
-if (Platform.OS == 'android') {
-appsFlyer.setCollectIMEI(false, (res) => {
-   //...
-});
-}
-```
-
----
-
-##### <a id="setCollectAndroidID"> **`setCollectAndroidID(isCollect, callback)`**
-
-❗(Android only)
-
-Opt-out of collection of Android ID.<br/>
-If the app does NOT contain Google Play Services, Android ID is collected by the SDK.<br/>
-However, apps with Google play services should avoid Android ID collection as this is in violation of the Google Play policy.<br/>
-
-| parameter       | type     | description               |
-| ----------      |----------|------------------         |
-| isCollect       | boolean  | opt-in boolean            |
-| callback        | function | success callback          |
-
-
-*Example:*
-
-```javascript
-if (Platform.OS == 'android') {
-appsFlyer.setCollectAndroidID(true, (res) => {
-   //...
-});
-}
-```
-
----
-
-##### <a id="setAppInviteOneLinkID"> **`setAppInviteOneLinkID(oneLinkID, callback)`**
-
-Set the OneLink ID that should be used for User-Invite-API.<br/>
-The link that is generated for the user invite will use this OneLink ID as the base link ID.
-
-| parameter       | type     | description               |
-| ----------      |----------|------------------         |
-| oneLinkID       | string   | oneLinkID                 |
-| callback        | function | success callback          |
-
-
-*Example:*
-
-```javascript
-appsFlyer.setAppInviteOneLinkID('abcd', (res) => {
-  //...
-});
 ```
 
 ---
@@ -525,172 +456,6 @@ A complete list of supported parameters is available [here](https://support.apps
 
 ---
 
-##### <a id="logCrossPromotionImpression"> **`logCrossPromotionImpression(appId, campaign)`**
-
-To attribute an impression use the following API call.<br/>
-Make sure to use the promoted App ID as it appears within the AppsFlyer dashboard.
-
-| parameter       | type      | description               |
-| ----------      |---------- |------------------         |
-| appId           | string    | promoted application ID   |
-| campaign        | string    | Promoted Campaign         |
-| params          | json     | additional parameters     |
-
-
-*Example:*
-
-```javascript
-if (Platform.OS == 'ios') {
-    appsFlyer.logCrossPromotionImpression('456789456', 'cross_promotion_and_store', {
-            custom_param: 'just_an_impression',
-        });
-}else{
-    appsFlyer.logCrossPromotionImpression('com.cool.RNApp', 'cross_promotion_and_store', {
-            custom_param: 'just_an_impression',
-        });
-}
-```
-
-For more details about Cross-Promotion logging please see the relevent doc [here](https://support.appsflyer.com/hc/en-us/articles/115004481946-Cross-Promotion-Tracking).
-
----
-
-##### <a id="logCrossPromotionAndOpenStore"> **`logCrossPromotionAndOpenStore(appId, campaign, params)`**
-
-Use the following API to attribute the click and launch the app store's app page.
-
-| parameter       | type     | description               |
-| ----------      |----------|------------------         |
-| appId           | string   | promoted application ID   |
-| campaign        | string   | promoted campaign         |
-| params          | json     | additional parameters     |
-
-
-*Example:*
-
-```javascript
-let crossPromOptions = {
-  customerID: '1234',
-  myCustomParameter: 'newUser',
-};
-if(Platform.OS == 'ios'){
-    appsFlyer.logCrossPromotionAndOpenStore('456789456', 'myCampaign', crossPromOptions);
-}else {
-    appsFlyer.logCrossPromotionAndOpenStore('com.cool.RNApp', 'myCampaign', crossPromOptions);
-}
-
-```
-
----
-
-##### <a id="setCurrencyCode"> **`setCurrencyCode(currencyCode, callback)`**
-
-Setting user local currency code for in-app purchases.<br/>
-The currency code should be a 3 character ISO 4217 code. (default is USD).<br/>
-You can set the currency code for all events by calling the following method.<br/>
-
-| parameter       | type     | description               |
-| ----------      |----------|------------------         |
-| currencyCode    | string   | currencyCode              |
-| callback        | function | success callback          |
-
-
-*Example:*
-
-```javascript
-appsFlyer.setCurrencyCode(currencyCode, () => {});
-```
-
----
-
-##### <a id="anonymizeUser"> **`anonymizeUser(shouldAnonymize, callback)`**
-
-It is possible to anonymize specific user identifiers within AppsFlyer analytics.<br/>
-This complies with both the latest privacy requirements (GDPR, COPPA) and Facebook's data and privacy policies.<br/>
-To anonymize an app user:<br/>
-
-| parameter                   | type     | description                                                |
-| ----------                  |----------|------------------                                          |
-| shouldAnonymize             | boolean  | True if want Anonymize user Data (default value is false). |
-| callback                    | function | success callback                                           |
-
-
-*Example:*
-
-```javascript
-appsFlyer.anonymizeUser(true, () => {});
-```
-
----
-##### <a id="setOneLinkCustomDomains"> **`setOneLinkCustomDomains(domains, successC, errorC)`**
-
- Set Onelink custom/branded domains<br/>
- Use this API during the SDK Initialization to indicate branded domains.<br/>
- For more information please refer to the [documentation](https://support.appsflyer.com/hc/en-us/articles/360002329137-Implementing-Branded-Links)
-
-| parameter                   | type     | description                                                |
-| ----------                  |----------|------------------                                          |
-| domains                     | array    | Comma separated array of branded domains                   |
-| successC                    | function | success callback                                           |
-| errorC                      | function | error callback                                             |
-
-
-*Example:*
-
-```javascript
-appsFlyer.setOneLinkCustomDomains(["click.mybrand.com"],
-    (res) => {
-        console.log(res);
-    }, (error) => {
-        console.log(error);
-    });
-```
----
-
-##### <a id="setResolveDeepLinkURLs"> **`setResolveDeepLinkURLs(urls, successC, errorC)`**
-
-Set domains used by ESP when wrapping your deeplinks.<br/>
-Use this API during the SDK Initialization to indicate that links from certain domains should be resolved in order to get original deeplink<br/>
-For more information please refer to the [documentation](https://support.appsflyer.com/hc/en-us/articles/360001409618-Email-service-provider-challenges-with-iOS-Universal-links) <br/>
-
-| parameter                   | type     | description                                                |
-| ----------                  |----------|------------------                                          |
-| urls                        | array    | Comma separated array of ESP domains requiring resolving   |
-| successC                    | function | success callback                                           |
-| errorC                      | function | error callback                                             |
-
-
-*Example:*
-
-```javascript
-appsFlyer.setResolveDeepLinkURLs(["click.esp-domain.com"],
-    (res) => {
-        console.log(res);
-    }, (error) => {
-        console.log(error);
-    });
-```
-
----
-
-##### <a id="performOnAppAttribution"> **`performOnAppAttribution(url, callback)`**
-
-This function allows developers to manually re-trigger onAppOpenAttribution with a specific link (URI or URL), **without recording a new re-engagement**.<br>
-This method may be required if the app needs to redirect users based on the given link, or resolve the AppsFlyer short URL while staying in the foreground/opened. This might be needed because regular onAppOpenAttribution callback is only called if the app was opened with the deep link.
-
-| parameter                   | type     | description                                                                                          |
-| ----------                  |----------|------------------                                                                                    |
-| url                         | string   | String representing the URL that needs to be resolved/returned in the onAppOpenAttribution callback  |
-| success callback                    | function | Result callback                                                                                             |
-| failure callback                    | function | error callback                                                                                             |
-
-
-*Example:*
-
-```javascript
-appsFlyer.performOnAppAttribution(url, res => console.log(res) , err => console.error(err));
-```
----
 ##### <a id="setSharingFilterForAllPartners"> **`setSharingFilterForAllPartners()`**
 ##### Deprecated! Start from version 6.4.0 please use [setSharingFilterForPartners](#setSharingFilterForPartners)
 Used by advertisers to exclude **all** networks/integrated partners from getting data. Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data)
@@ -701,6 +466,7 @@ Used by advertisers to exclude **all** networks/integrated partners from getting
 appsFlyer.setSharingFilterForAllPartners()
 ```
 ---
+
 ##### <a id="setSharingFilter"> **`setSharingFilter(partners, sucessC, errorC)`**
 ##### Deprecated! Start from version 6.4.0 please use [setSharingFilterForPartners](#setSharingFilterForPartners)
 Used by advertisers to exclude **specified** networks/integrated partners from getting data. Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data)
@@ -723,45 +489,30 @@ appsFlyer.setSharingFilterForAllPartners(partners,
 ```
 ---
 
-##### <a id="disableCollectASA"> **`disableCollectASA(shouldDisable)`**
+##### <a id="setSharingFilterForPartners"> **`setSharingFilterForPartners(partners)`**
 
-❗(iOS only)
+Used by advertisers to exclude networks/integrated partners from getting data.
 
-Disables Apple Search Ads collecting
 
 | parameter                   | type     | description                                                |
 | ----------                  |----------|------------------                                          |
-| shouldDisable               | boolean  | Flag to disable/enable Apple Search Ads data collection    |
+| partners                    | array    | Comma separated array of partners that need to be excluded |
 
 *Example:*
 
 ```javascript
-if (Platform.OS == 'ios') {
-appsFlyer.disableCollectASA(true);
-}
+appsFlyer.setSharingFilterForPartners([]);                                        // Reset list (default)
+appsFlyer.setSharingFilterForPartners(null);                                      // Reset list (default)
+appsFlyer.setSharingFilterForPartners(['facebook_int']);                          // Single partner
+appsFlyer.setSharingFilterForPartners(['facebook_int', 'googleadwords_int']);     // Multiple partners
+appsFlyer.setSharingFilterForPartners(['all']);                                   // All partners
+appsFlyer.setSharingFilterForPartners(['googleadwords_int', 'all']);              // All partners
 ```
-
----
-
-##### <a id="disableAdvertisingIdentifier"> **`disableAdvertisingIdentifier(shouldDisable)`**
-
-Disables IDFA collection in iOS and Advertising ID in Android. should be called before `initSdk`.
-
-| parameter                   | type     | description                                                |
-| ----------                  |----------|------------------                                          |
-| isDisable               | boolean  | Flag to disable/enable IDFA/Advertising ID collection    |
-
-*Example:*
-
-```javascript
-appsFlyer.disableAdvertisingIdentifier(true);
-```
-
 ---
 
 ##### <a id="validateAndLogInAppPurchase"> **`validateAndLogInAppPurchase(purchaseInfo, successC, errorC): Response<string>`**
 Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.<br>
-Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases
+Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases<br>
 ❗Important❗ for iOS - set SandBox to ```true```<br>
 ```appsFlyer.setUseReceiptValidationSandbox(true);```
 
@@ -776,27 +527,42 @@ Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-v
 *Example:*
 
 ```javascript
-let info = {};
-if (Platform.OS == 'android') {
-    info = {
+let info = {
         publicKey: 'key',
         currency: 'biz',
         signature: 'sig',
         purchaseData: 'data',
         price: '123',
+        productIdentifier: 'identifier',
+        currency: 'USD',
+        transactionId: '1000000614252747',
         additionalParameters: {'foo': 'bar'},
     };
-} else if (Platform.OS == 'ios') {
-     info = {
-         productIdentifier: 'identifier',
-         currency: 'USD',
-         transactionId: '1000000614252747',
-         price: '0.99',
-         additionalParameters: {'foo': 'bar'},
-     };
-}
+
 appsFlyer.validateAndLogInAppPurchase(info, res => console.log(res), err => console.log(err));
 ```
+
+---
+
+##### <a id="updateServerUninstallToken"> **`updateServerUninstallToken(token, callback)`**
+
+Manually pass the Firebase / GCM Device Token for Uninstall measurement.
+
+| parameter       | type     | description               |
+| ----------      |----------|------------------         |
+| token           | string   | FCM Token                 |
+| callback        | function | success callback          |
+
+
+*Example:*
+
+```javascript
+appsFlyer.updateServerUninstallToken('token', (res) => {
+  //...
+});
+```
+
+---
 
 ##### <a id="sendPushNotificationData"> **`sendPushNotificationData(pushPayload): void`**
 Push-notification campaigns are used to create fast re-engagements with existing users.
@@ -825,43 +591,90 @@ const pushPayload = {
         };
         appsFlyer.sendPushNotificationData(pushPayload);
 ```
----
 
-##### <a id="setHost"> **`setHost(hostPrefix, hostName, successC)`**
+## <a id="androidOnly"> Android Only APIs
 
-Set a custom host
+##### <a id="setCollectAndroidID"> **`setCollectAndroidID(isCollect, callback)`**
 
-| parameter | type     | description      |
-| ----------|----------|------------------|
-| hostPrefix    | string   | the host prefix |
-| hostName  | string | the host name |
-| successC  | function | success callback |
+Opt-out of collection of Android ID.<br/>
+If the app does NOT contain Google Play Services, Android ID is collected by the SDK.<br/>
+However, apps with Google play services should avoid Android ID collection as this is in violation of the Google Play policy.<br/>
 
-
-*Example:*
-
-```javascript
-appsFlyer.setHost('foo', 'bar.appsflyer.com', res => console.log(res));
-```
----
-
-##### <a id="addPushNotificationDeepLinkPath"> **`addPushNotificationDeepLinkPath(path, successC, errorC)`**
-The addPushNotificationDeepLinkPath method provides app owners with a flexible interface for configuring how deep links are extracted from push notification payloads.
-for more information: https://support.appsflyer.com/hc/en-us/articles/207032126-Android-SDK-integration-for-developers#core-apis-65-configure-push-notification-deep-link-resolution <br>
-❗Important❗ `addPushNotificationDeepLinkPath` must be called before calling `initSDK`
-
-| parameter | type     | description      |
-| ----------|----------|------------------|
-| path    | strings array   | the desired path separated into an array |
-| successC  | function | success callback |
-| errorC  | function | error callback |
+| parameter       | type     | description               |
+| ----------      |----------|------------------         |
+| isCollect       | boolean  | opt-in boolean            |
+| callback        | function | success callback          |
 
 
 *Example:*
 
 ```javascript
-appsFlyer.addPushNotificationDeepLinkPath(["deeply", "nested", "deep_link"], res => console.log(res), error => console.log(error));
+if (Platform.OS == 'android') {
+appsFlyer.setCollectAndroidID(true, (res) => {
+   //...
+});
+}
 ```
+
+---
+
+##### <a id="setCollectIMEI"> **`setCollectIMEI(isCollect, callback)`**
+
+Opt-out of collection of IMEI.<br/>
+If the app does NOT contain Google Play Services, device IMEI is collected by the SDK.<br/>
+However, apps with Google play services should avoid IMEI collection as this is in violation of the Google Play policy.<br/>
+
+| parameter       | type     | description               |
+| ----------      |----------|------------------         |
+| isCollect       | boolean  | opt-in boolean            |
+| callback        | function | success callback          |
+
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'android') {
+appsFlyer.setCollectIMEI(false, (res) => {
+   //...
+});
+}
+```
+
+## <a id="iOSOnly"> iOS Only APIs
+
+##### <a id="disableCollectASA"> **`disableCollectASA(shouldDisable)`**
+
+Disables Apple Search Ads collecting
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| shouldDisable               | boolean  | Flag to disable/enable Apple Search Ads data collection    |
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'ios') {
+appsFlyer.disableCollectASA(true);
+}
+```
+
+---
+
+##### <a id="setUseReceiptValidationSandbox"> **`void setUseReceiptValidationSandbox(bool useReceiptValidationSandbox)`**
+ 
+
+In app purchase receipt validation Apple environment(production or sandbox). The default value is false.
+
+| parameter                     | type      | description                                  |
+| ----------------------------  |---------- |--------------------------------------------- |
+| setUseReceiptValidationSandbox | boolean    | true if In app purchase is done with sandbox |
+
+*Example:*
+
+```javascript
+appsFlyer.setUseReceiptValidationSandbox(true);
+```
+
 ---
 
 ##### <a id="disableSKAD"> **`disableSKAD(disableSkad)`**
@@ -881,6 +694,8 @@ if (Platform.OS == 'ios') {
 }
 ```
 
+---
+
 ##### <a id="setCurrentDeviceLanguage"> **`setCurrentDeviceLanguage(language)`**
 
 Set the language of the device. The data will be displayed in Raw Data Reports<br>
@@ -898,46 +713,148 @@ if (Platform.OS == 'ios') {
     appsFlyer.setCurrentDeviceLanguage("EN");
 }
 ```
----
-##### <a id="setSharingFilterForPartners"> **`setSharingFilterForPartners(partners)`**
 
-Used by advertisers to exclude networks/integrated partners from getting data.
+## <a id="AppsFlyerConversionData"> AppsFlyerConversionData
+##### <a id="onInstallConversionData"> **`onInstallConversionData(callback) : function:unregister`**
 
+Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking).<br/>
 
-| parameter                   | type     | description                                                |
-| ----------                  |----------|------------------                                          |
-| partners                    | array    | Comma separated array of partners that need to be excluded |
-
-*Example:*
-
-```javascript
-appsFlyer.setSharingFilterForPartners([]);                                        // Reset list (default)
-appsFlyer.setSharingFilterForPartners(null);                                      // Reset list (default)
-appsFlyer.setSharingFilterForPartners(['facebook_int']);                          // Single partner
-appsFlyer.setSharingFilterForPartners(['facebook_int', 'googleadwords_int']);     // Multiple partners
-appsFlyer.setSharingFilterForPartners(['all']);                                   // All partners
-appsFlyer.setSharingFilterForPartners(['googleadwords_int', 'all']);              // All partners
-```
----
-##### <a id="setPartnerData"> **`setPartnerData(partnerId, partnerData)`**
-
-Allows sending custom data for partner integration purposes.
+The code implementation for the conversion listener must be made prior to the initialization code of the SDK.
 
 
-| parameter                   | type     | description                                                |
-| ----------                  |----------|------------------                                          |
-| partnerId                    | string    | ID of the partner (usually suffixed with "_int") |
-| partnerData                    | object    | Customer data, depends on the integration configuration with the specific partner |
+| parameter    | type     | description                               |
+| -----------  |----------|------------------------------------------ |
+| callback     | function | conversion data result                    |
 
 *Example:*
 
 ```javascript
-let partnerId = 'fb_int';
-let partnerData = {
-  param1: 'foo',
-  param2: {price: 10, nickName: 'bar'},
-  param3: 'bar',
-};
-    appsFlyer.setPartnerData(partnerId, partnerData);
+const onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+  (res) => {
+    if (JSON.parse(res.data.is_first_launch) == true) {
+      if (res.data.af_status === 'Non-organic') {
+        var media_source = res.data.media_source;
+        var campaign = res.data.campaign;
+        alert('This is first launch and a Non-Organic install. Media source: ' + media_source + ' Campaign: ' + campaign);
+      } else if (res.data.af_status === 'Organic') {
+        alert('This is first launch and a Organic Install');
+      }
+    } else {
+      alert('This is not first launch');
+    }
+  }
+);
+
+appsFlyer.initSdk(/*...*/);
 ```
+
+*Example onInstallConversionData:*
+
+```javascript
+{
+  "data": {
+    "af_message": "organic install",
+    "af_status": "Organic",
+    "is_first_launch": "true"
+  },
+  "status": "success",
+  "type": "onInstallConversionDataLoaded"
+}
+```
+
+> **Note** is_first_launch will be "true" (string) on Android and true (boolean) on iOS. To solve this issue wrap is_first_launch with JSON.parse(res.data.is_first_launch) as in the example above.
+
+`appsFlyer.onInstallConversionData` returns a function the will allow us to call `NativeAppEventEmitter.remove()`.<br/>
+
+---
+
+##### <a id="onInstallConversionFailure"> **`onInstallConversionFailure(callback) : function:unregister`**
+ 
+
+| parameter    | type     | description                               |
+| -----------  |----------|------------------------------------------ |
+| callback     | function | Failed conversion data result                    |
+
+
+*Example:*
+
+```javascript
+    const onInstallGCDFailure = appsFlyer.onInstallConversionFailure(res => {
+      console.log(JSON.stringify(res, null, 2));
+    });
+```
+*Example onInstallConversionFailure:*
+
+```javascript
+{
+  "status": "failure",
+  "type": "onInstallConversionFailure",
+  "data": "DevKey is incorrect"
+}
+```
+---
+
+##### <a id="onAppOpenAttribution"> **`onAppOpenAttribution(callback) : function:unregister`**
+
+this API related to DeepLinks. Please read more [Here](Docs/DeepLink.md)
+ 
+| parameter    | type     | description                               |
+| -----------  |----------|------------------------------------------ |
+| callback     | function | onAppOpenAttribution data result                    |
+
+*Example:*
+
+```javascript
+const onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
+  console.log(res);
+});
+
+appsFlyer.initSdk(/*...*/);
+```
+
+---
+
+##### <a id="onAttributionFailure"> **`onAttributionFailure(callback) : function:unregister`**
+
+this API related to DeepLinks. Please read more [Here](Docs/DeepLink.md)
+ 
+| parameter    | type     | description                               |
+| -----------  |----------|------------------------------------------ |
+| callback     | function | onAppOpenAttribution data error                    |
+
+*Example:*
+
+```javascript
+const onAppOpenAttributionCanceller = appsFlyer.onAttributionFailure((res) => {
+  console.log(res);
+});
+
+appsFlyer.initSdk(/*...*/);
+```
+
+---
+
+##### <a id="onDeepLink"> **`onDeepLink(callback) : function:unregister`**
+ 
+ this API related to DeepLinks. Please read more [Here](Docs/DeepLink.md)
+
+| parameter    | type     | description                               |
+| -----------  |----------|------------------------------------------ |
+| callback     | function | UDL data error                    |
+
+*Example:*
+
+```javascript
+const onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
+  if (res?.deepLinkStatus !== 'NOT_FOUND') {
+        const DLValue = res?.data.deep_link_value;
+        const mediaSrc = res?.data.media_source;
+        const param1 = res?.data.af_sub1;
+        console.log(JSON.stringify(res?.data, null, 2));
+      }
+})
+
+appsFlyer.initSdk(/*...*/);
+```
+
 ---
