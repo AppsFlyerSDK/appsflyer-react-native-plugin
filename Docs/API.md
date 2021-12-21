@@ -24,6 +24,7 @@ The list of available methods for this plugin is described below.
     - [validateAndLogInAppPurchase](#validateAndLogInAppPurchase)
     - [updateServerUninstallToken](#updateServerUninstallToken)
     - [sendPushNotificationData](#sendPushNotificationData)
+    - [addPushNotificationDeepLinkPath](#addPushNotificationDeepLinkPath)
 - [Android Only APIs](#androidOnly)
     - [setCollectAndroidID](#setCollectAndroidID)
     - [setCollectIMEI](#setCollectIMEI)
@@ -591,6 +592,41 @@ const pushPayload = {
         };
         appsFlyer.sendPushNotificationData(pushPayload);
 ```
+
+---
+##### <a id="addPushNotificationDeepLinkPath"> **`addPushNotificationDeepLinkPath(path, SuccessCB, ErrorCB): void`**
+
+Adds array of keys, which are used to compose key path to resolve deeplink from push notification payload.
+
+| parameter       | type     | description                      |
+| ----------      |----------|------------------                |
+| path      | array     | array of Strings that corresponds to the JSON path of the deep link.       |
+| successCB         | function | success callback |
+| errorCB           | function | error callback                   |
+
+*Example:*
+
+```javascript
+let path = ['deeply', 'nested', 'deep_link'];
+appsFlyer.addPushNotificationDeepLinkPath(
+  path,
+  res => console.log(res),
+  error => console.log(error),
+);
+```
+This call matches the following payload structure:
+```javascript
+{
+  ...
+  "deeply": {
+    "nested": {
+      "deep_link": "https://yourdeeplink2.onelink.me"
+    }
+  }
+  ...
+}
+```
+
 
 ## <a id="androidOnly"> Android Only APIs
 
