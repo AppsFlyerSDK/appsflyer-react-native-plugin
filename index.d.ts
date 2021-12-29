@@ -82,11 +82,11 @@ declare module "react-native-appsflyer" {
         anonymizeUser(shouldAnonymize: boolean, successC?: SuccessCB): void
         setOneLinkCustomDomains(domains: string[], successC: SuccessCB, errorC: ErrorCB): void
         setResolveDeepLinkURLs(urls: string[], successC: SuccessCB, errorC: ErrorCB): void
-        performOnAppAttribution(urlString, successC: SuccessCB, errorC: ErrorCB): void
+        performOnAppAttribution(urlString: string, successC: SuccessCB, errorC: ErrorCB): void
         setSharingFilterForAllPartners(): void
-        setSharingFilter(partners, successC, errorC): void
+        setSharingFilter(partners: string[], successC?: SuccessCB, errorC?: ErrorCB): void
         logLocation(longitude: number, latitude: number, successC?: SuccessCB): void
-        validateAndLogInAppPurchase(purchaseInfo: InAppPurchase, successC, errorC): Response<string>
+        validateAndLogInAppPurchase(purchaseInfo: InAppPurchase, successC: SuccessCB, errorC: ErrorCB): Response<string>
         updateServerUninstallToken(token: string, successC?: SuccessCB): void
         sendPushNotificationData(pushPayload: object): void
         setHost(hostPrefix: string, hostName: string, success: SuccessCB): void
