@@ -1,11 +1,22 @@
 # Adding   react-native-appsflyer to your project
 
-- [Installation using CLI](#installation-using-cli)
-- [Manual installation](#manual-installation)
+- Installation using CLI
+  - [Installation with autolinking](#Installation-with-autolinking)
+  - [Installation without autolinking](#Installation-without-autolinking)
+- Manual installation
   - [iOS](#manual-installation-ios)
   - [Android](#manual-installation-android)
 
-## <a id="installation-using-cli"> Installation (without [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md))
+## <a id="Installation-with-autolinking"> Installation (with [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md))
+
+Run the following:
+  
+```
+$ npm install react-native-appsflyer --save
+$ cd ios && pod install
+```
+
+## <a id="Installation-without-autolinking"> Installation (without [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md))
   
   
   Run the following:
@@ -30,8 +41,6 @@ pod 'react-native-appsflyer',
 ```
 
 This assumes your `Podfile` is located in `ios` directory.
-
-You must also have the React dependencies defined in the Podfile as described [here](https://facebook.github.io/react-native/docs/next/troubleshooting.html#missing-libraries-for-react).
 
 #### <a id="sample_podfile"> Sample pod file:
 ```
@@ -66,7 +75,7 @@ end
 
 ### Manual Integration (Integrating without Cocoapods):
 
-1. Download the Static Lib of the AppsFlyer iOS SDK from here:  https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS#2-quick-start
+1. Download the Static Lib of the AppsFlyer iOS SDK from [AppsFlyer devHub](https://dev.appsflyer.com/hc/docs/install-ios-sdk#manual-install)
 2. Unzip and copy the contents of the Zip file into your project directory
 3. Run `react-native link react-native-appsflyer` from of the project root or copy RNAppsFlyer.h and RNAppsFlyer.m from `node_modules` ➜ `react-native-appsflyer` to your project directory
 
