@@ -8,12 +8,15 @@
 #import <Foundation/Foundation.h>
 #import "AppsFlyerAttribution.h"
 
-@implementation AppsFlyerAttribution {
-    NSUserActivity * _userActivity;
-    NSURL * _url;
-    NSString * _sourceApplication;
-    NSDictionary * _options;
-};
+@interface AppsFlyerAttribution ()
+@property NSUserActivity * userActivity;
+@property NSURL * url;
+@property NSString * sourceApplication;
+@property NSDictionary * options;
+
+@end
+
+@implementation AppsFlyerAttribution
 
 + (instancetype)shared {
     static AppsFlyerAttribution *shared = nil;
@@ -42,29 +45,29 @@
 
 #pragma mark - AppDelegate methods
 
-- (void)continueUserActivity:(NSUserActivity*_Nullable)userActivity restorationHandler:(void (^_Nullable)(NSArray * _Nullable))restorationHandler{
-    if(_RNAFBridgeReady == YES){
+- (void)continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^_Nullable)(NSArray * _Nullable))restorationHandler{
+    if([self RNAFBridgeReady] == YES){
         [[AppsFlyerLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
     }else{
-        _userActivity = userActivity;
+        [self setUserActivity:userActivity];
     }
 }
 
 - (void)handleOpenUrl:(NSURL *)url options:(NSDictionary *)options{
-    if(_RNAFBridgeReady == YES){
+    if([self RNAFBridgeReady] == YES){
         [[AppsFlyerLib shared] handleOpenUrl:url options:options];
     }else{
-        _url = url;
-        _options = options;
+        [self setUrl:url];
+        [self setOptions:options];
     }
 }
 
 - (void)handleOpenUrl:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation{
-    if(_RNAFBridgeReady == YES){
+    if([self RNAFBridgeReady] == YES){
         [[AppsFlyerLib shared] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
     }else{
-        _url = url;
-        _sourceApplication = sourceApplication;
+        [self setUrl:url];
+        [self setSourceApplication:sourceApplication];
     }
 }
 
@@ -81,17 +84,17 @@
     }
     // end
 
-    if(_url && _sourceApplication){
-        [[AppsFlyerLib shared] handleOpenURL:_url sourceApplication:_sourceApplication withAnnotation:nil];
-        _url = nil;
-        _sourceApplication = nil;
-    }else if(_url && _options){
-        [[AppsFlyerLib shared] handleOpenUrl:_url options:_options];
-        _url = nil;
-        _options = nil;
-    }else if(_userActivity){
-        [[AppsFlyerLib shared] continueUserActivity:_userActivity restorationHandler:nil];
-        _userActivity = nil;
+    if([self url] && [self sourceApplication]){
+        [[AppsFlyerLib shared] handleOpenURL:[self url] sourceApplication:[self sourceApplication] withAnnotation:nil];
+        [self setUrl:nil];
+        [self setSourceApplication:nil];
+    }else if([self url] && [self options]){
+        [[AppsFlyerLib shared] handleOpenUrl:[self url] options:[self options]];
+        [self setUrl:nil];
+        [self setOptions:nil];
+    }else if([self userActivity]){
+        [[AppsFlyerLib shared] continueUserActivity:[self userActivity] restorationHandler:nil];
+        [self setUserActivity:nil];
     }
 }
 @end
