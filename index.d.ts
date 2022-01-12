@@ -7,15 +7,62 @@ declare module "react-native-appsflyer" {
     type ErrorCB = (error?: any) => any;
     export type ConversionData = {
         status: "success" | "failure",
-        type: "onAppOpenAttribution"
-        | "onInstallConversionDataLoaded"
-        | "onAttributionFailure"
-        | "onInstallConversionFailure"
+        type: "onInstallConversionDataLoaded" | "onInstallConversionFailure"
         data: {
             is_first_launch: "true" | "false";
             media_source: string;
             campaign: string;
             af_status: "Organic" | "Non-organic";
+            [key: string]: any;
+        } | string
+    }
+
+    export type OnAppOpenAttributionData = {
+        status: "success" | "failure",
+        type: "onAppOpenAttribution" | "onAttributionFailure"
+        data: {
+            af_dp?: string;
+            is_retargeting?: string,
+            af_channel?: string,
+            af_cost_currency?: string,
+            c?: string;
+            af_adset?: string,
+            af_click_lookback: string,
+            deep_link_sub1?: string;
+            campaign: string;
+            deep_link_value: string;
+            link: string;
+            media_source: string;
+            pid?: string;
+            path?: string // Uri-Scheme
+            host?: string // Uri-Scheme
+            shortlink?: string // Uri-Scheme
+            scheme?: string // Uri-Scheme
+            af_sub1?: string;
+            af_sub2?: string;
+            af_sub3?: string;
+            af_sub4?: string;
+            af_sub5?: string;
+            [key: string]: any;
+        } | string
+    }
+
+    export type UnifiedDeepLinkData = {
+        status: "success" | "failure",
+        type: "onDeepLinking",
+        deepLinkStatus: 'FOUND' | 'NOT_FOUND' | 'Error',
+        isDeferred: boolean,
+        data: {
+            campaign: string;
+            deep_link_value: string;
+            deep_link_sub1?: string;
+            media_source: string;
+            pid?: string;
+            af_sub1?: string;
+            af_sub2?: string;
+            af_sub3?: string;
+            af_sub4?: string;
+            af_sub5?: string;
             [key: string]: any;
         }
     }
@@ -62,9 +109,9 @@ declare module "react-native-appsflyer" {
     const appsFlyer: {
         onInstallConversionData(callback: (data: ConversionData) => any): () => void;
         onInstallConversionFailure(callback: (data: ConversionData) => any): () => void;
-        onAppOpenAttribution(callback: (data: any) => any): () => void;
-        onAttributionFailure(callback: (data: any) => any): () => void;
-        onDeepLink(callback: (data: any) => any): () => void;
+        onAppOpenAttribution(callback: (data: OnAppOpenAttributionData) => any): () => void;
+        onAttributionFailure(callback: (data: OnAppOpenAttributionData) => any): () => void;
+        onDeepLink(callback: (data: UnifiedDeepLinkData) => any): () => void;
         initSdk(options: InitSDKOptions): Promise<string>;
         initSdk(options: InitSDKOptions, successC: SuccessCB, errorC: ErrorCB): void;
         logEvent(eventName: string, eventValues: object): Promise<string>;
