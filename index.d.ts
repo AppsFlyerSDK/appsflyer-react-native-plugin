@@ -14,7 +14,7 @@ declare module "react-native-appsflyer" {
             campaign: string;
             af_status: "Organic" | "Non-organic";
             [key: string]: any;
-        } | string
+        }
     }
 
     export type OnAppOpenAttributionData = {
@@ -44,7 +44,7 @@ declare module "react-native-appsflyer" {
             af_sub4?: string;
             af_sub5?: string;
             [key: string]: any;
-        } | string
+        }
     }
 
     export type UnifiedDeepLinkData = {
