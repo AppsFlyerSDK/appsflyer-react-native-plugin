@@ -5,7 +5,7 @@
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "test": "jest --silent --coverage",
+    "test": "jest --coverage",
     "demo.ios": "npm run ios-pod; cd SampleApps/AppsFlyerExample; npm run ios",
     "demo.android": "cd SampleApps/AppsFlyerExample; npm run android",
     "ios-pod": "cd SampleApps/AppsFlyerExample/ios; pod install; cd ../"
