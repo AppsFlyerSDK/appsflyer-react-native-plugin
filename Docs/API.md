@@ -385,7 +385,8 @@ appsFlyer.setHost('foo', 'bar.appsflyer.com', res => console.log(res));
 ##### <a id="setUserEmails"> **`setUserEmails(options, success, error)`**
 
 Set the user emails and encrypt them.<br>
-**Note:** Android platform supports only 0 (none) and 3 (SHA256) emailsCryptType. iOS platform support all (0-3) emailsCryptType.
+**Note:** Android platform supports only 0 (none) and 3 (SHA256) emailsCryptType. iOS platform support all (0-3) emailsCryptType.<br>
+When unsupported emailsCryptType is passed, the SDK will use the default (none).
 
 | parameter       | type     | description               |
 | ----------      |----------|------------------         |
