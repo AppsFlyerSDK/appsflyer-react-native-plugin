@@ -291,17 +291,17 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
             deepLinkStatus = @"NOT_FOUND";
             break;
         case AFSDKDeepLinkResultStatusFailure:
-            deepLinkStatus = @"Error";
+            deepLinkStatus = @"ERROR";
             break;
         default:
             [NSException raise:NSGenericException format:@"Unexpected FormatType."];
     }
         NSMutableDictionary* message = [[NSMutableDictionary alloc] initWithCapacity:5];
-        message[@"status"] = ([deepLinkStatus isEqual:@"Error"] || [deepLinkStatus isEqual:@"NOT_FOUND"]) ? afFailure : afSuccess;
+        message[@"status"] = ([deepLinkStatus isEqual:@"ERROR"] || [deepLinkStatus isEqual:@"NOT_FOUND"]) ? afFailure : afSuccess;
         message[@"deepLinkStatus"] = deepLinkStatus;
         message[@"type"] = afOnDeepLinking;
         message[@"isDeferred"] = result.deepLink.isDeferred ? @YES : @NO;
-        if([deepLinkStatus  isEqual: @"Error"]){
+        if([deepLinkStatus  isEqual: @"ERROR"]){
             message[@"data"] = result.error.localizedDescription;
         }else if([deepLinkStatus  isEqual: @"NOT_FOUND"]){
             message[@"data"] = @"deep link not found";
