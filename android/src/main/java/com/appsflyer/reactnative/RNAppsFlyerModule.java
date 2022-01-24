@@ -167,22 +167,25 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         return new DeepLinkListener() {
             @Override
             public void onDeepLinking(@NonNull DeepLinkResult deepLinkResult) {
-                DeepLinkResult.Error dlError = deepLinkResult.getError();
-                if (dlError != null) {
-                    sendEvent(reactContext, afOnDeepLinking, dlError.toString());
-                }
                 JSONObject deepLinkObj = new JSONObject();
+                DeepLinkResult.Error dlError = deepLinkResult.getError();
                 try {
-                    deepLinkObj.put("status", afSuccess);
                     deepLinkObj.put("deepLinkStatus", deepLinkResult.getStatus());
+                    deepLinkObj.put("status", afSuccess);
                     deepLinkObj.put("type", afOnDeepLinking);
-                    if (deepLinkResult.getStatus() == DeepLinkResult.Status.FOUND) {
+
+                    if (dlError != null && deepLinkResult.getStatus() == DeepLinkResult.Status.ERROR) {
+                        deepLinkObj.put("status", afFailure);
+                        deepLinkObj.put("data", dlError.toString());
+                        deepLinkObj.put("isDeferred", false);
+                    } else if (deepLinkResult.getStatus() == DeepLinkResult.Status.FOUND) {
                         deepLinkObj.put("data", deepLinkResult.getDeepLink().getClickEvent());
                         deepLinkObj.put("isDeferred", deepLinkResult.getDeepLink().isDeferred());
-                    }else{
-                        deepLinkObj.put("data", "");
-                        deepLinkObj.put("isDeferred", "");
+                    } else {
+                        deepLinkObj.put("data", "deep link not found");
+                        deepLinkObj.put("isDeferred", false);
                     }
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
