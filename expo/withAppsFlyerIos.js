@@ -14,8 +14,8 @@ module.exports = function withAppsFlyerIos(config, shouldUseStrictMode) {
 			const configureStrictMode = mergeContents({
 				tag: 'AppsFlyer Strict Mode',
 				src: contents,
-				newSrc: `  $RNAppsFlyerStrictMode == ${shouldUseStrictMode}`,
-				anchor: "target 'expoAppsFlyerTest' do",
+				newSrc: `$RNAppsFlyerStrictMode=${shouldUseStrictMode}`,
+				anchor: 'use_expo_modules!',
 				offset: 0,
 				comment: '#',
 			});
