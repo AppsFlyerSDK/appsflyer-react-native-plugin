@@ -1,17 +1,44 @@
-const pkg = require('react-native-appsflyer/package.json');
-const { withDangerousMod } = require('@expo/config-plugins');
+const { withDangerousMod, withAppDelegate, WarningAggregator } = require('@expo/config-plugins');
 const { mergeContents } = require('@expo/config-plugins/build/utils/generateCode');
 const fs = require('fs');
 const path = require('path');
 
-module.exports = function withAppsFlyerIos(config, shouldUseStrictMode) {
+const RNAPPSFLYER_IMPORT = `#import <RNAppsFlyer.h>\n`;
+const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER = `- (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {`;
+const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE = `[[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];\n`;
+
+function modifyAppDelegate(appDelegate) {
+	if (!appDelegate.includes(RNAPPSFLYER_IMPORT)) {
+		appDelegate = RNAPPSFLYER_IMPORT + appDelegate;
+	}
+	if (appDelegate.includes(RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER)) {
+		const block = RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER + '\n' + RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE;
+		appDelegate = appDelegate.replace(RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER, block);
+	} else {
+		throw new Error('Failed to detect continueUserActivity in AppDelegate.m');
+	}
+	return appDelegate;
+}
+
+function withAppsFlyerAppDelegate(config) {
+	return withAppDelegate(config, (config) => {
+		if (config.modResults.language === 'objc') {
+			config.modResults.contents = modifyAppDelegate(config.modResults.contents);
+		} else {
+			WarningAggregator.addWarningIOS('withAppsFlyerAppDelegate', 'Swift AppDelegate files are not supported yet.');
+		}
+		return config;
+	});
+}
+
+function withPodfile(config, shouldUseStrictMode) {
 	return withDangerousMod(config, [
 		'ios',
 		async (config) => {
 			const filePath = path.join(config.modRequest.platformProjectRoot, 'Podfile');
 			const contents = fs.readFileSync(filePath, 'utf-8');
 
-			const configureStrictMode = mergeContents({
+			const mergedPodfileWithStrictMode = mergeContents({
 				tag: 'AppsFlyer Strict Mode',
 				src: contents,
 				newSrc: `$RNAppsFlyerStrictMode=${shouldUseStrictMode}`,
@@ -20,14 +47,20 @@ module.exports = function withAppsFlyerIos(config, shouldUseStrictMode) {
 				comment: '#',
 			});
 
-			if (!configureStrictMode.didMerge) {
+			if (!mergedPodfileWithStrictMode.didMerge) {
 				console.log("ERROR: Cannot add AppsFlyer strict mode to the project's ios/Podfile because it's malformed. Please report this with a copy of your project Podfile.");
 				return config;
 			}
 
-			fs.writeFileSync(filePath, configureStrictMode.contents);
+			fs.writeFileSync(filePath, mergedPodfileWithStrictMode.contents);
 
 			return config;
 		},
 	]);
+}
+
+module.exports = function withAppsFlyerIos(config, shouldUseStrictMode) {
+	config = withPodfile(config, shouldUseStrictMode);
+	config = withAppsFlyerAppDelegate(config);
+	return config;
 };
