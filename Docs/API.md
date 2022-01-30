@@ -384,7 +384,9 @@ appsFlyer.setHost('foo', 'bar.appsflyer.com', res => console.log(res));
 
 ##### <a id="setUserEmails"> **`setUserEmails(options, success, error)`**
 
-Set the user emails and encrypt them.
+Set the user emails and encrypt them.<br>
+**Note:** Android platform supports only 0 (none) and 3 (SHA256) emailsCryptType. iOS platform support all (0-3) emailsCryptType.<br>
+When unsupported emailsCryptType is passed, the SDK will use the default (none).
 
 | parameter       | type     | description               |
 | ----------      |----------|------------------         |
@@ -395,7 +397,7 @@ Set the user emails and encrypt them.
 
 | option          | type  | description   |
 | --------------  | ----  |------------- |
-| emailsCryptType | int   | none - 0 (default), SHA1 - 1, MD5 - 2, SHA256 - 3 |
+| emailsCryptType | int   | **iOS**: none - 0 (default), SHA1 - 1, MD5 - 2, SHA256 - 3<br>**Android**: none - 0 (default), SHA256 - 3|
 | emails          | array | comma separated list of emails |
 
 
@@ -403,7 +405,8 @@ Set the user emails and encrypt them.
 
 ```javascript
 const options = {
-  emailsCryptType: 2,
+  // In this case iOS platform will encrypt emails usind MD5 and android with SHA256. If you want both platform to encrypt with the same method, just write 0 or 3.
+  emailsCryptType: Platform.OS === 'ios' ? 2 : 3, 
   emails: ['user1@gmail.com', 'user2@gmail.com'],
 };
 

@@ -6,6 +6,7 @@
 - Manual installation
   - [iOS](#manual-installation-ios)
   - [Android](#manual-installation-android)
+- Add strict-mode for App-kids
 
 ## <a id="Installation-with-autolinking"> Installation (with [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md))
 
@@ -139,4 +140,34 @@ So `getPackages()` should look like:
       );
     }
 ```
+
+## Add strict-mode for App-kids
+Starting from version **6.1.10** iOS SDK comes in two variants: **Strict** mode and **Regular** mode. Please read more [here](https://dev.appsflyer.com/hc/docs/install-ios-sdk#strict-mode-sdk)<br>
+
+***Change to Strict mode***<br>
+After you installed the AppsFlyer plugin, add `$RNAppsFlyerStrictMode=true` in the project's Podfile:
+```
+//MyRNApp/ios/Podfile
+...
+use_frameworks!
+  $RNAppsFlyerStrictMode=true
+
+  # Pods for MyRNApp
+...
+
+```
+In the `ios` folder of your `root` project Run `pod install`
+
+***Change to Regular mode***<br>
+Remove `$RNAppsFlyerStrictMode=true` from the project's Podfile or set it to `false`:
+```
+//MyRNApp/ios/Podfile
+...
+use_frameworks!
+  $RNAppsFlyerStrictMode=false //OR remove this line
+
+  # Pods for MyRNApp
+...
+```
+In the `ios` folder of your `root` project Run `pod install`
 

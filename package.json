@@ -1,11 +1,11 @@
 {
   "name": "react-native-appsflyer",
-  "version": "6.4.40",
+  "version": "6.5.20",
   "description": "React Native Appsflyer plugin",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "test": "jest --silent --coverage",
+    "test": "jest --coverage",
     "demo.ios": "npm run ios-pod; cd SampleApps/AppsFlyerExample; npm run ios",
     "demo.android": "cd SampleApps/AppsFlyerExample; npm run android",
     "ios-pod": "cd SampleApps/AppsFlyerExample/ios; pod install; cd ../"

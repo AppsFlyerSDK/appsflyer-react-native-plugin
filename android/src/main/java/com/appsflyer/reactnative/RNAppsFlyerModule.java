@@ -22,6 +22,7 @@ import com.appsflyer.AppsFlyerProperties.EmailsCryptType;
 import com.appsflyer.share.CrossPromotionHelper;
 import com.appsflyer.share.LinkGenerator;
 import com.appsflyer.share.ShareInviteHelper;
+import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -46,7 +47,7 @@ import java.util.Iterator;
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnDeepLinking;
 
-public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
+public class RNAppsFlyerModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
     private ReactApplicationContext reactContext;
     private Application application;
@@ -55,6 +56,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         super(reactContext);
         this.reactContext = reactContext;
         this.application = (Application) reactContext.getApplicationContext();
+        getReactApplicationContext().addActivityEventListener(this);
     }
 
     @Override
@@ -167,22 +169,25 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         return new DeepLinkListener() {
             @Override
             public void onDeepLinking(@NonNull DeepLinkResult deepLinkResult) {
-                DeepLinkResult.Error dlError = deepLinkResult.getError();
-                if (dlError != null) {
-                    sendEvent(reactContext, afOnDeepLinking, dlError.toString());
-                }
                 JSONObject deepLinkObj = new JSONObject();
+                DeepLinkResult.Error dlError = deepLinkResult.getError();
                 try {
-                    deepLinkObj.put("status", afSuccess);
                     deepLinkObj.put("deepLinkStatus", deepLinkResult.getStatus());
+                    deepLinkObj.put("status", afSuccess);
                     deepLinkObj.put("type", afOnDeepLinking);
-                    if (deepLinkResult.getStatus() == DeepLinkResult.Status.FOUND) {
+
+                    if (dlError != null && deepLinkResult.getStatus() == DeepLinkResult.Status.ERROR) {
+                        deepLinkObj.put("status", afFailure);
+                        deepLinkObj.put("data", dlError.toString());
+                        deepLinkObj.put("isDeferred", false);
+                    } else if (deepLinkResult.getStatus() == DeepLinkResult.Status.FOUND) {
                         deepLinkObj.put("data", deepLinkResult.getDeepLink().getClickEvent());
                         deepLinkObj.put("isDeferred", deepLinkResult.getDeepLink().isDeferred());
-                    }else{
-                        deepLinkObj.put("data", "");
-                        deepLinkObj.put("isDeferred", "");
+                    } else {
+                        deepLinkObj.put("data", "deep link not found");
+                        deepLinkObj.put("isDeferred", false);
                     }
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -742,5 +747,15 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void removeListeners(Integer count) {
       // Keep: Required for RN built in Event Emitter Calls.
+    }
+
+    @Override
+    public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
+
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        getCurrentActivity().setIntent(intent);
     }
 }

@@ -8,9 +8,17 @@
 #import <Foundation/Foundation.h>
 #import "AppsFlyerAttribution.h"
 
+@interface AppsFlyerAttribution ()
+@property NSUserActivity * userActivity;
+@property NSURL * url;
+@property NSString * sourceApplication;
+@property NSDictionary * options;
+
+@end
+
 @implementation AppsFlyerAttribution
 
-+ (id)shared {
++ (instancetype)shared {
     static AppsFlyerAttribution *shared = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -21,66 +29,72 @@
 
 - (id)init {
     if (self = [super init]) {
-        self.options = nil;
-        self.restorationHandler = nil;
-        self.url = nil;
-        self.userActivity = nil;
-        self.annotation = nil;
-        self.sourceApplication = nil;
-        self.isBridgeReady = NO;
+        _url = nil;
+        _userActivity = nil;
+        _sourceApplication = nil;
+        _options = nil;
+        _RNAFBridgeReady = NO;
+
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(receiveBridgeReadyNotification:)
-                                                     name:AF_BRIDGE_SET
+                                                     name:RNAFBridgeInitializedNotification
                                                    object:nil];
-  }
-  return self;
+    }
+    return self;
 }
 
-- (void) continueUserActivity: (NSUserActivity*_Nullable) userActivity restorationHandler: (void (^_Nullable)(NSArray * _Nullable))restorationHandler{
-    if(self.isBridgeReady == YES){
+#pragma mark - AppDelegate methods
+
+- (void)continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^_Nullable)(NSArray * _Nullable))restorationHandler{
+    if([self RNAFBridgeReady] == YES){
         [[AppsFlyerLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
     }else{
-        [AppsFlyerAttribution shared].userActivity = userActivity;
-        [AppsFlyerAttribution shared].restorationHandler = restorationHandler;
+        [self setUserActivity:userActivity];
     }
 }
 
-- (void) handleOpenUrl:(NSURL *)url options:(NSDictionary *)options{
-    if(self.isBridgeReady == YES){
+- (void)handleOpenUrl:(NSURL *)url options:(NSDictionary *)options{
+    if([self RNAFBridgeReady] == YES){
         [[AppsFlyerLib shared] handleOpenUrl:url options:options];
     }else{
-        [AppsFlyerAttribution shared].url = url;
-        [AppsFlyerAttribution shared].options = options;
+        [self setUrl:url];
+        [self setOptions:options];
     }
 }
 
-- (void) handleOpenUrl:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation{
-    if(self.isBridgeReady == YES){
+- (void)handleOpenUrl:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation{
+    if([self RNAFBridgeReady] == YES){
         [[AppsFlyerLib shared] handleOpenURL:url sourceApplication:sourceApplication withAnnotation:annotation];
     }else{
-        [AppsFlyerAttribution shared].url = url;
-        [AppsFlyerAttribution shared].sourceApplication = sourceApplication;
-        [AppsFlyerAttribution shared].annotation = annotation;
+        [self setUrl:url];
+        [self setSourceApplication:sourceApplication];
     }
-
 }
 
-- (void) receiveBridgeReadyNotification:(NSNotification *) notification
-{
-    NSLog (@"AppsFlyer Debug: handle deep link");
-    if(self.url && self.sourceApplication && self.annotation){
-        [[AppsFlyerLib shared] handleOpenURL:self.url sourceApplication:self.sourceApplication withAnnotation:self.annotation];
-        self.url = nil;
-        self.sourceApplication = nil;
-        self.annotation = nil;
-    }else if(self.options && self.url){
-        [[AppsFlyerLib shared] handleOpenUrl:self.url options:self.options];
-        self.options = nil;
-        self.url = nil;
-    }else if(self.userActivity && self.restorationHandler){
-        [[AppsFlyerLib shared] continueUserActivity:self.userActivity restorationHandler:self.restorationHandler];
-        self.userActivity = nil;
-        self.restorationHandler = nil;
+#pragma mark - Bridge initialized notification
+
+- (void)receiveBridgeReadyNotification:(NSNotification *)notification {
+    // RD-69546
+    // start - We added this code because sometimes the SDK automatically resolves deeplinks on `applicationDidFinishLaunching`, and then when calling `continueUserActivity` on the same deeplink
+    // it skips them.
+    id AppsFlyer = [AppsFlyerLib shared];
+    SEL setSkipNextUniversalLinkAttribution = NSSelectorFromString(@"setSkipNextUniversalLinkAttribution:");
+    if ([AppsFlyer respondsToSelector:setSkipNextUniversalLinkAttribution]) {
+        ((void ( *) (id, SEL, BOOL))[AppsFlyer methodForSelector:setSkipNextUniversalLinkAttribution])(AppsFlyer, setSkipNextUniversalLinkAttribution, NO);
+    }
+    // end
+
+    if([self url] && [self sourceApplication]){
+        [[AppsFlyerLib shared] handleOpenURL:[self url] sourceApplication:[self sourceApplication] withAnnotation:nil];
+        [self setUrl:nil];
+        [self setSourceApplication:nil];
+    }else if([self url] && [self options]){
+        [[AppsFlyerLib shared] handleOpenUrl:[self url] options:[self options]];
+        [self setUrl:nil];
+        [self setOptions:nil];
+    }else if([self userActivity]){
+        [[AppsFlyerLib shared] continueUserActivity:[self userActivity] restorationHandler:nil];
+        [self setUserActivity:nil];
     }
 }
 @end

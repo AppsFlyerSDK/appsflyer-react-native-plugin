@@ -95,16 +95,15 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         [AppsFlyerLib shared].appsFlyerDevKey = devKey;
         [AppsFlyerLib shared].isDebug = isDebug;
 
-        [[AppsFlyerLib shared] start];
-
-        //post notification for the deep link object that the bridge is set and he can handle deep link
-        [AppsFlyerAttribution shared].isBridgeReady = YES;
-        [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
+        //post notification for the deep link object that the bridge is initialized and he can handle deep link
+        [[AppsFlyerAttribution shared] setRNAFBridgeReady:YES];
+        [[NSNotificationCenter defaultCenter] postNotificationName:RNAFBridgeInitializedNotification object:self];
         // Register for background-foreground transitions natively instead of doing this in JavaScript
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(sendLaunch:)
                                                      name:UIApplicationDidBecomeActiveNotification
                                                    object:nil];
+        [[AppsFlyerLib shared] start];
         return nil;
     }
 }
@@ -182,6 +181,12 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
             int _t = [emailsCryptTypeId intValue];
 
             switch (_t) {
+                case EmailCryptTypeSHA1:
+                    emailsCryptType = EmailCryptTypeSHA1;
+                    break;
+                case EmailCryptTypeMD5:
+                    emailsCryptType = EmailCryptTypeMD5;
+                    break;
                 case EmailCryptTypeSHA256:
                     emailsCryptType = EmailCryptTypeSHA256;
                     break;
@@ -207,7 +212,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 }
 
 -(void)sendLaunch:(UIApplication *)application {
-    [[NSNotificationCenter defaultCenter] postNotificationName:AF_BRIDGE_SET object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:RNAFBridgeInitializedNotification object:self];
     [[AppsFlyerLib shared] start];
 }
 
@@ -292,17 +297,17 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
             deepLinkStatus = @"NOT_FOUND";
             break;
         case AFSDKDeepLinkResultStatusFailure:
-            deepLinkStatus = @"Error";
+            deepLinkStatus = @"ERROR";
             break;
         default:
             [NSException raise:NSGenericException format:@"Unexpected FormatType."];
     }
         NSMutableDictionary* message = [[NSMutableDictionary alloc] initWithCapacity:5];
-        message[@"status"] = ([deepLinkStatus isEqual:@"Error"] || [deepLinkStatus isEqual:@"NOT_FOUND"]) ? afFailure : afSuccess;
+        message[@"status"] = ([deepLinkStatus isEqual:@"ERROR"] || [deepLinkStatus isEqual:@"NOT_FOUND"]) ? afFailure : afSuccess;
         message[@"deepLinkStatus"] = deepLinkStatus;
         message[@"type"] = afOnDeepLinking;
         message[@"isDeferred"] = result.deepLink.isDeferred ? @YES : @NO;
-        if([deepLinkStatus  isEqual: @"Error"]){
+        if([deepLinkStatus  isEqual: @"ERROR"]){
             message[@"data"] = result.error.localizedDescription;
         }else if([deepLinkStatus  isEqual: @"NOT_FOUND"]){
             message[@"data"] = @"deep link not found";
