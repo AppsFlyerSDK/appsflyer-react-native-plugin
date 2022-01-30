@@ -1,3 +1,13 @@
+## 6.5.20
+Release date: *2022-January-30*
+
+- React Native > Update native SDK to v6.5.2
+- React Native > show the ATT in didBecomeActive of the plugin's sample app
+- React Native > Android > userEmails defaults to None
+- React Native > iOS > Deeplink not working when app is in killed state and restorationHandler is nil
+- React Native > Android & iOS DeepLinkResult inconsistencies
+- React Native > add typescript declarations
+
 ## 6.4.40
 Release date: *2021-December-12*
 
