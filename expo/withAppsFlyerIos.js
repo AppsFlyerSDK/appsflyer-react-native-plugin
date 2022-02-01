@@ -5,7 +5,9 @@ const path = require('path');
 
 const RNAPPSFLYER_IMPORT = `#import <RNAppsFlyer.h>\n`;
 const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER = `- (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {`;
+const RNAPPSFLYER_OPENURL_IDENTIFIER = `- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {`;
 const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE = `[[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];\n`;
+const RNAPPSFLYER_OPENURL_CODE = `[[AppsFlyerAttribution shared] handleOpenUrl:url options:options];\n`;
 
 function modifyAppDelegate(appDelegate) {
 	if (!appDelegate.includes(RNAPPSFLYER_IMPORT)) {
@@ -14,6 +16,12 @@ function modifyAppDelegate(appDelegate) {
 	if (appDelegate.includes(RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER)) {
 		const block = RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER + '\n' + RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE;
 		appDelegate = appDelegate.replace(RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER, block);
+	} else {
+		throw new Error('Failed to detect continueUserActivity in AppDelegate.m');
+	}
+	if (appDelegate.includes(RNAPPSFLYER_OPENURL_IDENTIFIER)) {
+		const block = RNAPPSFLYER_OPENURL_IDENTIFIER + '\n' + RNAPPSFLYER_OPENURL_CODE;
+		appDelegate = appDelegate.replace(RNAPPSFLYER_OPENURL_IDENTIFIER, block);
 	} else {
 		throw new Error('Failed to detect continueUserActivity in AppDelegate.m');
 	}

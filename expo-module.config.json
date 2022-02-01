@@ -1,5 +1,0 @@
-{
-  "ios": {
-    "appDelegateSubscribers": ["AppLifecycleDelegate"]
-  }
-}
