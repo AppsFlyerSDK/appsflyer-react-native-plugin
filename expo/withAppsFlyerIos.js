@@ -23,7 +23,7 @@ function modifyAppDelegate(appDelegate) {
 		const block = RNAPPSFLYER_OPENURL_IDENTIFIER + '\n' + RNAPPSFLYER_OPENURL_CODE;
 		appDelegate = appDelegate.replace(RNAPPSFLYER_OPENURL_IDENTIFIER, block);
 	} else {
-		throw new Error('Failed to detect continueUserActivity in AppDelegate.m');
+		throw new Error('Failed to detect openURL in AppDelegate.m');
 	}
 	return appDelegate;
 }
