@@ -1,3 +1,8 @@
+## 6.5.21
+Release date: *2022-February-16*
+
+- React Native > remove ActivityEventListener
+
 ## 6.5.20
 Release date: *2022-January-30*
 
