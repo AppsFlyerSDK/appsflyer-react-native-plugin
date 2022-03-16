@@ -835,7 +835,7 @@ appsFlyer.initSdk(/*...*/);
 
 ##### <a id="onAppOpenAttribution"> **`onAppOpenAttribution(callback) : function:unregister`**
 
-this API related to DeepLinks. Please read more [Here](Docs/DeepLink.md)
+This API is related to DeepLinks. Please read more [here](./DeepLink.md)
  
 | parameter    | type     | description                               |
 | -----------  |----------|------------------------------------------ |
@@ -855,7 +855,7 @@ appsFlyer.initSdk(/*...*/);
 
 ##### <a id="onAttributionFailure"> **`onAttributionFailure(callback) : function:unregister`**
 
-this API related to DeepLinks. Please read more [Here](Docs/DeepLink.md)
+This API is related to DeepLinks. Please read more [here](./DeepLink.md)
  
 | parameter    | type     | description                               |
 | -----------  |----------|------------------------------------------ |
@@ -875,7 +875,7 @@ appsFlyer.initSdk(/*...*/);
 
 ##### <a id="onDeepLink"> **`onDeepLink(callback) : function:unregister`**
  
- this API related to DeepLinks. Please read more [Here](Docs/DeepLink.md)
+ This API is related to DeepLinks. Please read more [here](./DeepLink.md)
 
 | parameter    | type     | description                               |
 | -----------  |----------|------------------------------------------ |
