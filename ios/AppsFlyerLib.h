@@ -2,7 +2,7 @@
 //  AppsFlyerLib.h
 //  AppsFlyerLib
 //
-//  AppsFlyer iOS SDK 6.4.0 (29)
+//  AppsFlyer iOS SDK 6.5.4 (62)
 //  Copyright (c) 2012-2020 AppsFlyer Ltd. All rights reserved.
 //
 
@@ -95,6 +95,7 @@ NS_ASSUME_NONNULL_BEGIN
 #define AFEventParam8                      @"af_param_8"
 #define AFEventParam9                      @"af_param_9"
 #define AFEventParam10                     @"af_param_10"
+#define AFEventParamTouch                  @"af_touch_obj"
 
 #define AFEventParamDepartingDepartureDate  @"af_departing_departure_date"
 #define AFEventParamReturningDepartureDate  @"af_returning_departure_date"
@@ -610,7 +611,7 @@ NS_SWIFT_NAME(logEvent(name:values:completionHandler:));
  Block an events from being shared with ad networks and other 3rd party integrations
  Must only include letters/digits or underscore, maximum length: 45
  */
-@property(nonatomic, nullable) NSArray<NSString *> *sharingFilter DEPRECATED_MSG_ATTRIBUTE("starting SDK version 6.4.0, please use `setSharingFilterForAllPartners:`");
+@property(nonatomic, nullable) NSArray<NSString *> *sharingFilter DEPRECATED_MSG_ATTRIBUTE("starting SDK version 6.4.0, please use `setSharingFilterForPartners:`");
 
 @property(nonatomic) NSUInteger deepLinkTimeout;
 
@@ -618,7 +619,7 @@ NS_SWIFT_NAME(logEvent(name:values:completionHandler:));
  Block an events from being shared with any partner
  This method overwrite -[AppsFlyerLib setSharingFilter:]
  */
-- (void)setSharingFilterForAllPartners DEPRECATED_MSG_ATTRIBUTE("starting SDK version 6.4.0, please use `setSharingFilterForAllPartners:`");
+- (void)setSharingFilterForAllPartners DEPRECATED_MSG_ATTRIBUTE("starting SDK version 6.4.0, please use `setSharingFilterForPartners:`");
 
 /**
  Block an events from being shared with ad networks and other 3rd party integrations
