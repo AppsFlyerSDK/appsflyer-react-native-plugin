@@ -27,7 +27,7 @@ If you are developing a kids app and you wish to use our strict mode, you should
     ],
 ...
 ```
-4. In order to use AppsFlyer's deeplinks you need to configure intent filters/scheme/associatedDomains as described in [Expo's guids](https://docs.expo.dev/guides/linking/#universal-links-on-ios).
+4. In order to use AppsFlyer's deeplinks you need to configure intent filters/scheme/associatedDomains as described in [Expo's guide](https://docs.expo.dev/guides/linking/#universal-links-on-ios).
 
 ### Full app.json example
 ```
