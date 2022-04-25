@@ -45,6 +45,7 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 
  ##  📖 Guides
 - [Adding the SDK to your project](/Docs/Installation.md)
+- [Integrate into an ***Expo*** project](/Docs/Expo.md)
 - [Initializing the SDK](/Docs/BasicIntegration.md)
 - [In-app Events](/Docs/InAppEvents.md)
 - [Deep Linking](/Docs/DeepLink.md)
