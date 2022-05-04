@@ -680,26 +680,42 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void sendPushNotificationData(ReadableMap pushPayload) {
+    public void sendPushNotificationData(ReadableMap pushPayload, Callback errorCallback) {
         JSONObject payload = RNUtil.readableMapToJson(pushPayload);
+        String errorMsg;
         if (payload == null) {
-            Log.d("AppsFlyer", "PushNotification payload is null");
+            errorMsg = "PushNotification payload is null";
+            Log.d("AppsFlyer", errorMsg);
+            if (errorCallback != null) {
+                errorCallback.invoke(errorMsg);
+            }
             return;
         }
         Bundle bundle = null;
         try {
             bundle = RNUtil.jsonToBundle(payload);
         } catch (JSONException e) {
-            Log.d("AppsFlyer", "Can't parse pushPayload to bundle");
+            errorMsg = "Can't parse pushPayload to bundle";
+            Log.d("AppsFlyer", errorMsg);
             e.printStackTrace();
+            if (errorCallback != null) {
+                errorCallback.invoke(errorMsg);
+            }
             return;
         }
-        Intent intent = getCurrentActivity().getIntent();
-        intent.putExtras(bundle);
         Activity activity = getCurrentActivity();
-        activity.setIntent(intent);
-
-        AppsFlyerLib.getInstance().sendPushNotificationData(activity);
+        if (activity != null) {
+            Intent intent = activity.getIntent();
+            intent.putExtras(bundle);
+            activity.setIntent(intent);
+            AppsFlyerLib.getInstance().sendPushNotificationData(activity);
+        } else {
+            errorMsg = "The activity is null. Push payload has not been sent!";
+            Log.d("AppsFlyer", errorMsg);
+            if (errorCallback != null) {
+                errorCallback.invoke(errorMsg);
+            }
+        }
     }
 
     @ReactMethod
