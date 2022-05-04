@@ -568,14 +568,16 @@ appsFlyer.updateServerUninstallToken('token', (res) => {
 
 ---
 
-##### <a id="sendPushNotificationData"> **`sendPushNotificationData(pushPayload): void`**
+##### <a id="sendPushNotificationData"> **`sendPushNotificationData(pushPayload, ErrorCB): void`**
 Push-notification campaigns are used to create fast re-engagements with existing users.
 AppsFlyer supplies an open-for-all solution, that enables measuring the success of push-notification campaigns, for both iOS and Android platforms.<br>
-Learn more - https://support.appsflyer.com/hc/en-us/articles/207364076-Measuring-Push-Notification-Re-Engagement-Campaigns
+[Learn more](https://support.appsflyer.com/hc/en-us/articles/207364076-Measuring-Push-Notification-Re-Engagement-Campaigns)<br>
+From version ***6.6.0*** we added an error callback that returns an error message.<br>
 
 | parameter       | type     | description                      |
 | ----------      |----------|------------------                |
 | pushPayload      | json     | push notification payload      |
+| ErrorCB      | function     | returns an error msg when the payload has not been sent      |
 
 
 *Example:*
@@ -593,7 +595,7 @@ const pushPayload = {
                 sound:"default"
             }
         };
-        appsFlyer.sendPushNotificationData(pushPayload);
+        appsFlyer.sendPushNotificationData(pushPayload, err => console.log(err));
 ```
 
 ---
