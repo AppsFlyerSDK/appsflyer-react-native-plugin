@@ -22,7 +22,6 @@ import com.appsflyer.AppsFlyerProperties.EmailsCryptType;
 import com.appsflyer.share.CrossPromotionHelper;
 import com.appsflyer.share.LinkGenerator;
 import com.appsflyer.share.ShareInviteHelper;
-import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -47,7 +46,7 @@ import java.util.Iterator;
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnDeepLinking;
 
-public class RNAppsFlyerModule extends ReactContextBaseJavaModule implements ActivityEventListener {
+public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     private ReactApplicationContext reactContext;
     private Application application;
@@ -56,7 +55,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule implements Act
         super(reactContext);
         this.reactContext = reactContext;
         this.application = (Application) reactContext.getApplicationContext();
-        getReactApplicationContext().addActivityEventListener(this);
     }
 
     @Override
@@ -747,15 +745,5 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule implements Act
     @ReactMethod
     public void removeListeners(Integer count) {
       // Keep: Required for RN built in Event Emitter Calls.
-    }
-
-    @Override
-    public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-
-    }
-
-    @Override
-    public void onNewIntent(Intent intent) {
-        getCurrentActivity().setIntent(intent);
     }
 }
