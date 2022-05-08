@@ -569,9 +569,9 @@ appsFlyer.updateServerUninstallToken('token', (res) => {
 ---
 
 ##### <a id="sendPushNotificationData"> **`sendPushNotificationData(pushPayload, ErrorCB): void`**
-Push-notification campaigns are used to create fast re-engagements with existing users.
-AppsFlyer supplies an open-for-all solution, that enables measuring the success of push-notification campaigns, for both iOS and Android platforms.<br>
+Push-notification campaigns are used to create fast re-engagements with existing users.<br>
 [Learn more](https://support.appsflyer.com/hc/en-us/articles/207364076-Measuring-Push-Notification-Re-Engagement-Campaigns)<br>
+For Android platform, AppsFlyer SDK uses the activity in order to process the push payload. Make sure you call this api when the app's activity is available (NOT dead state).<br>
 From version ***6.6.0*** we added an error callback that returns an error message.<br>
 
 | parameter       | type     | description                      |
