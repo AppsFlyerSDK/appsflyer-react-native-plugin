@@ -685,36 +685,39 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         String errorMsg;
         if (payload == null) {
             errorMsg = "PushNotification payload is null";
-            Log.d("AppsFlyer", errorMsg);
-            if (errorCallback != null) {
-                errorCallback.invoke(errorMsg);
-            }
+            handleErrorMessage(errorMsg, errorCallback);
             return;
         }
         Bundle bundle = null;
         try {
             bundle = RNUtil.jsonToBundle(payload);
         } catch (JSONException e) {
-            errorMsg = "Can't parse pushPayload to bundle";
-            Log.d("AppsFlyer", errorMsg);
             e.printStackTrace();
-            if (errorCallback != null) {
-                errorCallback.invoke(errorMsg);
-            }
+            errorMsg = "Can't parse pushPayload to bundle";
+            handleErrorMessage(errorMsg, errorCallback);
             return;
         }
         Activity activity = getCurrentActivity();
         if (activity != null) {
             Intent intent = activity.getIntent();
-            intent.putExtras(bundle);
-            activity.setIntent(intent);
-            AppsFlyerLib.getInstance().sendPushNotificationData(activity);
+            if (intent != null) {
+                intent.putExtras(bundle);
+                activity.setIntent(intent);
+                AppsFlyerLib.getInstance().sendPushNotificationData(activity);
+            } else {
+                errorMsg = "The intent is null. Push payload has not been sent!";
+                handleErrorMessage(errorMsg, errorCallback);
+            }
         } else {
             errorMsg = "The activity is null. Push payload has not been sent!";
-            Log.d("AppsFlyer", errorMsg);
-            if (errorCallback != null) {
-                errorCallback.invoke(errorMsg);
-            }
+            handleErrorMessage(errorMsg, errorCallback);
+        }
+    }
+
+    private void handleErrorMessage(String errorMessage, Callback errorCB) {
+        Log.d("AppsFlyer", errorMessage);
+        if (errorCB != null) {
+            errorCB.invoke(errorMessage);
         }
     }
 
