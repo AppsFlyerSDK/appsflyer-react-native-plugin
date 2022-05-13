@@ -33,7 +33,7 @@ function withAppsFlyerAppDelegate(config) {
 		if (['objc', 'objcpp'].includes(config.modResults.language)) {
 			config.modResults.contents = modifyAppDelegate(config.modResults.contents);
 		} else {
-			WarningAggregator.addWarningIOS('withAppsFlyerAppDelegate', 'Swift AppDelegate files are not supported yet.');
+			WarningAggregator.addWarningIOS('withAppsFlyerAppDelegate', `${config.modResults.language} AppDelegate file is not supported yet`);
 		}
 		return config;
 	});
