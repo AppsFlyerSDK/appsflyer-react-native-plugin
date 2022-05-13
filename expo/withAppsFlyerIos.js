@@ -30,7 +30,7 @@ function modifyAppDelegate(appDelegate) {
 
 function withAppsFlyerAppDelegate(config) {
 	return withAppDelegate(config, (config) => {
-		if (config.modResults.language === 'objc') {
+		if (['objc', 'objcpp'].includes(config.modResults.language)) {
 			config.modResults.contents = modifyAppDelegate(config.modResults.contents);
 		} else {
 			WarningAggregator.addWarningIOS('withAppsFlyerAppDelegate', 'Swift AppDelegate files are not supported yet.');
