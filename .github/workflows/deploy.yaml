@@ -1,15 +1,15 @@
 on: 
   push:
-    inputs:
-      branch:
-        description: 'Branch to deploy'     
-        required: true
-        default: '' 
-        type: choice
-        options:
-        - info
-        - warning
-        - debug 
+    # inputs:
+    #   branch:
+    #     description: 'Branch to deploy'     
+    #     required: true
+    #     default: '' 
+    #     type: choice
+    #     options:
+    #     - info
+    #     - warning
+    #     - debug 
 
 jobs:
   deploy:
@@ -18,4 +18,4 @@ jobs:
       - run: |
           echo "The branch: $BRANCH"
         env:
-          BRANCH: ${{ github.event.inputs.branch }}
+          BRANCH: ${{ github }}
