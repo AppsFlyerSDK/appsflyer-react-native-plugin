@@ -16,6 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          echo "The branch: $BRANCH"
-        env:
-          BRANCH: ${{ github }}
+          echo "The branch: ${{github.ref_name}}"
+          echo "The run id: ${{github.run_id}}"
+          echo "The run number: ${{github.run_number}}"
