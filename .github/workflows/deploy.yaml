@@ -1,15 +1,8 @@
+name: Deployment
 on: 
   push:
-    # inputs:
-    #   branch:
-    #     description: 'Branch to deploy'     
-    #     required: true
-    #     default: '' 
-    #     type: choice
-    #     options:
-    #     - info
-    #     - warning
-    #     - debug 
+    branches:
+      - releases/*/*/*
 
 jobs:
   deploy:
