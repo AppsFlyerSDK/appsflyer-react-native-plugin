@@ -13,27 +13,27 @@ function modifyAppDelegate(appDelegate) {
 	if (!appDelegate.includes(RNAPPSFLYER_IMPORT)) {
 		appDelegate = RNAPPSFLYER_IMPORT + appDelegate;
 	}
-	if (appDelegate.includes(RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER)) {
+	if (appDelegate.includes(RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER) && !appDelegate.includes(RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE)) {
 		const block = RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER + '\n' + RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE;
 		appDelegate = appDelegate.replace(RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER, block);
 	} else {
-		throw new Error('Failed to detect continueUserActivity in AppDelegate.m');
+		WarningAggregator.addWarningIOS('withAppsFlyerAppDelegate', "Failed to detect continueUserActivity in AppDelegate or AppsFlyer's delegate method already exists");
 	}
-	if (appDelegate.includes(RNAPPSFLYER_OPENURL_IDENTIFIER)) {
+	if (appDelegate.includes(RNAPPSFLYER_OPENURL_IDENTIFIER) && !appDelegate.includes(RNAPPSFLYER_OPENURL_CODE)) {
 		const block = RNAPPSFLYER_OPENURL_IDENTIFIER + '\n' + RNAPPSFLYER_OPENURL_CODE;
 		appDelegate = appDelegate.replace(RNAPPSFLYER_OPENURL_IDENTIFIER, block);
 	} else {
-		throw new Error('Failed to detect openURL in AppDelegate.m');
+		WarningAggregator.addWarningIOS('withAppsFlyerAppDelegate', "Failed to detect openURL in AppDelegate or AppsFlyer's delegate method already exists");
 	}
 	return appDelegate;
 }
 
 function withAppsFlyerAppDelegate(config) {
 	return withAppDelegate(config, (config) => {
-		if (config.modResults.language === 'objc') {
+		if (['objc', 'objcpp'].includes(config.modResults.language)) {
 			config.modResults.contents = modifyAppDelegate(config.modResults.contents);
 		} else {
-			WarningAggregator.addWarningIOS('withAppsFlyerAppDelegate', 'Swift AppDelegate files are not supported yet.');
+			WarningAggregator.addWarningIOS('withAppsFlyerAppDelegate', `${config.modResults.language} AppDelegate file is not supported yet`);
 		}
 		return config;
 	});
