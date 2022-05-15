@@ -1,4 +1,5 @@
 name: Deployment
+
 on: 
   push:
     branches:
@@ -7,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: Staging
     steps:
       - run: |
           echo "The branch: ${{github.ref_name}}"
