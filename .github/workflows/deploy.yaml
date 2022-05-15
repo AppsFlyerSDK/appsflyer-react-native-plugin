@@ -1,5 +1,5 @@
 on: 
-  workflow_dispatch:
+  push:
     inputs:
       branch:
         description: 'Branch to deploy'     
