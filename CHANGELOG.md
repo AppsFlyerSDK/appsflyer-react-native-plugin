@@ -1,3 +1,9 @@
+## 6.6.0
+Release date: *2022-May-18*
+
+- React Native > Expo
+- React Native > Fix app crash when activity is null on sendPushNotificationData
+
 ## 6.5.21
 Release date: *2022-February-16*
 
