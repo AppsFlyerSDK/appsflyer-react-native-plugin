@@ -3,9 +3,9 @@
 ```
 expo install expo-dev-clients
 ```
-2. Install react-native-appsflyer from the beta branch:
+2. Install react-native-appsflyer:
 ```
-expo install git+https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin.git#releases/6.x.x/6.6.x/6.6.0-beta
+expo install react-native-appsflyer
 ```
 3. Add `react-native-appsflyer` into the `plugins` array inside the `app.json` file of your app:
 ```
