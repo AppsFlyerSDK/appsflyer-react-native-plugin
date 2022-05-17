@@ -190,9 +190,20 @@ describe("Test appsFlyer API's", () => {
 		appsFlyer.stop(true);
 		expect(RNAppsFlyer.stop).toHaveBeenCalledTimes(1);
 	});
+
 	test('it calls appsFlyer.stop(true, cb)', () => {
 		appsFlyer.stop(true, jest.fn);
 		expect(RNAppsFlyer.stop).toHaveBeenCalledTimes(1);
+	});
+
+	test('it calls appsFlyer.sendPushNotificationData({}, errorCb)', () => {
+		appsFlyer.sendPushNotificationData({ foo: 'bar' }, jest.fn);
+		expect(RNAppsFlyer.sendPushNotificationData).toHaveBeenCalledTimes(1);
+	});
+
+	test('it calls appsFlyer.sendPushNotificationData({})', () => {
+		appsFlyer.sendPushNotificationData({ foo: 'bar' });
+		expect(RNAppsFlyer.sendPushNotificationData).toHaveBeenCalledTimes(1);
 	});
 });
 

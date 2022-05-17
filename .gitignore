@@ -36,6 +36,7 @@ local.properties
 android/gradlew.bat
 .vscode
 android/gradle
+android/.project
 
 # node.js
 #

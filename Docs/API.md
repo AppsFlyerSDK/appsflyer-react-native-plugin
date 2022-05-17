@@ -92,7 +92,7 @@ appsFlyer.initSdk(
 
 In-App Events provide insight on what is happening in your app. It is recommended to take the time and define the events you want to measure to allow you to measure ROI (Return on Investment) and LTV (Lifetime Value).
 
-Recording in-app events is performed by calling sendEvent with event name and value parameters. See In-App Events documentation for more details.
+Recording in-app events is performed by calling logEvent with event name and value parameters. See In-App Events documentation for more details.
 
 **Note:** An In-App Event name must be no longer than 45 characters. Events names with more than 45 characters do not appear in the dashboard, but only in the raw Data, Pull and Push APIs.
 
@@ -568,14 +568,16 @@ appsFlyer.updateServerUninstallToken('token', (res) => {
 
 ---
 
-##### <a id="sendPushNotificationData"> **`sendPushNotificationData(pushPayload): void`**
-Push-notification campaigns are used to create fast re-engagements with existing users.
-AppsFlyer supplies an open-for-all solution, that enables measuring the success of push-notification campaigns, for both iOS and Android platforms.<br>
-Learn more - https://support.appsflyer.com/hc/en-us/articles/207364076-Measuring-Push-Notification-Re-Engagement-Campaigns
+##### <a id="sendPushNotificationData"> **`sendPushNotificationData(pushPayload, ErrorCB): void`**
+Push-notification campaigns are used to create fast re-engagements with existing users.<br>
+[Learn more](https://support.appsflyer.com/hc/en-us/articles/207364076-Measuring-Push-Notification-Re-Engagement-Campaigns)<br>
+For Android platform, AppsFlyer SDK uses the activity in order to process the push payload. Make sure you call this api when the app's activity is available (NOT dead state).<br>
+From version ***6.6.0*** we added an error callback that returns an error message.<br>
 
 | parameter       | type     | description                      |
 | ----------      |----------|------------------                |
 | pushPayload      | json     | push notification payload      |
+| ErrorCB      | function     | returns an error msg when the payload has not been sent      |
 
 
 *Example:*
@@ -593,7 +595,7 @@ const pushPayload = {
                 sound:"default"
             }
         };
-        appsFlyer.sendPushNotificationData(pushPayload);
+        appsFlyer.sendPushNotificationData(pushPayload, err => console.log(err));
 ```
 
 ---

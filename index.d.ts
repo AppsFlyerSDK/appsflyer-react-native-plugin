@@ -135,7 +135,7 @@ declare module "react-native-appsflyer" {
         logLocation(longitude: number, latitude: number, successC?: SuccessCB): void
         validateAndLogInAppPurchase(purchaseInfo: InAppPurchase, successC: SuccessCB, errorC: ErrorCB): Response<string>
         updateServerUninstallToken(token: string, successC?: SuccessCB): void
-        sendPushNotificationData(pushPayload: object): void
+        sendPushNotificationData(pushPayload: object, errorC?: ErrorCB): void
         setHost(hostPrefix: string, hostName: string, success: SuccessCB): void
         addPushNotificationDeepLinkPath(path: string[], successC: SuccessCB, errorC: ErrorCB): void
         disableAdvertisingIdentifier(isDisable: boolean): void

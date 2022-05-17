@@ -680,26 +680,45 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void sendPushNotificationData(ReadableMap pushPayload) {
+    public void sendPushNotificationData(ReadableMap pushPayload, Callback errorCallback) {
         JSONObject payload = RNUtil.readableMapToJson(pushPayload);
+        String errorMsg;
         if (payload == null) {
-            Log.d("AppsFlyer", "PushNotification payload is null");
+            errorMsg = "PushNotification payload is null";
+            handleErrorMessage(errorMsg, errorCallback);
             return;
         }
         Bundle bundle = null;
         try {
             bundle = RNUtil.jsonToBundle(payload);
         } catch (JSONException e) {
-            Log.d("AppsFlyer", "Can't parse pushPayload to bundle");
             e.printStackTrace();
+            errorMsg = "Can't parse pushPayload to bundle";
+            handleErrorMessage(errorMsg, errorCallback);
             return;
         }
-        Intent intent = getCurrentActivity().getIntent();
-        intent.putExtras(bundle);
         Activity activity = getCurrentActivity();
-        activity.setIntent(intent);
+        if (activity != null) {
+            Intent intent = activity.getIntent();
+            if (intent != null) {
+                intent.putExtras(bundle);
+                activity.setIntent(intent);
+                AppsFlyerLib.getInstance().sendPushNotificationData(activity);
+            } else {
+                errorMsg = "The intent is null. Push payload has not been sent!";
+                handleErrorMessage(errorMsg, errorCallback);
+            }
+        } else {
+            errorMsg = "The activity is null. Push payload has not been sent!";
+            handleErrorMessage(errorMsg, errorCallback);
+        }
+    }
 
-        AppsFlyerLib.getInstance().sendPushNotificationData(activity);
+    private void handleErrorMessage(String errorMessage, Callback errorCB) {
+        Log.d("AppsFlyer", errorMessage);
+        if (errorCB != null) {
+            errorCB.invoke(errorMessage);
+        }
     }
 
     @ReactMethod
