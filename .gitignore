@@ -59,3 +59,8 @@ demos/appsflyer-react-native-app/.DS_Store
 demos/appsflyer-react-native-app/node_modules
 demos/appsflyer-react-native-app/ios/Podfile.lock
 demos/appsflyer-react-native-app/ios/Pods
+demos/appsflyer-expo-app/ios
+demos/appsflyer-expo-app/android
+demos/appsflyer-expo-app/.expo
+demos/appsflyer-expo-app/node_modules
+demos/appsflyer-expo-app/yarn.lock

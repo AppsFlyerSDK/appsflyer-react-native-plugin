@@ -52,5 +52,5 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [Advanced APIs](/Docs/AdvancedAPI.md)
 - [Testing the integration](/Docs/Testing.md)
 - [APIs](/Docs/API.md)
-- [React-Native Sample App](/demos/appsflyer-react-native-app)
+- [React-Native Sample App](/demos)
 
