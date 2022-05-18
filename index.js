@@ -533,8 +533,8 @@ appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
  * Learn more - https://support.appsflyer.com/hc/en-us/articles/207364076-Measuring-Push-Notification-Re-Engagement-Campaigns
  * @param pushPayload
  */
-appsFlyer.sendPushNotificationData = (pushPayload) => {
-	return RNAppsFlyer.sendPushNotificationData(pushPayload);
+appsFlyer.sendPushNotificationData = (pushPayload, errorC = null) => {
+	return RNAppsFlyer.sendPushNotificationData(pushPayload, errorC);
 };
 
 /**
