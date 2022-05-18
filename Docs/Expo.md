@@ -1,4 +1,4 @@
-# 🚀 Integrate AppsFlyer into an Expo managed project (Beta)
+# 🚀 Integrate AppsFlyer into an Expo managed project
 1. Install `expo-dev-client`:
 ```
 expo install expo-dev-clients
