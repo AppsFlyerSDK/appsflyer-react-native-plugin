@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install AppsFlyer on an expo app
-      run: cd demos/appsflyer-expo-app && yarn install && expo install ../../ --save
+      run: cd demos/appsflyer-expo-app && yarn install && yarn add ../../ --save
 
   install-plugin-RN:
     runs-on: ubuntu-latest
