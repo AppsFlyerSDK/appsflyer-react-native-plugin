@@ -25,6 +25,9 @@ jobs:
     needs: install-plugin-RN
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
+    - name: print files
+      run: cd demos/appsflyer-react-native-app && ls
     - name: Build Android RN app
       run: echo 'RN android'
 
