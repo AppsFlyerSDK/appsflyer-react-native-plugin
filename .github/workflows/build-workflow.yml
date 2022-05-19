@@ -72,9 +72,11 @@ jobs:
     - name: 📥 Install Dependencies
       run: |
         cd demos/appsflyer-react-native-app/ios
-        pod install --repo-update        
+        pod install --repo-update
 
     - name: 🛠️ Build .app
+      run: |
+        cd demos/appsflyer-react-native-app/ios
       uses: sersoft-gmbh/xcodebuild-action@v1
       with:
         project: AppsFlyerExample.xcodeproj
