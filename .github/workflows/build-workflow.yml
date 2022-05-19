@@ -74,4 +74,4 @@ jobs:
         cd demos/appsflyer-react-native-app/ios
         pod install --repo-update
     - name: 🛠️  Build .app
-        run: xcodebuild -workspace demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcworkspace -scheme AppsFlyerExample clean archive -allowProvisioningUpdates
+      run: xcodebuild -workspace demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcworkspace -scheme AppsFlyerExample clean archive -allowProvisioningUpdates
