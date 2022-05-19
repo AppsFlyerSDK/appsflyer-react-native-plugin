@@ -37,6 +37,8 @@ jobs:
         yarn add ../../ --save
     - name: Build apk
       run: |
+        pwd
+        ls
         cd android
         ls
         chmod +x ./gradlew
