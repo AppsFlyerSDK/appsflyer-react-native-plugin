@@ -11,19 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: 🚀 Install AppsFlyer on an Expo-Android
+    - name: 🚀  Install AppsFlyer on an Expo-Android
       run: | 
         cd demos/appsflyer-expo-app
         yarn install
         yarn add expo
         yarn add ../../ --save
-    - name: 🎩 Install expo cli
+    - name: 🎩  Install expo cli
       run: npm install --global expo-cli
-    - name: 📦 Generate native folders
+    - name: 📦  Generate native folders
       run: |
         cd demos/appsflyer-expo-app
         expo prebuild
-    - name: 🛠️ Build apk
+    - name: 🛠️  Build apk
       run: |
         cd demos/appsflyer-expo-app/android
         chmod +x ./gradlew
@@ -33,12 +33,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: 🚀 Install AppsFlyer on a RN-Android
+    - name: 🚀  Install AppsFlyer on a RN-Android
       run: |
         cd demos/appsflyer-react-native-app
         yarn install
         yarn add ../../ --save
-    - name: 🛠️ Build apk
+    - name: 🛠️  Build apk
       run: |
         cd demos/appsflyer-react-native-app/android
         chmod +x ./gradlew
@@ -48,14 +48,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: 🚀 Install AppsFlyer on an Expo-iOS
+    - name: 🚀  Install AppsFlyer on an Expo-iOS
       run: | 
         cd demos/appsflyer-expo-app
         yarn install --force
         yarn add ../../ --save
-    - name: 🎩 Install expo cli
+    - name: 🎩  Install expo cli
       run: npm install --global expo-cli
-    - name: 📦 Generate native folders
+    - name: 📦  Generate native folders
       run: |
         cd demos/appsflyer-expo-app
         expo prebuild
@@ -64,18 +64,19 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    - name: 🚀 Install AppsFlyer on a RN-iOS
+    - name: 🚀  Install AppsFlyer on a RN-iOS
       run: | 
         cd demos/appsflyer-react-native-app
         yarn install --force
         yarn add ../../ --save
-    - name: 📥 Install Dependencies
+    - name: 📥  Install Dependencies
       run: |
         cd demos/appsflyer-react-native-app/ios
         pod install --repo-update
-    - name: 🛠️ Build .app
-      uses: sersoft-gmbh/xcodebuild-action@v1
-      with:
-        project: demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcodeproj
-        scheme: AppsFlyerExample
-        action: build
+    - name: 🛠️  Build .app
+      run: xcodebuild -workspace demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcworkspace -scheme AppsFlyerExample clean archive
+     # uses: sersoft-gmbh/xcodebuild-action@v1
+     # with:
+      #  project: demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcodeproj
+      #  scheme: AppsFlyerExample
+      #  action: build
