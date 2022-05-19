@@ -37,8 +37,9 @@ jobs:
         yarn add ../../ --save
     - name: Build apk
       run: |
+        cd android
         chmod +x ./gradlew
-        cd android && ./gradlew assembleRelease
+        ./gradlew assembleRelease
 
   Build-Expo-iOS:
     runs-on: ubuntu-latest
