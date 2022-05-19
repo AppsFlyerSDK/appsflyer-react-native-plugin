@@ -1,0 +1,64 @@
+name: Build React-Native and Expo apps with AppsFlyer plugin
+#                                          /--> rn --> build android
+#                                         /---> rn --> build ios
+# --> Install plugin on rn and expo apps 
+#                                        \---> expo --> build android
+#                                         \--> expo --> build ios
+on: [pull_request, push]
+
+jobs:
+  Build-Expo-android:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install AppsFlyer on an Expo-Android
+      run: | 
+        cd demos/appsflyer-expo-app
+        yarn install
+        yarn add ../../ --save
+    - name: Install expo cli
+      run: npm install --global expo-cli
+    - name: Generate native folders
+      run: expo prebuild
+    - name: Build apk
+      run: |
+        cd android
+        ./gradlew build
+
+  Build-RN-android:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install AppsFlyer on a RN-Android
+      run: |
+        cd demos/appsflyer-react-native-app
+        yarn install
+        yarn add ../../ --save
+    - name: Build apk
+      run: |
+        cd android
+        ./gradlew build
+
+  Build-Expo-iOS:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install AppsFlyer on an Expo-iOS
+      run: | 
+        cd demos/appsflyer-expo-app
+        yarn install
+        yarn add ../../ --save
+    - name: Install expo cli
+      run: npm install --global expo-cli
+    - name: Generate native folders
+      run: expo prebuild
+
+  Build-RN-ios:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install AppsFlyer on a RN-iOS
+      run: | 
+        cd demos/appsflyer-react-native-app
+        yarn install
+        yarn add ../../ --save
