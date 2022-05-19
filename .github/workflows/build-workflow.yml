@@ -87,4 +87,5 @@ jobs:
   Deploy-To-QA:
     if: github.ref == 'releases/*/*/*'
     runs-on: macos-latest
+    steps:
     - uses: ./.github/workflows/deploy.yml
