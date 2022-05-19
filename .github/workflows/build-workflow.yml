@@ -83,3 +83,8 @@ jobs:
     - name: 🛠️  Build .app
       run: echo 'We need to figure out how to build ios... =\'
      # run: xcodebuild -workspace demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcworkspace -scheme AppsFlyerExample clean archive -allowProvisioningUpdates
+
+  Deploy-To-QA:
+    if: github.ref == 'releases/*/*/*'
+    runs-on: macos-latest
+    - uses: ./.github/workflows/deploy.yml

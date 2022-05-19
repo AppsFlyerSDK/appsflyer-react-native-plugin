@@ -1,15 +1,7 @@
+name: Deploy To QA
+
 on: 
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to deploy'     
-        required: true
-        default: '' 
-        type: choice
-        options:
-          - info
-          - warning
-          - debug 
+  workflow_call:
 
 jobs:
   deploy:
