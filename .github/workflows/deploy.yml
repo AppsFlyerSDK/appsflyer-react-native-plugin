@@ -1,13 +1,11 @@
 name: Deploy To QA
 
-on: 
-  workflow_call:
+on: [workflow_call]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: Staging
     steps:
       - run: |
-          echo "The branch: $BRANCH"
-        env:
-          BRANCH: ${{ github.event.inputs.branch }}
+          echo "The branch: xsxsa"

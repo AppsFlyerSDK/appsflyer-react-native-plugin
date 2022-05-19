@@ -86,6 +86,7 @@ jobs:
 
   Deploy-To-QA:
     if: github.ref == 'releases/*/*/*'
+    needs: [Build-RN-ios, Build-RN-ios, Build-RN-android, Build-Expo-android]
     runs-on: macos-latest
     steps:
     - uses: ./.github/workflows/deploy.yml
