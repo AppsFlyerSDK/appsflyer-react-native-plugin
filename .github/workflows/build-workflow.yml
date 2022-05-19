@@ -20,11 +20,14 @@ jobs:
     - name: Install expo cli
       run: npm install --global expo-cli
     - name: Generate native folders
-      run: expo prebuild
+      run: |
+        cd demos/appsflyer-expo-app
+        expo prebuild
     - name: Build apk
       run: |
-        cd android
-        ./gradlew build
+        cd demos/appsflyer-expo-app/android
+        chmod +x ./gradlew
+        ./gradlew assembleRelease
 
   Build-RN-android:
     runs-on: ubuntu-latest
@@ -37,12 +40,7 @@ jobs:
         yarn add ../../ --save
     - name: Build apk
       run: |
-        pwd
-        cd demos/appsflyer-react-native-app
-        pwd
-        ls
-        cd android
-        ls
+        cd demos/appsflyer-react-native-app/android
         chmod +x ./gradlew
         ./gradlew assembleRelease
 
