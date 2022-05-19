@@ -15,6 +15,7 @@ jobs:
       run: | 
         cd demos/appsflyer-expo-app
         yarn install
+        yarn add expo
         yarn add ../../ --save
     - name: Install expo cli
       run: npm install --global expo-cli
@@ -36,8 +37,8 @@ jobs:
         yarn add ../../ --save
     - name: Build apk
       run: |
-        cd android
-        ./gradlew build
+        chmod +x ./gradlew
+        cd android && ./gradlew assembleRelease
 
   Build-Expo-iOS:
     runs-on: ubuntu-latest
@@ -46,7 +47,7 @@ jobs:
     - name: Install AppsFlyer on an Expo-iOS
       run: | 
         cd demos/appsflyer-expo-app
-        yarn install
+        yarn install --force
         yarn add ../../ --save
     - name: Install expo cli
       run: npm install --global expo-cli
@@ -60,5 +61,5 @@ jobs:
     - name: Install AppsFlyer on a RN-iOS
       run: | 
         cd demos/appsflyer-react-native-app
-        yarn install
+        yarn install --force
         yarn add ../../ --save
