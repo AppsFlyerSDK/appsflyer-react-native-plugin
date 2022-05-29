@@ -5,7 +5,7 @@ on: [workflow_call]
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: Staging
+    # environment: Staging
     steps:
       - run: |
           echo "The branch: xsxsa"
