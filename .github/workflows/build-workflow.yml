@@ -1,4 +1,4 @@
-name: Build React-Native and Expo apps with AppsFlyer plugin
+name: Build apps with AppsFlyer plugin
 #                                          /--> rn --> build android
 #                                         /---> rn --> build ios
 # --> Install plugin on rn and expo apps 
@@ -6,9 +6,8 @@ name: Build React-Native and Expo apps with AppsFlyer plugin
 #                                         \--> expo --> build ios
 
 on:
-  push:
-    branches:
-      - 'releases/*/*/*'
+  [workflow_call]
+  
   pull_request:
     branches:
       - master
@@ -86,11 +85,3 @@ jobs:
     # - name: 🛠️  Build .app
       run: echo 'We need to figure out how to build ios... =\'
      # run: xcodebuild -workspace demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcworkspace -scheme AppsFlyerExample clean archive -allowProvisioningUpdates
-
-  Unit-Tests:
-    uses: ./.github/workflows/unit-tests-workflow.yml
-
-  Deploy-To-QA:
-    if: github.ref == 'releases/*/*/*'
-    needs: [Build-RN-ios, Build-RN-android, Build-Expo-android, Build-Expo-iOS]
-    uses: ./.github/workflows/deploy-QA.yml
