@@ -87,6 +87,9 @@ jobs:
       run: echo 'We need to figure out how to build ios... =\'
      # run: xcodebuild -workspace demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcworkspace -scheme AppsFlyerExample clean archive -allowProvisioningUpdates
 
+  Unit-Tests:
+    uses: ./.github/workflows/unit-tests-workflow.yml
+
   Deploy-To-QA:
     if: github.ref == 'releases/*/*/*'
     needs: [Build-RN-ios, Build-RN-android, Build-Expo-android, Build-Expo-iOS]
