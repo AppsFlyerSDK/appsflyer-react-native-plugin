@@ -20,21 +20,22 @@ jobs:
     - uses: actions/checkout@v3
     - name: 🚀  Install AppsFlyer on an Expo-Android
       run: | 
-        cd demos/appsflyer-expo-app
-        yarn install
-        yarn add expo
-        yarn add ../../ --save
-    - name: 🎩  Install expo cli
-      run: npm install --global expo-cli
-    - name: 📦  Generate native folders
-      run: |
-        cd demos/appsflyer-expo-app
-        expo prebuild
-    - name: 🛠️  Build apk
-      run: |
-        cd demos/appsflyer-expo-app/android
-        chmod +x ./gradlew
-        ./gradlew assembleRelease
+        echo 'We need to figure out how to build ios... =\'
+    #     cd demos/appsflyer-expo-app
+    #     yarn install
+    #     yarn add expo
+    #     yarn add ../../ --save
+    # - name: 🎩  Install expo cli
+    #   run: npm install --global expo-cli
+    # - name: 📦  Generate native folders
+    #   run: |
+    #     cd demos/appsflyer-expo-app
+    #     expo prebuild
+    # - name: 🛠️  Build apk
+    #   run: |
+    #     cd demos/appsflyer-expo-app/android
+    #     chmod +x ./gradlew
+    #     ./gradlew assembleRelease
 
   Build-RN-android:
     runs-on: ubuntu-latest
@@ -42,51 +43,53 @@ jobs:
     - uses: actions/checkout@v3
     - name: 🚀  Install AppsFlyer on a RN-Android
       run: |
-        cd demos/appsflyer-react-native-app
-        yarn install
-        yarn add ../../ --save
-    - name: 🛠️  Build apk
-      run: |
-        cd demos/appsflyer-react-native-app/android
-        chmod +x ./gradlew
-        ./gradlew assembleRelease
+        echo 'We need to figure out how to build ios... =\'
+    #     cd demos/appsflyer-react-native-app
+    #     yarn install
+    #     yarn add ../../ --save
+    # - name: 🛠️  Build apk
+    #   run: |
+    #     cd demos/appsflyer-react-native-app/android
+    #     chmod +x ./gradlew
+    #     ./gradlew assembleRelease
 
   Build-Expo-iOS:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
     - name: 🚀  Install AppsFlyer on an Expo-iOS
-      run: | 
-        cd demos/appsflyer-expo-app
-        yarn install --force
-        yarn add ../../ --save
-    - name: 🎩  Install expo cli
-      run: npm install --global expo-cli
-    - name: 📦  Generate native folders
       run: |
-        cd demos/appsflyer-expo-app
-        expo prebuild
+        echo 'We need to figure out how to build ios... =\'
+    #     cd demos/appsflyer-expo-app
+    #     yarn install --force
+    #     yarn add ../../ --save
+    # - name: 🎩  Install expo cli
+    #   run: npm install --global expo-cli
+    # - name: 📦  Generate native folders
+    #   run: |
+    #     cd demos/appsflyer-expo-app
+    #     expo prebuild
 
   Build-RN-ios:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
     - name: 🚀  Install AppsFlyer on a RN-iOS
-      run: | 
-        cd demos/appsflyer-react-native-app
-        yarn install --force
-        yarn add ../../ --save
-    - name: 📥  Install Dependencies
-      run: |
-        cd demos/appsflyer-react-native-app/ios
-        pod install --repo-update
-    - name: 🛠️  Build .app
+    #   run: | 
+    #     cd demos/appsflyer-react-native-app
+    #     yarn install --force
+    #     yarn add ../../ --save
+    # - name: 📥  Install Dependencies
+    #   run: |
+    #     cd demos/appsflyer-react-native-app/ios
+    #     pod install --repo-update
+    # - name: 🛠️  Build .app
       run: echo 'We need to figure out how to build ios... =\'
      # run: xcodebuild -workspace demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcworkspace -scheme AppsFlyerExample clean archive -allowProvisioningUpdates
 
   Deploy-To-QA:
     if: github.ref == 'releases/*/*/*'
-    needs: [Build-RN-ios, Build-RN-ios, Build-RN-android, Build-Expo-android]
+    needs: [Build-RN-ios, Build-RN-android, Build-Expo-android, Build-Expo-iOS]
     runs-on: macos-latest
     steps:
     - uses: ./.github/workflows/deploy.yml
