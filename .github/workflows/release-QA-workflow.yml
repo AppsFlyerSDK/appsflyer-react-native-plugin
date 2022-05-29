@@ -12,14 +12,14 @@ on:
   pull_request:
     branches:
       - master
-  jobs:
-    Run-Unit-Tests:
-      uses: ./.github/workflows/unit-tests-workflow.yml
+jobs:
+  Run-Unit-Tests:
+    uses: ./.github/workflows/unit-tests-workflow.yml
 
-    Build-Sample-Apps:
-      uses: ./.github/workflows/build-workflow.yml
+  Build-Sample-Apps:
+    uses: ./.github/workflows/build-workflow.yml
 
-    Deploy-To-QA:
-      if: github.ref == 'releases/*/*/*'
-      needs: [Build-Sample-Apps, Run-Unit-Tests]
-      uses: ./.github/workflows/deploy-QA.yml
+  Deploy-To-QA:
+    if: github.ref == 'releases/*/*/*'
+    needs: [Build-Sample-Apps, Run-Unit-Tests]
+    uses: ./.github/workflows/deploy-QA.yml
