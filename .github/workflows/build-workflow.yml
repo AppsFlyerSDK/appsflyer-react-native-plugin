@@ -5,8 +5,8 @@ name: Build apps with AppsFlyer plugin
 #                                        \---> expo --> build android
 #                                         \--> expo --> build ios
 
-on:
-  [workflow_call]
+on: 
+  workflow_call
   pull_request:
     branches:
       - master
