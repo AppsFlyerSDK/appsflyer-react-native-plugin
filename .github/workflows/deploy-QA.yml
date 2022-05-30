@@ -8,4 +8,4 @@ jobs:
     # environment: Staging
     steps:
       - run: |
-          echo "The branch: xsxsa"
+          echo "The branch: ${{github.ref_name}}"
