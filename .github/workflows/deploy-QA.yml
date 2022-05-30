@@ -3,7 +3,7 @@ name: Deploy To QA
 on: [workflow_call]
 
 jobs:
-  update-package.json-version:
+  update-package-json-version:
     runs-on: ubuntu-latest
     # environment: Staging
     steps:
