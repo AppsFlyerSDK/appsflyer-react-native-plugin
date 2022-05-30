@@ -7,8 +7,6 @@ name: Build apps with AppsFlyer plugin
 
 on: 
   workflow_call:
-    branches:
-      - *
   pull_request:
     branches:
       - master

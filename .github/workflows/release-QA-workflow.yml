@@ -3,7 +3,7 @@ name: Pre-release workflow
 on:
   push:
     branches:
-      - 'releases/*/*/*'
+      - releases/*/*/*
   pull_request:
     branches:
       - master
