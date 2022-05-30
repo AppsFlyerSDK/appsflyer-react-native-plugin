@@ -13,7 +13,7 @@ jobs:
   push-to-npm:
     runs-on: ubuntu-latest
     # environment: Staging
-    needs: [update-package.json-version]
+    needs: [update-package-json-version]
     steps:
       - run: |
           echo "here we push to npm"
