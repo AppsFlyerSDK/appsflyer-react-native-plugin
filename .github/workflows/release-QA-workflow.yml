@@ -1,9 +1,4 @@
 name: Pre-release workflow
-#                                          /--> rn --> build android
-#                                         /---> rn --> build ios
-# --> Install plugin on rn and expo apps 
-#                                        \---> expo --> build android
-#                                         \--> expo --> build ios
 
 on:
   push:
