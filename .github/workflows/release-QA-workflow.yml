@@ -15,6 +15,6 @@ jobs:
     uses: ./.github/workflows/build-workflow.yml
 
   Deploy-To-QA:
-    # if: github.ref == 'releases/*/*/*'
+    if: ${{github.ref_name == 'releases/*/*/*'}}
     needs: [Build-Sample-Apps, Run-Unit-Tests]
     uses: ./.github/workflows/deploy-QA.yml
