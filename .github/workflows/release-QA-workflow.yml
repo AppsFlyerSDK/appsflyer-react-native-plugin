@@ -3,10 +3,8 @@ name: Pre-release workflow
 on:
   push:
     branches:
-      - releases/*/*/*
-  pull_request:
-    branches:
-      - master
+      - releases/[0-9].x.x/[0-9].[0-9].x/[0-9].[0-9].[0-9]+-rc[0-9]+
+
 jobs:
   Run-Unit-Tests:
     uses: ./.github/workflows/unit-tests-workflow.yml
@@ -15,7 +13,5 @@ jobs:
     uses: ./.github/workflows/build-workflow.yml
 
   Deploy-To-QA:
-    if: contains(github.ref_name, 'releases/[0-9].x.x/[0-9].[0-9].x/[0-9].[0-9].[0-9]+-rc[0-9]+')
-    # if: ${{github.ref_name == 'releases/[0-9].x.x/[0-9].[0-9].x/[0-9].[0-9].[0-9]+-rc[0-9]+'}}
     needs: [Build-Sample-Apps, Run-Unit-Tests]
     uses: ./.github/workflows/deploy-QA.yml
