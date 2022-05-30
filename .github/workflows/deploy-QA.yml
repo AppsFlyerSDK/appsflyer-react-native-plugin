@@ -3,9 +3,25 @@ name: Deploy To QA
 on: [workflow_call]
 
 jobs:
-  deploy:
+  update-package.json-version:
     runs-on: ubuntu-latest
     # environment: Staging
     steps:
       - run: |
-          echo "The branch: ${{github.ref_name}}"
+          echo "here we run npm version"
+
+  push-to-npm:
+    runs-on: ubuntu-latest
+    # environment: Staging
+    needs: [update-package.json-version]
+    steps:
+      - run: |
+          echo "here we push to npm"
+
+  report-slack:
+    runs-on: ubuntu-latest
+    # environment: Staging
+    needs: [push-to-npm]
+    steps:
+      - run: |
+          echo "here we report slack"
