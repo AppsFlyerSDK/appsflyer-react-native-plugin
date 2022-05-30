@@ -3,7 +3,7 @@ name: Deploy To QA
 on: [workflow_call]
 
 jobs:
-  update-package.json-version:
+  update-package-json-version:
     runs-on: ubuntu-latest
     # environment: Staging
     steps:
@@ -13,7 +13,7 @@ jobs:
   push-to-npm:
     runs-on: ubuntu-latest
     # environment: Staging
-    needs: [update-package.json-version]
+    needs: [update-package-json-version]
     steps:
       - run: |
           echo "here we push to npm"
