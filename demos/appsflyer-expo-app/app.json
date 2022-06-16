@@ -1,0 +1,70 @@
+{
+  "expo": {
+    "name": "expoAppsFlyer",
+    "slug": "expoAppsFlyer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/atom.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "plugins": [
+      [
+        "react-native-appsflyer",
+        {"shouldUseStrictMode": false}
+      ]
+    ],
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "scheme": "amitkremer",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.appsflyer.bundleId",
+      "associatedDomains": ["applinks:appsflyer.onelink.me"]
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.expo.rntest",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "https",
+              "host": "appsflyer.onelink.me",
+              "pathPrefix": "/DvWi"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        },
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "myScheme"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

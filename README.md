@@ -13,8 +13,8 @@
 
 ### <a id="plugin-build-for"> This plugin is built for
 
-- Android AppsFlyer SDK **v6.5.2**
-- iOS AppsFlyer SDK **v6.5.2**
+- Android AppsFlyer SDK **v6.6.1**
+- iOS AppsFlyer SDK **v6.6.1**
 
 ## <a id="breaking-changes"> 	❗❗ Breaking changes when updating to v6.x.x❗❗
 
@@ -45,11 +45,12 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 
  ##  📖 Guides
 - [Adding the SDK to your project](/Docs/Installation.md)
+- [Integrate into an ***Expo*** project](/Docs/Expo.md)
 - [Initializing the SDK](/Docs/BasicIntegration.md)
 - [In-app Events](/Docs/InAppEvents.md)
 - [Deep Linking](/Docs/DeepLink.md)
 - [Advanced APIs](/Docs/AdvancedAPI.md)
 - [Testing the integration](/Docs/Testing.md)
 - [APIs](/Docs/API.md)
-- [React-Native Sample App](/demos/appsflyer-react-native-app)
+- [React-Native Sample App](/demos)
 

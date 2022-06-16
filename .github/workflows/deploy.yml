@@ -7,9 +7,9 @@ on:
         default: '' 
         type: choice
         options:
-        - info
-        - warning
-        - debug 
+          - info
+          - warning
+          - debug 
 
 jobs:
   deploy:
