@@ -641,8 +641,7 @@ Note:<br>
 1. The `parameters` object must be consisted of `string` key and `string` value
 2. Call this api *before* calling `appsFlyer.initSDK()`
 3. For Android, you must provide the following parameters:
-  `pid`,<br>
-  `is_retargeting` most be set to `'true'`
+  `pid`, `is_retargeting` most be set to `'true'`
 
 | parameter       | type     | description                      |
 | ----------      |----------|------------------                |
