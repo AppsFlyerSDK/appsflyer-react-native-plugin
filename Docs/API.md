@@ -25,6 +25,7 @@ The list of available methods for this plugin is described below.
     - [updateServerUninstallToken](#updateServerUninstallToken)
     - [sendPushNotificationData](#sendPushNotificationData)
     - [addPushNotificationDeepLinkPath](#addPushNotificationDeepLinkPath)
+    - [appendParametersToDeepLinkingURL](#appendParametersToDeepLinkingURL)
 - [Android Only APIs](#androidOnly)
     - [setCollectAndroidID](#setCollectAndroidID)
     - [setCollectIMEI](#setCollectIMEI)
@@ -632,6 +633,24 @@ This call matches the following payload structure:
 }
 ```
 
+---
+##### <a id="appendParametersToDeepLinkingURL"> **`appendParametersToDeepLinkingURL(contains, parameters): void`**
+
+Matches URLs that contain `contains` as a substring and appends query parameters to them. In case the URL does not match, parameters are not appended to it.<br>
+Note:<br>
+1. The `parameters` object must be consists of `string` key and `string` value
+2. Call this api *before* calling `appsFlyer.initSDK()`
+
+| parameter       | type     | description                      |
+| ----------      |----------|------------------                |
+| contains        | string   | The string to check in URL |
+| parameters      | object   | Parameters to append to the deeplink url after it passed validation |
+
+*Example:*
+
+```javascript
+appsFlyer.appendParametersToDeepLinkingURL('substring-of-url', {param1: 'value'});
+```
 
 ## <a id="androidOnly"> Android Only APIs
 
