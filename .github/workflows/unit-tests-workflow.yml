@@ -8,11 +8,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install modules
-      env:
-        JIRA_TOKEN: ${{ secrets.CI_JIRA_TOKEN }}
-        BRANCH_NAME: ${{github.ref_name}}
-      run: | 
-        echo "$JIRA_TOKEN and $BRANCH_NAME"
+      run:
         npm install
     - name: Run tests
       run: npm run test
+    - name: print
+      env:
+        JIRA_TOKEN: ${{ secrets.CI_JIRA_TOKEN }}
+        BRANCH_NAME: ${{github.ref_name}}
+      run: 
+        echo "$JIRA_TOKEN and $BRANCH_NAME"
