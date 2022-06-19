@@ -638,7 +638,7 @@ This call matches the following payload structure:
 
 Matches URLs that contain `contains` as a substring and appends query parameters to them. In case the URL does not match, parameters are not appended to it.<br>
 Note:<br>
-1. The `parameters` object must be consists of `string` key and `string` value
+1. The `parameters` object must be consisted of `string` key and `string` value
 2. Call this api *before* calling `appsFlyer.initSDK()`
 
 | parameter       | type     | description                      |
