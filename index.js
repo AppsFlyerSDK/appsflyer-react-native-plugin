@@ -593,6 +593,17 @@ appsFlyer.setPartnerData = (partnerId, partnerData) => {
 	}
 };
 
+/**
+ * Matches URLs that contain contains as a substring and appends query parameters to them. In case the URL does not match, parameters are not appended to it.
+ * @param contains: The string to check in URL.
+ * @param parameters: Parameters to append to the deeplink url after it passed validation.
+ */
+appsFlyer.appendParametersToDeepLinkingURL = (contains, parameters) => {
+	if (typeof contains === 'string' && typeof parameters === 'object') {
+		return RNAppsFlyer.appendParametersToDeepLinkingURL(contains, parameters);
+	}
+};
+
 function AFParseJSONException(_message, _data) {
 	this.message = _message;
 	this.data = _data;

@@ -141,6 +141,7 @@ declare module "react-native-appsflyer" {
         disableAdvertisingIdentifier(isDisable: boolean): void
         setSharingFilterForPartners(partners: string[]): void
         setPartnerData(partnerId: string, partnerData: object): void
+        appendParametersToDeepLinkingURL(contains: string, parameters: object): void
 
         /**
          * For iOS Only

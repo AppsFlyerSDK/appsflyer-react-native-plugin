@@ -539,4 +539,8 @@ RCT_EXPORT_METHOD(setCurrentDeviceLanguage: (NSString *)language ) {
 RCT_EXPORT_METHOD(setPartnerData:(NSString *)partnerId partnerData:(NSDictionary *)partnerData) {
     [[AppsFlyerLib shared] setPartnerDataWithPartnerId:partnerId partnerInfo:partnerData];
 }
+
+RCT_EXPORT_METHOD(appendParametersToDeepLinkingURL:(NSString *)contains partnerData:(NSDictionary *)parameters) {
+    [[AppsFlyerLib shared] appendParametersToDeepLinkingURLWithString:contains parameters:parameters];
+}
 @end
