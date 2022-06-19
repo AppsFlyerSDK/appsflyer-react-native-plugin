@@ -641,7 +641,7 @@ Note:<br>
 1. The `parameters` object must be consisted of `string` key and `string` value
 2. Call this api *before* calling `appsFlyer.initSDK()`
 3. For Android, you must provide the following parameters:
-  `pid`
+  `pid`,<br>
   `is_retargeting` most be set to `'true'`
 
 | parameter       | type     | description                      |
@@ -652,7 +652,7 @@ Note:<br>
 *Example:*
 
 ```javascript
-appsFlyer.appendParametersToDeepLinkingURL('substring-of-url',{param1: 'value',pid: 'value2',is_retargeting: 'true'});
+appsFlyer.appendParametersToDeepLinkingURL('substring-of-url', {param1: 'value', pid: 'value2', is_retargeting: 'true'});
 ```
 
 ## <a id="androidOnly"> Android Only APIs
