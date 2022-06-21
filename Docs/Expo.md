@@ -1,7 +1,7 @@
 # 🚀 Integrate AppsFlyer into an Expo managed project
 1. Install `expo-dev-client`:
 ```
-expo install expo-dev-clients
+expo install expo-dev-client
 ```
 2. Install react-native-appsflyer:
 ```

@@ -757,6 +757,12 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void appendParametersToDeepLinkingURL(String contains, ReadableMap parameters) {
+        Map parametersAsMap = RNUtil.toMap(parameters);
+        AppsFlyerLib.getInstance().appendParametersToDeepLinkingURL(contains, parametersAsMap);
+    }
+    
+    @ReactMethod
     public void addListener(String eventName) {
       // Keep: Required for RN built in Event Emitter Calls.
     }
