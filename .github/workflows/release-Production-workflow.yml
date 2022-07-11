@@ -9,6 +9,8 @@ on:
     paths-ignore:
       - '**.md'
       - '**.yml'
+      - 'demoes/**'
+      - 'Docs/**'
 jobs:
   Deploy-To-Production:
     if: github.event.pull_request.merged == true
