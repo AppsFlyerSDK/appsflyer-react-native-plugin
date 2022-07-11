@@ -16,5 +16,5 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install modules
       run: npm install
-    - name: Run tests
-      run: echo 'npm run test'
+    - name: Run jest tests
+      run: npm run test
