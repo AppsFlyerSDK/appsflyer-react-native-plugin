@@ -1,3 +1,8 @@
+## 6.6.1
+Release date: *2022-June-21*
+
+- React Native > add support for the appendParametersToDeepLinkingURL API
+
 ## 6.6.0
 Release date: *2022-May-18*
 
