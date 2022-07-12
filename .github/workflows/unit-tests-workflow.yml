@@ -1,0 +1,20 @@
+name: Tests
+
+on: 
+  pull_request:
+  push:
+    branches-ignore:
+      - 'releases/**'
+      - 'master'
+  workflow_call:
+
+jobs:
+  Run-unit-tests:
+    if: ${{ startsWith(github.head_ref, 'releases/') == false }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install modules
+      run: npm install
+    - name: Run jest tests
+      run: npm run test
