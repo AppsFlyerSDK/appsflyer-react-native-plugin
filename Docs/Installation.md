@@ -7,6 +7,7 @@
   - [iOS](#manual-installation-ios)
   - [Android](#manual-installation-android)
 - Add strict-mode for App-kids
+- The AD_ID permission for android apps
 
 ## <a id="Installation-with-autolinking"> Installation (with [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md))
 
@@ -171,3 +172,7 @@ use_frameworks!
 ```
 In the `ios` folder of your `root` project Run `pod install`
 
+## The AD_ID permission for android apps
+In early 2022, Google announced a change to the behavior of Google Play Services and fetching of the Android Advertising ID. According to the [announcement](https://support.google.com/googleplay/android-developer/answer/6048248?hl=en), apps targeting Android 13 (API 33) and above must declare a Google Play services normal permission in their AndroidManifest.xml file in order to get access to the device’s Advertising ID.
+
+Starting V6.8.0, the SDK adds the AD_ID permission automatically. You can read more [here](https://dev.appsflyer.com/hc/docs/install-android-sdk#the-ad_id-permission)
