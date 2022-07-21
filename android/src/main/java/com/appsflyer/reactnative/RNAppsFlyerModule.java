@@ -761,6 +761,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         Map parametersAsMap = RNUtil.toMap(parameters);
         AppsFlyerLib.getInstance().appendParametersToDeepLinkingURL(contains, parametersAsMap);
     }
+
+    @ReactMethod
+    public void setDisableNetworkData(Boolean disabled) {
+        AppsFlyerLib.getInstance().setDisableNetworkData(disabled);
+    }
     
     @ReactMethod
     public void addListener(String eventName) {
