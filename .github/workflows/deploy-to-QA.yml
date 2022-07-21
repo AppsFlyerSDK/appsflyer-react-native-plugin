@@ -24,7 +24,7 @@ jobs:
         run: |
           fixed_version_found=false
           plugin_version=$(echo "$BRANCH_NAME" | grep -Eo '[0-9].[0-9].[0-9]+')
-          jira_fixed_version="React-Native SDK v$plugin_version"
+          jira_fixed_version="React-Native( |-)SDK v$plugin_version"
           # echo "PLUGIN_VERSION=$plugin_version" >> $GITHUB_ENV
           echo "JIRA_FIXED_VERSION=$jira_fixed_version" >> $GITHUB_ENV
           chmod +x .github/workflows/scripts/releaseNotesGenerator.sh
