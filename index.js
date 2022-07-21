@@ -604,6 +604,10 @@ appsFlyer.appendParametersToDeepLinkingURL = (contains, parameters) => {
 	}
 };
 
+appsFlyer.setDisableNetworkData = (disable) => {
+	return RNAppsFlyer.setDisableNetworkData(disable);
+};
+
 function AFParseJSONException(_message, _data) {
 	this.message = _message;
 	this.data = _data;
