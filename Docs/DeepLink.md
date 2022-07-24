@@ -95,7 +95,7 @@ The flow works as follows:
 3. The SDK triggers the onDeepLink listener, and passes the deep link result object to the user.
 4. The onDeepLink listener uses the deep link result object that includes the deep_link_value and other parameters to create the personalized experience for the users, which is the main goal of OneLink.
 
-> Check out the Unified Deep Linking docs for [Android](https://dev.appsflyer.com/docs/android-unified-deep-linking) and [iOS](https://dev.appsflyer.com/docs/ios-unified-deep-linking).
+> Check out the Unified Deep Linking docs for [Android](https://dev.appsflyer.com/hc/docs/unified-deep-linking-udl) and [iOS](https://dev.appsflyer.com/hc/docs/unified-deep-linking-udl-1).
 
 Considerations:
 

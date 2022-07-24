@@ -156,6 +156,7 @@ declare module "react-native-appsflyer" {
          * */
         setCollectIMEI(isCollect: boolean, successC?: SuccessCB): void
         setCollectAndroidID(isCollect: boolean, successC?: SuccessCB): void
+        setDisableNetworkData(disable: boolean): void
     };
 
     export default appsFlyer;

@@ -7,6 +7,7 @@
   - [iOS](#manual-installation-ios)
   - [Android](#manual-installation-android)
 - Add strict-mode for App-kids
+- The AD_ID permission for android apps
 
 ## <a id="Installation-with-autolinking"> Installation (with [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md))
 
@@ -171,3 +172,8 @@ use_frameworks!
 ```
 In the `ios` folder of your `root` project Run `pod install`
 
+## The AD_ID permission for android apps
+In v6.8.0 of the AppsFlyer SDK, we added the normal permission com.google.android.gms.permission.AD_ID to the SDK's AndroidManifest, 
+to allow the SDK to collect the Android Advertising ID on apps targeting API 33.
+If your app is targeting children, you need to revoke this permission to comply with Google's Data policy.
+You can read more about it here [here](https://dev.appsflyer.com/hc/docs/install-android-sdk#the-ad_id-permission)
