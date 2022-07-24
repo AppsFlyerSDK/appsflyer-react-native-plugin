@@ -29,6 +29,7 @@ The list of available methods for this plugin is described below.
 - [Android Only APIs](#androidOnly)
     - [setCollectAndroidID](#setCollectAndroidID)
     - [setCollectIMEI](#setCollectIMEI)
+    - [setDisableNetworkData](#setDisableNetworkData)
 - [iOS Only APIs](#iOSOnly)
     - [disableCollectASA](#disableCollectASA)
     - [setUseReceiptValidationSandbox](#setUseReceiptValidationSandbox)
@@ -699,6 +700,23 @@ if (Platform.OS == 'android') {
 appsFlyer.setCollectIMEI(false, (res) => {
    //...
 });
+}
+```
+
+##### <a id="setDisableNetworkData"> **`setDisableNetworkData(disable)`**
+
+Use to opt-out of collecting the network operator name (carrier) and sim operator name from the device.
+
+| parameter       | type     | description               |
+| ----------      |----------|------------------         |
+| disable         | boolean  | Defaults to false.        |
+
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'android') {
+appsFlyer.setDisableNetworkData(true);
 }
 ```
 
