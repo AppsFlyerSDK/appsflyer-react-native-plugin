@@ -1,3 +1,8 @@
+## 6.8.0
+ Release date: *2022-07-24*
+
+- Update React Native Plugin to v6.8.0
+
 ## 6.6.1
 Release date: *2022-June-21*
 
