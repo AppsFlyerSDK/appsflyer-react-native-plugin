@@ -38,7 +38,7 @@ jobs:
       - name: Update CHANGELOG.md
         env:
           JIRA_TOKEN: ${{ secrets.CI_JIRA_TOKEN }}
-          JIRA_FIXED_VERSION: "React-Native SDK v${{env.PLUGIN_VERSION}}"
+          JIRA_FIXED_VERSION: "React Native SDK v${{env.PLUGIN_VERSION}}"
         run: |
           chmod +x .github/workflows/scripts/releaseNotesGenerator.sh
           .github/workflows/scripts/releaseNotesGenerator.sh $JIRA_TOKEN "$JIRA_FIXED_VERSION"
