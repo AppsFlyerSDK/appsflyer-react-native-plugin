@@ -1,5 +1,5 @@
 const withAppsFlyerIos = require('./withAppsFlyerIos');
-module.exports = function withAppsFlyer(config, { shouldUseStrictMode = false }) {
-	config = withAppsFlyerIos(config, shouldUseStrictMode);
+module.exports = function withAppsFlyer(config, strictModeConfig) {
+	config = withAppsFlyerIos(config, strictModeConfig?.shouldUseStrictMode === true);
 	return config;
 };
