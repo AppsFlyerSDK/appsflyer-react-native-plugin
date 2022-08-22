@@ -66,6 +66,7 @@ The dev key is required for all apps and the appID is required only for iOS.<br/
 |onInstallConversionDataListener| Set listener for [GCD](https://dev.appsflyer.com/hc/docs/conversion-data) response (Optional. default=true) |
 |onDeepLinkListener| Set listener for [UDL](https://dev.appsflyer.com/hc/docs/unified-deep-linking-udl) response (Optional. default=false) |
 |timeToWaitForATTUserAuthorization| Waits for request user authorization to access app-related data. please read more [Here](https://dev.appsflyer.com/hc/docs/ios-sdk-reference-appsflyerlib#waitforattuserauthorization) |
+|manualStart| Android only! prevents from the sdk to send acctual launch after use `appsFlyer.initSdk(...)`. when using this property you MUST use the api `appsFlyer.startSdk()`. read more [here](#startSdk). (Optional, default=false) |
 *Example:*
 
 ```javascript
@@ -81,6 +82,7 @@ appsFlyer.initSdk(
     onInstallConversionDataListener: false, //Optional
     onDeepLinkListener: true, //Optional
     timeToWaitForATTUserAuthorization: 10 //for iOS 14.5
+    manualStart: true, //Optional, take effect only on Android
   },
   (res) => {
     console.log(res);
@@ -723,8 +725,8 @@ appsFlyer.setDisableNetworkData(true);
 
 ##### <a id="startSdk"> **`startSdk()`**
 
-In version 6.9.0 of the react-native-appslfyer SDK we added the option of spliting between [init](https://dev.appsflyer.com/hc/docs/android-sdk-reference-appsflyerlib#init) and [start](https://dev.appsflyer.com/hc/docs/android-sdk-reference-appsflyerlib#start) of the *android* sdk. You just need to add the property `manualStart: true` to the init object, and later call `appsFlyer.startSdk()` whenever you descide. If this property is set to `false` or doesn't exist the sdk will start after calling `appsFlyer.initSdk(...)`<br>
-`manualStart` property will no effect the behavior of the iOS app! for iOS the sdk will start after the call of `appsFlyer.initSdk(...)`
+In version 6.9.0 of the react-native-appslfyer SDK we added the option of spliting between [init](https://dev.appsflyer.com/hc/docs/android-sdk-reference-appsflyerlib#init) and [start](https://dev.appsflyer.com/hc/docs/android-sdk-reference-appsflyerlib#start) of the *Android* sdk. You just need to add the property `manualStart: true` to the init object, and later call `appsFlyer.startSdk()` whenever you descide. If this property is set to `false` or doesn't exist the sdk will start after calling `appsFlyer.initSdk(...)`<br>
+`manualStart` property will not effect the behavior of the iOS app! for iOS the sdk will start after the call of `appsFlyer.initSdk(...)`
 
 *Example:*
 ```javascript
