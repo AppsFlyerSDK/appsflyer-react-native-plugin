@@ -30,6 +30,8 @@ The list of available methods for this plugin is described below.
     - [setCollectAndroidID](#setCollectAndroidID)
     - [setCollectIMEI](#setCollectIMEI)
     - [setDisableNetworkData](#setDisableNetworkData)
+    - [startSdk](#startSdk)
+    - [performOnDeepLinking](#performOnDeepLinking)
 - [iOS Only APIs](#iOSOnly)
     - [disableCollectASA](#disableCollectASA)
     - [setUseReceiptValidationSandbox](#setUseReceiptValidationSandbox)
@@ -713,13 +715,98 @@ Use to opt-out of collecting the network operator name (carrier) and sim operato
 
 
 *Example:*
-
 ```javascript
 if (Platform.OS == 'android') {
 appsFlyer.setDisableNetworkData(true);
 }
 ```
 
+##### <a id="startSdk"> **`startSdk()`**
+
+In version 6.9.0 of the react-native-appslfyer SDK we added the option of spliting between [init](https://dev.appsflyer.com/hc/docs/android-sdk-reference-appsflyerlib#init) and [start](https://dev.appsflyer.com/hc/docs/android-sdk-reference-appsflyerlib#start) of the *android* sdk. You just need to add the property `manualStart: true` to the init object, and later call `appsFlyer.startSdk()` whenever you descide. If this property is set to `false` or doesn't exist the sdk will start after calling `appsFlyer.initSdk(...)`<br>
+`manualStart` property will no effect the behavior of the iOS app! for iOS the sdk will start after the call of `appsFlyer.initSdk(...)`
+
+*Example:*
+```javascript
+const option = {
+  isDebug: true,
+  devKey: 'UsxXxXxed',
+  appId: '75xXxXxXxXx11',
+  onInstallConversionDataListener: true,
+  onDeepLinkListener: true,
+  timeToWaitForATTUserAuthorization: 5,
+  manualStart: true, // <--- for manual start.
+};
+
+appsFlyer.initSdk(
+  option,
+  () => {
+    if (!option.manualStart || Platform.OS != 'android') {
+      console.warn('AppsFlyer SDK started!');
+    } else {
+      console.warn('AppsFlyer SDK init, didn\'t send launch yet');
+      }
+    },
+      err => {
+        // handle error
+      },
+    );
+    //...
+    // app flow
+    //...
+if (Platform.OS == 'android') {
+  appsFlyer.startSdk(); // <--- Here we send launch
+}
+```
+
+##### <a id="performOnDeepLinking"> **`performOnDeepLinking()`**
+
+Enables manual triggering of deep link resolution. This method allows apps that are delaying the call to `appsFlyer.startSdk()` to resolve deep links before the SDK starts.
+
+*Example:*
+```javascript
+// Let's say we want the resolve a deeplink and get the deeplink params when the user clicks on it but delay the actual 'start' of the sdk (not sending launch to appsflyer). 
+
+const option = {
+  isDebug: true,
+  devKey: 'UsxXxXxed',
+  appId: '75xXxXxXxXx11',
+  onInstallConversionDataListener: true,
+  onDeepLinkListener: true,
+  manualStart: true, // <--- for manual start.
+};
+
+const onDeepLink = appsFlyer.onDeepLink(res => {
+  // here we will get the deeplink params after resolving it.
+  // more flow...
+});
+
+appsFlyer.initSdk(
+  option,
+  () => {
+    if (!option.manualStart || Platform.OS != 'android') {
+      console.warn('AppsFlyer SDK started!');
+    } else {
+      console.warn('AppsFlyer SDK init, didn\'t send launch yet');
+      }
+    },
+  () => {},
+);
+/**
+using `appsFlyer.performOnDeepLinking()` will trigger `appsFlyer.onDeepLink` callback every time the app is opened. To deal with it you have 2 options:
+1. use a flag that indicates if the app was opened from deeplink(isAppOpenedFromDeeplink in this example).
+2. inside `appsFlyer.onDeepLink` callback first check if `res.deepLinkStatus` is equal to "FOUND" and then continue with the params extraction.
+**/
+if (Platform.OS == 'android' && isAppOpenedFromDeeplink) {
+  appsFlyer.performOnDeepLinking();
+}
+
+// more app flow...
+
+if (Platform.OS == 'android') {
+  appsFlyer.startSdk(); // <--- Here we send launch
+}
+```
 ## <a id="iOSOnly"> iOS Only APIs
 
 ##### <a id="disableCollectASA"> **`disableCollectASA(shouldDisable)`**
