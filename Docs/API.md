@@ -66,7 +66,7 @@ The dev key is required for all apps and the appID is required only for iOS.<br/
 |onInstallConversionDataListener| Set listener for [GCD](https://dev.appsflyer.com/hc/docs/conversion-data) response (Optional. default=true) |
 |onDeepLinkListener| Set listener for [UDL](https://dev.appsflyer.com/hc/docs/unified-deep-linking-udl) response (Optional. default=false) |
 |timeToWaitForATTUserAuthorization| Waits for request user authorization to access app-related data. please read more [Here](https://dev.appsflyer.com/hc/docs/ios-sdk-reference-appsflyerlib#waitforattuserauthorization) |
-|manualStart| Android only! prevents from the sdk to send actual launch after use `appsFlyer.initSdk(...)`. when using this property you MUST use the api `appsFlyer.startSdk()`. read more [here](#startSdk). (Optional, default=false) |
+|manualStart| prevents from the sdk to send actual launch after use `appsFlyer.initSdk(...)`. when using this property you MUST use the api `appsFlyer.startSdk()`. read more [here](#startSdk). (Optional, default=false) |
 *Example:*
 
 ```javascript
@@ -82,7 +82,7 @@ appsFlyer.initSdk(
     onInstallConversionDataListener: false, //Optional
     onDeepLinkListener: true, //Optional
     timeToWaitForATTUserAuthorization: 10, //for iOS 14.5
-    manualStart: true, //Optional, take effect only on Android
+    manualStart: true, //Optional
   },
   (res) => {
     console.log(res);
