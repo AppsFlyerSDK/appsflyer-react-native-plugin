@@ -66,7 +66,7 @@ The dev key is required for all apps and the appID is required only for iOS.<br/
 |onInstallConversionDataListener| Set listener for [GCD](https://dev.appsflyer.com/hc/docs/conversion-data) response (Optional. default=true) |
 |onDeepLinkListener| Set listener for [UDL](https://dev.appsflyer.com/hc/docs/unified-deep-linking-udl) response (Optional. default=false) |
 |timeToWaitForATTUserAuthorization| Waits for request user authorization to access app-related data. please read more [Here](https://dev.appsflyer.com/hc/docs/ios-sdk-reference-appsflyerlib#waitforattuserauthorization) |
-|manualStart| prevents from the sdk to send actual launch after use `appsFlyer.initSdk(...)`. when using this property you MUST use the api `appsFlyer.startSdk()`. read more [here](#startSdk). (Optional, default=false) |
+|manualStart| Prevents from the SDK from sending the launch request after using appsFlyer.initSdk(...). When using this property, the apps needs to manually trigger the appsFlyer.startSdk() API to report the app launch. read more [here](#startSdk). (Optional, default=false) |
 *Example:*
 
 ```javascript
@@ -97,7 +97,7 @@ appsFlyer.initSdk(
 
 ##### <a id="startSdk"> **`startSdk()`**
 
-In version 6.9.0 of the react-native-appslfyer SDK we added the option of spliting between the initialization stage and start stage. You just need to add the property `manualStart: true` to the init object, and later call `appsFlyer.startSdk()` whenever you descide. If this property is set to `false` or doesn't exist the sdk will start after calling `appsFlyer.initSdk(...)`.
+In version 6.9.0 of the react-native-appslfyer SDK we added the option of splitting between the initialization stage and start stage. All you need to do is add the property manualStart: true to the init object, and later call appsFlyer.startSdk() whenever you decide. If this property is set to false or doesn’t exist, the sdk will start after calling `appsFlyer.initSdk(...)`.
 
 *Example:*
 ```javascript
@@ -763,7 +763,8 @@ appsFlyer.setDisableNetworkData(true);
 
 ##### <a id="performOnDeepLinking"> **`performOnDeepLinking()`**
 
-Enables manual triggering of deep link resolution. This method allows apps that are delaying the call to `appsFlyer.startSdk()` to resolve deep links before the SDK starts.
+Enables manual triggering of deep link resolution. This method allows apps that are delaying the call to `appsFlyer.startSdk()` to resolve deep links before the SDK starts.<br>
+Note:<br>This API will trigger the `appsFlyer.onDeepLink` callback. In the following example, we check if `res.deepLinkStatus` is equal to “FOUND” inside `appsFlyer.onDeepLink` callback to extract the deeplink parameters.
 
 *Example:*
 ```javascript
@@ -779,8 +780,10 @@ const option = {
 };
 
 const onDeepLink = appsFlyer.onDeepLink(res => {
-  // here we will get the deeplink params after resolving it.
-  // more flow...
+  if (res.deepLinkStatus == 'FOUND') {
+      // here we will get the deeplink params after resolving it.
+      // more flow...
+  }
 });
 
 appsFlyer.initSdk(
@@ -794,12 +797,8 @@ appsFlyer.initSdk(
     },
   () => {},
 );
-/**
-using `appsFlyer.performOnDeepLinking()` will trigger `appsFlyer.onDeepLink` callback every time the app is opened. To deal with it you have 2 options:
-1. use a flag that indicates if the app was opened from deeplink(isAppOpenedFromDeeplink in this example).
-2. inside `appsFlyer.onDeepLink` callback first check if `res.deepLinkStatus` is equal to "FOUND" and then continue with the params extraction.
-**/
-if (Platform.OS == 'android' && isAppOpenedFromDeeplink) {
+
+if (Platform.OS == 'android') {
   appsFlyer.performOnDeepLinking();
 }
 
