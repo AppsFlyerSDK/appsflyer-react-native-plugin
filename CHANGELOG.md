@@ -1,3 +1,8 @@
+## 6.8.2
+ Release date: *2022-08-30*
+
+- React Native > update android native SDK to v6.8.2
+
 ## 6.8.0
  Release date: *2022-07-24*
 
