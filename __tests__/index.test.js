@@ -205,6 +205,36 @@ describe("Test appsFlyer API's", () => {
 		appsFlyer.sendPushNotificationData({ foo: 'bar' });
 		expect(RNAppsFlyer.sendPushNotificationData).toHaveBeenCalledTimes(1);
 	});
+
+	test('it calls appsFlyer.appendParametersToDeepLinkingURL(dummy-url, foo)', () => {
+		appsFlyer.appendParametersToDeepLinkingURL('dummy-url', 'foo');
+		expect(RNAppsFlyer.appendParametersToDeepLinkingURL).toHaveBeenCalledTimes(0);
+	});
+
+	test('it calls appsFlyer.appendParametersToDeepLinkingURL(dummy-url, boolean)', () => {
+		appsFlyer.appendParametersToDeepLinkingURL('dummy-url', true);
+		expect(RNAppsFlyer.appendParametersToDeepLinkingURL).toHaveBeenCalledTimes(0);
+	});
+
+	test('it calls appsFlyer.appendParametersToDeepLinkingURL(dummy-url, {})', () => {
+		appsFlyer.appendParametersToDeepLinkingURL('dummy-url', {});
+		expect(RNAppsFlyer.appendParametersToDeepLinkingURL).toHaveBeenCalledTimes(1);
+	});
+
+	test('it calls appsFlyer.setDisableNetworkData(true)', () => {
+		appsFlyer.setDisableNetworkData(true);
+		expect(RNAppsFlyer.setDisableNetworkData).toHaveBeenCalledTimes(1);
+	});
+
+	test('it calls appsFlyer.startSdk()', () => {
+		appsFlyer.startSdk();
+		expect(RNAppsFlyer.startSdk).toHaveBeenCalledTimes(1);
+	});
+
+	test('it calls appsFlyer.performOnDeepLinking()', () => {
+		appsFlyer.performOnDeepLinking();
+		expect(RNAppsFlyer.performOnDeepLinking).toHaveBeenCalledTimes(1);
+	});
 });
 
 describe('Test native event emitter', () => {

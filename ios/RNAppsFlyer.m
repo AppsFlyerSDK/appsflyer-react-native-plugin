@@ -38,6 +38,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
     BOOL isDebug = NO;
     BOOL isConversionData = YES;
     BOOL isDeepLinking = NO;
+    BOOL isManualStart = NO;
     NSNumber* interval = 0;
 
     if (![initSdkOptions isKindOfClass:[NSNull class]]) {
@@ -48,6 +49,8 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         devKey = (NSString*)[initSdkOptions objectForKey: afDevKey];
         appId = (NSString*)[initSdkOptions objectForKey: afAppId];
         interval = (NSNumber*)[initSdkOptions objectForKey: timeToWaitForATTUserAuthorization];
+        isManualStart = [[initSdkOptions objectForKey:@"manualStart"] boolValue];
+        [self setIsManualStart:isManualStart];
 
         isDebugValue = [initSdkOptions objectForKey: afIsDebug];
         if ([isDebugValue isKindOfClass:[NSNumber class]]) {
@@ -103,9 +106,16 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
                                                  selector:@selector(sendLaunch:)
                                                      name:UIApplicationDidBecomeActiveNotification
                                                    object:nil];
-        [[AppsFlyerLib shared] start];
+        if (!isManualStart) {
+            [[AppsFlyerLib shared] start];
+        }
         return nil;
     }
+}
+
+RCT_EXPORT_METHOD(startSdk) {
+    [self setIsManualStart:NO];
+    [[AppsFlyerLib shared] start];
 }
 
 RCT_EXPORT_METHOD(logEvent: (NSString *)eventName eventValues:(NSDictionary *)eventValues
@@ -213,7 +223,9 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 
 -(void)sendLaunch:(UIApplication *)application {
     [[NSNotificationCenter defaultCenter] postNotificationName:RNAFBridgeInitializedNotification object:self];
-    [[AppsFlyerLib shared] start];
+    if (![self isManualStart]) {
+        [[AppsFlyerLib shared] start];
+    }
 }
 
 RCT_EXPORT_METHOD(setAdditionalData: (NSDictionary *)additionalData callback:(RCTResponseSenderBlock)callback) {

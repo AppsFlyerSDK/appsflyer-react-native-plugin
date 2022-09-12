@@ -4,6 +4,7 @@
 The list of available methods for this plugin is described below.
 - [Android & iOS APIs](#allAPI)
     - [initSDK](#initSDK)
+    - [startSdk](#startSdk)
     - [logEvent](#logEvent)
     - [setCustomerUserId](#setCustomerUserId)
     - [stop](#stop)
@@ -30,6 +31,7 @@ The list of available methods for this plugin is described below.
     - [setCollectAndroidID](#setCollectAndroidID)
     - [setCollectIMEI](#setCollectIMEI)
     - [setDisableNetworkData](#setDisableNetworkData)
+    - [performOnDeepLinking](#performOnDeepLinking)
 - [iOS Only APIs](#iOSOnly)
     - [disableCollectASA](#disableCollectASA)
     - [setUseReceiptValidationSandbox](#setUseReceiptValidationSandbox)
@@ -64,6 +66,7 @@ The dev key is required for all apps and the appID is required only for iOS.<br/
 |onInstallConversionDataListener| Set listener for [GCD](https://dev.appsflyer.com/hc/docs/conversion-data) response (Optional. default=true) |
 |onDeepLinkListener| Set listener for [UDL](https://dev.appsflyer.com/hc/docs/unified-deep-linking-udl) response (Optional. default=false) |
 |timeToWaitForATTUserAuthorization| Waits for request user authorization to access app-related data. please read more [Here](https://dev.appsflyer.com/hc/docs/ios-sdk-reference-appsflyerlib#waitforattuserauthorization) |
+|manualStart| Prevents from the SDK from sending the launch request after using appsFlyer.initSdk(...). When using this property, the apps needs to manually trigger the appsFlyer.startSdk() API to report the app launch. read more [here](#startSdk). (Optional, default=false) |
 *Example:*
 
 ```javascript
@@ -78,7 +81,8 @@ appsFlyer.initSdk(
     appId: '41*****44',
     onInstallConversionDataListener: false, //Optional
     onDeepLinkListener: true, //Optional
-    timeToWaitForATTUserAuthorization: 10 //for iOS 14.5
+    timeToWaitForATTUserAuthorization: 10, //for iOS 14.5
+    manualStart: true, //Optional
   },
   (res) => {
     console.log(res);
@@ -87,6 +91,44 @@ appsFlyer.initSdk(
     console.error(err);
   }
 );
+```
+
+---
+
+##### <a id="startSdk"> **`startSdk()`**
+
+In version 6.9.0 of the react-native-appslfyer SDK we added the option of splitting between the initialization stage and start stage. All you need to do is add the property manualStart: true to the init object, and later call appsFlyer.startSdk() whenever you decide. If this property is set to false or doesn’t exist, the sdk will start after calling `appsFlyer.initSdk(...)`.
+
+*Example:*
+```javascript
+const option = {
+  isDebug: true,
+  devKey: 'UsxXxXxed',
+  appId: '75xXxXxXxXx11',
+  onInstallConversionDataListener: true,
+  onDeepLinkListener: true,
+  timeToWaitForATTUserAuthorization: 5,
+  manualStart: true, // <--- for manual start.
+};
+
+appsFlyer.initSdk(
+  option,
+  () => {
+    if (!option.manualStart) {
+      console.warn('AppsFlyer SDK started!');
+    } else {
+      console.warn('AppsFlyer SDK init, didn\'t send launch yet');
+      }
+    },
+      err => {
+        // handle error
+      },
+    );
+    //...
+    // app flow
+    //...
+
+  appsFlyer.startSdk(); // <--- Here we send launch
 ```
 ---
 
@@ -713,13 +755,57 @@ Use to opt-out of collecting the network operator name (carrier) and sim operato
 
 
 *Example:*
-
 ```javascript
 if (Platform.OS == 'android') {
 appsFlyer.setDisableNetworkData(true);
 }
 ```
 
+##### <a id="performOnDeepLinking"> **`performOnDeepLinking()`**
+
+Enables manual triggering of deep link resolution. This method allows apps that are delaying the call to `appsFlyer.startSdk()` to resolve deep links before the SDK starts.<br>
+Note:<br>This API will trigger the `appsFlyer.onDeepLink` callback. In the following example, we check if `res.deepLinkStatus` is equal to “FOUND” inside `appsFlyer.onDeepLink` callback to extract the deeplink parameters.
+
+*Example:*
+```javascript
+// Let's say we want the resolve a deeplink and get the deeplink params when the user clicks on it but delay the actual 'start' of the sdk (not sending launch to appsflyer). 
+
+const option = {
+  isDebug: true,
+  devKey: 'UsxXxXxed',
+  appId: '75xXxXxXxXx11',
+  onInstallConversionDataListener: true,
+  onDeepLinkListener: true,
+  manualStart: true, // <--- for manual start.
+};
+
+const onDeepLink = appsFlyer.onDeepLink(res => {
+  if (res.deepLinkStatus == 'FOUND') {
+      // here we will get the deeplink params after resolving it.
+      // more flow...
+  }
+});
+
+appsFlyer.initSdk(
+  option,
+  () => {
+    if (!option.manualStart) {
+      console.warn('AppsFlyer SDK started!');
+    } else {
+      console.warn('AppsFlyer SDK init, didn\'t send launch yet');
+      }
+    },
+  () => {},
+);
+
+if (Platform.OS == 'android') {
+  appsFlyer.performOnDeepLinking();
+}
+
+// more app flow...
+
+appsFlyer.startSdk(); // <--- Here we send launch
+```
 ## <a id="iOSOnly"> iOS Only APIs
 
 ##### <a id="disableCollectASA"> **`disableCollectASA(shouldDisable)`**

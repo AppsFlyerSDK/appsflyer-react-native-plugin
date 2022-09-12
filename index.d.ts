@@ -79,6 +79,7 @@ declare module "react-native-appsflyer" {
         onInstallConversionDataListener?: boolean;
         onDeepLinkListener?: boolean;
         timeToWaitForATTUserAuthorization?: number; // iOS only
+        manualStart?: boolean
     }
 
     export interface InAppPurchase {
@@ -142,6 +143,7 @@ declare module "react-native-appsflyer" {
         setSharingFilterForPartners(partners: string[]): void
         setPartnerData(partnerId: string, partnerData: object): void
         appendParametersToDeepLinkingURL(contains: string, parameters: object): void
+        startSdk(): void
 
         /**
          * For iOS Only
@@ -157,6 +159,7 @@ declare module "react-native-appsflyer" {
         setCollectIMEI(isCollect: boolean, successC?: SuccessCB): void
         setCollectAndroidID(isCollect: boolean, successC?: SuccessCB): void
         setDisableNetworkData(disable: boolean): void
+        performOnDeepLinking(): void
     };
 
     export default appsFlyer;

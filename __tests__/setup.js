@@ -18,6 +18,10 @@ jest.mock('../node_modules/react-native/Libraries/BatchedBridge/NativeModules', 
 			setSharingFilterForPartners: jest.fn(),
 			setCurrentDeviceLanguage: jest.fn(),
 			sendPushNotificationData: jest.fn(),
+			appendParametersToDeepLinkingURL: jest.fn(),
+			setDisableNetworkData: jest.fn(),
+			performOnDeepLinking: jest.fn(),
+			startSdk: jest.fn(),
 		},
 	};
 });
