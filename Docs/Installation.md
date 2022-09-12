@@ -81,7 +81,7 @@ end
 2. Unzip and copy the contents of the Zip file into your project directory
 3. Run `react-native link react-native-appsflyer` from of the project root or copy RNAppsFlyer.h and RNAppsFlyer.m from `node_modules` ➜ `react-native-appsflyer` to your project directory
 
-![enter image description here](https://firebasestorage.googleapis.com/v0/b/firstintegrationapp.appspot.com/o/Screen%20Shot%202018-07-19%20at%2011.33.05.png?alt=media&token=66666250-f12c-41ef-a994-c2240add7a47)
+![enter image description here](assets/ios_files.png)
 
 
 
