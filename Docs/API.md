@@ -97,7 +97,7 @@ appsFlyer.initSdk(
 
 ##### <a id="startSdk"> **`startSdk()`**
 
-In version 6.9.0 of the react-native-appslfyer SDK we added the option of splitting between the initialization stage and start stage. All you need to do is add the property manualStart: true to the init object, and later call appsFlyer.startSdk() whenever you decide. If this property is set to false or doesn’t exist, the sdk will start after calling `appsFlyer.initSdk(...)`.
+In version 6.8.3 of the react-native-appslfyer SDK we added the option of splitting between the initialization stage and start stage. All you need to do is add the property manualStart: true to the init object, and later call appsFlyer.startSdk() whenever you decide. If this property is set to false or doesn’t exist, the sdk will start after calling `appsFlyer.initSdk(...)`.
 
 *Example:*
 ```javascript
@@ -137,8 +137,6 @@ appsFlyer.initSdk(
 In-App Events provide insight on what is happening in your app. It is recommended to take the time and define the events you want to measure to allow you to measure ROI (Return on Investment) and LTV (Lifetime Value).
 
 Recording in-app events is performed by calling logEvent with event name and value parameters. See In-App Events documentation for more details.
-
-**Note:** An In-App Event name must be no longer than 45 characters. Events names with more than 45 characters do not appear in the dashboard, but only in the raw Data, Pull and Push APIs.
 
 | parameter    | type     | description                                   |
 | -----------  |----------|------------------------------------------     |
