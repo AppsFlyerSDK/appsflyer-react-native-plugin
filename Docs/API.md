@@ -138,6 +138,8 @@ In-App Events provide insight on what is happening in your app. It is recommende
 
 Recording in-app events is performed by calling logEvent with event name and value parameters. See In-App Events documentation for more details.
 
+**Note:** An In-App Event name must be no longer than 45 characters. Events names with more than 45 characters do not appear in the dashboard, but only in the raw Data, Pull and Push APIs.
+
 | parameter    | type     | description                                   |
 | -----------  |----------|------------------------------------------     |
 | eventName    | string   | The name of the event                         |
