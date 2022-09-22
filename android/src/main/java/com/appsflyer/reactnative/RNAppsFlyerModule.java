@@ -50,11 +50,13 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     private ReactApplicationContext reactContext;
     private Application application;
+    private String personalDevKey;
 
     public RNAppsFlyerModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
         this.application = (Application) reactContext.getApplicationContext();
+        this.personalDevKey = "";
     }
 
     @Override
@@ -128,6 +130,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         boolean isDebug;
         boolean isConversionData;
         boolean isDeepLinking;
+        boolean isManualStartMode;
 
         AppsFlyerLib instance = AppsFlyerLib.getInstance();
         JSONObject options = RNUtil.readableMapToJson(_options);
@@ -135,6 +138,8 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         if (devKey.trim().equals("")) {
             return NO_DEVKEY_FOUND;
         }
+        this.personalDevKey = devKey;
+
         isDebug = options.optBoolean(afIsDebug, false);
         instance.setDebugLog(isDebug);
 
@@ -143,22 +148,15 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             Log.d("AppsFlyer", "Starting SDK");
         }
         isDeepLinking = options.optBoolean(afDeepLink, false);
+        isManualStartMode = options.optBoolean("manualStart", false);
 
         instance.init(devKey, (isConversionData == true) ? registerConversionListener() : null, application.getApplicationContext());
         if (isDeepLinking) {
             instance.subscribeForDeepLink(registerDeepLinkListener());
         }
-        Intent intent = null;
-        Activity currentActivity = getCurrentActivity();
 
-        if (currentActivity != null) {
-            // register for lifecycle with Activity (automatically fetching deeplink from Activity if present)
-            instance.start(currentActivity, devKey);
-        } else {
-            // register for lifecycle with Application (cannot fetch deeplink without access to the Activity,
-            // also sending first session manually)
-            instance.logEvent(application, null, null);
-            instance.start(application, devKey);
+        if (!isManualStartMode) {
+            startSdk();
         }
         return null;
     }
@@ -260,6 +258,20 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         reactContext
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit(eventName, params);
+    }
+
+    @ReactMethod
+    public void startSdk() {
+        Activity currentActivity = getCurrentActivity();
+        if (currentActivity != null) {
+            // register for lifecycle with Activity (automatically fetching deeplink from Activity if present)
+            AppsFlyerLib.getInstance().start(currentActivity, this.personalDevKey);
+        } else {
+            // register for lifecycle with Application (cannot fetch deeplink without access to the Activity,
+            // also sending first session manually)
+            AppsFlyerLib.getInstance().logEvent(this.application, null, null);
+            AppsFlyerLib.getInstance().start(this.application, this.personalDevKey);
+        }
     }
 
     @ReactMethod
@@ -765,6 +777,21 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void setDisableNetworkData(Boolean disabled) {
         AppsFlyerLib.getInstance().setDisableNetworkData(disabled);
+    }
+
+    @ReactMethod
+    public void performOnDeepLinking() {
+        Activity activity = getCurrentActivity();
+        if (activity != null) {
+            Intent intent = activity.getIntent();
+            if (intent != null) {
+                AppsFlyerLib.getInstance().performOnDeepLinking(intent, this.application);
+            } else {
+                Log.d("AppsFlyer", "performOnDeepLinking: intent is null!");
+            }
+        } else{
+            Log.d("AppsFlyer", "performOnDeepLinking: activity is null!");
+        }
     }
     
     @ReactMethod

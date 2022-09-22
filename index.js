@@ -608,6 +608,14 @@ appsFlyer.setDisableNetworkData = (disable) => {
 	return RNAppsFlyer.setDisableNetworkData(disable);
 };
 
+appsFlyer.startSdk = () => {
+	return RNAppsFlyer.startSdk();
+};
+
+appsFlyer.performOnDeepLinking = () => {
+	return RNAppsFlyer.performOnDeepLinking();
+};
+
 function AFParseJSONException(_message, _data) {
 	this.message = _message;
 	this.data = _data;
