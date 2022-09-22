@@ -18,6 +18,7 @@
 
 
 @interface RNAppsFlyer: RCTEventEmitter <RCTBridgeModule, AppsFlyerLibDelegate, AppsFlyerDeepLinkDelegate>
+@property (readwrite, nonatomic) BOOL isManualStart;
 @end
 
 

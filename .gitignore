@@ -36,6 +36,7 @@ local.properties
 android/gradlew.bat
 .vscode
 android/gradle
+android/gradlew
 android/.project
 
 # node.js
@@ -50,7 +51,7 @@ buck-out/
 android/app/libs
 android/keystores/debug.keystore
 
-
+.watchmanconfig
 coverage/
 package-lock.json
 

@@ -1,3 +1,9 @@
+## 6.9.1
+ Release date: *2022-09-22*
+
+- React Native >> Support Deep Linking without calling startSDK()
+- React Native >> Separate between initSDK and startSDK
+
 ## 6.8.2
  Release date: *2022-08-30*
 
