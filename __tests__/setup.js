@@ -22,6 +22,7 @@ jest.mock('../node_modules/react-native/Libraries/BatchedBridge/NativeModules', 
 			setDisableNetworkData: jest.fn(),
 			performOnDeepLinking: jest.fn(),
 			startSdk: jest.fn(),
+			disableIDFVCollection: jest.fn(),
 		},
 	};
 });
