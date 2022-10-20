@@ -481,8 +481,13 @@ RCT_EXPORT_METHOD(disableAdvertisingIdentifier:(BOOL)shouldDisable) {
     [AppsFlyerLib shared].disableAdvertisingIdentifier = shouldDisable;
 }
 #endif
+
 RCT_EXPORT_METHOD(disableCollectASA: (BOOL)shouldDisable) {
     [AppsFlyerLib shared].disableCollectASA = shouldDisable;
+}
+
+RCT_EXPORT_METHOD(disableIDFVCollection: (BOOL)shouldDisable) {
+    [[AppsFlyerLib shared] setDisableIDFVCollection:shouldDisable];
 }
 
 RCT_EXPORT_METHOD(setUseReceiptValidationSandbox: (BOOL)isSandbox) {

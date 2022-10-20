@@ -37,6 +37,7 @@ The list of available methods for this plugin is described below.
     - [setUseReceiptValidationSandbox](#setUseReceiptValidationSandbox)
     - [disableSKAD](#disableSKAD)
     - [setCurrentDeviceLanguage](#setCurrentDeviceLanguage)
+    - [disableIDFVCollection](#disableIDFVCollection)
 - [AppsFlyerConversionData](#AppsFlyerConversionData)
     - [onInstallConversionData](#onInstallConversionData)
     - [onInstallConversionFailure](#onInstallConversionFailure)
@@ -821,6 +822,25 @@ Disables Apple Search Ads collecting
 ```javascript
 if (Platform.OS == 'ios') {
 appsFlyer.disableCollectASA(true);
+}
+```
+
+---
+
+##### <a id="disableIDFVCollection"> **`disableIDFVCollection(shouldDisable)`**
+
+Disables app vendor identifier (IDFV) collection in iOS.<br>
+Default is false (the SDK will collect IDFV).
+
+| parameter                   | type     | description                                                |
+| ----------                  |----------|------------------                                          |
+| shouldDisable               | boolean  | Flag to disable/enable IDFV collection    |
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'ios') {
+appsFlyer.disableIDFVCollection(true);
 }
 ```
 
