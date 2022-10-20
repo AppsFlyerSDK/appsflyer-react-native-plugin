@@ -235,6 +235,11 @@ describe("Test appsFlyer API's", () => {
 		appsFlyer.performOnDeepLinking();
 		expect(RNAppsFlyer.performOnDeepLinking).toHaveBeenCalledTimes(1);
 	});
+
+	test('it calls appsFlyer.disableIDFVCollection()', () => {
+		appsFlyer.disableIDFVCollection(true);
+		expect(RNAppsFlyer.disableIDFVCollection).toHaveBeenCalledTimes(1);
+	});
 });
 
 describe('Test native event emitter', () => {

@@ -503,6 +503,15 @@ appsFlyer.disableAdvertisingIdentifier = (isDisable) => {
 };
 
 /**
+ * Disables app vendor identifier (IDFV) collection in iOS
+ * @param shouldDisable Flag to disable/enable IDFA collection
+ * @platform iOS only
+ */
+appsFlyer.disableIDFVCollection = (shouldDisable) => {
+	return RNAppsFlyer.disableIDFVCollection(shouldDisable);
+};
+
+/**
  * Disables Apple Search Ads collecting
  * @param shouldDisable Flag to disable/enable Apple Search Ads data collection
  * @platform iOS only
