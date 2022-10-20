@@ -1,3 +1,8 @@
+## 6.9.2
+ Release date: *2022-10-20*
+
+- React Native Plugin - add support for the disableIDFVCollection API
+
 ## 6.9.1
  Release date: *2022-09-22*
 
