@@ -829,7 +829,8 @@ appsFlyer.disableCollectASA(true);
 
 ##### <a id="disableIDFVCollection"> **`disableIDFVCollection(shouldDisable)`**
 
-Disables app vendor identifier (IDFV) collection in iOS
+Disables app vendor identifier (IDFV) collection in iOS.<br>
+Default is false (the SDK will collect IDFV).
 
 | parameter                   | type     | description                                                |
 | ----------                  |----------|------------------                                          |
