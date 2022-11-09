@@ -102,9 +102,15 @@ declare module "react-native-appsflyer" {
         channel: string;
         campaign?: string;
         customerID?: string;
-        userParams?: object;
-
-        [key: string]: any;
+        userParams?: {
+            deep_link_value?: string;
+            [key: string]: any;
+        };
+        referrerName?: string;
+        referrerImageUrl?: string;
+        deeplinkPath?: string;
+        baseDeeplink?: string;
+        brandDomain?: string;
     }
 
     const appsFlyer: {
