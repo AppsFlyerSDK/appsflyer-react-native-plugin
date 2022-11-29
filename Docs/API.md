@@ -174,7 +174,9 @@ appsFlyer.logEvent(
 
 ##### <a id="setCustomerUserId"> **`setCustomerUserId(userId, callback)`**
 
-Setting your own Custom ID enables you to cross-reference your own unique ID with AppsFlyer’s user ID and the other devices’ IDs. This ID is available in AppsFlyer CSV reports along with postbacks APIs for cross-referencing with you internal IDs. NOTE: This must be set before `initSdk` is called.
+Setting your own Custom ID enables you to cross-reference your own unique ID with AppsFlyer’s user ID and the other devices’ IDs. This ID is available in AppsFlyer CSV reports along with postbacks APIs for cross-referencing with you internal IDs.<br>
+If you wish to see the CUID (Customer User ID) under your installs raw data reports, it should be called before starting the SDK.<br>
+If you simply would like to add additional user id to the events raw data reports, then you can freely call it anytime you need.
 
 
 | parameter | type     | description      |
