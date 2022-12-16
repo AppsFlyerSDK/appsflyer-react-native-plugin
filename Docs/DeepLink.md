@@ -175,7 +175,7 @@ In your app’s manifest add the following intent-filter to your relevant activi
 For more on URI Scheme check out the guide [here](https://dev.appsflyer.com/hc/docs/initial-setup-for-deep-linking-and-deferred-deep-linking#deciding-on-a-uri-scheme).
 
 #### <a id="app-links"> App Links
-First you need to generate SHA256 fingerprint an then In your app’s manifest add the following intent-filter to your relevant activity:
+First, you need to generate SHA256 fingerprint, then add the following intent-filter to the relevant activity in your app’s manifest:
 ```xml
 <intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW" />
