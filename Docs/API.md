@@ -919,7 +919,8 @@ The code implementation for the conversion listener must be made prior to the in
 ```javascript
 const onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
   (res) => {
-    if (JSON.parse(res.data.is_first_launch) == true) {
+    // Note that `is_first_launch` will be "true" (string) on Android and true (boolean) on iOS.
+    if (res.data.is_first_launch === "true" || res.data.is_first_launch === true) {
       if (res.data.af_status === 'Non-organic') {
         var media_source = res.data.media_source;
         var campaign = res.data.campaign;
@@ -949,8 +950,6 @@ appsFlyer.initSdk(/*...*/);
   "type": "onInstallConversionDataLoaded"
 }
 ```
-
-> **Note** is_first_launch will be "true" (string) on Android and true (boolean) on iOS. To solve this issue wrap is_first_launch with JSON.parse(res.data.is_first_launch) as in the example above.
 
 `appsFlyer.onInstallConversionData` returns a function the will allow us to call `NativeAppEventEmitter.remove()`.<br/>
 
