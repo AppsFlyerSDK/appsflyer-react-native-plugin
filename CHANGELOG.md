@@ -1,3 +1,9 @@
+## 6.9.4
+ Release date: *2022-12-27*
+
+- React Native > Change implementation to api when importing native android sdk
+- Update React Native Plugin to v6.9.4
+
 ## 6.9.2
  Release date: *2022-10-20*
 
