@@ -3,8 +3,8 @@
  **/
 declare module "react-native-appsflyer" {
     type Response<T> = void | Promise<T>;
-    type SuccessCB = (result?: any) => any;
-    type ErrorCB = (error?: any) => any;
+    type SuccessCB = (result?: unknown) => unknown;
+    type ErrorCB = (error?: Error) => unknown;
     export type ConversionData = {
         status: "success" | "failure",
         type: "onInstallConversionDataLoaded" | "onInstallConversionFailure"
