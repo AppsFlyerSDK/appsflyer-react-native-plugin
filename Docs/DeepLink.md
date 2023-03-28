@@ -22,7 +22,7 @@ For more info please check out the [OneLink™ Deep Linking Guide](https://suppo
 
 ###  <a id="deferred-deep-linking"> 1. Deferred Deep Linking (Get Conversion Data)
 
-Check out the deferred deeplinkg guide from the AppFlyer knowledge base [here](https://support.appsflyer.com/hc/en-us/articles/207032096-Accessing-AppsFlyer-Attribution-Conversion-Data-from-the-SDK-Deferred-Deeplinking-#Introduction).
+Check out the deferred deeplinkg guide from the AppFlyer knowledge base [here](https://dev.appsflyer.com/hc/docs/dl_work_flow).
 
 Code Sample to handle the conversion data:
 
@@ -60,7 +60,7 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
 
 ###  <a id="handle-deeplinking"> 2. Direct Deeplinking
     
-When a deeplink is clicked on the device the AppsFlyer SDK will return the resolved link in the [onAppOpenAttribution](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#deep-linking-data-the-onappopenattribution-method-) method.
+When a deeplink is clicked on the device the AppsFlyer SDK will return the resolved link in the onAppOpenAttribution method.([Android](https://dev.appsflyer.com/hc/docs/dl_android_gcd_legacy) / [iOS](https://dev.appsflyer.com/hc/docs/dl_ios_gcd_legacy))
 
 Code Sample to handle OnAppOpenAttribution:
 

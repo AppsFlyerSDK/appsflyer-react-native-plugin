@@ -25,6 +25,7 @@ Pod::Spec.new do |s|
       Pod::UI.puts "#{s.name}: Using default AppsFlyerFramework. You may require App Tracking Transparency. Not allowed for Kids apps."
       Pod::UI.puts "#{s.name}: You may set variable `$RNAppsFlyerStrictMode=true` in Podfile to use strict mode for kids apps."
     end
-    s.dependency 'AppsFlyerFramework', '6.9.1'
+    # s.dependency 'AppsFlyerFramework', '6.9.1'
+    s.dependency 'appsflyer-apple-sdk-qa', '6.10.1.106'
   end
 end
