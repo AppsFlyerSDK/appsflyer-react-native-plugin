@@ -18,8 +18,6 @@ Since users may or may not have the mobile app installed, there are 3 types of d
 2. Direct Deep Linking - Directly serving personalized content to existing users, which already have the mobile app installed.
 3. Starting from v6.1.3, the new Unified Deep Linking API is available to handle deeplinking logic.
 
-For more info please check out the [OneLink™ Deep Linking Guide](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#Intro).
-
 ###  <a id="deferred-deep-linking"> 1. Deferred Deep Linking (Get Conversion Data)
 
 Check out the deferred deeplinkg guide from the AppFlyer knowledge base [here](https://dev.appsflyer.com/hc/docs/dl_work_flow).
