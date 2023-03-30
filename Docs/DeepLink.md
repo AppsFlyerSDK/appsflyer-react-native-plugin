@@ -189,7 +189,8 @@ For more on App Links check out the guide [here](https://dev.appsflyer.com/hc/do
 
 
 ###  <a id="ios-deeplink"> iOS Deeplink Setup
-In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file or in your **bridging header if you are using Swift**:
+In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK.<br>
+First, import the plugin in the **AppDelegate.m** file or in your **bridging header if you are using Swift**:
 
 ```objectivec
 #import <RNAppsFlyer.h>
