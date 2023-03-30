@@ -189,12 +189,12 @@ For more on App Links check out the guide [here](https://dev.appsflyer.com/hc/do
 
 
 ###  <a id="ios-deeplink"> iOS Deeplink Setup
-In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
+In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file or in your **bridging header if you are using Swift**:
 
-#### import
 ```objectivec
 #import <RNAppsFlyer.h>
 ```
+For Objective-c projects: add the following to you **AppDelegate.m**
 ```objectivec
 // Deep linking
 // Open URI-scheme for iOS 9 and above
@@ -212,6 +212,23 @@ In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in
     [[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
     return YES;
 }
+```
+For Swift projects: add the following to you **AppDelegate.swift**
+```swift
+  func application(_ application: UIApplication, handleOpen url: URL) -> Bool {
+    AppsFlyerAttribution.shared().handleOpen(url)
+    return true
+  }
+  
+  func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
+    AppsFlyerAttribution.shared().handleOpen(url, sourceApplication: sourceApplication, annotation: annotation)
+    return true
+  }
+  
+  func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+    AppsFlyerAttribution.shared().continue(userActivity)
+    return true
+  }
 ```
 
 #### Universal Links
