@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "AppsFlyerLinkGenerator.h"
+#import <AppsFlyerLib/AppsFlyerLinkGenerator.h>
 
 /**
  AppsFlyerShareInviteHelper

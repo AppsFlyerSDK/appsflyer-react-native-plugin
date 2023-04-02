@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import "AppsFlyerAttribution.h"
+#import <AppsFlyerLib/AppsFlyerLib.h>
 
 @interface AppsFlyerAttribution ()
 @property NSUserActivity * userActivity;

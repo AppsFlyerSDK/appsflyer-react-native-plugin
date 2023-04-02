@@ -55,8 +55,5 @@
     "setupFiles": [
       "<rootDir>/__tests__/setup.js"
     ]
-  },
-  "peerDependencies": {
-    "expo": "*"
   }
 }
