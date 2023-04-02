@@ -2,7 +2,7 @@
 //  AppsFlyerLib.h
 //  AppsFlyerLib
 //
-//  AppsFlyer iOS SDK 6.10.1.106 (106)
+//  AppsFlyer iOS SDK 6.10.1 (109)
 //  Copyright (c) 2012-2023 AppsFlyer Ltd. All rights reserved.
 //
 
@@ -140,7 +140,7 @@ typedef enum  {
     EmailCryptTypeSHA256 = 3
 } EmailCryptType;
 
-typedef NS_CLOSED_ENUM(NSInteger, AFSDKPlugin) {
+typedef NS_CLOSED_ENUM (NSInteger ,AFSDKPlugin) {
     AFSDKPluginIOSNative,
     AFSDKPluginUnity,
     AFSDKPluginFlutter,
@@ -155,8 +155,11 @@ typedef NS_CLOSED_ENUM(NSInteger, AFSDKPlugin) {
     AFSDKPluginUnreal,
     AFSDKPluginXamarin,
     AFSDKPluginCapacitor,
-} NS_SWIFT_NAME(AppsFlyerPlugin);
+    AFSDKPluginSegment,
+    AFSDKPluginAdobeSwiftAEP
+} NS_SWIFT_NAME(Plugin);
 
+@class AFSDKPluginInfo;
 
 NS_SWIFT_NAME(DeepLinkDelegate)
 @protocol AppsFlyerDeepLinkDelegate <NSObject>
@@ -312,9 +315,9 @@ NS_SWIFT_NAME(waitForATTUserAuthorization(timeoutInterval:));
 @property(atomic) BOOL anonymizeUser;
 
 /**
- Deprecated. This API has no effect, since the SDK is no longer fetching Apple Search Ads data from the iAd Framework. iAd Framework has been deprecated by Apple. For more information, see here: https://developer.apple.com/documentation/iad/iad_changelog
+ Opt-out for Apple Search Ads attributions
  */
-@property(atomic) BOOL disableCollectASA DEPRECATED_MSG_ATTRIBUTE("Deprecated. This API has no effect, since the SDK is no longer fetching Apple Search Ads data from the iAd Framework.");
+@property(atomic) BOOL disableCollectASA;
 
 /**
  Disable Apple Ads Attribution API +[AAAtribution attributionTokenWithError:]
@@ -392,11 +395,8 @@ NS_SWIFT_NAME(waitForATTUserAuthorization(timeoutInterval:));
 /**
  Internal API. Please don't use.
  */
-- (void)setPluginInfoWith:(AFSDKPlugin)plugin
-            pluginVersion:(NSString *)version
-         additionalParams:(NSDictionary * _Nullable)additionalParams
+- (void)setPluginInfoWith:(AFSDKPlugin)plugin pluginVersion:(NSString *)version additionalParams:(NSDictionary * _Nullable)additionalParams
 NS_SWIFT_NAME(setPluginInfo(plugin:version:additionalParams:));
-
 /**
  Enable the collection of Facebook Deferred AppLinks
  Requires Facebook SDK and Facebook app on target/client device.
