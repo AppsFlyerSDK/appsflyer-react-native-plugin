@@ -18,11 +18,9 @@ Since users may or may not have the mobile app installed, there are 3 types of d
 2. Direct Deep Linking - Directly serving personalized content to existing users, which already have the mobile app installed.
 3. Starting from v6.1.3, the new Unified Deep Linking API is available to handle deeplinking logic.
 
-For more info please check out the [OneLink™ Deep Linking Guide](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#Intro).
-
 ###  <a id="deferred-deep-linking"> 1. Deferred Deep Linking (Get Conversion Data)
 
-Check out the deferred deeplinkg guide from the AppFlyer knowledge base [here](https://support.appsflyer.com/hc/en-us/articles/207032096-Accessing-AppsFlyer-Attribution-Conversion-Data-from-the-SDK-Deferred-Deeplinking-#Introduction).
+Check out the deferred deeplinkg guide from the AppFlyer knowledge base [here](https://dev.appsflyer.com/hc/docs/dl_work_flow).
 
 Code Sample to handle the conversion data:
 
@@ -60,7 +58,7 @@ The `appsFlyer.onInstallConversionData` returns function to  unregister this eve
 
 ###  <a id="handle-deeplinking"> 2. Direct Deeplinking
     
-When a deeplink is clicked on the device the AppsFlyer SDK will return the resolved link in the [onAppOpenAttribution](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#deep-linking-data-the-onappopenattribution-method-) method.
+When a deeplink is clicked on the device the AppsFlyer SDK will return the resolved link in the onAppOpenAttribution method.([Android](https://dev.appsflyer.com/hc/docs/dl_android_gcd_legacy) / [iOS](https://dev.appsflyer.com/hc/docs/dl_ios_gcd_legacy))
 
 Code Sample to handle OnAppOpenAttribution:
 
@@ -191,12 +189,13 @@ For more on App Links check out the guide [here](https://dev.appsflyer.com/hc/do
 
 
 ###  <a id="ios-deeplink"> iOS Deeplink Setup
-In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
+In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK.<br>
+First, import the plugin in the **AppDelegate.m** file or in your **bridging header if you are using Swift**:
 
-#### import
 ```objectivec
 #import <RNAppsFlyer.h>
 ```
+For Objective-c projects: add the following to you **AppDelegate.m**
 ```objectivec
 // Deep linking
 // Open URI-scheme for iOS 9 and above
@@ -214,6 +213,23 @@ In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in
     [[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
     return YES;
 }
+```
+For Swift projects: add the following to you **AppDelegate.swift**
+```swift
+  func application(_ application: UIApplication, handleOpen url: URL) -> Bool {
+    AppsFlyerAttribution.shared().handleOpen(url)
+    return true
+  }
+  
+  func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
+    AppsFlyerAttribution.shared().handleOpen(url, sourceApplication: sourceApplication, annotation: annotation)
+    return true
+  }
+  
+  func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+    AppsFlyerAttribution.shared().continue(userActivity)
+    return true
+  }
 ```
 
 #### Universal Links
