@@ -1,3 +1,9 @@
+## 6.10.2
+ Release date: *2023-04-03*
+
+- Update Android SDK to v6.10.2
+- Update iOS SDK to v6.10.1
+
 ## 6.9.4
  Release date: *2022-12-27*
 
