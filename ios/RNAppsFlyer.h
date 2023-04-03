@@ -10,11 +10,11 @@
 
 #import "AppsFlyerAttribution.h"
 #import <objc/message.h>
-//#if __has_include(<AppsFlyerLib/AppsFlyerLib.h>) // from Pod
-//#import <AppsFlyerLib/AppsFlyerLib.h>
-//#else
-//#import "AppsFlyerLib.h"
-//#endif
+#if __has_include(<AppsFlyerLib/AppsFlyerLib.h>) // from Pod
+#import <AppsFlyerLib/AppsFlyerLib.h>
+#else
+#import "AppsFlyerLib.h"
+#endif
 
 
 @interface RNAppsFlyer: RCTEventEmitter <RCTBridgeModule, AppsFlyerLibDelegate, AppsFlyerDeepLinkDelegate>
@@ -22,6 +22,7 @@
 @end
 
 
+static NSString *const kAppsFlyerPluginVersion      = @"6.10.2";
 static NSString *const NO_DEVKEY_FOUND              = @"No 'devKey' found or its empty";
 static NSString *const NO_APPID_FOUND               = @"No 'appId' found or its empty";
 static NSString *const NO_EVENT_NAME_FOUND          = @"No 'eventName' found or its empty";
