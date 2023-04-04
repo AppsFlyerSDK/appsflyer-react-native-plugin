@@ -1,5 +1,4 @@
-
-## UDL flow
+# UDL flow
 
 1. The SDK is triggered by:
    - **Deferred Deep Linking** - using a dedicated API

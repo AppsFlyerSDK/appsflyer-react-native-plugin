@@ -1,4 +1,4 @@
-### <a id="userInvite"> User invite
+# User invite
 A complete list of supported parameters is available [here](https://support.appsflyer.com/hc/en-us/articles/115004480866-User-Invite-Tracking). Custom parameters can be passed using a userParams{} nested object, as in the example above.
 
 | parameter       | type     | description                      |

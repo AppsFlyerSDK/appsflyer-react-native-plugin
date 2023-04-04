@@ -1,4 +1,4 @@
-# Adding   react-native-appsflyer to your project
+# Adding react-native-appsflyer to your project
 
 - Installation using CLI
   - [Installation with autolinking](#Installation-with-autolinking)

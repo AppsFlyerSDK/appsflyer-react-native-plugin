@@ -1,6 +1,4 @@
-
 # Getting started
-
     
 ![alt text](https://massets.appsflyer.com/wp-content/uploads/2018/03/21101417/app-installed-Recovered.png "")
 

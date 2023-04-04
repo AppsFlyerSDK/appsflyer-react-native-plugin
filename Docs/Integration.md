@@ -1,4 +1,4 @@
-# 🚀 Basic integration of the SDK
+# Basic integration of the SDK
 Initialize the SDK to enable AppsFlyer to detect installations, sessions (app opens) and updates.<br>
 
 ```javascript

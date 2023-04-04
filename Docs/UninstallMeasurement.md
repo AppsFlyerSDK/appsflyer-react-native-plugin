@@ -1,4 +1,4 @@
-### <a id="uninstall"> Measure App Uninstalls
+# Measure App Uninstalls
 
 #### iOS
 
