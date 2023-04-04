@@ -3,6 +3,7 @@
 ```
 expo install expo-dev-client
 ```
+You can read more about expo development builds [here.](https://docs.expo.dev/development/introduction/)
 2. Install react-native-appsflyer:
 ```
 expo install react-native-appsflyer

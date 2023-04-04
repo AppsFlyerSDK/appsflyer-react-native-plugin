@@ -2,8 +2,6 @@
 Initialize the SDK to enable AppsFlyer to detect installations, sessions (app opens) and updates.<br>
 
 ```javascript
-import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
 import appsFlyer from 'react-native-appsflyer';
 
 appsFlyer.initSdk(
