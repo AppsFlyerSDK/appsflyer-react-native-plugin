@@ -1,5 +1,4 @@
 #import "RNAppsFlyer.h"
-#import "AppsFlyerAttribution.h"
 
 @implementation RNAppsFlyer
 @synthesize bridge = _bridge;
@@ -95,11 +94,6 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
             [[AppsFlyerLib shared] waitForATTUserAuthorizationWithTimeoutInterval:timeoutInterval];
         }
 #endif
-        BOOL isExpoApp = [self isExpoApp];
-        [[AppsFlyerLib shared] setPluginInfoWith:isExpoApp ? AFSDKPluginExpo : AFSDKPluginReactNative
-                                   pluginVersion:kAppsFlyerPluginVersion
-                                additionalParams:nil];
-
         [AppsFlyerLib shared].appleAppID = appId;
         [AppsFlyerLib shared].appsFlyerDevKey = devKey;
         [AppsFlyerLib shared].isDebug = isDebug;
@@ -197,6 +191,12 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
             int _t = [emailsCryptTypeId intValue];
 
             switch (_t) {
+                case EmailCryptTypeSHA1:
+                    emailsCryptType = EmailCryptTypeSHA1;
+                    break;
+                case EmailCryptTypeMD5:
+                    emailsCryptType = EmailCryptTypeMD5;
+                    break;
                 case EmailCryptTypeSHA256:
                     emailsCryptType = EmailCryptTypeSHA256;
                     break;
@@ -422,10 +422,6 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
     } @catch (NSException *exception) {
         NSLog(@"AppsFlyer Debug: %@", exception);
     }
-}
-
-- (BOOL)isExpoApp {
-    return NSClassFromString(@"EXAppDelegateWrapper") != nil;
 }
 
 RCT_EXPORT_METHOD(anonymizeUser: (BOOL *)b callback:(RCTResponseSenderBlock)callback) {

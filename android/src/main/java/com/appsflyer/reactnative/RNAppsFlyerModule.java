@@ -19,8 +19,6 @@ import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
 import com.appsflyer.AppsFlyerProperties.EmailsCryptType;
-import com.appsflyer.internal.platform_extension.Plugin;
-import com.appsflyer.internal.platform_extension.PluginInfo;
 import com.appsflyer.share.CrossPromotionHelper;
 import com.appsflyer.share.LinkGenerator;
 import com.appsflyer.share.ShareInviteHelper;
@@ -152,10 +150,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         isDeepLinking = options.optBoolean(afDeepLink, false);
         isManualStartMode = options.optBoolean("manualStart", false);
 
-        boolean isExpoApp = this.isExpoApp();
-        PluginInfo pluginInfo = new PluginInfo(isExpoApp ? Plugin.EXPO : Plugin.REACT_NATIVE, PLUGIN_VERSION);
-        instance.setPluginInfo(pluginInfo);
-
         instance.init(devKey, (isConversionData == true) ? registerConversionListener() : null, application.getApplicationContext());
         if (isDeepLinking) {
             instance.subscribeForDeepLink(registerDeepLinkListener());
@@ -165,22 +159,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             startSdk();
         }
         return null;
-    }
-
-    /**
-     * We try to load this class which is associated with Expo. If the class is loaded we return true
-     * so we handle this app as an Expo app. If not its just a React Native app.
-     * @return true if its an Expo app, false is its React Native app
-     */
-    private boolean isExpoApp() {
-        try {
-            Class.forName("expo.modules.devmenu.react.DevMenuAwareReactActivity");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     private DeepLinkListener registerDeepLinkListener() {

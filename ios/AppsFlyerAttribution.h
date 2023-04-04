@@ -7,6 +7,7 @@
 #ifndef AppsFlyerAttribution_h
 #define AppsFlyerAttribution_h
 #endif /* AppsFlyerAttribution_h */
+#import "AppsFlyerLib.h"
 
 @interface AppsFlyerAttribution : NSObject
 @property BOOL RNAFBridgeReady;

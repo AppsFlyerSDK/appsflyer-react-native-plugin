@@ -1,6 +1,6 @@
 {
   "name": "react-native-appsflyer",
-  "version": "6.10.2",
+  "version": "6.9.2",
   "description": "React Native Appsflyer plugin",
   "main": "index.js",
   "types": "index.d.ts",
@@ -55,5 +55,8 @@
     "setupFiles": [
       "<rootDir>/__tests__/setup.js"
     ]
+  },
+  "peerDependencies": {
+    "expo": "*"
   }
 }

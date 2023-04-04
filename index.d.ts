@@ -3,8 +3,8 @@
  **/
 declare module "react-native-appsflyer" {
     type Response<T> = void | Promise<T>;
-    type SuccessCB = (result?: unknown) => unknown;
-    type ErrorCB = (error?: Error) => unknown;
+    type SuccessCB = (result?: any) => any;
+    type ErrorCB = (error?: any) => any;
     export type ConversionData = {
         status: "success" | "failure",
         type: "onInstallConversionDataLoaded" | "onInstallConversionFailure"
@@ -102,15 +102,9 @@ declare module "react-native-appsflyer" {
         channel: string;
         campaign?: string;
         customerID?: string;
-        userParams?: {
-            deep_link_value?: string;
-            [key: string]: any;
-        };
-        referrerName?: string;
-        referrerImageUrl?: string;
-        deeplinkPath?: string;
-        baseDeeplink?: string;
-        brandDomain?: string;
+        userParams?: object;
+
+        [key: string]: any;
     }
 
     const appsFlyer: {
