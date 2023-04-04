@@ -43,21 +43,14 @@ And removed the following ones:
 
 If you have used 1 of the removed APIs, please check the integration guide for the updated instructions
 
- ##  🚀 Guides
-- [Installation](/Docs/Installation.md)
-- [***Expo*** Installation](/Docs/Expo.md)
-- [Integration](/Docs/BasicIntegration.md)
-- [Testing the integration](/Docs/Testing.md)
+ ##  📖 Guides
+- [Adding the SDK to your project](/Docs/Installation.md)
+- [Integrate into an ***Expo*** project](/Docs/Expo.md)
+- [Initializing the SDK](/Docs/BasicIntegration.md)
 - [In-app Events](/Docs/InAppEvents.md)
 - [Deep Linking](/Docs/DeepLink.md)
 - [Advanced APIs](/Docs/AdvancedAPI.md)
+- [Testing the integration](/Docs/Testing.md)
 - [APIs](/Docs/API.md)
 - [React-Native Sample App](/demos)
- ##  🌟 Deep Linking
- - [Deep Linking](/Docs/DeepLink.md)
- ##  🌟 Deep Linking
-### [API refrence](/Docs/API.md)
-
-
-
 
