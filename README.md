@@ -53,7 +53,8 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [In-app events](/Docs/InAppEvents.md)
 - [Uninstall measurement](/Docs/UninstallMeasurement.md)
 ##  🔗 Deep Linking
-- [Deep Linking](/Docs/DeepLink.md)
+- [Getting Started](/Docs/DLGettingStarted.md)
+- [Unified Deep Link (UDL)](/Docs/UnifiedDeepLink.md)
 - [User Invite](/Docs/UserInvite.md)
 ## 🧪 Sample Apps
 - [React-Native Sample App](/demos/appsflyer-react-native-app
@@ -61,7 +62,6 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [Expo Sample App](/demos/appsflyer-expo-app
 )
 
---
 ### [API reference](/docs/API.md)    
 
 
