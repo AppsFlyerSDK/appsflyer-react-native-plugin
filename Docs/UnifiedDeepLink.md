@@ -1,112 +1,24 @@
-# Deep linking
 
-Deep Linking vs Deferred Deep Linking:
+## UDL flow
 
-A deep link is a special URL that routes to a specific spot, whether that’s on a website or in an app. A “mobile deep link” then, is a link that contains all the information needed to take a user directly into an app or a particular location within an app instead of just launching the app’s home page.
+1. The SDK is triggered by:
+   - **Deferred Deep Linking** - using a dedicated API
+   - **Direct Deep Linking** - triggered by the OS via Android App Link, iOS Universal Links or URI scheme.
+2. The SDK triggers the `OnDeepLink` listener, and passes the deep link result object to the user.
+3. The `OnDeepLink` listener uses the deep link result object that includes the `deep_link_value` and other parameters to create the personalized experience for the users, which is the main goal of OneLink.
 
-If the app is installed on the user's device - the deep link routes them to the correct location in the app. But what if the app isn't installed? This is where Deferred Deep Linking is used.When the app isn't installed, clicking on the link routes the user to the store to download the app. Deferred Deep linking defer or delay the deep linking process until after the app has been downloaded, and ensures that after they install, the user gets to the right location in the app.
+> Check out the Unified Deep Linking docs for [Android](https://dev.appsflyer.com/docs/android-unified-deep-linking) and [iOS](https://dev.appsflyer.com/docs/ios-unified-deep-linking).
 
-[Android and iOS set-up](#setup)
-
-![alt text](https://massets.appsflyer.com/wp-content/uploads/2018/03/21101417/app-installed-Recovered.png "")
-
-
-#### <a id="Deep-Linking"> The 3 Deep Linking Types:
-Since users may or may not have the mobile app installed, there are 3 types of deep linking:
-
-1. Deferred Deep Linking - Serving personalized content to new or former users, directly after the installation. 
-2. Direct Deep Linking - Directly serving personalized content to existing users, which already have the mobile app installed.
-3. Starting from v6.1.3, the new Unified Deep Linking API is available to handle deeplinking logic.
-
-For more info please check out the [OneLink™ Deep Linking Guide](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#Intro).
-
-###  <a id="deferred-deep-linking"> 1. Deferred Deep Linking (Get Conversion Data)
-
-Check out the deferred deeplinkg guide from the AppFlyer knowledge base [here](https://support.appsflyer.com/hc/en-us/articles/207032096-Accessing-AppsFlyer-Attribution-Conversion-Data-from-the-SDK-Deferred-Deeplinking-#Introduction).
-
-Code Sample to handle the conversion data:
-
-
-```javascript
-const onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
-  (res) => {
-    const isFirstLaunch = res?.data?.is_first_launch;
-
-    if (isFirstLaunch && JSON.parse(isFirstLaunch) === true) {
-      if (res.data.af_status === 'Non-organic') {
-        const media_source = res.data.media_source;
-        const campaign = res.data.campaign;
-        alert('This is first launch and a Non-Organic install. Media source: ' + media_source + ' Campaign: ' + campaign);
-      } else if (res.data.af_status === 'Organic') {
-        alert('This is first launch and a Organic Install');
-      }
-    } else {
-      alert('This is not first launch');
-    }
-  }
-);
-
-appsFlyer.initSdk(/*...*/);
-```
-**Note:** The code implementation for `onInstallConversionData` must be made **prior to the initialization** code of the SDK.
-
-<hr/>
-
-**Important**
-
-The `appsFlyer.onInstallConversionData` returns function to  unregister this event listener. If you want to remove the listener for any reason (Component unmount), you can simply call `onInstallConversionDataCanceller()`. This function will call `NativeAppEventEmitter.remove()`.
-
-<hr/>
-
-###  <a id="handle-deeplinking"> 2. Direct Deeplinking
-    
-When a deeplink is clicked on the device the AppsFlyer SDK will return the resolved link in the [onAppOpenAttribution](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#deep-linking-data-the-onappopenattribution-method-) method.
-
-Code Sample to handle OnAppOpenAttribution:
-
-```javascript
-const onAppOpenAttributionCanceller = appsFlyer.onAppOpenAttribution((res) => {
-        console.log(`status: ${res.status}`);
-        console.log(`campaign: ${res.data.campaign}`);
-        console.log(`af_dp: ${res.data.af_dp}`);
-        console.log(`link: ${res.data.link}`);
-        console.log(`DL value: ${res.data.deep_link_value}`);
-        console.log(`media source: ${res.data.media_source}`);
-});
-
-appsFlyer.initSdk(/*...*/);
-```
-**Note:** The code implementation for `onAppOpenAttribution` must be made **prior to the initialization** code of the SDK.
-
-<hr/>
-
-**Important**
-
-The `appsFlyer.onAppOpenAttribution` returns function to  unregister this event listener. If you want to remove the listener for any reason (Component unmount), you can simply call `onAppOpenAttributionCanceller()`. This function will call `NativeAppEventEmitter.remove()`.
-
-<hr/>
-
-###  <a id="unified-deeplinking"> 3. Unified deep linking
-
-The flow works as follows:
-
-1. User clicks the OneLink short URL.
-2. The iOS Universal Links/ Android App Links (for deep linking) or the deferred deep link, trigger the SDK.
-3. The SDK triggers the onDeepLink listener, and passes the deep link result object to the user.
-4. The onDeepLink listener uses the deep link result object that includes the deep_link_value and other parameters to create the personalized experience for the users, which is the main goal of OneLink.
-
-> Check out the Unified Deep Linking docs for [Android](https://dev.appsflyer.com/hc/docs/unified-deep-linking-udl) and [iOS](https://dev.appsflyer.com/hc/docs/unified-deep-linking-udl-1).
-
-Considerations:
+## Considerations:
 
 * Requires AppsFlyer Android SDK V6.1.3 or later.
 * Does not support SRN campaigns.
 * Does not provide af_dp in the API response.
 * onAppOpenAttribution will not be called. All code should migrate to `onDeepLink`.
 
-Implementation:
+## Implementation:
 
-* The code implementation for `onDeepLink` must be made **prior to the initialization** code of the SDK.
+**Important**  The code implementation for `onDeepLink` must be made **prior to the initialization** code of the SDK.
 
 Example:
 
