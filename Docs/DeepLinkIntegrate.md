@@ -14,78 +14,63 @@
 For more info please check out the [OneLink™ Deep Linking Guide](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#Intro) and [developer guide](https://dev.appsflyer.com/hc/docs/getting-started-1).
 
 ---
-4. In order to use AppsFlyer's deeplinks you need to configure intent filters/scheme/associatedDomains as described in [Expo's guide](https://docs.expo.dev/guides/linking/#universal-links-on-ios).
 
-### Full app.json example
+#  Android Deeplink Setup
+## Android Deeplink Setup(only for non-Expo projects)
+
+AppsFlyer SDK inspects activity intent object during onResume(). Because of that, for each activity that may be configured or launched with any [non-standard launch mode](https://developer.android.com/guide/topics/manifest/activity-element#lmode) please make sure to add the following code to `MainActivity.java` in `android/app/src/main/java/com...`:
 ```
-{
-  "expo": {
-    "name": "expoAppsFlyer",
-    "slug": "expoAppsFlyer",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/atom.png",
-    "plugins": [
-      [
-        "react-native-appsflyer",
-        {"shouldUseStrictMode": true} // <<-- for strict mode
-      ]
-    ],
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "scheme": "my-own-scheme", // <<-- uri scheme as configured on AF dashboard
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.appsflyer.expoaftest",
-      "associatedDomains": ["applinks:expotest.onelink.me"] // <<-- important in order to use universal links
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      },
-      "package": "com.af.expotest",
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "data": [
-            {
-              "scheme": "https",
-              "host": "expotest.onelink.me",
-              "pathPrefix": "/DvWi"
-            }
-          ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
-        },
-        {
-          "action": "VIEW",
-          "data": [
-            {
-              "scheme": "my-own-scheme" // <<-- uri scheme as configured on AF dashboard
-            }
-          ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
-        }
-      ]
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+...
+import android.content.Intent;
+...
+public class MainActivity extends ReactActivity {
+...
+    @Override
+    public void onNewIntent(Intent intent) {
+         super.onNewIntent(intent);
+         setIntent(intent);
     }
-  }
+ }
+```
+
+## App Links
+For more on App Links check out the guide [here](https://dev.appsflyer.com/hc/docs/initial-setup-for-deep-linking-and-deferred-deep-linking#procedures-for-android-app-links).
+
+##  URI scheme in Android
+
+Full setup guide for URI scheme in Android can be found [here](https://dev.appsflyer.com/hc/docs/initial-setup-for-deep-linking-and-deferred-deep-linking#procedures-for-uri-scheme).
+
+#  iOS Deeplink Setup
+## iOS Deeplink Setup(only for non-Expo projects)
+
+In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
+#### import
+```objectivec
+#import <RNAppsFlyer.h>
+```
+```objectivec
+// Deep linking
+// Open URI-scheme for iOS 9 and above
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary *) options {
+  [[AppsFlyerAttribution shared] handleOpenUrl:url options:options];
+    return YES;
+}
+// Open URI-scheme for iOS 8 and below
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
+  [[AppsFlyerAttribution shared] handleOpenUrl:url sourceApplication:sourceApplication annotation:annotation];
+  return YES;
+}
+// Open Universal Links
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nullable))restorationHandler {
+    [[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
+    return YES;
 }
 ```
+
+## Universal Links 
+
+Essentially, the Universal Links method links between an iOS mobile app and an associate website/domain, such as AppsFlyer’s OneLink domain (xxx.onelink.me). For more on Universal Links check out the guide [here](https://dev.appsflyer.com/hc/docs/initial-setup-2#procedures-for-ios-universal-links).
+
+## URI scheme in iOS
+
+Full setup guide for URI scheme in iOS can be found [here](https://dev.appsflyer.com/hc/docs/initial-setup-2#procedures-for-uri-scheme).
