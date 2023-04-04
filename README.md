@@ -49,18 +49,21 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [Installation](/Docs/Installation.md)
 - [***Expo*** Installation](/Docs/ExpoInstallasion.md)
 - [Integration](/Docs/Integration.md)
-- [Testing the integration](/Docs/Testing.md)
+- [Test integration](/Docs/Testing.md)
 - [In-app events](/Docs/InAppEvents.md)
 - [Uninstall measurement](/Docs/UninstallMeasurement.md)
 ##  🔗 Deep Linking
 - [Deep Linking](/Docs/DeepLink.md)
 - [User Invite](/Docs/UserInvite.md)
-- [APIs](/Docs/API.md)
 ## 🧪 Sample Apps
 - [React-Native Sample App](/demos/appsflyer-react-native-app
 )
 - [Expo Sample App](/demos/appsflyer-expo-app
 )
+
+--
+### [API reference](/docs/API.md)    
+
 
 
 
