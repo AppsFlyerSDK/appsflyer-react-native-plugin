@@ -11,11 +11,18 @@ A complete list of supported parameters is available [here](https://support.apps
 *Example:*
 
 ```javascript
+
+// set the tamplate ID, without it UserInvite won't work
+appsFlyer.setAppInviteOneLinkID('scVs', null, null);
+
+// set the user invite params
 appsFlyer.generateInviteLink(
  {
    channel: 'gmail',
    campaign: 'myCampaign',
    customerID: '1234',
+   deep_link_value : 'value', // deep link param
+   deep_link_sub1 : 'sub1', // deep link param
    userParams: {
      myParam: 'newUser',
      anotherParam: 'fromWeb',
