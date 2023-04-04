@@ -53,7 +53,8 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [In-app events](/Docs/InAppEvents.md)
 - [Uninstall measurement](/Docs/UninstallMeasurement.md)
 ##  🔗 Deep Linking
-- [Integrate](/Docs/DeepLinkIntegrate.md)
+- [Integration](/Docs/DeepLinkIntegrate.md)
+- [***Expo*** Integration](/Docs/ExpoDeepLinkIntegration.md)
 - [Unified Deep Link (UDL)](/Docs/UnifiedDeepLink.md)
 - [User Invite](/Docs/UserInvite.md)
 ## 🧪 Sample Apps
