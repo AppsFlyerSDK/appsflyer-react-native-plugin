@@ -28,7 +28,7 @@ For more info please check out the [OneLink™ Deep Linking Guide](https://suppo
     "plugins": [
       [
         "react-native-appsflyer",
-        {"shouldUseStrictMode": true} // <<-- for strict mode
+        {"shouldUseStrictMode": true} // <<-- only for strict mode
       ]
     ],
     "splash": {
@@ -60,8 +60,8 @@ For more info please check out the [OneLink™ Deep Linking Guide](https://suppo
           "data": [
             {
               "scheme": "https",
-              "host": "expotest.onelink.me",
-              "pathPrefix": "/DvWi"
+              "host": "expotest.onelink.me", // <<-- important for android App Links
+              "pathPrefix": "/DvWi" // <<-- set your onelink template id
             }
           ],
           "category": [
