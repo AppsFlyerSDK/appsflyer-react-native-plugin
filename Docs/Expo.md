@@ -29,6 +29,15 @@ If you are developing a kids app and you wish to use our strict mode, you should
 ```
 4. In order to use AppsFlyer's deeplinks you need to configure intent filters/scheme/associatedDomains as described in [Expo's guide](https://docs.expo.dev/guides/linking/#universal-links-on-ios).
 
+
+5. The Expo go app is not compatible with custom native code build so you will need to run
+```
+expo run:ios
+```
+
+If you still want to use Expo Go for development, you can conditionally disable appsflyer features as explained [here](https://docs.expo.dev/bare/using-expo-client/).
+
+
 ### Full app.json example
 ```
 {
