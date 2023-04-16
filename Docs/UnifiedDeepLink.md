@@ -26,7 +26,7 @@ const onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
   if (res?.deepLinkStatus !== 'NOT_FOUND') {
         const DLValue = res?.data.deep_link_value;
         const mediaSrc = res?.data.media_source;
-        const param1 = res?.data.af_sub1;
+        const deepLinkSub1 = res?.data.deep_link_sub1; // set deep_link_sub1-10 custom one link params
         console.log(JSON.stringify(res?.data, null, 2));
       }
 })
