@@ -31,12 +31,36 @@ public class MainActivity extends ReactActivity {
  }
 ```
 
-## App Links
+    
+#### <a id="uri-scheme"> URI Scheme
+In your app’s manifest add the following intent-filter to your relevant activity:
+```xml 
+<intent-filter>
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+
+    <data
+        android:host="mainactivity"
+        android:scheme="afshopapp" />
+</intent-filter>
+```
+For more on URI Scheme check out the guide [here](https://dev.appsflyer.com/hc/docs/initial-setup-for-deep-linking-and-deferred-deep-linking#deciding-on-a-uri-scheme).
+
+#### <a id="app-links"> App Links
+First, you need to generate SHA256 fingerprint, then add the following intent-filter to the relevant activity in your app’s manifest:
+```xml
+<intent-filter android:autoVerify="true">
+    <action android:name="android.intent.action.VIEW" />
+
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data
+        android:host="onelink-basic-app.onelink.me"
+        android:scheme="https" />
+</intent-filter>
+```
 For more on App Links check out the guide [here](https://dev.appsflyer.com/hc/docs/initial-setup-for-deep-linking-and-deferred-deep-linking#procedures-for-android-app-links).
-
-##  URI scheme in Android
-
-Full setup guide for URI scheme in Android can be found [here](https://dev.appsflyer.com/hc/docs/initial-setup-for-deep-linking-and-deferred-deep-linking#procedures-for-uri-scheme).
 
 #  iOS Deeplink Setup
 ## iOS Deeplink Setup(only for non-Expo projects)
@@ -53,22 +77,4 @@ In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in
   [[AppsFlyerAttribution shared] handleOpenUrl:url options:options];
     return YES;
 }
-// Open URI-scheme for iOS 8 and below
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
-  [[AppsFlyerAttribution shared] handleOpenUrl:url sourceApplication:sourceApplication annotation:annotation];
-  return YES;
-}
-// Open Universal Links
-- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nullable))restorationHandler {
-    [[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
-    return YES;
-}
-```
-
-## Universal Links 
-
-Essentially, the Universal Links method links between an iOS mobile app and an associate website/domain, such as AppsFlyer’s OneLink domain (xxx.onelink.me). For more on Universal Links check out the guide [here](https://dev.appsflyer.com/hc/docs/initial-setup-2#procedures-for-ios-universal-links).
-
-## URI scheme in iOS
-
-Full setup guide for URI scheme in iOS can be found [here](https://dev.appsflyer.com/hc/docs/initial-setup-2#procedures-for-uri-scheme).
+For more on App Links check out the guide [here](https://dev.appsflyer.com/hc/docs/initial-setup-for-deep-linking-and-deferred-deep-linking#procedures-for-android-app-links).
