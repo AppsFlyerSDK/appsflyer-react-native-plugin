@@ -1,4 +1,4 @@
-<img src="https://massets.appsflyer.com/wp-content/uploads/2018/06/20092440/static-ziv_1TP.png"  width="400" > 
+<img src="https://massets.appsflyer.com/wp-content/uploads/2018/06/20092440/static-ziv_1TP.png"  width="400" >
 
 # appsflyer-react-native-plugin
 
@@ -8,32 +8,31 @@
 
 🛠 In order for us to provide optimal support, we would kindly ask you to submit any issues to support@appsflyer.com
 
-> *When submitting an issue please specify your AppsFlyer sign-up (account) email , your app ID , production steps, logs, code snippets and any additional relevant information.*
-
+> _When submitting an issue please specify your AppsFlyer sign-up (account) email , your app ID , production steps, logs, code snippets and any additional relevant information._
 
 ### <a id="plugin-build-for"> This plugin is built for
 
-- Android AppsFlyer SDK **v6.9.1**
-- iOS AppsFlyer SDK **v6.8.1**
+- Android AppsFlyer SDK **v6.10.2**
+- iOS AppsFlyer SDK **v6.10.1**
 
-## <a id="breaking-changes"> 	❗❗ Breaking changes when updating to v6.x.x❗❗
+## <a id="breaking-changes"> ❗❗ Breaking changes when updating to v6.x.x❗❗
 
 - From version `6.3.0`, we use `xcframework` for iOS platform. Then you need to use cocoapods version >= 1.10
 
-- From version `6.2.30`, `logCrossPromotionAndOpenStore`  api will register as `af_cross_promotion` instead of `af_app_invites` in your dashboard.<br>
-Click on a link that was generated using `generateInviteLink` api will be register as `af_app_invites`.
+- From version `6.2.30`, `logCrossPromotionAndOpenStore` api will register as `af_cross_promotion` instead of `af_app_invites` in your dashboard.<br>
+  Click on a link that was generated using `generateInviteLink` api will be register as `af_app_invites`.
 
 - From version `6.0.0` we have renamed the following APIs:
 
 | Old API                       | New API                       |
-| ------------------------------|-------------------------------|
+| ----------------------------- | ----------------------------- |
 | trackEvent                    | logEvent                      |
 | trackLocation                 | logLocation                   |
 | stopTracking                  | stop                          |
 | trackCrossPromotionImpression | logCrossPromotionImpression   |
 | trackAndOpenStore             | logCrossPromotionAndOpenStore |
 | setDeviceTrackingDisabled     | anonymizeUser                 |
-| AppsFlyerTracker    | AppsFlyerLib                 |
+| AppsFlyerTracker              | AppsFlyerLib                  |
 
 And removed the following ones:
 
@@ -41,7 +40,7 @@ And removed the following ones:
 - sendDeepLinkData -> no longer needed. See new init guide
 - enableUninstallTracking -> no longer needed. See new uninstall measurement guide
 
-If you have used 1 of the removed APIs, please check the integration guide for the updated instructions
+If you have used 1 of the removed APIs, please check the integration guide for the updated instructions.
 
  ---
 
