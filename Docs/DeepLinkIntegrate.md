@@ -13,7 +13,7 @@ For more info please check out the [OneLink™ Deep Linking Guide](https://suppo
 
 ---
 
-##Android Deeplink Setup
+## Android Deeplink Setup
 
 AppsFlyer SDK inspects activity intent object during onResume(). Because of that, for each activity that may be configured or launched with any [non-standard launch mode](https://developer.android.com/guide/topics/manifest/activity-element#lmode) please make sure to add the following code to `MainActivity.java` in `android/app/src/main/java/com...`:
 ```
