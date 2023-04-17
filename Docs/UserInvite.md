@@ -1,18 +1,15 @@
 # User invite
 
 
-##### 1. <a id="setCustomerUserId"> **`setCustomerUserId(userId, callback)`**
+##### 1. <a id="setAppInviteOneLinkID"> **`setAppInviteOneLinkID(oneLinkID, callback)`**
 
-Setting your own Custom ID enables you to cross-reference your own unique ID with AppsFlyer’s user ID and the other devices’ IDs. This ID is available in AppsFlyer CSV reports along with postbacks APIs for cross-referencing with you internal IDs.<br>
-If you wish to see the CUID (Customer User ID) under your installs raw data reports, it should be called before starting the SDK.<br>
-If you simply would like to add additional user id to the events raw data reports, then you can freely call it anytime you need.
+Set the OneLink ID that should be used for User-Invite-API.<br/>
+The link that is generated for the user invite will use this OneLink ID as the base link ID.
 
-
-| parameter | type     | description      |
-| ----------|----------|------------------|
-| userId    | string   | user ID          |
-| callback  | function | success callback |
-
+| parameter       | type     | description               |
+| ----------      |----------|------------------         |
+| oneLinkID       | string   | oneLinkID                 |
+| callback        | function | success callback          |
  
  
  ##### 2. <a id="generateInviteLink"> **`generateInviteLink(parameters, success, error)`**
@@ -32,7 +29,7 @@ If you simply would like to add additional user id to the events raw data report
 ```javascript
 
 // set the tamplate ID before you generate a link. Without it UserInvite won't work.
-appsFlyer.setAppInviteOneLinkID('scVs', null, null);
+appsFlyer.setAppInviteOneLinkID('scVs', null);
 
 // set the user invite params
 appsFlyer.generateInviteLink(
