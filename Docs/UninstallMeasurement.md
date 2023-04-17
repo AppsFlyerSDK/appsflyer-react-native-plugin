@@ -1,6 +1,6 @@
 # Measure App Uninstalls
 
-#### iOS
+## iOS
 
 #### First method
 
@@ -33,7 +33,7 @@ appsFlyer.updateServerUninstallToken(deviceToken, (success) => {
 });
 ```
 
-#### <a id="measure-app-uninstalls-android"> Android
+## <a id="measure-app-uninstalls-android"> Android
 
 Update Firebase device token so it can be sent to AppsFlyer
 
