@@ -13,8 +13,7 @@ For more info please check out the [OneLink™ Deep Linking Guide](https://suppo
 
 ---
 
-#  Android Deeplink Setup
-## Android Deeplink Setup(only for non-Expo projects)
+##Android Deeplink Setup
 
 AppsFlyer SDK inspects activity intent object during onResume(). Because of that, for each activity that may be configured or launched with any [non-standard launch mode](https://developer.android.com/guide/topics/manifest/activity-element#lmode) please make sure to add the following code to `MainActivity.java` in `android/app/src/main/java/com...`:
 ```
@@ -62,10 +61,9 @@ First, you need to generate SHA256 fingerprint, then add the following intent-fi
 ```
 For more on App Links check out the guide [here](https://dev.appsflyer.com/hc/docs/initial-setup-for-deep-linking-and-deferred-deep-linking#procedures-for-android-app-links).
 
-#  iOS Deeplink Setup
-## iOS Deeplink Setup(only for non-Expo projects)
-
+##  iOS Deeplink Setup
 In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
+
 #### import
 ```objectivec
 #import <RNAppsFlyer.h>
@@ -77,4 +75,69 @@ In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in
   [[AppsFlyerAttribution shared] handleOpenUrl:url options:options];
     return YES;
 }
-For more on App Links check out the guide [here](https://dev.appsflyer.com/hc/docs/initial-setup-for-deep-linking-and-deferred-deep-linking#procedures-for-android-app-links).
+// Open URI-scheme for iOS 8 and below
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
+  [[AppsFlyerAttribution shared] handleOpenUrl:url sourceApplication:sourceApplication annotation:annotation];
+  return YES;
+}
+// Open Universal Links
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nullable))restorationHandler {
+    [[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
+    return YES;
+}
+```
+
+#### Universal Links
+Universal Links link between an iOS mobile app and an associate website/domain, such as AppsFlyer’s OneLink domain (xxx.onelink.me). To do so, it is required to:
+
+1. Configure OneLink sub-domain and link to mobile app (by hosting the ‘apple-app-site-association’ file - AppsFlyer takes care of this part in the onelink setup on your dashboard)
+2. Configure the mobile app to register approved domains:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>com.apple.developer.associated-domains</key>
+        <array>
+            <string>applinks:test.onelink.me</string>
+        </array>
+    </dict>
+</plist>
+```
+
+For more on Universal Links check out the guide [here](https://dev.appsflyer.com/hc/docs/initial-setup-2#getting-the-app-bundle-id-and-prefix-id).
+
+#### URI Scheme
+A URI scheme is a URL that leads users directly to the mobile app.
+When an app user enters a URI scheme in a browser address bar box, or clicks on a link based on a URI scheme, the app launches and the user is deep-linked.
+
+To configure it you will have to:
+
+1. Add a unique url identifier in the URL types entry in the app's `info.plist`
+2. Add URL Scheme as a value.
+
+example of a URL scheme configuration in the `info.plist`:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  ...
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>YOUR.URL.IDENTIFIER</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>YOUR-URL-SCHEME</string>
+			</array>
+		</dict>
+	</array>
+	...
+</dict>
+</plist>
+```
+
+For more on URI Scheme check out the guide [here](https://dev.appsflyer.com/hc/docs/initial-setup-2#procedures-for-uri-scheme).
