@@ -20,7 +20,7 @@ expo install react-native-appsflyer
 ...
 ```
 
-4. ___optinal___ If you are developing a kids app and you wish to use our strict mode, you should add `"shouldUseStrictMode": true` as followed:
+4. ___optional___ If you are developing a kids app and you wish to use our strict mode, you should add `"shouldUseStrictMode": true` as followed:
 ```
 ...
 "plugins": [
