@@ -63,7 +63,7 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [Expo Sample App](/demos/appsflyer-expo-app
 )
 
-### [API reference](/docs/API.md)    
+### [API reference](/Docs/API.md)    
 
 
 
