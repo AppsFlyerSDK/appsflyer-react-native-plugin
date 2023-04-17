@@ -1,4 +1,4 @@
-# UDL flow
+### UDL flow
 
 1. The SDK is triggered by:
    - **Deferred Deep Linking** - using a dedicated API
@@ -8,16 +8,16 @@
 
 > Check out the Unified Deep Linking docs for [Android](https://dev.appsflyer.com/docs/android-unified-deep-linking) and [iOS](https://dev.appsflyer.com/docs/ios-unified-deep-linking).
 
-## Considerations:
+### Considerations:
 
 * Requires AppsFlyer Android SDK V6.1.3 or later.
 * Does not support SRN campaigns.
 * Does not provide af_dp in the API response.
 * onAppOpenAttribution will not be called. All code should migrate to `onDeepLink`.
 
-## Implementation:
+### Implementation:
 
-**Important**  The code implementation for `onDeepLink` must be made **prior to the initialization** code of the SDK.
+___Important___  The code implementation for `onDeepLink` must be made **prior to the initialization** code of the SDK.
 
 Example:
 
@@ -26,7 +26,11 @@ const onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
   if (res?.deepLinkStatus !== 'NOT_FOUND') {
         const DLValue = res?.data.deep_link_value;
         const mediaSrc = res?.data.media_source;
-        const deepLinkSub1 = res?.data.deep_link_sub1; // set deep_link_sub1-10 custom one link params
+        const deepLinkSub1 = res?.data.deep_link_sub1; // get up to 10 custom OneLink params
+	
+	[...]
+	
+	const deepLinkSub10 = res?.data.deep_link_sub10; // get up to 10 custom OneLink params
         console.log(JSON.stringify(res?.data, null, 2));
       }
 })
@@ -37,7 +41,7 @@ appsFlyer.initSdk(
     isDebug: false,
     appId: '41*****44',
     onInstallConversionDataListener: true,
-    onDeepLinkListener: true
+    onDeepLinkListener: true // -->  you must set the onDeepLinkListener to true to get onDeepLink callbacks
   },
   (result) => {
     console.log(result);
