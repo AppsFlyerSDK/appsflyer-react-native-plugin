@@ -19,7 +19,7 @@ AppsFlyer enables you to measure app uninstalls. To handle notifications it requ
 }
 ```
 
-Read more about Uninstall register: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/207032066-AppsFlyer-SDK-Integration-iOS)
+Read more about Uninstall Measurement: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)
 
 #### Second method
 
