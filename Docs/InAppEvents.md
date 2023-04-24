@@ -41,8 +41,10 @@ appsFlyer.logEvent(
 
 ---
 ### <a id="iae"> In-app purchase validation
-Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.<br>
-Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases<br>
+Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.
+<br> 
+Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases).
+<br>
 ❗Important❗ for iOS - set SandBox to ```true```<br>
 ```appsFlyer.setUseReceiptValidationSandbox(true);```
 | parameter       | type     | description                      |
