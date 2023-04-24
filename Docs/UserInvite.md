@@ -37,12 +37,10 @@ appsFlyer.generateInviteLink(
    channel: 'gmail',
    campaign: 'myCampaign',
    customerID: '1234',
-   deep_link_value : 'value', // deep link param
-   deep_link_sub1 : 'sub1', // deep link param
    userParams: {
-     myParam: 'newUser',
-     anotherParam: 'fromWeb',
-     amount: 1,
+     deep_link_value : 'value', // deep link param
+     deep_link_sub1 : 'sub1', // deep link param
+     custom_param : 'custom'
    },
  },
  (link) => {
