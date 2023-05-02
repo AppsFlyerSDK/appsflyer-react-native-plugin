@@ -12,7 +12,7 @@
 
 ### <a id="plugin-build-for"> This plugin is built for
 
-- Android AppsFlyer SDK **v6.10.2**
+- Android AppsFlyer SDK **v6.10.3**
 - iOS AppsFlyer SDK **v6.10.1**
 
 ## <a id="breaking-changes"> ❗❗ Breaking changes when updating to v6.x.x❗❗
@@ -61,5 +61,3 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 ## 🌟 Deep Linking
 
 ### [API refrence](/Docs/API.md)
-
-test
