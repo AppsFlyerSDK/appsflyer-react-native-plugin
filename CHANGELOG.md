@@ -1,3 +1,20 @@
+## 6.10.3
+ Release date: *2023-05-02*
+
+- Update android SDK to 6.10.3
+
+## 6.10.2
+ Release date: *2023-04-03*
+
+- Update Android SDK to v6.10.2
+- Update iOS SDK to v6.10.1
+
+## 6.9.4
+ Release date: *2022-12-27*
+
+- React Native > Change implementation to api when importing native android sdk
+- Update React Native Plugin to v6.9.4
+
 ## 6.9.2
  Release date: *2022-10-20*
 
