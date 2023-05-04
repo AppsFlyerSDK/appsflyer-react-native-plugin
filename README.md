@@ -40,24 +40,33 @@ And removed the following ones:
 - sendDeepLinkData -> no longer needed. See new init guide
 - enableUninstallTracking -> no longer needed. See new uninstall measurement guide
 
-If you have used 1 of the removed APIs, please check the integration guide for the updated instructions
+If you have used 1 of the removed APIs, please check the integration guide for the updated instructions.
 
-## 🚀 Guides
+ ---
 
+ ##  🚀 Getting Started
 - [Installation](/Docs/Installation.md)
-- [**_Expo_** Installation](/Docs/Expo.md)
-- [Integration](/Docs/BasicIntegration.md)
-- [Testing the integration](/Docs/Testing.md)
-- [In-app Events](/Docs/InAppEvents.md)
-- [Deep Linking](/Docs/DeepLink.md)
-- [Advanced APIs](/Docs/AdvancedAPI.md)
-- [APIs](/Docs/API.md)
-- [React-Native Sample App](/demos)
+- [***Expo*** Installation](/Docs/ExpoInstallasion.md)
+- [Integration](/Docs/Integration.md)
+- [Test integration](/Docs/Testing.md)
+- [In-app events](/Docs/InAppEvents.md)
+- [Uninstall measurement](/Docs/UninstallMeasurement.md)
+##  🔗 Deep Linking
+- [Integration](/Docs/DeepLinkIntegrate.md)
+- [***Expo*** Integration](/Docs/ExpoDeepLinkIntegration.md)
+- [Unified Deep Link (UDL)](/Docs/UnifiedDeepLink.md)
+- [User Invite](/Docs/UserInvite.md)
+## 🧪 Sample Apps
+- [React-Native Sample App](/demos/appsflyer-react-native-app
+)
+- [Expo Sample App](/demos/appsflyer-expo-app
+)
 
-## 🌟 Deep Linking
+### [API reference](/Docs/API.md)    
 
 - [Deep Linking](/Docs/DeepLink.md)
 
 ## 🌟 Deep Linking
 
 ### [API refrence](/Docs/API.md)
+
