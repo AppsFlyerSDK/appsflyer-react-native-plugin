@@ -1,5 +1,13 @@
+---
+title: Integration
+category: 5f9705393c689a065c409b23
+parentDoc: 645213236f53a00d4daa9230
+order: 1
+hidden: true
+---
+
 # Basic integration of the SDK
-Initialize the SDK to enable AppsFlyer to detect installations, sessions (app opens) and updates.<br>
+Initialize the SDK to enable AppsFlyer to detect installations, sessions (app opens) and updates.
 
 
 | Setting  | Description   |

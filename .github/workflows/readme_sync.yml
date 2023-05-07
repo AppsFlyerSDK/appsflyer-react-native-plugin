@@ -1,0 +1,22 @@
+name: Sync `docs` directory to ReadMe
+
+# Run workflow for every push to the `main` branch
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+
+      # Run GitHub Action to sync docs in `documentation` directory
+      - name: GitHub Action
+        # We recommend specifying a fixed version, i.e. @7.5.0
+        # Docs: https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions#example-using-versioned-actions
+        uses: readmeio/rdme@7.5.0
+        with:
+          rdme: docs ./docs --key=${{ secrets.README_SYNC_API_KEY }} --version=0.1
