@@ -8,15 +8,15 @@ hidden: true
 # Adding react-native-appsflyer to your project
 
 - Installation using CLI
-  - [Installation with autolinking](#Installation-with-autolinking)
-  - [Installation without autolinking](#Installation-without-autolinking)
+  - [Installation with autolinking](#installation-with-autolinking)
+  - [Installation without autolinking](#installation-without-autolinking)
 - Manual installation
   - [iOS](#manual-installation-ios)
   - [Android](#manual-installation-android)
 - Add strict-mode for App-kids
 - The AD_ID permission for android apps
 
-## <a id="Installation-with-autolinking"> Installation (with [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md))
+## Installation with [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md)
 
 Run the following:
   
@@ -25,7 +25,7 @@ $ npm install react-native-appsflyer --save
 $ cd ios && pod install
 ```
 
-## <a id="Installation-without-autolinking"> Installation (without [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md))
+## Installation without [autolinking](https://github.com/react-native-community/cli/blob/master/docs/autolinking.md)
   
   
   Run the following:
