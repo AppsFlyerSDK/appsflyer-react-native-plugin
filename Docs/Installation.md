@@ -1,3 +1,10 @@
+---
+title: Installation
+category: 5f9705393c689a065c409b23
+parentDoc: 645213236f53a00d4daa9230
+order: 2
+hidden: true
+---
 # Adding react-native-appsflyer to your project
 
 - Installation using CLI
