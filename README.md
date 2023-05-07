@@ -62,11 +62,4 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [Expo Sample App](/demos/appsflyer-expo-app
 )
 
-### [API reference](/Docs/API.md)    
-
-- [Deep Linking](/Docs/DeepLink.md)
-
-## 🌟 Deep Linking
-
-### [API refrence](/Docs/API.md)
-
+### [API reference](/Docs/API.md)
