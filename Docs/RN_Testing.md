@@ -1,9 +1,17 @@
-# Testing
+---
+title: Test integration
+category: 5f9705393c689a065c409b23
+parentDoc: 645213236f53a00d4daa9230
+order: 4
+hidden: true
+---
+
+## Testing
 
 More info about testing the SDK for marketers [here](https://support.appsflyer.com/hc/en-us/articles/360001559405-Test-mobile-SDK-integration-with-the-app#introduction).
 
-- [Testing for iOS](#iOS)
-- [Testing for Android](#Android)
+- [Testing for iOS](#testing-for-ios)
+- [Testing for Android](#testing-for-android)
 
 First, you need to enable debug mode for full logs from the SDK.
 To enable it, set the initialization object with `isDebug` as `true`:
@@ -21,7 +29,7 @@ const option = {
 appsFlyer.initSdk(option, null, null); // null can be functions for success or error handler
 ```
 
-## <a id="iOS"> Testing for iOS
+## Testing for iOS
 Open your ios project with XCode (`appName.xcworkspace`) and run it. In the logs section or in the console app, you will see logs related to AppsFlyer start with `[AppsFlyerSDK]`.<br>
 Search for launch event that looks like this:
 ```
@@ -42,7 +50,7 @@ Result: {
 ```
 For more iOS integration tests, see [Here](https://dev.appsflyer.com/hc/docs/testing-ios)
 
-## <a id="Android"> Testing for Android
+## Testing for Android
 Open your Android project with Android studio (`android` folder) and run it. In the logs section (adb), you will see logs related to AppsFlyer start with `I/AppsFlyer_x.x.x`.<br>
 Search for launch event that looks like this:
 ```

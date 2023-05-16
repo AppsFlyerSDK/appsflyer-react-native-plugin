@@ -1,4 +1,12 @@
-# Install AppsFlyer in an Expo managed project
+---
+title: Expo Installation
+category: 5f9705393c689a065c409b23
+parentDoc: 645213236f53a00d4daa9230
+order: 2
+hidden: true
+---
+
+## Install AppsFlyer in an Expo managed project
 1. Install `expo-dev-client`. You can read more about expo development builds [here](https://docs.expo.dev/development/introduction/):
 ```
 expo install expo-dev-client

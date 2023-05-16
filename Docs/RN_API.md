@@ -1,52 +1,62 @@
-# 📑 APIs
-<img src="https://massets.appsflyer.com/wp-content/uploads/2018/06/20092440/static-ziv_1TP.png"  width="400" >
-
-The list of available methods for this plugin is described below.
-- [Android & iOS APIs](#allAPI)
-    - [initSDK](#initSDK)
-    - [startSdk](#startSdk)
-    - [logEvent](#logEvent)
-    - [setCustomerUserId](#setCustomerUserId)
-    - [stop](#stop)
-    - [setAppInviteOneLinkID](#setAppInviteOneLinkID)
-    - [setAdditionalData](#setAdditionalData)
-    - [setResolveDeepLinkURLs](#setResolveDeepLinkURLs)
-    - [setOneLinkCustomDomain](#setOneLinkCustomDomain)
-    - [setCurrencyCode](#setCurrencyCode)
-    - [logLocation](#logLocation)
-    - [anonymizeUser](#anonymizeUser)
-    - [getAppsFlyerUID](#getAppsFlyerUID)
-    - [setHost](#setHost)
-    - [setUserEmails](#setUserEmails)
-    - [generateInviteLink](#generateInviteLink)
-    - [setSharingFilterForAllPartners](#setSharingFilterForAllPartners)[Deprecated]
-    - [setSharingFilter](#setSharingFilter)[Deprecated]
-    - [setSharingFilterForPartners](#setSharingFilterForPartners)
-    - [validateAndLogInAppPurchase](#validateAndLogInAppPurchase)
-    - [updateServerUninstallToken](#updateServerUninstallToken)
-    - [sendPushNotificationData](#sendPushNotificationData)
-    - [addPushNotificationDeepLinkPath](#addPushNotificationDeepLinkPath)
-    - [appendParametersToDeepLinkingURL](#appendParametersToDeepLinkingURL)
-- [Android Only APIs](#androidOnly)
-    - [setCollectAndroidID](#setCollectAndroidID)
-    - [setCollectIMEI](#setCollectIMEI)
-    - [setDisableNetworkData](#setDisableNetworkData)
-    - [performOnDeepLinking](#performOnDeepLinking)
-- [iOS Only APIs](#iOSOnly)
-    - [disableCollectASA](#disableCollectASA)
-    - [setUseReceiptValidationSandbox](#setUseReceiptValidationSandbox)
-    - [disableSKAD](#disableSKAD)
-    - [setCurrentDeviceLanguage](#setCurrentDeviceLanguage)
-    - [disableIDFVCollection](#disableIDFVCollection)
-- [AppsFlyerConversionData](#AppsFlyerConversionData)
-    - [onInstallConversionData](#onInstallConversionData)
-    - [onInstallConversionFailure](#onInstallConversionFailure)
-    - [onAppOpenAttribution](#onAppOpenAttribution)
-    - [onAttributionFailure](#onAttributionFailure)
-    - [onDeepLink](#onDeepLink)
+---
+title: API reference
+category: 5f9705393c689a065c409b23
+parentDoc: 645213236f53a00d4daa9230
+order: 11
+hidden: true
 ---
 
-##### <a id="initSDK"> **`initSdk(options, success, error)`**
+## APIs
+
+The list of available methods for this plugin is described below.
+- [Android and iOS APIs](#android-and-ios-apis)
+    - [initSDK](#initsdk)
+    - [startSdk](#startsdk)
+    - [logEvent](#logevent)
+    - [setCustomerUserId](#setcustomeruserid)
+    - [stop](#stop)
+    - [setAppInviteOneLinkID](#setappinviteonelinkid)
+    - [setAdditionalData](#setadditionaldata)
+    - [setResolveDeepLinkURLs](#setresolvedeeplinkurls)
+    - [setOneLinkCustomDomain](#setonelinkcustomdomain)
+    - [setCurrencyCode](#setcurrencycode)
+    - [logLocation](#loglocation)
+    - [anonymizeUser](#anonymizeuser)
+    - [getAppsFlyerUID](#getappsflyeruid)
+    - [setHost](#sethost)
+    - [setUserEmails](#setuseremails)
+    - [generateInviteLink](#generateinvitelink)
+    - [setSharingFilterForAllPartners](#setsharingfilterforallpartners) *Deprecated*
+    - [setSharingFilter](#setsharingfilter) *Deprecated*
+    - [setSharingFilterForPartners](#setsharingfilterforpartners)
+    - [validateAndLogInAppPurchase](#validateandloginapppurchase)
+    - [updateServerUninstallToken](#updateserveruninstalltoken)
+    - [sendPushNotificationData](#sendpushnotificationdata)
+    - [addPushNotificationDeepLinkPath](#addpushnotificationdeeplinkpath)
+    - [appendParametersToDeepLinkingURL](#appendparameterstodeeplinkingurl)
+- [Android Only APIs](#android-only-apis)
+    - [setCollectAndroidID](#setcollectandroidid)
+    - [setCollectIMEI](#setcollectimei)
+    - [setDisableNetworkData](#setdisablenetworkdata)
+    - [performOnDeepLinking](#performondeeplinking)
+- [iOS Only APIs](#ios-only-apis)
+    - [disableCollectASA](#disablecollectasa)
+    - [setUseReceiptValidationSandbox](#setusereceiptvalidationsandbox)
+    - [disableSKAD](#disableskad)
+    - [setCurrentDeviceLanguage](#setcurrentdevicelanguage)
+    - [disableIDFVCollection](#disableidfvcollection)
+- [AppsFlyerConversionData](#appsflyerconversiondata)
+    - [onInstallConversionData](#oninstallconversiondata)
+    - [onInstallConversionFailure](#oninstallconversionfailure)
+    - [onAppOpenAttribution](#onappopenattribution)
+    - [onAttributionFailure](#onattributionfailure)
+    - [onDeepLink](#ondeeplink)
+---
+
+## Android and iOS APIs
+
+### initSdk 
+`initSdk(options, success, error)`
 
 Initialize the AppsFlyer SDK with the devKey and appID.<br/>
 The dev key is required for all apps and the appID is required only for iOS.<br/>
@@ -93,10 +103,10 @@ appsFlyer.initSdk(
   }
 );
 ```
-
 ---
 
-##### <a id="startSdk"> **`startSdk()`**
+#### startSdk
+`startSdk()`
 
 In version 6.9.1 of the react-native-appslfyer SDK we added the option of splitting between the initialization stage and start stage. All you need to do is add the property manualStart: true to the init object, and later call appsFlyer.startSdk() whenever you decide. If this property is set to false or doesn’t exist, the sdk will start after calling `appsFlyer.initSdk(...)`.
 
@@ -133,7 +143,8 @@ appsFlyer.initSdk(
 ```
 ---
 
-##### <a id="logEvent"> **`logEvent(eventName, eventValues, success, error)`**
+#### logEvent
+`logEvent(eventName, eventValues, success, error)`
 
 In-App Events provide insight on what is happening in your app. It is recommended to take the time and define the events you want to measure to allow you to measure ROI (Return on Investment) and LTV (Lifetime Value).
 
@@ -172,7 +183,8 @@ appsFlyer.logEvent(
 
 ---
 
-##### <a id="setCustomerUserId"> **`setCustomerUserId(userId, callback)`**
+### setCustomerUserId
+`setCustomerUserId(userId, callback)`
 
 Setting your own Custom ID enables you to cross-reference your own unique ID with AppsFlyer’s user ID and the other devices’ IDs. This ID is available in AppsFlyer CSV reports along with postbacks APIs for cross-referencing with you internal IDs.<br>
 If you wish to see the CUID (Customer User ID) under your installs raw data reports, it should be called before starting the SDK.<br>
@@ -195,7 +207,8 @@ appsFlyer.setCustomerUserId('some_user_id', (res) => {
 
 ---
 
-##### <a id="stop"> **`stop(isStopped, callback)`**
+### stop
+`stop(isStopped, callback)`
 
 In some extreme cases you might want to shut down all SDK functions due to legal and privacy compliance. This can be achieved with the stopSDK API. Once this API is invoked, our SDK no longer communicates with our servers and stops functioning.
 
@@ -219,7 +232,8 @@ appsFlyer.stop(true, (res) => {
 
 ---
 
-##### <a id="setAppInviteOneLinkID"> **`setAppInviteOneLinkID(oneLinkID, callback)`**
+### setAppInviteOneLinkID
+`setAppInviteOneLinkID(oneLinkID, callback)`
 
 Set the OneLink ID that should be used for User-Invite-API.<br/>
 The link that is generated for the user invite will use this OneLink ID as the base link ID.
@@ -240,7 +254,8 @@ appsFlyer.setAppInviteOneLinkID('abcd', (res) => {
 
 ---
 
-##### <a id="setAdditionalData"> **`setAdditionalData(additionalData, callback)`**
+### setAdditionalData
+`setAdditionalData(additionalData, callback)`
 
 The setAdditionalData API is required to integrate on the SDK level with several external partner platforms, including Segment, Adobe and Urban Airship. Use this API only if the integration article of the platform specifically states setAdditionalData API is needed.
 
@@ -267,7 +282,8 @@ appsFlyer.setAdditionalData(
 
 ---
 
-##### <a id="setResolveDeepLinkURLs"> **`setResolveDeepLinkURLs(urls, successC, errorC)`**
+### setResolveDeepLinkURLs
+`setResolveDeepLinkURLs(urls, successC, errorC)`
 
 Set domains used by ESP when wrapping your deeplinks.<br/>
 Use this API during the SDK Initialization to indicate that links from certain domains should be resolved in order to get original deeplink<br/>
@@ -293,7 +309,8 @@ appsFlyer.setResolveDeepLinkURLs(["click.esp-domain.com"],
 
 ---
 
-##### <a id="setOneLinkCustomDomains"> **`setOneLinkCustomDomains(domains, successC, errorC)`**
+### setOneLinkCustomDomains
+`setOneLinkCustomDomains(domains, successC, errorC)`
 
  Set Onelink custom/branded domains<br/>
  Use this API during the SDK Initialization to indicate branded domains.<br/>
@@ -319,7 +336,8 @@ appsFlyer.setOneLinkCustomDomains(["click.mybrand.com"],
 
 ---
 
-##### <a id="setCurrencyCode"> **`setCurrencyCode(currencyCode, callback)`**
+### setCurrencyCode
+`setCurrencyCode(currencyCode, callback)`
 
 Setting user local currency code for in-app purchases.<br/>
 The currency code should be a 3 character ISO 4217 code. (default is USD).<br/>
@@ -339,7 +357,8 @@ appsFlyer.setCurrencyCode(currencyCode, () => {});
 
 ---
 
-##### <a id="logLocation"> **`logLocation(longitude, latitude, callback)`**
+### logLocation
+`logLocation(longitude, latitude, callback)`
 
 Manually record the location of the user.
 
@@ -367,11 +386,12 @@ appsFlyer.logLocation(longitude, latitude, (err, coords) => {
 
 ---
 
-##### <a id="anonymizeUser"> **`anonymizeUser(shouldAnonymize, callback)`**
+### anonymizeUser
+`anonymizeUser(shouldAnonymize, callback)`
 
-It is possible to anonymize specific user identifiers within AppsFlyer analytics.<br/>
-This complies with both the latest privacy requirements (GDPR, COPPA) and Facebook's data and privacy policies.<br/>
-To anonymize an app user:<br/>
+It is possible to anonymize specific user identifiers within AppsFlyer analytics.
+This complies with both the latest privacy requirements (GDPR, COPPA) and Facebook's data and privacy policies.
+To anonymize an app user.
 
 | parameter                   | type     | description                                                |
 | ----------                  |----------|------------------                                          |
@@ -387,7 +407,8 @@ appsFlyer.anonymizeUser(true, () => {});
 
 ---
 
-##### <a id="getAppsFlyerUID"> **`getAppsFlyerUID(callback)`**
+### getAppsFlyerUID
+`getAppsFlyerUID(callback)`
 
 AppsFlyer's unique device ID is created for every new install of an app. Use the following API to obtain AppsFlyer’s Unique ID.
 
@@ -411,7 +432,8 @@ appsFlyer.getAppsFlyerUID((err, appsFlyerUID) => {
 
 ---
 
-##### <a id="setHost"> **`setHost(hostPrefix, hostName, successC)`**
+### setHost
+`setHost(hostPrefix, hostName, successC)`
 
 Set a custom host
 
@@ -429,10 +451,11 @@ appsFlyer.setHost('foo', 'bar.appsflyer.com', res => console.log(res));
 ```
 ---
 
-##### <a id="setUserEmails"> **`setUserEmails(options, success, error)`**
+### setUserEmails
+`setUserEmails(options, success, error)`
 
-Set the user emails and encrypt them.<br>
-**Note:** Android platform supports only 0 (none) and 3 (SHA256) emailsCryptType. iOS platform support all (0-3) emailsCryptType.<br>
+Set the user emails and encrypt them.
+**Note:** Android platform supports only 0 (none) and 3 (SHA256) emailsCryptType. iOS platform support all (0-3) emailsCryptType.
 When unsupported emailsCryptType is passed, the SDK will use the default (none).
 
 | parameter       | type     | description               |
@@ -470,7 +493,8 @@ appsFlyer.setUserEmails(
 
 ---
 
-##### <a id="generateInviteLink"> **`generateInviteLink(parameters, success, error)`**
+### generateInviteLink
+`generateInviteLink(parameters, success, error)`
 
 
 | parameter       | type     | description                      |
@@ -507,8 +531,9 @@ A complete list of supported parameters is available [here](https://support.apps
 
 ---
 
-##### <a id="setSharingFilterForAllPartners"> **`setSharingFilterForAllPartners()`**
-##### Deprecated! Start from version 6.4.0 please use [setSharingFilterForPartners](#setSharingFilterForPartners)
+### setSharingFilterForAllPartners
+`setSharingFilterForAllPartners()`
+> **Deprecated!** Start from version 6.4.0 please use [setSharingFilterForPartners](#setSharingFilterForPartners)
 Used by advertisers to exclude **all** networks/integrated partners from getting data. Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data)
 
 *Example:*
@@ -518,8 +543,9 @@ appsFlyer.setSharingFilterForAllPartners()
 ```
 ---
 
-##### <a id="setSharingFilter"> **`setSharingFilter(partners, sucessC, errorC)`**
-##### Deprecated! Start from version 6.4.0 please use [setSharingFilterForPartners](#setSharingFilterForPartners)
+### setSharingFilter
+`setSharingFilter(partners, sucessC, errorC)`
+> **Deprecated!** Start from version 6.4.0 please use [setSharingFilterForPartners](#setSharingFilterForPartners)
 Used by advertisers to exclude **specified** networks/integrated partners from getting data. Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data)
 
 | parameter                   | type     | description                                                |
@@ -540,10 +566,10 @@ appsFlyer.setSharingFilterForAllPartners(partners,
 ```
 ---
 
-##### <a id="setSharingFilterForPartners"> **`setSharingFilterForPartners(partners)`**
+### setSharingFilterForPartners
+`setSharingFilterForPartners(partners)`
 
 Used by advertisers to exclude networks/integrated partners from getting data.
-
 
 | parameter                   | type     | description                                                |
 | ----------                  |----------|------------------                                          |
@@ -561,10 +587,11 @@ appsFlyer.setSharingFilterForPartners(['googleadwords_int', 'all']);            
 ```
 ---
 
-##### <a id="validateAndLogInAppPurchase"> **`validateAndLogInAppPurchase(purchaseInfo, successC, errorC): Response<string>`**
-Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.<br>
-Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases<br>
-❗Important❗ for iOS - set SandBox to ```true```<br>
+### validateAndLogInAppPurchase
+`validateAndLogInAppPurchase(purchaseInfo, successC, errorC): Response<string>`
+Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.
+Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases
+❗Important❗ for iOS - set SandBox to ```true```
 ```appsFlyer.setUseReceiptValidationSandbox(true);```
 
 
@@ -595,7 +622,8 @@ appsFlyer.validateAndLogInAppPurchase(info, res => console.log(res), err => cons
 
 ---
 
-##### <a id="updateServerUninstallToken"> **`updateServerUninstallToken(token, callback)`**
+### updateServerUninstallToken
+`updateServerUninstallToken(token, callback)`
 
 Manually pass the Firebase / GCM Device Token for Uninstall measurement.
 
@@ -615,7 +643,8 @@ appsFlyer.updateServerUninstallToken('token', (res) => {
 
 ---
 
-##### <a id="sendPushNotificationData"> **`sendPushNotificationData(pushPayload, ErrorCB): void`**
+### sendPushNotificationData
+`sendPushNotificationData(pushPayload, ErrorCB): void`
 Push-notification campaigns are used to create fast re-engagements with existing users.<br>
 [Learn more](https://support.appsflyer.com/hc/en-us/articles/207364076-Measuring-Push-Notification-Re-Engagement-Campaigns)<br>
 For Android platform, AppsFlyer SDK uses the activity in order to process the push payload. Make sure you call this api when the app's activity is available (NOT dead state).<br>
@@ -646,7 +675,8 @@ const pushPayload = {
 ```
 
 ---
-##### <a id="addPushNotificationDeepLinkPath"> **`addPushNotificationDeepLinkPath(path, SuccessCB, ErrorCB): void`**
+### addPushNotificationDeepLinkPath
+`addPushNotificationDeepLinkPath(path, SuccessCB, ErrorCB): void`
 
 Adds array of keys, which are used to compose key path to resolve deeplink from push notification payload.
 
@@ -680,7 +710,8 @@ This call matches the following payload structure:
 ```
 
 ---
-##### <a id="appendParametersToDeepLinkingURL"> **`appendParametersToDeepLinkingURL(contains, parameters): void`**
+### appendParametersToDeepLinkingURL
+`appendParametersToDeepLinkingURL(contains, parameters): void`
 
 Matches URLs that contain `contains` as a substring and appends query parameters to them. In case the URL does not match, parameters are not appended to it.<br>
 Note:<br>
@@ -700,9 +731,10 @@ Note:<br>
 appsFlyer.appendParametersToDeepLinkingURL('substring-of-url', {param1: 'value', pid: 'value2', is_retargeting: 'true'});
 ```
 
-## <a id="androidOnly"> Android Only APIs
+## Android Only APIs
 
-##### <a id="setCollectAndroidID"> **`setCollectAndroidID(isCollect, callback)`**
+### setCollectAndroidID 
+`setCollectAndroidID(isCollect, callback)`
 
 Opt-out of collection of Android ID.<br/>
 If the app does NOT contain Google Play Services, Android ID is collected by the SDK.<br/>
@@ -726,7 +758,8 @@ appsFlyer.setCollectAndroidID(true, (res) => {
 
 ---
 
-##### <a id="setCollectIMEI"> **`setCollectIMEI(isCollect, callback)`**
+### setCollectIMEI 
+`setCollectIMEI(isCollect, callback)`
 
 Opt-out of collection of IMEI.<br/>
 If the app does NOT contain Google Play Services, device IMEI is collected by the SDK.<br/>
@@ -748,7 +781,7 @@ appsFlyer.setCollectIMEI(false, (res) => {
 }
 ```
 
-##### <a id="setDisableNetworkData"> **`setDisableNetworkData(disable)`**
+### setDisableNetworkData `setDisableNetworkData(disable)`
 
 Use to opt-out of collecting the network operator name (carrier) and sim operator name from the device.
 
@@ -764,7 +797,8 @@ appsFlyer.setDisableNetworkData(true);
 }
 ```
 
-##### <a id="performOnDeepLinking"> **`performOnDeepLinking()`**
+### performOnDeepLinking 
+`performOnDeepLinking()`
 
 Enables manual triggering of deep link resolution. This method allows apps that are delaying the call to `appsFlyer.startSdk()` to resolve deep links before the SDK starts.<br>
 Note:<br>This API will trigger the `appsFlyer.onDeepLink` callback. In the following example, we check if `res.deepLinkStatus` is equal to “FOUND” inside `appsFlyer.onDeepLink` callback to extract the deeplink parameters.
@@ -809,9 +843,10 @@ if (Platform.OS == 'android') {
 
 appsFlyer.startSdk(); // <--- Here we send launch
 ```
-## <a id="iOSOnly"> iOS Only APIs
+## iOS Only APIs
 
-##### <a id="disableCollectASA"> **`disableCollectASA(shouldDisable)`**
+### disableCollectASA 
+`disableCollectASA(shouldDisable)`
 
 Disables Apple Search Ads collecting
 
@@ -829,7 +864,8 @@ appsFlyer.disableCollectASA(true);
 
 ---
 
-##### <a id="disableIDFVCollection"> **`disableIDFVCollection(shouldDisable)`**
+### disableIDFVCollection 
+`disableIDFVCollection(shouldDisable)`
 
 Disables app vendor identifier (IDFV) collection in iOS.<br>
 Default is false (the SDK will collect IDFV).
@@ -848,8 +884,8 @@ appsFlyer.disableIDFVCollection(true);
 
 ---
 
-##### <a id="setUseReceiptValidationSandbox"> **`void setUseReceiptValidationSandbox(bool useReceiptValidationSandbox)`**
- 
+### setUseReceiptValidationSandbox 
+`void setUseReceiptValidationSandbox(bool useReceiptValidationSandbox)`
 
 In app purchase receipt validation Apple environment(production or sandbox). The default value is false.
 
@@ -865,7 +901,8 @@ appsFlyer.setUseReceiptValidationSandbox(true);
 
 ---
 
-##### <a id="disableSKAD"> **`disableSKAD(disableSkad)`**
+### disableSKAD 
+`disableSKAD(disableSkad)`
 
 ❗Important❗ `disableSKAD` must be called before calling `initSDK` and for iOS ONLY!
 
@@ -884,7 +921,8 @@ if (Platform.OS == 'ios') {
 
 ---
 
-##### <a id="setCurrentDeviceLanguage"> **`setCurrentDeviceLanguage(language)`**
+### setCurrentDeviceLanguage 
+`setCurrentDeviceLanguage(language)`
 
 Set the language of the device. The data will be displayed in Raw Data Reports<br>
 If you want to clear this property, set an empty string. ("")
@@ -902,8 +940,10 @@ if (Platform.OS == 'ios') {
 }
 ```
 
-## <a id="AppsFlyerConversionData"> AppsFlyerConversionData
-##### <a id="onInstallConversionData"> **`onInstallConversionData(callback) : function:unregister`**
+## AppsFlyerConversionData
+
+### onInstallConversionData 
+`onInstallConversionData(callback) : function:unregister`
 
 Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking).<br/>
 
@@ -950,13 +990,14 @@ appsFlyer.initSdk(/*...*/);
 }
 ```
 
-> **Note** is_first_launch will be "true" (string) on Android and true (boolean) on iOS. To solve this issue wrap is_first_launch with JSON.parse(res.data.is_first_launch) as in the example above.
+ Note** is_first_launch will be "true" (string) on Android and true (boolean) on iOS. To solve this issue wrap is_first_launch with JSON.parse(res.data.is_first_launch) as in the example above.
 
 `appsFlyer.onInstallConversionData` returns a function the will allow us to call `NativeAppEventEmitter.remove()`.<br/>
 
 ---
 
-##### <a id="onInstallConversionFailure"> **`onInstallConversionFailure(callback) : function:unregister`**
+### onInstallConversionFailure
+`onInstallConversionFailure(callback) : function:unregister`
  
 
 | parameter    | type     | description                               |
@@ -982,7 +1023,8 @@ appsFlyer.initSdk(/*...*/);
 ```
 ---
 
-##### <a id="onAppOpenAttribution"> **`onAppOpenAttribution(callback) : function:unregister`**
+### onAppOpenAttribution
+`onAppOpenAttribution(callback) : function:unregister`
 
 This API is related to DeepLinks. Please read more [here](./DeepLink.md)
  
@@ -1002,7 +1044,8 @@ appsFlyer.initSdk(/*...*/);
 
 ---
 
-##### <a id="onAttributionFailure"> **`onAttributionFailure(callback) : function:unregister`**
+### onAttributionFailure
+`onAttributionFailure(callback) : function:unregister`
 
 This API is related to DeepLinks. Please read more [here](./DeepLink.md)
  
@@ -1022,7 +1065,8 @@ appsFlyer.initSdk(/*...*/);
 
 ---
 
-##### <a id="onDeepLink"> **`onDeepLink(callback) : function:unregister`**
+### onDeepLink
+`onDeepLink(callback) : function:unregister`
  
  This API is related to DeepLinks. Please read more [here](./DeepLink.md)
 

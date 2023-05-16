@@ -1,9 +1,17 @@
+---
+title: User invite
+category: 5f9705393c689a065c409b23
+parentDoc: 645213236f53a00d4daa9230
+order: 10
+hidden: true
+---
+
 # User invite
 
 
-##### 1. <a id="setAppInviteOneLinkID"> **`setAppInviteOneLinkID(oneLinkID, callback)`**
+##### 1. `setAppInviteOneLinkID(oneLinkID, callback)`
 
-Set the OneLink ID that should be used for User-Invite-API.<br/>
+Set the OneLink ID that should be used for User-Invite-API.
 The link that is generated for the user invite will use this OneLink ID as the base link ID.
 
 | parameter       | type     | description               |
@@ -12,7 +20,7 @@ The link that is generated for the user invite will use this OneLink ID as the b
 | callback        | function | success callback          |
  
  
- ##### 2. <a id="generateInviteLink"> **`generateInviteLink(parameters, success, error)`**
+ ##### 2. `generateInviteLink(parameters, success, error)`
  A complete list of supported parameters is available [here](https://support.appsflyer.com/hc/en-us/articles/115004480866-User-Invite-Tracking). Custom parameters can be passed using a userParams{} nested object, as in the example above.
 
 

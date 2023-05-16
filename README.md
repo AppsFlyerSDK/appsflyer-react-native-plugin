@@ -45,17 +45,17 @@ If you have used 1 of the removed APIs, please check the integration guide for t
  ---
 
  ##  🚀 Getting Started
-- [Installation](/Docs/Installation.md)
-- [***Expo*** Installation](/Docs/ExpoInstallasion.md)
-- [Integration](/Docs/Integration.md)
-- [Test integration](/Docs/Testing.md)
-- [In-app events](/Docs/InAppEvents.md)
-- [Uninstall measurement](/Docs/UninstallMeasurement.md)
+- [Installation](/Docs/RN_Installation.md)
+- [***Expo*** Installation](/Docs/RN_ExpoInstallasion.md)
+- [Integration](/Docs/RN_Integration.md)
+- [Test integration](/Docs/RN_Testing.md)
+- [In-app events](/Docs/RN_InAppEvents.md)
+- [Uninstall measurement](/Docs/RN_UninstallMeasurement.md)
 ##  🔗 Deep Linking
-- [Integration](/Docs/DeepLinkIntegrate.md)
-- [***Expo*** Integration](/Docs/ExpoDeepLinkIntegration.md)
-- [Unified Deep Link (UDL)](/Docs/UnifiedDeepLink.md)
-- [User Invite](/Docs/UserInvite.md)
+- [Integration](/Docs/RN_DeepLinkIntegrate.md)
+- [***Expo*** Integration](/Docs/RN_ExpoDeepLinkIntegration.md)
+- [Unified Deep Link (UDL)](/Docs/RN_UnifiedDeepLink.md)
+- [User Invite](/Docs/RN_UserInvite.md)
 ## 🧪 Sample Apps
 - [React-Native Sample App](/demos/appsflyer-react-native-app
 )

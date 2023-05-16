@@ -1,4 +1,12 @@
-# In-App events
+---
+title: In-App Events
+category: 5f9705393c689a065c409b23
+parentDoc: 645213236f53a00d4daa9230
+order: 5
+hidden: true
+---
+
+## In-App events
 
 In-App Events provide insight on what is happening in your app. It is recommended to take the time and define the events you want to measure to allow you to measure ROI (Return on Investment) and LTV (Lifetime Value).
 
@@ -10,12 +18,13 @@ Find more info about recording events [here](https://dev.appsflyer.com/hc/docs/i
 ## Send Event
 
 **`logEvent(eventName, eventValues, success, error)`**
+
 | parameter    | type     | description                                   |
 | -----------  |----------|------------------------------------------     |
-| eventName    | string   |  In-App Event name                       
+| eventName    | string   |  In-App Event name  |                      
 | eventValues  | json     | The event values that are sent with the event 
-| success      | function | success callback                              
-| error        | function | error callback                              
+| success      | function | success callback |                             
+| error        | function | error callback |                          
 
 
 *Example:*
@@ -40,18 +49,19 @@ appsFlyer.logEvent(
 ```
 
 ---
-### <a id="iae"> In-app purchase validation
+## In-app purchase validation
 Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.
-<br> 
 Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases).
-<br>
-❗Important❗ for iOS - set SandBox to ```true```<br>
+
+❗Important❗ for iOS - set SandBox to ```true```
 ```appsFlyer.setUseReceiptValidationSandbox(true);```
+
 | parameter       | type     | description                      |
 | ----------      |----------|------------------                |
-| purchaseInfo      | json     | In-App Purchase parameters      |
-| successC         | function | success callback (generated link)|
-| errorC           | function | error callback                   |
+| purchaseInfo    | json     | In-App Purchase parameters      |
+| successC        | function | success callback (generated link) |
+| errorC          | function | error callback                   |
+
 *Example:*
 ```javascript
 let info = {
