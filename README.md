@@ -46,7 +46,7 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 
  ##  🚀 Getting Started
 - [Installation](/Docs/RN_Installation.md)
-- [***Expo*** Installation](/Docs/RN_ExpoInstallasion.md)
+- [***Expo*** Installation](/Docs/RN_ExpoInstallation.md)
 - [Integration](/Docs/RN_Integration.md)
 - [Test integration](/Docs/RN_Testing.md)
 - [In-app events](/Docs/RN_InAppEvents.md)
@@ -62,4 +62,4 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [Expo Sample App](/demos/appsflyer-expo-app
 )
 
-### [API reference](/Docs/API.md)
+### [API reference](/Docs/RN_API.md)
