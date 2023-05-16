@@ -58,7 +58,6 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [User Invite](/Docs/RN_UserInvite.md)
 ## 🧪 Sample Apps
 - [React-Native Sample App](/demos/appsflyer-react-native-app)
-- [🆕 Expo Sample App]([/demos/appsflyer-expo-app](https://github.com/AppsFlyerSDK/appsflyer-expo-sample-app)
-)
+- [🆕 Expo Sample App](https://github.com/AppsFlyerSDK/appsflyer-expo-sample-app)
 
 ### [API reference](/Docs/RN_API.md)
