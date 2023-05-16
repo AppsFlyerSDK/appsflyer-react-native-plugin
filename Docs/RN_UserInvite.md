@@ -3,7 +3,7 @@ title: User invite
 category: 5f9705393c689a065c409b23
 parentDoc: 645213236f53a00d4daa9230
 order: 10
-hidden: true
+hidden: false
 ---
 
 # User invite
