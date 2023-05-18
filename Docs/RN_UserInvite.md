@@ -48,7 +48,8 @@ appsFlyer.generateInviteLink(
    userParams: {
      deep_link_value : 'value', // deep link param
      deep_link_sub1 : 'sub1', // deep link param
-     custom_param : 'custom'
+     custom_param : 'custom',
+     brandDomain:'myexample.com'
    },
  },
  (link) => {
