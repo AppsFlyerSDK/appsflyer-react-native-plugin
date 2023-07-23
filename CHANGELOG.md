@@ -1,3 +1,8 @@
+## 6.10.3
+ Release date: *2023-05-02*
+
+- Update android SDK to 6.10.3
+
 ## 6.10.2
  Release date: *2023-04-03*
 
