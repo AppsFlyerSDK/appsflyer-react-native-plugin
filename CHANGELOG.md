@@ -1,7 +1,7 @@
 ## 6.12.1
- Release date: *2023-07-24*
+ Release date: *2023-07-26*
 
-- Add 'link' property for onDeepLink object
+- Add 'link' property to onDeepLink object
 - Update Android sdk v6.12.1
 - Update iOS sdk v6.12.0
 
