@@ -58,6 +58,7 @@ declare module "react-native-appsflyer" {
             deep_link_sub1?: string;
             media_source: string;
             pid?: string;
+            link: string,
             af_sub1?: string;
             af_sub2?: string;
             af_sub3?: string;
