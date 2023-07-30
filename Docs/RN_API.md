@@ -738,7 +738,7 @@ appsFlyer.appendParametersToDeepLinkingURL('substring-of-url', {param1: 'value',
 
 Disables collection of various Advertising IDs by the SDK.<br>
 **Anroid:** Google Advertising ID (GAID), OAID and Amazon Advertising ID (AAID)<br>
-**iOS:** Apple's advertisingIdentifier
+**iOS:** Apple's advertisingIdentifier (IDFA)
 
 | parameter       | type     | description                      |
 | ----------      |----------|------------------                |
