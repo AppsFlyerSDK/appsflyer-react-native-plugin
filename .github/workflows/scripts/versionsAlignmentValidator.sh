@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Plugin version from release branch
 PLUGIN_VERSION=$1
