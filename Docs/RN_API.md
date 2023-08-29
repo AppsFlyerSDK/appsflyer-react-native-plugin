@@ -34,6 +34,7 @@ The list of available methods for this plugin is described below.
     - [sendPushNotificationData](#sendpushnotificationdata)
     - [addPushNotificationDeepLinkPath](#addpushnotificationdeeplinkpath)
     - [appendParametersToDeepLinkingURL](#appendparameterstodeeplinkingurl)
+    - [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
 - [Android Only APIs](#android-only-apis)
     - [setCollectAndroidID](#setcollectandroidid)
     - [setCollectIMEI](#setcollectimei)
@@ -729,6 +730,24 @@ Note:<br>
 
 ```javascript
 appsFlyer.appendParametersToDeepLinkingURL('substring-of-url', {param1: 'value', pid: 'value2', is_retargeting: 'true'});
+```
+
+---
+### disableAdvertisingIdentifier
+`disableAdvertisingIdentifier(shouldDisdable): void`
+
+Disables collection of various Advertising IDs by the SDK.<br>
+**Anroid:** Google Advertising ID (GAID), OAID and Amazon Advertising ID (AAID)<br>
+**iOS:** Apple's advertisingIdentifier (IDFA)
+
+| parameter       | type     | description                      |
+| ----------      |----------|------------------                |
+| shouldDisdable  | boolean  | Flag that disable/enable Advertising ID collection       |
+
+*Example:*
+
+```javascript
+appsFlyer.disableAdvertisingIdentifier(true);
 ```
 
 ## Android Only APIs
