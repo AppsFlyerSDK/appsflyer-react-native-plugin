@@ -8,6 +8,7 @@ const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER = `- (BOOL)application:(UIAp
 const RNAPPSFLYER_OPENURL_IDENTIFIER = `- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {`;
 const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE = `[[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];\n`;
 const RNAPPSFLYER_OPENURL_CODE = `[[AppsFlyerAttribution shared] handleOpenUrl:url options:options];\n`;
+const RNAPPSFLYER_ATTRIBUTION_ENDPOINT = 'https://appsflyer-skadnetwork.com/';
 
 function modifyAppDelegate(appDelegate) {
 	if (!appDelegate.includes(RNAPPSFLYER_IMPORT)) {
@@ -67,10 +68,10 @@ function withPodfile(config, shouldUseStrictMode) {
 	]);
 }
 
-function withPlistAdvertisingAttribution(config, url) {
+function withPlistAdvertisingAttribution(config) {
 	  return withInfoPlist(config, async config => {
     		const infoPlist = config.modResults;
-    		infoPlist.NSAdvertisingAttributionReportEndpoint = url;
+    		infoPlist.NSAdvertisingAttributionReportEndpoint = RNAPPSFLYER_ATTRIBUTION_ENDPOINT;
 
     		return config;
   });
@@ -78,7 +79,7 @@ function withPlistAdvertisingAttribution(config, url) {
 
 module.exports = function withAppsFlyerIos(config, shouldUseStrictMode, skanEndpoint) {
 	config = withPodfile(config, shouldUseStrictMode);
-	config = withAppsFlyerAppDelegate(config);
-	config = withPlistAdvertisingAttribution(config, skanEndpoint)
+	config = withAppsFlyerAppDelegate(config);	
+	config = withPlistAdvertisingAttribution(config);
 	return config;
 };
