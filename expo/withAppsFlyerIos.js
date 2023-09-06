@@ -1,4 +1,4 @@
-const { withDangerousMod, withAppDelegate, WarningAggregator } = require('@expo/config-plugins');
+const { withDangerousMod, withAppDelegate, WarningAggregator, withInfoPlist } = require('@expo/config-plugins');
 const { mergeContents } = require('@expo/config-plugins/build/utils/generateCode');
 const fs = require('fs');
 const path = require('path');
