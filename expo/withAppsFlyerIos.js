@@ -67,8 +67,18 @@ function withPodfile(config, shouldUseStrictMode) {
 	]);
 }
 
-module.exports = function withAppsFlyerIos(config, shouldUseStrictMode) {
+function withPlistAdvertisingAttribution(config, url) {
+	  return withInfoPlist(config, async config => {
+    		const infoPlist = config.modResults;
+    		infoPlist.NSAdvertisingAttributionReportEndpoint = url;
+
+    		return config;
+  });
+}
+
+module.exports = function withAppsFlyerIos(config, shouldUseStrictMode, skanEndpoint) {
 	config = withPodfile(config, shouldUseStrictMode);
 	config = withAppsFlyerAppDelegate(config);
+	config = withPlistAdvertisingAttribution(config, skanEndpoint)
 	return config;
 };
