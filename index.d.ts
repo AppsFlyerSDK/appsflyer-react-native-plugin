@@ -151,6 +151,9 @@ declare module "react-native-appsflyer" {
         setPartnerData(partnerId: string, partnerData: object): void
         appendParametersToDeepLinkingURL(contains: string, parameters: object): void
         startSdk(): void
+        enableTCFDataCollection(enabled: boolean): void
+        setConsentData(consentData: object): void
+        setNonGDPRUser(): void
 
         /**
          * For iOS Only

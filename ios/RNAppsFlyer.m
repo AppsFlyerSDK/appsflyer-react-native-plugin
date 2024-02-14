@@ -564,4 +564,23 @@ RCT_EXPORT_METHOD(setPartnerData:(NSString *)partnerId partnerData:(NSDictionary
 RCT_EXPORT_METHOD(appendParametersToDeepLinkingURL:(NSString *)contains partnerData:(NSDictionary *)parameters) {
     [[AppsFlyerLib shared] appendParametersToDeepLinkingURLWithString:contains parameters:parameters];
 }
+
+RCT_EXPORT_METHOD(enableTCFDataCollection:(BOOL *)enabled) {
+    [[AppsFlyerLib shared] enableTCFDataCollection:enabled];
+}
+
+RCT_EXPORT_METHOD(setConsentData:(NSDictionary *)consentData) {
+    if (![consentData isKindOfClass:[NSNull null]]) {
+        BOOL hasConsentForDataUsage = consentData[@"hasConsentForDataUsage"];
+        BOOL hasConsentForAdsPersonalization = consentData[@"hasConsentForAdsPersonalization"];
+        AppsFlyerConsent *consentData = [[AppsFlyerConsent alloc] initForGDPRUserWithHasConsentForDataUsage:hasConsentForDataUsage hasConsentForAdsPersonalization:hasConsentForAdsPersonalization];
+        [[AppsFlyerLib shared] setConsentData:consentData];
+    }
+}
+
+RCT_EXPORT_METHOD(setNonGDPRUser) {
+    AppsFlyerConsent *consentData = [[AppsFlyerConsent alloc] initNonGDPRUser];
+    [[AppsFlyerLib shared] setConsentData:consentData];
+}
+
 @end
