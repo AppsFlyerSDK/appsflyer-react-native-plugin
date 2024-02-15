@@ -35,6 +35,9 @@ The list of available methods for this plugin is described below.
     - [addPushNotificationDeepLinkPath](#addpushnotificationdeeplinkpath)
     - [appendParametersToDeepLinkingURL](#appendparameterstodeeplinkingurl)
     - [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
+    - [enableTCFDataCollection](#enableTCFDataCollection)
+    - [setConsentData](#setConsentData)
+    - [setNonGDPRUser](#setNonGDPRUser)
 - [Android Only APIs](#android-only-apis)
     - [setCollectAndroidID](#setcollectandroidid)
     - [setCollectIMEI](#setcollectimei)
@@ -748,6 +751,61 @@ Disables collection of various Advertising IDs by the SDK.<br>
 
 ```javascript
 appsFlyer.disableAdvertisingIdentifier(true);
+```
+
+---
+### enableTCFDataCollection
+`enableTCFDataCollection(enabled): void`
+
+instruct the SDK to collect the TCF data from the device.
+
+
+| parameter       | type     | description                      |
+| ----------      |----------|------------------                |
+| enabled  | boolean  |   enable/disable TCF data collection      |
+
+*Example:*
+
+```javascript
+appsFlyer.enableTCFDataCollection(true);
+```
+
+---
+### setConsentData
+`setConsentData(consentData): void`
+
+When GDPR applies to the user and your app does not use a CMP compatible with TCF v2.2, use this API to provide the consent data directly to the SDK.<br>
+The consent object has 2 properties:
+
+1. `hasConsentForDataUsage`: Indicates whether the user has consented to use their data for advertising purposes.
+2. `hasConsentForAdsPersonalization`: ndicates whether the user has consented to use their data for personalized advertising.
+
+| parameter       | type     | description                      |
+| ----------      |----------|------------------                |
+| consentData  | object  | Consent object of the user       |
+
+*Example:*
+
+```javascript
+let consentData = {
+      hasConsentForDataUsage: true,
+      hasConsentForAdsPersonalization: false
+    }
+
+appsFlyer.setConsentData(consentData);
+```
+
+---
+
+### setNonGDPRUser
+`setNonGDPRUser(): void`
+
+Use this API if GDPR doesn’t apply to the user.<br>
+
+*Example:*
+
+```javascript
+appsFlyer.setNonGDPRUser();
 ```
 
 ## Android Only APIs
