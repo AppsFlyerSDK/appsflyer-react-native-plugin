@@ -68,12 +68,14 @@ If GDPR applies to the user, perform the following:
 1. Given that GDPR is applicable to the user, determine whether the consent data is already stored for this session.
     1. If there is no consent data stored, show the consent dialog to capture the user consent decision.
     2. If there is consent data stored continue to the next step.
-2. To transfer the consent data to the SDK create a JSON with the following parameters:<br>
-    `hasConsentForDataUsage` - Indicates whether the user has consented to use their data for advertising purposes.<br>
-    `hasConsentForAdsPersonalization` - Indicates whether the user has consented to use their data for personalized advertising.
-3. Call `appsFlyer.setConsentData({})` with the JSON.
+2. To transfer the consent data to the SDK create an AppsFlyerConsent object using `forGDPRUser` method that accepts the following parameters:<br>
+    `hasConsentForDataUsage: boolean` - Indicates whether the user has consented to use their data for advertising purposes.<br>
+    `hasConsentForAdsPersonalization: boolean` - Indicates whether the user has consented to use their data for personalized advertising.
+3. Call `appsFlyer.setConsentData(consentData)` with the AppsFlyerConsent object.
 4. Call `appsFlyer.initSdk()`.
 ```javascript
+import appsFlyer, {AppsFlyerConsent} from 'react-native-appsflyer';
+
 useEffect(() => {
     const option = {
     isDebug: true,
@@ -84,10 +86,7 @@ useEffect(() => {
     };
 
     // user consent data
-    let consentData = {
-      hasConsentForDataUsage: true/false,
-      hasConsentForAdsPersonalization: true/false
-    }
+    let consentData = AppsFlyerConsent.forGDPRUser(true, false);
 
     appsFlyer.setConsentData(consentData);
 
@@ -106,10 +105,12 @@ useEffect(() => {
 ### When GDPR does not apply to the user
 
 If GDPR doesn’t apply to the user perform the following:
-
-1. Call `appsFlyer.setNonGDPRUser()`.
-2. Call `appsFlyer.initSdk()`.
+1. Create an AppsFlyerConsent object using `forNonGDPRUser` method that doesn't accepts any parameters
+2. Call `appsFlyer.setConsentData(consentData)` with the AppsFlyerConsent object.
+3. Call `appsFlyer.initSdk()`.
 ```javascript
+import appsFlyer, {AppsFlyerConsent} from 'react-native-appsflyer';
+
 useEffect(() => {
     const option = {
     isDebug: true,
@@ -120,7 +121,9 @@ useEffect(() => {
     };
 
     // GDPR does not apply to the user
-    appsFlyer.setNonGDPRUser()
+   let consentData = AppsFlyerConsent.forNonGDPRUser();
+
+   appsFlyer.setConsentData(consentData);
 
     //start appsflyer
     appsFlyer.initSdk(
