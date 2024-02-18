@@ -37,7 +37,6 @@ The list of available methods for this plugin is described below.
     - [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
     - [enableTCFDataCollection](#enableTCFDataCollection)
     - [setConsentData](#setConsentData)
-    - [setNonGDPRUser](#setNonGDPRUser)
 - [Android Only APIs](#android-only-apis)
     - [setCollectAndroidID](#setcollectandroidid)
     - [setCollectIMEI](#setcollectimei)
@@ -772,40 +771,30 @@ appsFlyer.enableTCFDataCollection(true);
 
 ---
 ### setConsentData
-`setConsentData(consentData): void`
+`setConsentData(consentObject): void`
 
 When GDPR applies to the user and your app does not use a CMP compatible with TCF v2.2, use this API to provide the consent data directly to the SDK.<br>
-The consent object has 2 properties:
+The AppsFlyerConsent object has 2 methods:
 
-1. `hasConsentForDataUsage`: Indicates whether the user has consented to use their data for advertising purposes.
-2. `hasConsentForAdsPersonalization`: ndicates whether the user has consented to use their data for personalized advertising.
+1. `AppsFlyerConsent.forNonGDPRUser`: Indicates that GDPR doesn’t apply to the user and generates nonGDPR consent object. This method doesn’t accept any parameters.
+2. `AppsFlyerConsent.forGDPRUser`: create an AppsFlyerConsent object with 2 parameters:
+
 
 | parameter       | type     | description                      |
 | ----------      |----------|------------------                |
-| consentData  | object  | Consent object of the user       |
+| hasConsentForDataUsage  | boolean  | Indicates whether the user has consented to use their data for advertising purposes       |
+| hasConsentForAdsPersonalization  | boolean  | Indicates whether the user has consented to use their data for personalized advertising       |
 
 *Example:*
 
 ```javascript
-let consentData = {
-      hasConsentForDataUsage: true,
-      hasConsentForAdsPersonalization: false
-    }
+import appsFlyer, {AppsFlyerConsent} from 'react-native-appsflyer';
 
-appsFlyer.setConsentData(consentData);
-```
+let nonGDPRUser = AppsFlyerConsent.forNonGDPRUser();
+// OR
+let GDPRUser = AppsFlyerConsent.forGDPRUser(true, false);
 
----
-
-### setNonGDPRUser
-`setNonGDPRUser(): void`
-
-Use this API if GDPR doesn’t apply to the user.<br>
-
-*Example:*
-
-```javascript
-appsFlyer.setNonGDPRUser();
+appsFlyer.setConsentData(nonGDPRUser /**or**/ GDPRUser);
 ```
 
 ## Android Only APIs

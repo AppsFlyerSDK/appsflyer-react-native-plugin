@@ -824,16 +824,16 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void setConsentData(ReadableMap consentData) {
         JSONObject JSONConsentData = RNUtil.readableMapToJson(consentData);
+        boolean isUserSubjectToGDPR = JSONConsentData.optBoolean("isUserSubjectToGDPR");
         boolean hasConsentForDataUsage = JSONConsentData.optBoolean("hasConsentForDataUsage");
         boolean hasConsentForAdsPersonalization = JSONConsentData.optBoolean("hasConsentForAdsPersonalization");
-        AppsFlyerConsent consentObject = AppsFlyerConsent.forGDPRUser(hasConsentForDataUsage, hasConsentForAdsPersonalization);
+        AppsFlyerConsent consentObject;
+        if (isUserSubjectToGDPR) {
+            consentObject = AppsFlyerConsent.forGDPRUser(hasConsentForDataUsage, hasConsentForAdsPersonalization);
+        } else {
+            consentObject = AppsFlyerConsent.forNonGDPRUser();
+        }
         AppsFlyerLib.getInstance().setConsentData(consentObject);
-    }
-
-    @ReactMethod
-    public void setNonGDPRUser() {
-        AppsFlyerConsent consentData = AppsFlyerConsent.forNonGDPRUser();
-        AppsFlyerLib.getInstance().setConsentData(consentData);
     }
 
     @ReactMethod

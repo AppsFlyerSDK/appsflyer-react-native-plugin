@@ -569,18 +569,21 @@ RCT_EXPORT_METHOD(enableTCFDataCollection:(BOOL *)enabled) {
     [[AppsFlyerLib shared] enableTCFDataCollection:enabled];
 }
 
-RCT_EXPORT_METHOD(setConsentData:(NSDictionary *)consentData) {
-    if (![consentData isKindOfClass:[NSNull null]]) {
-        BOOL hasConsentForDataUsage = consentData[@"hasConsentForDataUsage"];
-        BOOL hasConsentForAdsPersonalization = consentData[@"hasConsentForAdsPersonalization"];
-        AppsFlyerConsent *consentData = [[AppsFlyerConsent alloc] initForGDPRUserWithHasConsentForDataUsage:hasConsentForDataUsage hasConsentForAdsPersonalization:hasConsentForAdsPersonalization];
+RCT_EXPORT_METHOD(setConsentData:(NSDictionary *)consentDictionary) {
+    if (![consentDictionary isKindOfClass:[NSNull null]]) {
+        BOOL isUserSubjectToGDPR = [consentDictionary[@"isUserSubjectToGDPR"] boolValue];
+        
+        AppsFlyerConsent *consentData;
+        if (isUserSubjectToGDPR){
+            BOOL hasConsentForDataUsage = [consentDictionary[@"hasConsentForDataUsage"] boolValue];
+            BOOL hasConsentForAdsPersonalization = [consentDictionary[@"hasConsentForAdsPersonalization"] boolValue];
+            consentData = [[AppsFlyerConsent alloc] initForGDPRUserWithHasConsentForDataUsage:hasConsentForDataUsage hasConsentForAdsPersonalization:hasConsentForAdsPersonalization];
+        } else {
+            consentData = [[AppsFlyerConsent alloc] initNonGDPRUser];
+        }
+         
         [[AppsFlyerLib shared] setConsentData:consentData];
     }
-}
-
-RCT_EXPORT_METHOD(setNonGDPRUser) {
-    AppsFlyerConsent *consentData = [[AppsFlyerConsent alloc] initNonGDPRUser];
-    [[AppsFlyerLib shared] setConsentData:consentData];
 }
 
 @end

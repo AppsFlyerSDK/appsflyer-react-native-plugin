@@ -114,6 +114,13 @@ declare module "react-native-appsflyer" {
         brandDomain?: string;
     }
 
+    export const AppsFlyerConsent: {
+        forGDPRUser: (hasConsentForDataUsage: boolean, hasConsentForAdsPersonalization: boolean) => void;
+        forNonGDPRUser: () => void;
+    }
+
+    export type AppsFlyerConsentType = typeof AppsFlyerConsent;
+
     const appsFlyer: {
         onInstallConversionData(callback: (data: ConversionData) => any): () => void;
         onInstallConversionFailure(callback: (data: ConversionData) => any): () => void;
@@ -152,8 +159,7 @@ declare module "react-native-appsflyer" {
         appendParametersToDeepLinkingURL(contains: string, parameters: object): void
         startSdk(): void
         enableTCFDataCollection(enabled: boolean): void
-        setConsentData(consentData: object): void
-        setNonGDPRUser(): void
+        setConsentData(consentData: AppsFlyerConsentType): void
 
         /**
          * For iOS Only
