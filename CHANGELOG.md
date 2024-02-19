@@ -1,3 +1,10 @@
+## 6.13.0
+ Release date: *2024-02-19*
+
+- Add DMA support
+- Fix incompatible config for RN >= 0.69.x
+- Update Plugin to v6.13.0
+
 ## 6.12.2
  Release date: *2023-08-29*
 
