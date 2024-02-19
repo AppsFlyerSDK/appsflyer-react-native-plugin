@@ -36,7 +36,7 @@ The link that is generated for the user invite will use this OneLink ID as the b
 
 ```javascript
 
-// set the tamplate ID before you generate a link. Without it UserInvite won't work.
+// set the template ID before you generate a link. Without it UserInvite won't work.
 appsFlyer.setAppInviteOneLinkID('scVs', null);
 
 // set the user invite params

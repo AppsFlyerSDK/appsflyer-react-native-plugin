@@ -815,7 +815,27 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             Log.d("AppsFlyer", "performOnDeepLinking: activity is null!");
         }
     }
-    
+
+    @ReactMethod
+    public void enableTCFDataCollection(Boolean enabled) {
+        AppsFlyerLib.getInstance().enableTCFDataCollection(enabled);
+    }
+
+    @ReactMethod
+    public void setConsentData(ReadableMap consentData) {
+        JSONObject JSONConsentData = RNUtil.readableMapToJson(consentData);
+        boolean isUserSubjectToGDPR = JSONConsentData.optBoolean("isUserSubjectToGDPR");
+        boolean hasConsentForDataUsage = JSONConsentData.optBoolean("hasConsentForDataUsage");
+        boolean hasConsentForAdsPersonalization = JSONConsentData.optBoolean("hasConsentForAdsPersonalization");
+        AppsFlyerConsent consentObject;
+        if (isUserSubjectToGDPR) {
+            consentObject = AppsFlyerConsent.forGDPRUser(hasConsentForDataUsage, hasConsentForAdsPersonalization);
+        } else {
+            consentObject = AppsFlyerConsent.forNonGDPRUser();
+        }
+        AppsFlyerLib.getInstance().setConsentData(consentObject);
+    }
+
     @ReactMethod
     public void addListener(String eventName) {
       // Keep: Required for RN built in Event Emitter Calls.
