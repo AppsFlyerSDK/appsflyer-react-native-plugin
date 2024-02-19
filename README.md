@@ -12,8 +12,8 @@
 
 ### <a id="plugin-build-for"> This plugin is built for
 
-- Android AppsFlyer SDK **v6.12.2**
-- iOS AppsFlyer SDK **v6.12.2**
+- Android AppsFlyer SDK **v6.13.0**
+- iOS AppsFlyer SDK **v6.13.0**
 
 ## <a id="breaking-changes"> ❗❗ Breaking changes when updating to v6.x.x❗❗
 
@@ -51,6 +51,7 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [Test integration](/Docs/RN_Testing.md)
 - [In-app events](/Docs/RN_InAppEvents.md)
 - [Uninstall measurement](/Docs/RN_UninstallMeasurement.md)
+- [Send consent for DMA compliance](/Docs/RN_CMP.md)
 ##  🔗 Deep Linking
 - [Integration](/Docs/RN_DeepLinkIntegrate.md)
 - [***Expo*** Integration](/Docs/RN_ExpoDeepLinkIntegration.md)

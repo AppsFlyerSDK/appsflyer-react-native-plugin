@@ -625,10 +625,48 @@ appsFlyer.performOnDeepLinking = () => {
 	return RNAppsFlyer.performOnDeepLinking();
 };
 
+/**
+ * instruct the SDK to collect the TCF data from the device.
+ * @param enabled: if the sdk should collect the TCF data. true/false 
+ */
+appsFlyer.enableTCFDataCollection= (enabled) => {
+	return RNAppsFlyer.enableTCFDataCollection(enabled);
+}
+
+/**
+ * If your app does not use a CMP compatible with TCF v2.2, use the SDK API detailed below to provide the consent data directly to the SDK.
+ * @param  consentData: AppsFlyerConsent object.
+ */
+appsFlyer.setConsentData = (consentData) => {
+	return RNAppsFlyer.setConsentData(consentData);
+}
+
 function AFParseJSONException(_message, _data) {
 	this.message = _message;
 	this.data = _data;
 	this.name = 'AFParseJSONException';
 }
+
+// Consent object
+export const AppsFlyerConsent = (function () {
+    // Private constructor
+    function AppsFlyerConsent(isUserSubjectToGDPR, hasConsentForDataUsage, hasConsentForAdsPersonalization) {
+        this.isUserSubjectToGDPR = isUserSubjectToGDPR;
+        this.hasConsentForDataUsage = hasConsentForDataUsage;
+        this.hasConsentForAdsPersonalization = hasConsentForAdsPersonalization;
+    }
+
+    return {
+        // Factory method for GDPR user
+        forGDPRUser: function(hasConsentForDataUsage, hasConsentForAdsPersonalization) {
+            return new AppsFlyerConsent(true, hasConsentForDataUsage, hasConsentForAdsPersonalization);
+        },
+
+        // Factory method for non GDPR user
+        forNonGDPRUser: function() {
+            return new AppsFlyerConsent(false, null, null);
+        }
+    };
+})();
 
 export default appsFlyer;
