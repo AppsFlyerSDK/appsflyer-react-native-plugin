@@ -1,6 +1,8 @@
 import appsFlyer from '../index';
 import { RNAppsFlyer } from '../node_modules/react-native/Libraries/BatchedBridge/NativeModules';
 import { NativeEventEmitter } from 'react-native';
+const fs = require('fs');
+const path = require('path');
 
 describe("Test appsFlyer API's", () => {
 	afterEach(() => {
@@ -240,6 +242,26 @@ describe("Test appsFlyer API's", () => {
 		appsFlyer.disableIDFVCollection(true);
 		expect(RNAppsFlyer.disableIDFVCollection).toHaveBeenCalledTimes(1);
 	});
+
+	test('plugin version between platforms should match', () => {
+		const RNJavaFile = fs.readFileSync(
+		  path.resolve(__dirname, '../android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java'),
+		  'utf-8'
+		);
+	
+		const RNObjCFile = fs.readFileSync(
+		  path.resolve(__dirname, '../ios/RNAppsFlyer.h'),
+		  'utf-8'
+		);
+	
+		const pluginVersionJavaRegex = /final\s+static\s+String\s+PLUGIN_VERSION\s+=\s+"([\d.]+)";/;
+		const pluginVersionObjCRegex = /static\s+NSString\s+\*const\s+kAppsFlyerPluginVersion\s+=\s+@"([\d.]+)";/;
+	
+		const versionAndroid = RNJavaFile.match(pluginVersionJavaRegex)[1];
+		const versionIos = RNObjCFile.match(pluginVersionObjCRegex)[1];
+
+		expect(versionAndroid).toEqual(versionIos);
+	  });
 });
 
 describe('Test native event emitter', () => {
@@ -323,3 +345,7 @@ describe('Test native event emitter', () => {
 		nativeEventEmitter.emit('onDeepLinking', nativeEventObject);
 	});
 });
+
+describe('Plugin version alignment between platforms Test', () => {
+	
+  });
