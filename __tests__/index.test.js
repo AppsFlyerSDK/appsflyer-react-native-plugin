@@ -345,7 +345,3 @@ describe('Test native event emitter', () => {
 		nativeEventEmitter.emit('onDeepLinking', nativeEventObject);
 	});
 });
-
-describe('Plugin version alignment between platforms Test', () => {
-	
-  });
