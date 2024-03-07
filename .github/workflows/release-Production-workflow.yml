@@ -74,7 +74,7 @@ jobs:
         run: |
           chmod +x .github/workflows/scripts/releaseNotesGenerator.sh
           .github/workflows/scripts/releaseNotesGenerator.sh $JIRA_TOKEN "$JIRA_FIXED_VERSION"
-          ios_sdk_version=$(cat react-native-appsflyer.podspec | grep '\'AppsFlyerFramework\' | grep -Eo '[0-9].[0-9]+.[0.9]+')
-          android_sdk_version=$(cat android/build.gradle | grep 'com.appsflyer:af-android-sdk' | grep -Eo '[0-9].[0-9]+.[0.9]+')
+          ios_sdk_version=$(cat react-native-appsflyer.podspec | grep '\'AppsFlyerFramework\' | grep -Eo '[0-9].[0-9]+.[0-9]+')
+          android_sdk_version=$(cat android/build.gradle | grep 'com.appsflyer:af-android-sdk' | grep -Eo '[0-9].[0-9]+.[0-9]+')
           CHANGES=$(cat "$JIRA_FIXED_VERSION-releasenotes".txt)
           curl -X POST -H 'Content-type: application/json' --data '{"jira_fixed_version": "'"${{env.JIRA_FIXED_VERSION}}"'", "deploy_type": "Production", "install_tag": "latest", "git_branch": "'"$RELEASE_BRACH_NAME"'", "changes_and_fixes": "'"$CHANGES"'", "android_dependencie": "'"$android_sdk_version"'", "ios_dependencie": "'"$ios_sdk_version"'"}' "$SLACK_TOKEN"
