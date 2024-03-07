@@ -115,11 +115,15 @@ declare module "react-native-appsflyer" {
     }
 
     export const AppsFlyerConsent: {
-        forGDPRUser: (hasConsentForDataUsage: boolean, hasConsentForAdsPersonalization: boolean) => void;
-        forNonGDPRUser: () => void;
+        forGDPRUser: (hasConsentForDataUsage: boolean, hasConsentForAdsPersonalization: boolean) => AppsFlyerConsentType;
+        forNonGDPRUser: () => AppsFlyerConsentType;
     }
 
-    export type AppsFlyerConsentType = typeof AppsFlyerConsent;
+    export interface AppsFlyerConsentType {
+        isUserSubjectToGDPR: boolean;
+        hasConsentForDataUsage?: boolean;
+        hasConsentForAdsPersonalization?: boolean;
+    }
 
     const appsFlyer: {
         onInstallConversionData(callback: (data: ConversionData) => any): () => void;

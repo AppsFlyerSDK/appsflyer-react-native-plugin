@@ -458,19 +458,19 @@ appsFlyer.setHost('foo', 'bar.appsflyer.com', res => console.log(res));
 `setUserEmails(options, success, error)`
 
 Set the user emails and encrypt them.
-**Note:** Android platform supports only 0 (none) and 3 (SHA256) emailsCryptType. iOS platform support all (0-3) emailsCryptType.
+**Note:** Android and iOS platforms supports only 0 (none) and 3 (SHA256) emailsCryptType.
 When unsupported emailsCryptType is passed, the SDK will use the default (none).
 
 | parameter       | type     | description               |
 | ----------      |----------|------------------         |
 | configuration   | json     | email configuration       |
 | success         | function | success callback          |
-| error           | function | error callback             |
+| error           | function | error callback            |
 
 
-| option          | type  | description   |
+| option          | type  | description  |
 | --------------  | ----  |------------- |
-| emailsCryptType | int   | **iOS**: none - 0 (default), SHA1 - 1, MD5 - 2, SHA256 - 3<br>**Android**: none - 0 (default), SHA256 - 3|
+| emailsCryptType | int   | none - 0 (default), SHA256 - 3 |
 | emails          | array | comma separated list of emails |
 
 
