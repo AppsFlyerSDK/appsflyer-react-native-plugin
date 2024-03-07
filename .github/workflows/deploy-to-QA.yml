@@ -55,7 +55,7 @@ jobs:
         env:
           SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
         run: | 
-          ios_sdk_version=$(cat README.md | grep 'iOS AppsFlyer SDK' | grep -Eo '[0-9].[0-9]+.[0-9]')
-          android_sdk_version=$(cat README.md | grep 'Android AppsFlyer SDK' | grep -Eo '[0-9].[0-9]+.[0-9]')
+          ios_sdk_version=$(cat react-native-appsflyer.podspec | grep '\'AppsFlyerFramework\' | grep -Eo '[0-9].[0-9]+.[0-9]+')
+          android_sdk_version=$(cat android/build.gradle | grep 'com.appsflyer:af-android-sdk' | grep -Eo '[0-9].[0-9]+.[0-9]+')
           CHANGES=$(cat "${{env.JIRA_FIXED_VERSION}}-releasenotes".txt)
           curl -X POST -H 'Content-type: application/json' --data '{"jira_fixed_version": "'"${{env.JIRA_FIXED_VERSION}}"'", "deploy_type": "QA", "install_tag": "QA", "git_branch": "'"${{github.ref_name}}"'", "changes_and_fixes": "'"$CHANGES"'", "android_dependencie": "'"$android_sdk_version"'", "ios_dependencie": "'"$ios_sdk_version"'"}' "$SLACK_TOKEN"
