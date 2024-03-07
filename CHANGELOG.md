@@ -1,3 +1,8 @@
+## 6.13.1
+ Release date: *2024-03-07*
+
+- React Native >> update iOS to 6.13.1
+
 ## 6.13.0
  Release date: *2024-02-19*
 
