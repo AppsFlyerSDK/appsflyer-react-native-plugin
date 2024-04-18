@@ -13,7 +13,7 @@
 ### <a id="plugin-build-for"> This plugin is built for
 
 - Android AppsFlyer SDK **v6.13.0**
-- iOS AppsFlyer SDK **v6.13.1**
+- iOS AppsFlyer SDK **v6.14.0**
 
 ## <a id="breaking-changes"> ❗❗ Breaking changes when updating to v6.x.x❗❗
 
@@ -62,4 +62,3 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [🆕 Expo Sample App](https://github.com/AppsFlyerSDK/appsflyer-expo-sample-app)
 
 ### [API reference](/Docs/RN_API.md)
-
