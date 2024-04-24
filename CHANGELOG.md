@@ -1,3 +1,8 @@
+## 6.14.2
+ Release date: *2024-04-21*
+- React Native >> Update iOS to 6.14.2 , Android to 6.14.0
+- React Native >> iOS >> Adding privacy manifest
+
 ## 6.13.1
  Release date: *2024-03-07*
 
