@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.author           = pkg["author"]
   s.source           = { :git => pkg["repository"]["url"] }
   s.source_files     = 'ios/**/*.{h,m}'
-  s.platform         = :ios, "13.0"
+  s.platform         = :ios, "9.0"
   s.static_framework = true
   s.dependency 'React'
 
@@ -26,6 +26,6 @@ Pod::Spec.new do |s|
       Pod::UI.puts "#{s.name}: You may set variable `$RNAppsFlyerStrictMode=true` in Podfile to use strict mode for kids apps."
     end
     s.dependency 'AppsFlyerFramework', '6.14.2'
-    s.resource_bundles = {'react_native_appsflyer_sdk_privacy' => ['Resources/PrivacyInfo.xcprivacy']}
+    s.resource_bundles = {'AppsFlyerFramework' => ['Resources/PrivacyInfo.xcprivacy']}
   end
 end
