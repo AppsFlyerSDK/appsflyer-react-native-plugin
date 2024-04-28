@@ -24,6 +24,7 @@ export function AFInit() {
   }
   appsFlyer.setAppInviteOneLinkID('oW4R');
   appsFlyer.initSdk(initOptions, null, null);
+  
 }
 
 // Sends in-app events to AppsFlyer servers. name is the events name ('simple event') and the values are a JSON ({info: 'fff', size: 5})
