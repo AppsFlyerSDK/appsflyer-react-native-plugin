@@ -6,6 +6,8 @@ order: 2
 hidden: false
 ---
 
+Note: You **cannot** use Expo Go. You must use Development Builds if you want to use an Expo Managed Workflow.
+
 ## Install AppsFlyer in an Expo managed project
 1. Install `expo-dev-client`. You can read more about expo development builds [here](https://docs.expo.dev/development/introduction/):
 ```
