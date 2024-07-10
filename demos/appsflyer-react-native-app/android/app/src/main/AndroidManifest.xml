@@ -1,9 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
   package="com.appsflyerexample">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+      tools:replace="android:allowBackup"
       android:name=".MainApplication"
       android:label="@string/app_name"
       android:icon="@mipmap/ic_launcher"

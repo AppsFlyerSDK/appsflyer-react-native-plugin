@@ -1,3 +1,10 @@
+## 6.14.3
+ Release date: *2024-04-28*
+
+- Add privacy manifest
+- Update Android to 6.14.0
+- Update iOS to 6.14.3
+
 ## 6.13.1
  Release date: *2024-03-07*
 
