@@ -19,7 +19,11 @@ The link that is generated for the user invite will use this OneLink ID as the b
 | oneLinkID       | string   | oneLinkID                 |
 | callback        | function | success callback          |
  
- 
+ > 📘 Note
+ > 
+ > - Make sure to call `setAppInviteOneLinkID()` **before** calling `start`.
+ > - The OneLink template must be assigned to the app. 
+
  ##### 2. `generateInviteLink(parameters, success, error)`
  A complete list of supported parameters is available [here](https://support.appsflyer.com/hc/en-us/articles/115004480866-User-Invite-Tracking). Custom parameters can be passed using a userParams{} nested object, as in the example above.
 
