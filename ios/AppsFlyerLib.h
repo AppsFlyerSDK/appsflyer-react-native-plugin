@@ -13,6 +13,7 @@
 #import <AppsFlyerLib/AppsFlyerDeepLinkResult.h>
 #import <AppsFlyerLib/AppsFlyerDeepLink.h>
 #import <AppsFlyerLib/AppsFlyerConsent.h>
+#import <AppsFlyerLib/AppsFlyerAdRevenueData.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -469,6 +470,15 @@ NS_SWIFT_NAME(setPluginInfo(plugin:version:additionalParams:));
                   eventValues:(NSDictionary<NSString * , id> * _Nullable)eventValues
             completionHandler:(void (^ _Nullable)(NSDictionary<NSString *, id> * _Nullable dictionary, NSError * _Nullable error))completionHandler
 NS_SWIFT_NAME(logEvent(name:values:completionHandler:));
+
+/**
+ Logs ad revenue data to AppsFlyer.
+
+ Use this method to send monetization information along with optional additional parameters for detailed tracking.
+
+ @param adRevenueData The object containing ad revenue details.
+ */
+- (void)logAdRevenue:(AFAdRevenueData *)adRevenueData NS_SWIFT_NAME(logAdRevenue(adRevenueData:));
 
 /**
  To log and validate in app purchases you can call this method from the completeTransaction: method on
