@@ -37,7 +37,7 @@ The list of available methods for this plugin is described below.
     - [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
     - [enableTCFDataCollection](#enableTCFDataCollection)
     - [setConsentData](#setConsentData)
-    - [logAdRevenue](#logAdRevenue)  - Since 6.15.1
+    - [logAdRevenue](#logAdRevenue)
 - [Android Only APIs](#android-only-apis)
     - [setCollectAndroidID](#setcollectandroidid)
     - [setCollectIMEI](#setcollectimei)
@@ -798,7 +798,7 @@ let GDPRUser = AppsFlyerConsent.forGDPRUser(true, false);
 appsFlyer.setConsentData(nonGDPRUser /**or**/ GDPRUser);
 ```
 
-### logAdRevenue
+### logAdRevenue - Since 6.15.1
 `logAdRevenue(data: AFAdRevenueData): void`
 
 Use this method to log your ad revenue.</br>
