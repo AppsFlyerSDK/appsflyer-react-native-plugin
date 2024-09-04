@@ -125,6 +125,33 @@ declare module "react-native-appsflyer" {
         hasConsentForAdsPersonalization?: boolean;
     }
 
+    //Log Ad Revenue Section
+    export enum MEDIATION_NETWORK {
+        IRONSOURCE ,
+        APPLOVIN_MAX ,
+        GOOGLE_ADMOB ,
+        FYBER ,
+        APPODEAL ,
+        ADMOST ,
+        TOPON ,
+        TRADPLUS,
+        YANDEX ,
+        CHARTBOOST ,
+        UNITY ,
+        TOPON_PTE ,
+        CUSTOM_MEDIATION ,
+        DIRECT_MONETIZATION_NETWORK 
+    }
+
+    //Interface representing ad revenue information
+    export interface AFAdRevenueData {
+        monetizationNetwork: string;
+        mediationNetwork: MEDIATION_NETWORK;
+        currencyIso4217Code: string;
+        revenue: number;
+        additionalParameters?: StringMap;
+    }
+
     const appsFlyer: {
         onInstallConversionData(callback: (data: ConversionData) => any): () => void;
         onInstallConversionFailure(callback: (data: ConversionData) => any): () => void;
@@ -164,7 +191,7 @@ declare module "react-native-appsflyer" {
         startSdk(): void
         enableTCFDataCollection(enabled: boolean): void
         setConsentData(consentData: AppsFlyerConsentType): void
-
+        logAdRevenue(adRevenueData: AFAdRevenueData) : void
         /**
          * For iOS Only
          * */

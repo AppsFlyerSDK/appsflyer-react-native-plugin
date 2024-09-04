@@ -57,6 +57,30 @@ function logEvent(eventName, eventValues, success, error): Promise<string> {
 
 appsFlyer.logEvent = logEvent;
 
+
+export const MEDIATION_NETWORK = Object.freeze({
+	IRONSOURCE : "ironsource",
+	APPLOVIN_MAX : "applovinmax",
+	GOOGLE_ADMOB : "googleadmob",
+	FYBER : "fyber",
+	APPODEAL : "appodeal",
+	ADMOST : "Admost",
+	TOPON : "Topon",
+	TRADPLUS : "Tradplus",
+	YANDEX : "Yandex",
+	CHARTBOOST : "chartboost",
+	UNITY : "Unity",
+	TOPON_PTE : "toponpte",
+	CUSTOM_MEDIATION : "customMediation",
+	DIRECT_MONETIZATION_NETWORK : "directMonetizationNetwork"
+});
+
+function logAdRevenue(adRevenueData) {
+	RNAppsFlyer.logAdRevenue(adRevenueData);
+}
+
+appsFlyer.logAdRevenue = logAdRevenue
+
 /**
  * Manually record the location of the user
  *

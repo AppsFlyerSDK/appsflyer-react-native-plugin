@@ -65,3 +65,5 @@ demos/appsflyer-expo-app/android
 demos/appsflyer-expo-app/.expo
 demos/appsflyer-expo-app/node_modules
 demos/appsflyer-expo-app/yarn.lock
+
+demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcodeproj/project.pbxproj
