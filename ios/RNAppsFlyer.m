@@ -79,6 +79,11 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
         error = [NSError errorWithDomain:NO_APPID_FOUND code:1 userInfo:nil];
     }
 
+    //DELIVERY-58378
+    [AppsFlyerLib shared].appleAppID = appId;
+    [AppsFlyerLib shared].appsFlyerDevKey = devKey;
+    [AppsFlyerLib shared].isDebug = isDebug;
+    
     if(error != nil){
         return error;
     }
@@ -100,9 +105,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
                                    pluginVersion:kAppsFlyerPluginVersion
                                 additionalParams:nil];
 
-        [AppsFlyerLib shared].appleAppID = appId;
-        [AppsFlyerLib shared].appsFlyerDevKey = devKey;
-        [AppsFlyerLib shared].isDebug = isDebug;
+      
 
         //post notification for the deep link object that the bridge is initialized and he can handle deep link
         [[AppsFlyerAttribution shared] setRNAFBridgeReady:YES];
@@ -158,6 +161,74 @@ RCT_EXPORT_METHOD(logEventWithPromise: (NSString *)eventName eventValues:(NSDict
         }
         resolve(@[SUCCESS]);
     }];
+}
+
+
+RCT_EXPORT_METHOD(logAdRevenue:(NSDictionary *)adRevenueDictionary)
+{
+    // Verify if the adRevenueDictionary is not empty
+    if (adRevenueDictionary.count == 0) {
+        NSLog(@"adRevenueData is missing, the data is mandatory to use this API.");
+        return;
+    }
+    
+    // Parse the fields from the adRevenueData object
+    NSString *monetizationNetwork = adRevenueDictionary[@"monetizationNetwork"];
+    if (!monetizationNetwork) {
+        NSLog(@"monetizationNetwork is missing");
+        return;
+    }
+    NSString *currencyIso4217Code = adRevenueDictionary[@"currencyIso4217Code"];
+    if (!currencyIso4217Code) {
+        NSLog(@"currencyIso4217Code is missing");
+        return;
+    }
+    NSNumber *revenue = adRevenueDictionary[@"revenue"];
+    if (!revenue) {
+        NSLog(@"revenue is missing or not a number");
+        return;
+    }
+    NSString *mediationNetworkString = adRevenueDictionary[@"mediationNetwork"];
+    if (!mediationNetworkString) {
+        NSLog(@"mediationNetwork is missing");
+        return;
+    }
+    
+    // Use literals to map the mediation network string to the corresponding enum value
+    NSDictionary<NSString *, NSNumber *> *mediationNetworkMappings = @{
+        @"googleadmob": @(AppsFlyerAdRevenueMediationNetworkTypeGoogleAdMob),
+        @"ironsource": @(AppsFlyerAdRevenueMediationNetworkTypeIronSource),
+        @"applovinmax": @(AppsFlyerAdRevenueMediationNetworkTypeApplovinMax),
+        @"fyber": @(AppsFlyerAdRevenueMediationNetworkTypeFyber),
+        @"appodeal": @(AppsFlyerAdRevenueMediationNetworkTypeAppodeal),
+        @"admost": @(AppsFlyerAdRevenueMediationNetworkTypeAdmost),
+        @"topon": @(AppsFlyerAdRevenueMediationNetworkTypeTopon),
+        @"tradplus": @(AppsFlyerAdRevenueMediationNetworkTypeTradplus),
+        @"yandex": @(AppsFlyerAdRevenueMediationNetworkTypeYandex),
+        @"chartboost": @(AppsFlyerAdRevenueMediationNetworkTypeChartBoost),
+        @"unity": @(AppsFlyerAdRevenueMediationNetworkTypeUnity),
+        @"toponpte": @(AppsFlyerAdRevenueMediationNetworkTypeToponPte),
+        @"custom": @(AppsFlyerAdRevenueMediationNetworkTypeCustom),
+        @"directmonetization": @(AppsFlyerAdRevenueMediationNetworkTypeDirectMonetization),
+    };
+    
+    NSNumber *mediationNetworkEnumNumber = mediationNetworkMappings[mediationNetworkString.lowercaseString];
+    if (!mediationNetworkEnumNumber) {
+        NSLog(@"Invalid mediation network");
+        return;
+    }
+    
+    AppsFlyerAdRevenueMediationNetworkType mediationNetworkEnum = (AppsFlyerAdRevenueMediationNetworkType)[mediationNetworkEnumNumber integerValue];
+    
+    // If AFAdRevenueData class is available and has the appropriate initializer:
+    AFAdRevenueData *adRevenueData = [[AFAdRevenueData alloc] initWithMonetizationNetwork:monetizationNetwork
+                                                                         mediationNetwork:mediationNetworkEnum
+                                                                      currencyIso4217Code:currencyIso4217Code
+                                                                             eventRevenue:revenue];
+    
+    NSDictionary *additionalParameters = adRevenueDictionary[@"additionalParameters"];
+    // Log the ad revenue to the AppsFlyer SDK
+    [[AppsFlyerLib shared] logAdRevenue:adRevenueData additionalParameters:additionalParameters];
 }
 
 RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback) {

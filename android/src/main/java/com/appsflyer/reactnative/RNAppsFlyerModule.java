@@ -31,6 +31,7 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
@@ -360,6 +361,59 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             promise.reject(UNKNOWN_ERROR, e);
             return;
         }
+    }
+
+@ReactMethod
+    public void logAdRevenue(ReadableMap adRevenueDictionary) {
+        if (adRevenueDictionary == null || !adRevenueDictionary.keySetIterator().hasNextKey()) {
+            Log.d("AppsFlyer", "adRevenueData is missing, the data is mandatory to use this API.");
+            return;
+        }
+
+        String monetizationNetwork = adRevenueDictionary.getString(MONETIZATION_NETWORK);
+        if (monetizationNetwork == null) {
+            Log.d("AppsFlyer", "monetizationNetwork is missing");
+            return;
+        }
+
+        String currencyIso4217Code = adRevenueDictionary.getString(CURRENCY_ISO4217_CODE);
+        if (currencyIso4217Code == null) {
+            Log.d("AppsFlyer", "currencyIso4217Code is missing");
+            return;
+        }
+
+        if (!adRevenueDictionary.hasKey(AF_REVENUE) || adRevenueDictionary.getType(AF_REVENUE) != ReadableType.Number) {
+            Log.d("AppsFlyer", "revenue is missing or not a number");
+            return;
+        }
+        double revenue = adRevenueDictionary.getDouble(AF_REVENUE);
+
+        ReadableMap additionalParameters = null;
+        if (adRevenueDictionary.hasKey(AF_ADDITIONAL_PARAMETERS) && adRevenueDictionary.getType(AF_ADDITIONAL_PARAMETERS) == ReadableType.Map) {
+            additionalParameters = adRevenueDictionary.getMap(AF_ADDITIONAL_PARAMETERS);
+        }
+
+        String mediationNetworkValue = adRevenueDictionary.getString(AF_MEDIATION_NETWORK);
+        if (mediationNetworkValue == null || mediationNetworkValue.isEmpty()) {
+            Log.d("AppsFlyer", "mediationNetwork is missing");
+            return;
+        }
+
+        MediationNetwork mediationNetwork = MediationNetwork.valueOf(mediationNetworkValue.toUpperCase());
+        if (mediationNetwork == null) {
+            Log.d("AppsFlyer", "Invalid mediation network");
+            return;
+        }
+
+        AFAdRevenueData adRevenueData = new AFAdRevenueData(
+                monetizationNetwork,
+                mediationNetwork,
+                currencyIso4217Code,
+                revenue
+        );
+
+        // Log the ad revenue to the AppsFlyer SDK
+        AppsFlyerLib.getInstance().logAdRevenue(adRevenueData, RNUtil.toMap(additionalParameters));
     }
 
     @ReactMethod
