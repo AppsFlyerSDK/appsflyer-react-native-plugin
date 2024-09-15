@@ -1,4 +1,4 @@
-import appsFlyer from 'react-native-appsflyer';
+import appsFlyer , {MEDIATION_NETWORK} from 'react-native-appsflyer';
 import {Platform} from 'react-native';
 
 // events
@@ -29,4 +29,20 @@ export function AFInit() {
 // Sends in-app events to AppsFlyer servers. name is the events name ('simple event') and the values are a JSON ({info: 'fff', size: 5})
 export function AFLogEvent(name, values) {
   appsFlyer.logEvent(name, values, null, null);
+  AFLogAdRevenue();
+}
+
+export function AFLogAdRevenue(){
+  const adRevenueData = {
+    monetizationNetwork: 'AF-AdNetwork',
+    mediationNetwork: MEDIATION_NETWORK.IRONSOURCE,
+    currencyIso4217Code: 'USD',
+    revenue: 1.23, 
+    additionalParameters : {
+      customParam1: 'value1',
+      customParam2: 'value2',
+    }
+  }; 
+
+  appsFlyer.logAdRevenue(adRevenueData);
 }

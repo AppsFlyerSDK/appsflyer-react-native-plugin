@@ -17,6 +17,10 @@
 
 ## <a id="breaking-changes"> ❗❗ Breaking changes when updating to v6.x.x❗❗
 
+- From version `6.15.1`, upgraded to targetSDKVersion 34, Java 17, and Gradle 8.7 in [AppsFlyer Android SDK v6.15.1](https://support.appsflyer.com/hc/en-us/articles/115001256006-AppsFlyer-Android-SDK-release-notes).
+
+- From version `6.15.1`, iOS Minimum deployment target is set to 12.0.
+
 - From version `6.3.0`, we use `xcframework` for iOS platform. Then you need to use cocoapods version >= 1.10
 
 - From version `6.2.30`, `logCrossPromotionAndOpenStore` api will register as `af_cross_promotion` instead of `af_app_invites` in your dashboard.<br>

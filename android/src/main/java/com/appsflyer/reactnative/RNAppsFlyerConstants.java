@@ -6,7 +6,7 @@ package com.appsflyer.reactnative;
 
 public class RNAppsFlyerConstants {
 
-    final static String PLUGIN_VERSION = "6.14.3";
+    final static String PLUGIN_VERSION = "6.15.1";
     final static String NO_DEVKEY_FOUND = "No 'devKey' found or its empty";
     final static String UNKNOWN_ERROR = "AF Unknown Error";
     final static String SUCCESS = "Success";
@@ -51,6 +51,12 @@ public class RNAppsFlyerConstants {
     final static String NO_PARAMETERS_ERROR = "Please provide purchase parameters";
     final static String VALIDATE_SUCCESS = "In-App Purchase Validation success";
     final static String VALIDATE_FAILED = "In-App Purchase Validation failed with error: ";
+
+    final static String MONETIZATION_NETWORK = "monetizationNetwork";
+    final static String CURRENCY_ISO4217_CODE = "currencyIso4217Code";
+    final static String AF_REVENUE = "revenue";
+    final static String AF_MEDIATION_NETWORK = "mediationNetwork";
+    final static String AF_ADDITIONAL_PARAMETERS = "additionalParameters";
 
 }
 
