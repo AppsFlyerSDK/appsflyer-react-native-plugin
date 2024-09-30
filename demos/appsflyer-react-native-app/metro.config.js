@@ -5,6 +5,10 @@
  * @format
  */
 
+const localPackagePaths = [
+  '/Users/amit.levy/RN-Projects/appsflyer-react-native-plugin',
+];
+
 module.exports = {
   transformer: {
     getTransformOptions: async () => ({
@@ -14,4 +18,8 @@ module.exports = {
       },
     }),
   },
+  resolver: {
+    nodeModulesPaths: [...localPackagePaths], // update to resolver
+  },
+  watchFolders: [...localPackagePaths], // update to watch
 };

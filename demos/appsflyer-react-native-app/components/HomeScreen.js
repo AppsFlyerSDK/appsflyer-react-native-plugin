@@ -14,6 +14,7 @@ import {Card, ListItem, Button, FAB, Badge} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import appsFlyer from 'react-native-appsflyer';
 import {
+  PCInit,
   AFInit,
   AFLogEvent,
   AF_clickOnItem,
@@ -162,6 +163,7 @@ const HomeScreen = ({navigation}) => {
       }
     });
     AFInit();
+    PCInit();
 
     return () => {
       AFGCDListener();

@@ -58,5 +58,9 @@ public class RNAppsFlyerConstants {
     final static String AF_MEDIATION_NETWORK = "mediationNetwork";
     final static String AF_ADDITIONAL_PARAMETERS = "additionalParameters";
 
+    //Purchase Connector
+    final static String EVENT_SUBSCRIPTION_VALIDATION_RESULT = "onSubscriptionValidationResult";
+    final static String EVENT_IN_APP_PURCHASE_VALIDATION_RESULT = "onInAppPurchaseValidationResult";
+    final static String ENABLE_MODULE_MESSAGE = "Please set appsflyer.enable_purchase_connector to true in your gradle.properties file.";
 }
 
