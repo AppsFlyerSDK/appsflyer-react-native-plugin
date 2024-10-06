@@ -180,6 +180,19 @@ declare module "react-native-appsflyer" {
     create(config: PurchaseConnectorConfig): void;
     startObservingTransactions(): void;
     stopObservingTransactions(): void;
+    setSubscriptionValidationResultSuccess(
+      callback: (data:OnResponse<SubscriptionValidationResult>) => any
+    ): () => void;
+    setSubscriptionValidationResultFailure(
+      callback: (data:onFailure) => any
+    ): () => void;
+    setInAppValidationResultSuccess(
+      callback: (data:OnResponse<InAppPurchaseValidationResult>) => any
+    ): () => void;
+    setInAppValidationResultFailure(
+      callback: (data:onFailure) => any
+    ): () => void;
+    /*
     setSubscriptionValidationResultListener(
       onResponse: OnResponse<SubscriptionValidationResult>,
       onFailure: OnFailure
@@ -188,6 +201,7 @@ declare module "react-native-appsflyer" {
       onResponse: OnResponse<InAppPurchaseValidationResult>,
       onFailure: OnFailure
     ): void;
+    */
     setOnReceivePurchaseRevenueValidationInfo(
       callback: onReceivePurchaseRevenueValidationInfo
     ): void;
