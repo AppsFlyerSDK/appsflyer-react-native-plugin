@@ -3,10 +3,10 @@ class AppsFlyerConstants {
     static readonly MISSING_CONFIGURATION_EXCEPTION_MSG: string = "Could not create an instance without configuration";
       
     // Adding method constants
-    static readonly SUBSCRIPTION_PURCHASE_VALIDATION_RESULT_LISTENER: string =
-    "onSubscriptionValidationResult";
-    static readonly IN_APP_VALIDATION_RESULT_LISTENER: string =
-      "onInAppPurchaseValidationResult";
+    static readonly SUBSCRIPTION_VALIDATION_SUCCESS: string = 'subscriptionValidationSuccess';
+    static readonly SUBSCRIPTION_VALIDATION_FAILURE: string = 'subscriptionValidationFailure';
+    static readonly IN_APP_PURCHASE_VALIDATION_SUCCESS: string = 'inAppPurchaseValidationSuccess';
+    static readonly IN_APP_PURCHASE_VALIDATION_FAILURE: string = 'inAppPurchaseValidationFailure';
     static readonly DID_RECEIVE_PURCHASE_REVENUE_VALIDATION_INFO: string =
       "onDidReceivePurchaseRevenueValidationInfo";
   

@@ -12,6 +12,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		758FBD406B8A60C781CB65C7 /* libPods-AppsFlyerExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3772C10A05F15474D2AE8E5B /* libPods-AppsFlyerExample.a */; };
+		7E0676052CABDEBC0055F176 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E0676042CABDEBC0055F176 /* StoreKit.framework */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		8A99A8955B526C01707AFBFA /* libPods-AppsFlyerExample-AppsFlyerExampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C982642725666DF8D1E1F96 /* libPods-AppsFlyerExample-AppsFlyerExampleTests.a */; };
 /* End PBXBuildFile section */
@@ -39,6 +40,7 @@
 		1C982642725666DF8D1E1F96 /* libPods-AppsFlyerExample-AppsFlyerExampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AppsFlyerExample-AppsFlyerExampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3772C10A05F15474D2AE8E5B /* libPods-AppsFlyerExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AppsFlyerExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5CAE30CF50FDE233EFB84891 /* Pods-AppsFlyerExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsFlyerExample.release.xcconfig"; path = "Target Support Files/Pods-AppsFlyerExample/Pods-AppsFlyerExample.release.xcconfig"; sourceTree = "<group>"; };
+		7E0676042CABDEBC0055F176 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = AppsFlyerExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		BE4C6B4402435E3245DA5B5C /* Pods-AppsFlyerExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsFlyerExample.debug.xcconfig"; path = "Target Support Files/Pods-AppsFlyerExample/Pods-AppsFlyerExample.debug.xcconfig"; sourceTree = "<group>"; };
 		C6E030350442BE719CA4C6F7 /* Pods-AppsFlyerExample-AppsFlyerExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsFlyerExample-AppsFlyerExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-AppsFlyerExample-AppsFlyerExampleTests/Pods-AppsFlyerExample-AppsFlyerExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -61,6 +63,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				758FBD406B8A60C781CB65C7 /* libPods-AppsFlyerExample.a in Frameworks */,
+				7E0676052CABDEBC0055F176 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,6 +104,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7E0676042CABDEBC0055F176 /* StoreKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				3772C10A05F15474D2AE8E5B /* libPods-AppsFlyerExample.a */,
 				1C982642725666DF8D1E1F96 /* libPods-AppsFlyerExample-AppsFlyerExampleTests.a */,
@@ -345,7 +349,7 @@
 		};
 		FD10A7F022414F080027D42C /* Start Packager */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 8;
 			files = (
 			);
 			inputFileListPaths = (
@@ -357,7 +361,7 @@
 			);
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
 			shellScript = "export RCT_METRO_PORT=\"${RCT_METRO_PORT:=8081}\"\necho \"export RCT_METRO_PORT=${RCT_METRO_PORT}\" > \"${SRCROOT}/../node_modules/react-native/scripts/.packager.env\"\nif [ -z \"${RCT_NO_LAUNCH_PACKAGER+xxx}\" ] ; then\n  if nc -w 5 -z localhost ${RCT_METRO_PORT} ; then\n    if ! curl -s \"http://localhost:${RCT_METRO_PORT}/status\" | grep -q \"packager-status:running\" ; then\n      echo \"Port ${RCT_METRO_PORT} already in use, packager is either not running or not running correctly\"\n      exit 2\n    fi\n  else\n    open \"$SRCROOT/../node_modules/react-native/scripts/launchPackager.command\" || echo \"Can't start packager automatically\"\n  fi\nfi\n";
 			showEnvVarsInLog = 0;
@@ -468,7 +472,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.AppsFlyer.AppsFlyerExample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.appsflyer.inapppurchase;
 				PRODUCT_NAME = AppsFlyerExample;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -497,7 +501,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.AppsFlyer.AppsFlyerExample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.appsflyer.inapppurchase;
 				PRODUCT_NAME = AppsFlyerExample;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

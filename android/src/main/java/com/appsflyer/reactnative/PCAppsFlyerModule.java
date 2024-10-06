@@ -131,12 +131,12 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
     private final MappedValidationResultListener arsListener = new MappedValidationResultListener() {
         @Override
         public void onFailure(String result, Throwable error) {
-            handleError(EVENT_SUBSCRIPTION_VALIDATION_RESULT, result, error);
+            handleError(EVENT_SUBSCRIPTION_VALIDATION_FAILURE, result, error);
         }
 
         @Override
         public void onResponse(Map<String, Object> response) {
-            handleSuccess(EVENT_SUBSCRIPTION_VALIDATION_RESULT, response);
+            handleSuccess(EVENT_SUBSCRIPTION_VALIDATION_SUCCESS, response);
         }
     };
 
@@ -144,12 +144,12 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
     private final MappedValidationResultListener viapListener = new MappedValidationResultListener() {
         @Override
         public void onFailure(String result, Throwable error) {
-            handleError(EVENT_IN_APP_PURCHASE_VALIDATION_RESULT, result, error);
+            handleError(EVENT_IN_APP_PURCHASE_VALIDATION_FAILURE, result, error);
         }
 
         @Override
         public void onResponse(Map<String, Object> response) {
-            handleSuccess(EVENT_IN_APP_PURCHASE_VALIDATION_RESULT, response);
+            handleSuccess(EVENT_IN_APP_PURCHASE_VALIDATION_SUCCESS, response);
         }
     };
 

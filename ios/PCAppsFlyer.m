@@ -12,6 +12,8 @@ static NSString *const TAG = @"[AppsFlyer_PurchaseConnector] ";
 static NSString *const logSubscriptionsKey = @"logSubscriptions";
 static NSString *const logInAppsKey = @"logInApps";
 static NSString *const sandboxKey = @"sandbox";
+static NSString *const connectorAlreadyConfiguredMessage = @"Connector already configured";
+static NSString *const connectorNotConfiguredMessage = @"Connector not configured, did you call `create` first?";
 
 PurchaseConnector *connector;
 
@@ -25,7 +27,7 @@ RCT_EXPORT_METHOD(create:(NSDictionary *)config
 
     // Perform a check to ensure that we do not reconfigure an existing connector.
     if (connector != nil) {
-        reject(@"401", @"Connector already configured", nil);
+        reject(connectorAlreadyConfiguredMessage, connectorAlreadyConfiguredMessage, nil);
         return;
     }
 
@@ -40,7 +42,6 @@ RCT_EXPORT_METHOD(create:(NSDictionary *)config
   
     [connector setIsSandbox:sandbox];
 
-    // Based on the arguments, insert the corresponding options.
     if (logSubscriptions) {
         [connector setAutoLogPurchaseRevenue:AFSDKAutoLogPurchaseRevenueOptionsAutoRenewableSubscriptions];
     }
@@ -56,7 +57,7 @@ RCT_EXPORT_METHOD(startObservingTransactions:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     NSLog(@"%@Starting to observe transactions.", TAG);
     if (connector == nil) {
-        reject(@"404", @"Connector not configured, did you call `create` first?", nil);
+        reject(connectorNotConfiguredMessage, connectorNotConfiguredMessage, nil);
     } else {
         [connector startObservingTransactions];
         NSLog(@"%@Started observing transactions.", TAG);
@@ -68,7 +69,7 @@ RCT_EXPORT_METHOD(stopObservingTransactions:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     NSLog(@"%@Stopping the observation of transactions.", TAG);
     if (connector == nil) {
-        reject(@"404", @"Connector not configured, did you call `create` first?", nil);
+        reject(connectorNotConfiguredMessage, connectorNotConfiguredMessage, nil);
     } else {
         [connector stopObservingTransactions];
         NSLog(@"%@Stopped observing transactions.", TAG);

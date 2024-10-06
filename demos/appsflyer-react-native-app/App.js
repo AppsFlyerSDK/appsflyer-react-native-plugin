@@ -25,6 +25,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import HomeScreen from './components/HomeScreen.js';
 import Cart from './components/Cart.js';
 import Item from './components/Item.js';
+import {withIAPContext} from 'react-native-iap';
 
 const Stack = createStackNavigator();
 try {
@@ -59,3 +60,5 @@ const App = () => {
 const styles = StyleSheet.create({});
 
 export default App;
+
+//export default withIAPContext(App);

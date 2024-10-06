@@ -27,78 +27,124 @@ function stopObservingTransactions() {
 AppsFlyerPurchaseConnector.stopObservingTransactions =
   stopObservingTransactions;
 
-function setSubscriptionValidationResultListener(onResponse, onFailure) {
-  const subValidationListener = purchaseConnectorEventEmitter.addListener(
-    AppsFlyerConstants.SUBSCRIPTION_PURCHASE_VALIDATION_RESULT_LISTENER,
-    (result) => {
-      try {
-        const validationResult = JSON.parse(result);
-        onResponse(validationResult);
-      } catch (error) {
-        onFailure("Failed to parse subscription validation result", error);
+AppsFlyerPurchaseConnector.setSubscriptionValidationResultSuccess = (
+  onSuccess
+) => {
+  const subValidationSuccessListener =
+    purchaseConnectorEventEmitter.addListener(
+      AppsFlyerConstants.SUBSCRIPTION_VALIDATION_SUCCESS,
+      (result) => {
+        try {
+          const validationResult = JSON.parse(result);
+          onSuccess(validationResult);
+        } catch (error) {
+          console.error(
+            "Failed to parse subscription validation result:",
+            error
+          );
+        }
       }
-    }
-  );
+    );
 
-  pcEventsMap[
-    AppsFlyerConstants.SUBSCRIPTION_PURCHASE_VALIDATION_RESULT_LISTENER
-  ] = subValidationListener;
+  pcEventsMap[AppsFlyerConstants.SUBSCRIPTION_VALIDATION_SUCCESS] = subValidationSuccessListener;
 
   return function remove() {
-    subValidationListener.remove();
+    subValidationSuccessListener.remove();
   };
-}
+};
 
-AppsFlyerPurchaseConnector.setSubscriptionValidationResultListener =
-  setSubscriptionValidationResultListener;
-
-function setInAppValidationResultListener(onResponse, onFailure) {
-  const inAppValidationListener = purchaseConnectorEventEmitter.addListener(
-    AppsFlyerConstants.IN_APP_VALIDATION_RESULT_LISTENER,
-    (result) => {
-      try {
-        const validationResult = JSON.parse(result);
-        onResponse(validationResult);
-      } catch (error) {
-        onFailure("Failed to parse in-app purchase validation result", error);
+AppsFlyerPurchaseConnector.setSubscriptionValidationResultFailure = (
+  onFailure
+) => {
+  const subValidationFailureListener =
+    purchaseConnectorEventEmitter.addListener(
+      AppsFlyerConstants.SUBSCRIPTION_VALIDATION_FAILURE,
+      (result) => {
+        onFailure(
+          "Failed to parse subscription validation result",
+          new Error(result)
+        );
       }
-    }
-  );
+    );
 
-  pcEventsMap[AppsFlyerConstants.IN_APP_VALIDATION_RESULT_LISTENER] =
-    inAppValidationListener;
+  pcEventsMap[AppsFlyerConstants.SUBSCRIPTION_VALIDATION_FAILURE] = subValidationFailureListener;
 
   return function remove() {
-    inAppValidationListener.remove();
+    subValidationFailureListener.remove();
   };
-}
+};
 
-AppsFlyerPurchaseConnector.setInAppValidationResultListener =
-  setInAppValidationResultListener;
+AppsFlyerPurchaseConnector.setInAppValidationResultSuccess = (onSuccess) => {
+  const inAppValidationSuccessListener =
+    purchaseConnectorEventEmitter.addListener(
+      AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_SUCCESS,
+      (result) => {
+        try {
+          const validationResult = JSON.parse(result);
+          onSuccess(validationResult);
+        } catch (error) {
+          console.error(
+            "Failed to parse in-app purchase validation result:",
+            error
+          );
+        }
+      }
+    );
 
-function setDidReceivePurchaseRevenueValidationInfo(callback) {
+  pcEventsMap[AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_SUCCESS] =
+    inAppValidationSuccessListener;
+
+  return function remove() {
+    inAppValidationSuccessListener.remove();
+  };
+};
+
+AppsFlyerPurchaseConnector.setInAppValidationResultFailure = (onFailure) => {
+  const inAppValidationFailureListener =
+    purchaseConnectorEventEmitter.addListener(
+      AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_FAILURE,
+      (result) => {
+        onFailure(
+          "Failed to parse in-app purchase validation result",
+          new Error(result)
+        );
+      }
+    );
+
+  pcEventsMap[AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_FAILURE] =
+    inAppValidationFailureListener;
+
+  return function remove() {
+    inAppValidationFailureListener.remove();
+  };
+};
+
+AppsFlyerPurchaseConnector.setOnReceivePurchaseRevenueValidationInfo = (
+  callback
+) => {
   const revenueValidationListener = purchaseConnectorEventEmitter.addListener(
     AppsFlyerConstants.DID_RECEIVE_PURCHASE_REVENUE_VALIDATION_INFO,
     (info) => {
-      try {
-        const validationInfo = JSON.parse(info);
-        callback(validationInfo);
-      } catch (error) {
-        callback(null, error);
+      if (callback && typeof callback === "function") {
+        try {
+          const validationInfo = JSON.parse(info);
+          callback(validationInfo, null);
+        } catch (error) {
+          callback(null, error);
+        }
       }
     }
   );
 
+  // Store the listener in the events map
   pcEventsMap[AppsFlyerConstants.DID_RECEIVE_PURCHASE_REVENUE_VALIDATION_INFO] =
     revenueValidationListener;
 
+  // Return a function to remove the event listener
   return function remove() {
     revenueValidationListener.remove();
   };
-}
-
-AppsFlyerPurchaseConnector.setDidReceivePurchaseRevenueValidationInfo =
-  setDidReceivePurchaseRevenueValidationInfo;
+};
 
 const AppsFlyerPurchaseConnectorConfig = {
   setConfig: ({ logSubscriptions, logInApps, sandbox }) => {
@@ -114,7 +160,7 @@ function create(config) {
   if (!config) {
     throw new MissingConfigurationException();
   }
-   PCAppsFlyer.create(config);
+  PCAppsFlyer.create(config);
 }
 
 AppsFlyerPurchaseConnector.create = create;
