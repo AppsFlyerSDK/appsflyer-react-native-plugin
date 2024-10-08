@@ -23,7 +23,7 @@ For more info please check out the [OneLink™ Deep Linking Guide](https://suppo
 
 1. In order to use AppsFlyer's deeplinks you need to configure intent filters/scheme/associatedDomains as described in [Expo's guide](https://docs.expo.dev/guides/linking/#universal-links-on-ios).
 
-2. **For Android apps:** You need to add `setIntent()` inside the `onNewIntent` method like described [here](RN_DeepLinkIntegrate.md#android-deeplink-setup). This plugin is NOT adding this code out the box, so you need to implement it **manually or with [custom config plugin](https://docs.expo.dev/modules/config-plugin-and-native-module-tutorial/#4-creating-a-new-config-plugin)**
+2. **For Android apps:** You need to add `setIntent()` inside the `onNewIntent` method like described [here](https://dev.appsflyer.com/hc/docs/rn_deeplinkintegrate#android-deeplink-setup). This plugin is NOT adding this code out the box, so you need to implement it **manually or with [custom config plugin](https://docs.expo.dev/modules/config-plugin-and-native-module-tutorial/#4-creating-a-new-config-plugin)**
 
 ## Full app.json example
 
