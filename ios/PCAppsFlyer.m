@@ -33,8 +33,8 @@ RCT_EXPORT_METHOD(create:(NSDictionary *)config
 
     // Obtain a shared instance of PurchaseConnector
     connector = [PurchaseConnector shared];
-    [connector setPurchaseRevenueDelegate: PCAppsFlyer.self];
-    [connector setPurchaseRevenueDataSource:PCAppsFlyer.self];
+    [connector setPurchaseRevenueDelegate: self];
+    [connector setPurchaseRevenueDataSource: self];
 
     BOOL logSubscriptions = [config[logSubscriptionsKey] boolValue];
     BOOL logInApps = [config[logInAppsKey] boolValue];

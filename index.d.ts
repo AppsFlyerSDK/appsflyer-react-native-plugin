@@ -186,22 +186,12 @@ declare module "react-native-appsflyer" {
     setSubscriptionValidationResultFailure(
       callback: (data:onFailure) => any
     ): () => void;
-    setInAppValidationResultSuccess(
+    onInAppValidationResultSuccess(
       callback: (data:OnResponse<InAppPurchaseValidationResult>) => any
     ): () => void;
-    setInAppValidationResultFailure(
+    onInAppValidationResultFailure(
       callback: (data:onFailure) => any
     ): () => void;
-    /*
-    setSubscriptionValidationResultListener(
-      onResponse: OnResponse<SubscriptionValidationResult>,
-      onFailure: OnFailure
-    ): void;
-    setInAppValidationResultListener(
-      onResponse: OnResponse<InAppPurchaseValidationResult>,
-      onFailure: OnFailure
-    ): void;
-    */
     setOnReceivePurchaseRevenueValidationInfo(
       callback: onReceivePurchaseRevenueValidationInfo
     ): void;

@@ -1,41 +1,24 @@
 package com.appsflyer.reactnative;
 
 import android.app.Application;
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.NativeModule;
-import com.facebook.react.bridge.JavaScriptModule;
-import com.facebook.react.bridge.Callback;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReadableType;
-import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Iterator;
-import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Arrays;
 
@@ -136,7 +119,9 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
         @Override
         public void onResponse(Map<String, Object> response) {
-            handleSuccess(EVENT_SUBSCRIPTION_VALIDATION_SUCCESS, response);
+            WritableMap writableMap = RNUtil.toWritableMap(response);
+            JSONObject json = RNUtil.readableMapToJson(writableMap);
+            handleSuccess(EVENT_SUBSCRIPTION_VALIDATION_SUCCESS, json);
         }
     };
 
@@ -149,24 +134,31 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
         @Override
         public void onResponse(Map<String, Object> response) {
-            handleSuccess(EVENT_IN_APP_PURCHASE_VALIDATION_SUCCESS, response);
+            WritableMap writableMap = RNUtil.toWritableMap(response);
+            JSONObject json = RNUtil.readableMapToJson(writableMap);
+            handleSuccess(EVENT_IN_APP_PURCHASE_VALIDATION_SUCCESS, json);
         }
     };
 
     //HELPER METHODS
-    private void handleSuccess(String eventName, Map<String, Object> response) {
-        emitEvent(eventName, convertMapToWritableMap(response));
+    private void handleSuccess(String eventName, JSONObject response){
+        sendEvent(reactContext,eventName, response);
     }
 
     private void handleError(String eventName, String result, Throwable error) {
         WritableMap resMap = Arguments.createMap();
         resMap.putString("result", result);
         resMap.putMap("error", error != null ? errorToMap(error) : null);
-        emitEvent(eventName, resMap);
+        sendEvent(reactContext,eventName, resMap.toString());
     }
 
-    private void emitEvent(String eventName, WritableMap eventData) {
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, eventData);
+    private void sendEvent(ReactContext reactContext,
+                           String eventName,
+                           Object params) {
+        Log.d("ReactNativeJS", "Event: " + eventName + ", params: " + params.toString());
+        reactContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(eventName, params);
     }
 
     private WritableMap errorToMap(Throwable error) {
@@ -175,10 +167,13 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
         return errorMap;
     }
 
-    private WritableMap convertMapToWritableMap(Map<String, Object> map) {
-        JSONObject jsonMap = new JSONObject(map);
-        WritableMap writableMap = RNUtil.jsonToWritableMap(jsonMap);
-        return writableMap;
+    private Map<String, Object> toMap(Throwable throwable) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", throwable.getClass().getSimpleName());
+        map.put("message", throwable.getMessage());
+        map.put("stacktrace", String.join("\n", Arrays.stream(throwable.getStackTrace()).map(StackTraceElement::toString).toArray(String[]::new)));
+        map.put("cause", throwable.getCause() != null ? toMap(throwable.getCause()) : null);
+        return map;
     }
 
     @ReactMethod
@@ -190,15 +185,6 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
     public void removeListeners(Integer count) {
         // Keep: Required for RN built in Event Emitter Calls.
     }
-
-    private Map<String, Object> toMap(Throwable throwable) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("type", throwable.getClass().getSimpleName());
-        map.put("message", throwable.getMessage());
-        map.put("stacktrace", String.join("\n", Arrays.stream(throwable.getStackTrace()).map(StackTraceElement::toString).toArray(String[]::new)));
-        map.put("cause", throwable.getCause() != null ? toMap(throwable.getCause()) : null);
-        return map;
-    }
 }
 
 class ConnectorWrapper implements PurchaseClient {
@@ -206,11 +192,11 @@ class ConnectorWrapper implements PurchaseClient {
 
     public ConnectorWrapper(Context context, boolean logSubs, boolean logInApps, boolean sandbox,
                             MappedValidationResultListener subsListener, MappedValidationResultListener inAppListener) {
-        this.connector = new PurchaseClient.Builder(context, Store.GOOGLE)
+        this.connector = new Builder(context, Store.GOOGLE)
                 .setSandbox(sandbox)
                 .logSubscriptions(logSubs)
                 .autoLogInApps(logInApps)
-                .setSubscriptionValidationResultListener(new PurchaseClient.SubscriptionPurchaseValidationResultListener() {
+                .setSubscriptionValidationResultListener(new SubscriptionPurchaseValidationResultListener() {
                     @Override
                     public void onResponse(Map<String, ? extends SubscriptionValidationResult> result) {
                         if (result != null) {
@@ -227,14 +213,18 @@ class ConnectorWrapper implements PurchaseClient {
                         subsListener.onFailure(result, error);
                     }
                 })
-                .setInAppValidationResultListener(new PurchaseClient.InAppPurchaseValidationResultListener() {
+                .setInAppValidationResultListener(new InAppPurchaseValidationResultListener() {
                     @Override
                     public void onResponse(Map<String, ? extends InAppPurchaseValidationResult> result) {
-                        if (result != null) {
-                            Map<String, Object> mappedResults = result.entrySet().stream()
-                                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> toJsonMap(entry.getValue())));
-                            inAppListener.onResponse(mappedResults);
+                        if (result != null && !result.isEmpty()) {
+                            Log.d("AppsFlyer", "onResponse: " + result);
+
+                            Map.Entry<String, ? extends InAppPurchaseValidationResult> entry = result.entrySet().iterator().next();
+                            Map<String, Object> innerJsonMap = toJsonMap(entry.getValue());
+
+                            inAppListener.onResponse(innerJsonMap);
                         } else {
+                            // There's no result or it's empty, handle this case accordingly.
                             inAppListener.onResponse(null);
                         }
                     }

@@ -12,7 +12,9 @@ import {
 } from 'react-native';
 import {Card, ListItem, Button, FAB, Badge} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
+//import appsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
 import appsFlyer from 'react-native-appsflyer';
+
 import {
   PCInit,
   AFInit,
@@ -139,7 +141,7 @@ const HomeScreen = ({navigation}) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     AFGCDListener = appsFlyer.onInstallConversionData(res => {
       const isFirstLaunch = res?.data?.is_first_launch;
-
+      console.log(">> onInstallConversionData: " , res);
       if (isFirstLaunch && JSON.parse(isFirstLaunch) === true) {
         setIsFirstLaunch(true);
       } else {
@@ -149,6 +151,7 @@ const HomeScreen = ({navigation}) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     AFUDLListener = appsFlyer.onDeepLink(res => {
+      console.log(">> onDeepLink: " , res);
       if (res?.deepLinkStatus !== 'NOT_FOUND') {
         const productName = res?.data?.af_productName;
         const product = getProductByName(productName);
@@ -163,7 +166,7 @@ const HomeScreen = ({navigation}) => {
       }
     });
     AFInit();
-    PCInit();
+    //PCInit();
 
     return () => {
       AFGCDListener();
@@ -173,6 +176,26 @@ const HomeScreen = ({navigation}) => {
 
   useEffect(() => {}, [itemsInCart]);
 
+  /*
+  const handleValidationSuccess = (validationResult) => {
+    console.log('>> ValidationSuccess: ', validationResult);
+  };
+
+  const handleValidationFailure = (validationResult) => {
+    console.log('>> ValidationFailure: ', validationResult);
+  }
+  
+  useEffect(() => {
+   const validationSuccessListener = AppsFlyerPurchaseConnector.onInAppValidationResultSuccess(handleValidationSuccess);
+   const validationFailureListener = AppsFlyerPurchaseConnector.onInAppValidationResultFailure(handleValidationFailure);
+    
+    return () => {
+      validationSuccessListener();
+      validationFailureListener();
+    };
+  }, []);
+  */
+ 
   return (
     <View style={styles.container}>
       <WelcomeModal

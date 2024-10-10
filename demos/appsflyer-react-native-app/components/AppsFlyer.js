@@ -1,6 +1,6 @@
 import appsFlyer, {
-  AppsFlyerPurchaseConnector,
-  AppsFlyerPurchaseConnectorConfig,
+  //AppsFlyerPurchaseConnector,
+  //AppsFlyerPurchaseConnectorConfig,
   MEDIATION_NETWORK,
 } from 'react-native-appsflyer';
 import {Platform} from 'react-native';
@@ -14,7 +14,7 @@ export const AF_clickOnItem = 'af_click_on_item';
 
 const initOptions = {
   isDebug: true,
-  devKey: 'WdpTVAcYwmxsaQ4WeTspmh',
+  devKey: '6jJTVBNyc832U5D57Jvzmg',
   onInstallConversionDataListener: true,
   timeToWaitForATTUserAuthorization: 10,
   onDeepLinkListener: true,
@@ -26,12 +26,17 @@ export function AFInit() {
   if (Platform.OS == 'ios') {
     appsFlyer.setCurrentDeviceLanguage('EN');
   }
-  appsFlyer.setAppInviteOneLinkID('oW4R');
-  appsFlyer.initSdk(initOptions, null, null);
-
-
+  //appsFlyer.setAppInviteOneLinkID('oW4R');
+  appsFlyer.initSdk(initOptions, 
+    (success) => {
+      console.log("init SDK success", success);
+    }, 
+    (error) =>{
+      console.log("init SDK failed", error);
+  });
 }
 
+/*
 export function PCInit() {
   const purchaseConnectorConfig: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
     logSubscriptions: true,
@@ -44,6 +49,7 @@ export function PCInit() {
   );
   AppsFlyerPurchaseConnector.startObservingTransactions();
 }
+*/
 
 // Sends in-app events to AppsFlyer servers. name is the events name ('simple event') and the values are a JSON ({info: 'fff', size: 5})
 export function AFLogEvent(name, values) {

@@ -126,7 +126,8 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "com.appsflyerexample"
+        applicationId "com.appsflyer.billing2"
+        //applicationId "com.appsflyerexample"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -181,7 +182,7 @@ android {
 }
 
 dependencies {
-    implementation "com.android.billingclient:billing:7.0.0"
+    implementation "com.android.billingclient:billing:6.0.0"
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion

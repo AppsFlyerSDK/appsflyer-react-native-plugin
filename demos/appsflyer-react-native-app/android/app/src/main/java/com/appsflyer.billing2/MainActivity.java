@@ -1,4 +1,4 @@
-package com.appsflyerexample;
+package com.appsflyer.billing2;
 
 import com.facebook.react.ReactActivity;
 
