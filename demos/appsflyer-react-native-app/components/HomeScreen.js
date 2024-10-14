@@ -1,5 +1,5 @@
 /* @flow weak */
-
+import { NativeEventEmitter, NativeModules } from "react-native";
 import React, {useState, useEffect} from 'react';
 import {
   View,
@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import {Card, ListItem, Button, FAB, Badge} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-//import appsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
-import appsFlyer from 'react-native-appsflyer';
+import appsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
+//import appsFlyer from 'react-native-appsflyer';
 
 import {
   PCInit,
@@ -166,7 +166,7 @@ const HomeScreen = ({navigation}) => {
       }
     });
     AFInit();
-    //PCInit();
+    PCInit();
 
     return () => {
       AFGCDListener();
@@ -176,7 +176,6 @@ const HomeScreen = ({navigation}) => {
 
   useEffect(() => {}, [itemsInCart]);
 
-  /*
   const handleValidationSuccess = (validationResult) => {
     console.log('>> ValidationSuccess: ', validationResult);
   };
@@ -184,17 +183,28 @@ const HomeScreen = ({navigation}) => {
   const handleValidationFailure = (validationResult) => {
     console.log('>> ValidationFailure: ', validationResult);
   }
-  
+
+  const handleSubscriptionValidationSuccess = (subscriptionValidationResult) => {
+    console.log('>> handleSubscriptionValidationSuccess: ', subscriptionValidationResult);
+  };
+
+  const handleSubscriptionValidationFailure = (subscriptionValidationResult) => {
+    console.log('>> handleSubscriptionValidationFailure: ', subscriptionValidationResult);
+  }
+
   useEffect(() => {
    const validationSuccessListener = AppsFlyerPurchaseConnector.onInAppValidationResultSuccess(handleValidationSuccess);
    const validationFailureListener = AppsFlyerPurchaseConnector.onInAppValidationResultFailure(handleValidationFailure);
+   const subscriptionValidationSuccessListener = AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess(handleSubscriptionValidationSuccess);
+   const subscriptionValidationFailureListener = AppsFlyerPurchaseConnector.onSubscriptionValidationResultFailure(handleSubscriptionValidationFailure);
     
     return () => {
       validationSuccessListener();
       validationFailureListener();
+      subscriptionValidationSuccessListener();
+      subscriptionValidationFailureListener();
     };
   }, []);
-  */
  
   return (
     <View style={styles.container}>

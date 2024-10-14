@@ -180,10 +180,10 @@ declare module "react-native-appsflyer" {
     create(config: PurchaseConnectorConfig): void;
     startObservingTransactions(): void;
     stopObservingTransactions(): void;
-    setSubscriptionValidationResultSuccess(
+    onSubscriptionValidationResultSuccess(
       callback: (data:OnResponse<SubscriptionValidationResult>) => any
     ): () => void;
-    setSubscriptionValidationResultFailure(
+    onSubscriptionValidationResultFailure(
       callback: (data:onFailure) => any
     ): () => void;
     onInAppValidationResultSuccess(

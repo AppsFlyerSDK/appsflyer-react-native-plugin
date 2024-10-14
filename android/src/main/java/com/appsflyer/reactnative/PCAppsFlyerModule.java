@@ -119,9 +119,15 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
         @Override
         public void onResponse(Map<String, Object> response) {
-            WritableMap writableMap = RNUtil.toWritableMap(response);
-            JSONObject json = RNUtil.readableMapToJson(writableMap);
-            handleSuccess(EVENT_SUBSCRIPTION_VALIDATION_SUCCESS, json);
+            Map.Entry<String, Object> firstEntry = null;
+            if (response != null) {
+                firstEntry = response.entrySet().iterator().next();
+            }
+            if (firstEntry != null && firstEntry.getValue() instanceof Map<?, ?>) {
+                Map<String, Object> productData = (Map<String, Object>) firstEntry.getValue();
+                WritableMap writableMap = RNUtil.toWritableMap(productData);
+                handleSuccess(EVENT_SUBSCRIPTION_VALIDATION_SUCCESS, writableMap);
+            }
         }
     };
 
@@ -135,13 +141,12 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
         @Override
         public void onResponse(Map<String, Object> response) {
             WritableMap writableMap = RNUtil.toWritableMap(response);
-            JSONObject json = RNUtil.readableMapToJson(writableMap);
-            handleSuccess(EVENT_IN_APP_PURCHASE_VALIDATION_SUCCESS, json);
+            handleSuccess(EVENT_IN_APP_PURCHASE_VALIDATION_SUCCESS, writableMap);
         }
     };
 
     //HELPER METHODS
-    private void handleSuccess(String eventName, JSONObject response){
+    private void handleSuccess(String eventName, WritableMap response){
         sendEvent(reactContext,eventName, response);
     }
 
@@ -152,15 +157,16 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
         sendEvent(reactContext,eventName, resMap.toString());
     }
 
-    private void sendEvent(ReactContext reactContext,
-                           String eventName,
-                           Object params) {
-        Log.d("ReactNativeJS", "Event: " + eventName + ", params: " + params.toString());
-        reactContext
-                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit(eventName, params);
+    private void sendEvent(ReactContext reactContext, String eventName, Object params) {
+        if (reactContext.hasActiveReactInstance()) {  // Ensure the context is active
+            Log.d("ReactNativeJS", "Event: " + eventName + ", params: " + params.toString());
+            reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit(eventName, params);
+        } else {
+            Log.d("ReactNativeJS", "Skipping event: " + eventName);
+        }
     }
-
     private WritableMap errorToMap(Throwable error) {
         JSONObject errorJson = new JSONObject(this.toMap(error));
         WritableMap errorMap = RNUtil.jsonToWritableMap(errorJson);

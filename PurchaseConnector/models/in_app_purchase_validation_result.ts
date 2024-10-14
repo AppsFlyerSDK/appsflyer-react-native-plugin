@@ -1,7 +1,7 @@
 import { ProductPurchase } from "./product_purchase";
 import { ValidationFailureData } from "./validation_failure_data";
 
-export class InAppPurchaseValidationResult {
+export default class InAppPurchaseValidationResult {
     success: boolean;
     productPurchase?: ProductPurchase;
     failureData?: ValidationFailureData;

@@ -7,7 +7,7 @@
  */
 
 import React, {Component} from 'react';
-import {LogBox, I18nManager} from 'react-native';
+import {Platform, LogBox, I18nManager} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import 'react-native-gesture-handler';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -65,7 +65,7 @@ class App extends Component {
   purchaseErrorSubscription = null;
 
   componentDidMount() {
-    //this.setupIAP();
+    this.setupIAP();
   }
 
   setupIAP = async () => {
@@ -90,29 +90,42 @@ class App extends Component {
         .then(res => {
           console.log('[Subscriptions] >> ', res);
         })
-        .catch(() => {
-          console.log('[Error finding Subscriptions] >> ', err);
-        });
-      this.purchaseUpdateSubscription = purchaseUpdatedListener(
+        .catch((err) => {
+         console.log('[Error finding Subscriptions] >> ', err);
+       });
+        this.purchaseUpdateSubscription = purchaseUpdatedListener(
          async purchase => {
-            try {
-              console.log('purchaseUpdatedListener', purchase);
-              const receipt = purchase.transactionReceipt;
-              if (receipt) {
-                console.log('[Receipt] >> ', receipt);
-          
-                await finishTransaction({
-                  purchase: purchase,
-                  isConsumable: true // Set to false if the product is non-consumable
-                }).catch(error => {
-                  console.warn('Error finishing transaction:', error);
-                });
-              }
-            } catch (error) {
-              console.warn('Error in purchaseUpdatedListener', error);
-            }
-          },
-      );
+           try {
+             console.log('purchaseUpdatedListener', purchase);
+             const receipt = purchase.transactionReceipt;
+             if (receipt) {
+               // Check if the purchased product is a subscription or a consumable item
+               const isSubscription = subscriptions.includes(purchase.productId);
+               const isConsumable = items.includes(purchase.productId);
+       
+               console.log('[Receipt] >> ', receipt);
+               if (isSubscription || isConsumable) {
+                 await finishTransaction({
+                   purchase: purchase,
+                   isConsumable: isConsumable, // true for consumables, false for subscriptions
+                 }).catch(error => {
+                   console.warn('Error finishing transaction:', error);
+                 });
+               } else {
+                 // Handle the case where the purchase is non-consumable and not a subscription.
+                 await finishTransaction({
+                   purchase: purchase,
+                   isConsumable: false,
+                 }).catch(error => {
+                   console.warn('Error finishing transaction:', error);
+                 });
+               }
+             }
+           } catch (error) {
+             console.warn('Error in purchaseUpdatedListener', error);
+           }
+         },
+       );
 
       this.purchaseErrorSubscription = purchaseErrorListener(error => {
         console.warn('purchaseErrorListener', error);

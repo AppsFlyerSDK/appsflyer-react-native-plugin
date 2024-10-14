@@ -1,6 +1,6 @@
 import appsFlyer, {
-  //AppsFlyerPurchaseConnector,
-  //AppsFlyerPurchaseConnectorConfig,
+  AppsFlyerPurchaseConnector,
+  AppsFlyerPurchaseConnectorConfig,
   MEDIATION_NETWORK,
 } from 'react-native-appsflyer';
 import {Platform} from 'react-native';
@@ -36,7 +36,6 @@ export function AFInit() {
   });
 }
 
-/*
 export function PCInit() {
   const purchaseConnectorConfig: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
     logSubscriptions: true,
@@ -49,7 +48,6 @@ export function PCInit() {
   );
   AppsFlyerPurchaseConnector.startObservingTransactions();
 }
-*/
 
 // Sends in-app events to AppsFlyer servers. name is the events name ('simple event') and the values are a JSON ({info: 'fff', size: 5})
 export function AFLogEvent(name, values) {

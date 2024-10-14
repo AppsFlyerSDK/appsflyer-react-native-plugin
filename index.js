@@ -1,6 +1,12 @@
-import { NativeEventEmitter, NativeModules } from "react-native";
+import {
+  NativeEventEmitter,
+  NativeModules,
+} from "react-native";
 import AppsFlyerConstants from "./PurchaseConnector/constants/constants";
 import InAppPurchaseValidationResult from "./PurchaseConnector/models/in_app_purchase_validation_result";
+import ValidationFailureData from "./PurchaseConnector/models/validation_failure_data";
+import SubscriptionValidationResult from "./PurchaseConnector/models/subscription_validation_result";
+
 const { RNAppsFlyer } = NativeModules;
 const appsFlyer = {};
 const eventsMap = {};
@@ -26,15 +32,20 @@ function stopObservingTransactions() {
 AppsFlyerPurchaseConnector.stopObservingTransactions =
   stopObservingTransactions;
 
-AppsFlyerPurchaseConnector.setSubscriptionValidationResultSuccess = (
+AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess = (
   onSuccess
 ) => {
+  if (typeof onSuccess !== "function") {
+    throw new Error("onSuccess callback must be a function");
+  }
+
   const subValidationSuccessListener =
     purchaseConnectorEventEmitter.addListener(
       AppsFlyerConstants.SUBSCRIPTION_VALIDATION_SUCCESS,
       (result) => {
         try {
-          const validationResult = JSON.parse(result);
+          const validationResult =
+            SubscriptionValidationResult.fromJson(result);
           onSuccess(validationResult);
         } catch (error) {
           console.error(
@@ -53,17 +64,29 @@ AppsFlyerPurchaseConnector.setSubscriptionValidationResultSuccess = (
   };
 };
 
-AppsFlyerPurchaseConnector.setSubscriptionValidationResultFailure = (
+AppsFlyerPurchaseConnector.onSubscriptionValidationResultFailure = (
   onFailure
 ) => {
+  if (typeof onFailure !== "function") {
+    throw new Error("onFailure callback must be a function");
+  }
+
   const subValidationFailureListener =
     purchaseConnectorEventEmitter.addListener(
       AppsFlyerConstants.SUBSCRIPTION_VALIDATION_FAILURE,
-      (result) => {
-        onFailure(
-          "Failed to parse subscription validation result",
-          new Error(result)
-        );
+      (validationResult) => {
+        try {
+          const failureValidationResult =
+            ValidationFailureData.fromJson(validationResult);
+          onFailure(
+            new Error("Failed to parse subscription validation result")
+          );
+        } catch (error) {
+          console.error(
+            "Failed to handle subscription validation result:",
+            error
+          );
+        }
       }
     );
 
@@ -75,29 +98,29 @@ AppsFlyerPurchaseConnector.setSubscriptionValidationResultFailure = (
   };
 };
 
-AppsFlyerPurchaseConnector.onInAppValidationResultSuccess = (callback) => {
-  console.log(">> In onInAppValidationResultSuccess , Callback: ", callback);
+AppsFlyerPurchaseConnector.onInAppValidationResultSuccess = (onSuccess) => {
+  if (typeof onSuccess !== "function") {
+    throw new Error("onSuccess callback must be a function");
+  }
+
   const inAppValidationSuccessListener =
     purchaseConnectorEventEmitter.addListener(
-      'inAppPurchaseValidationSuccess',
-        validationResult => {
-          console.log('>> Received inAppPurchaseValidationSuccess Event');
-          const purchaseValidationResult = InAppPurchaseValidationResult.fromJson(validationResult);
-          console.log('validationResult', purchaseValidationResult);
-          if (callback && typeof callback === 'function') {
-            try {
-              callback(purchaseValidationResult);
-            } catch (error) {
-              console.error(
-                "Failed to handle in-app purchase validation result:",
-                error
-              );
-            }
-          }
+      AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_SUCCESS,
+      (validationResult) => {
+        try {
+          const purchaseValidationResult =
+            InAppPurchaseValidationResult.fromJson(validationResult);
+          onSuccess(purchaseValidationResult);
+        } catch (error) {
+          console.error(
+            "Failed to handle in-app purchase validation result:",
+            error
+          );
+        }
       }
     );
 
-  pcEventsMap['inAppPurchaseValidationSuccess'] =
+  pcEventsMap[AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_SUCCESS] =
     inAppValidationSuccessListener;
 
   return function remove() {
@@ -106,15 +129,26 @@ AppsFlyerPurchaseConnector.onInAppValidationResultSuccess = (callback) => {
 };
 
 AppsFlyerPurchaseConnector.onInAppValidationResultFailure = (onFailure) => {
-  console.log(">> In InAppValidationResultFailure , Callback: ", onFailure);
+  if (typeof onFailure !== "function") {
+    throw new Error("onFailure callback must be a function");
+  }
+
   const inAppValidationFailureListener =
     purchaseConnectorEventEmitter.addListener(
       AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_FAILURE,
-      (result) => {
-        onFailure(
-          "Failed to parse in-app purchase validation result",
-          new Error(result)
-        );
+      (validationResult) => {
+        try {
+          const failureValidationResult =
+            ValidationFailureData.fromJson(validationResult);
+          onFailure(
+            new Error("Failed to parse in-app purchase validation result")
+          );
+        } catch (error) {
+          console.error(
+            "Failed to handle in-app purchase validation result:",
+            error
+          );
+        }
       }
     );
 
@@ -143,11 +177,9 @@ AppsFlyerPurchaseConnector.setOnReceivePurchaseRevenueValidationInfo = (
     }
   );
 
-  // Store the listener in the events map
   pcEventsMap[AppsFlyerConstants.DID_RECEIVE_PURCHASE_REVENUE_VALIDATION_INFO] =
     revenueValidationListener;
 
-  // Return a function to remove the event listener
   return function remove() {
     revenueValidationListener.remove();
   };

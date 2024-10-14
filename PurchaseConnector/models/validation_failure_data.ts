@@ -3,7 +3,7 @@ export type ValidationFailureDataJson = {
   description: string;
 };
 
-export class ValidationFailureData {
+export default class ValidationFailureData {
   status: number;
   description: string;
 

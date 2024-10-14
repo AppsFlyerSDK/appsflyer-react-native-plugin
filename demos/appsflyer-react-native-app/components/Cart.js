@@ -3,7 +3,7 @@
 import React from 'react';
 import {View, StyleSheet, ScrollView, Alert, Platform} from 'react-native';
 import {ListItem, Avatar, Button} from 'react-native-elements';
-import { requestPurchase, requestSubscription, RequestPurchase } from 'react-native-iap';
+import {getSubscriptions, requestPurchase, requestSubscription, RequestPurchase, finishTransaction} from 'react-native-iap';
 
 
 const Cart = ({route, navigation}) => {
@@ -42,11 +42,26 @@ const Cart = ({route, navigation}) => {
     }
   };
 
-  const subscribe = async (sku, offerToken) => {
+  const subscribe = async (sku) => {
     try {
-      await requestSubscription({
+      const offerDetails = await getSubscriptions({ skus: [sku] });
+      const subscriptionOffer = offerDetails.find((offer) => offer.productId === sku);
+      
+      // Check if offer details exist for the sku
+      if (!subscriptionOffer || !subscriptionOffer.subscriptionOfferDetails || subscriptionOffer.subscriptionOfferDetails.length === 0) {
+        throw new Error('Subscription offer details not found for sku: ' + sku);
+      }
+  
+      const offerToken = subscriptionOffer.subscriptionOfferDetails[0].offerToken;
+  
+      const purchase = await requestSubscription({
         sku,
-        ...(offerToken && {subscriptionOffers: [{sku, offerToken}]}),
+        subscriptionOffers: [
+          {
+            sku,
+            offerToken,
+          },
+        ],
       });
     } catch (err) {
       console.warn(err.code, err.message);
@@ -62,7 +77,7 @@ const Cart = ({route, navigation}) => {
     if (productList.length !== 0) {
       checkout();
       //purchase(items[1]);
-      //subscribe(subscriptions[0]); // Hardcoded for testing. 
+      subscribe(subscriptions[0]); // Hardcoded for testing. 
       navigation.goBack();
     } else {
       Alert.alert(
