@@ -1,30 +1,36 @@
 /* @flow weak */
-
 import React from 'react';
 import {View, StyleSheet, ScrollView, Alert, Platform} from 'react-native';
 import {ListItem, Avatar, Button} from 'react-native-elements';
-import {getSubscriptions, requestPurchase, requestSubscription, RequestPurchase, finishTransaction} from 'react-native-iap';
-
+import {
+  getSubscriptions,
+  requestPurchase,
+  requestSubscription,
+  RequestPurchase,
+  finishTransaction,
+} from 'react-native-iap';
 
 const Cart = ({route, navigation}) => {
   const {productList, removeProductFromCart, checkout} = route.params;
 
   // Test items (hardcoded)
+  /*
   const items = Platform.select({
     ios: [
-      'one1',
-      'non.cons2',
-      'auto.renew',
-      'non.renew',
-      'cons.test',
-      'nonconsumable.purchase1',
-      'autorenewable.purchase1',
-      'nonrenewing.purchase1',
+      'com.appsflyer.inapppurchase.non.cons',
+      'com.appsflyer.inapppurchase.cons',
+      'com.appsflyer.inapppurchase.two',
     ],
-    android: ['paz_test', 'btc'],
+    android: ['noa_coin1', 'paz_test', 'btc'],
   });
 
-  const subscriptions = ['cheap' , 'intro'];
+  const subscriptions = Platform.select({
+    ios: [
+      'com.appsflyer.inapppurchase.non.renew',
+      'com.appsflyer.inapppurchase.auto.renew',
+    ],
+    android: ['cheap', 'intro'],
+  });
 
   // Added methods
   const purchase = async (sku: string) => {
@@ -34,7 +40,7 @@ const Cart = ({route, navigation}) => {
         andDangerouslyFinishTransactionAutomaticallyIOS: false,
       };
       if (Platform.OS === 'android') {
-        purchaseParams = { skus: [sku] };
+        purchaseParams = {skus: [sku]};
       }
       await requestPurchase(purchaseParams);
     } catch (err) {
@@ -42,31 +48,37 @@ const Cart = ({route, navigation}) => {
     }
   };
 
-  const subscribe = async (sku) => {
+  const subscribe = async (sku, offerToken) => {
     try {
-      const offerDetails = await getSubscriptions({ skus: [sku] });
-      const subscriptionOffer = offerDetails.find((offer) => offer.productId === sku);
-      
+      const offerDetails = await getSubscriptions({skus: [sku]});
+      const subscriptionOffer = offerDetails.find(
+        offer => offer.productId === sku,
+      );
+
       // Check if offer details exist for the sku
-      if (!subscriptionOffer || !subscriptionOffer.subscriptionOfferDetails || subscriptionOffer.subscriptionOfferDetails.length === 0) {
-        throw new Error('Subscription offer details not found for sku: ' + sku);
+      if (Platform.OS == 'android') {
+        if (
+          !subscriptionOffer ||
+          !subscriptionOffer.subscriptionOfferDetails ||
+          subscriptionOffer.subscriptionOfferDetails.length === 0
+        ) {
+          throw new Error(
+            'Subscription offer details not found for sku: ' + sku,
+          );
+        }
+        const offerToken =
+          subscriptionOffer.subscriptionOfferDetails[0].offerToken;
       }
-  
-      const offerToken = subscriptionOffer.subscriptionOfferDetails[0].offerToken;
-  
-      const purchase = await requestSubscription({
+
+      await requestSubscription({
         sku,
-        subscriptionOffers: [
-          {
-            sku,
-            offerToken,
-          },
-        ],
+        ...(offerToken && {subscriptionOffers: [{sku, offerToken}]}),
       });
     } catch (err) {
       console.warn(err.code, err.message);
     }
   };
+  */
 
   const handleRemove = product => {
     removeProductFromCart(product);
@@ -76,8 +88,9 @@ const Cart = ({route, navigation}) => {
   const handleCheckout = () => {
     if (productList.length !== 0) {
       checkout();
-      //purchase(items[1]);
-      subscribe(subscriptions[0]); // Hardcoded for testing. 
+      //Handle purchase or subscription for testing AF-PC in-app validation
+      //purchase(items[0]);
+      //subscribe(subscriptions[0]);
       navigation.goBack();
     } else {
       Alert.alert(

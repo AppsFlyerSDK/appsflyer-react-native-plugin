@@ -7,10 +7,17 @@
 #endif
 
 #import <objc/message.h>
+#if __has_include(<PurchaseConnector/PurchaseConnector.h>)
 #import <PurchaseConnector/PurchaseConnector.h>
 
 @interface PCAppsFlyer: RCTEventEmitter <RCTBridgeModule, AppsFlyerPurchaseRevenueDelegate, AppsFlyerPurchaseRevenueDataSource>
-// Define any properties and methods the PCAppsFlyer module will need
+// This is the PCAppsFlyer if the AppsFlyerPurchaseConnector is set to true in the podfile
 @end
 
-// Define any static constants related to PCAppsFlyer.
+#else
+
+@interface PCAppsFlyer: RCTEventEmitter <RCTBridgeModule>
+// This is the PCAppsFlyer if the AppsFlyerPurchaseConnector is set to false in the podfile
+@end
+
+#endif

@@ -6,7 +6,7 @@
  */
 
 const localPackagePaths = [
-  '/Users/amit.levy/RN-Projects/appsflyer-react-native-plugin',
+  'your path for local testing the package',
 ];
 
 module.exports = {

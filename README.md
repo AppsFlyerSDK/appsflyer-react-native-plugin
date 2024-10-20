@@ -56,6 +56,7 @@ If you have used 1 of the removed APIs, please check the integration guide for t
 - [In-app events](/Docs/RN_InAppEvents.md)
 - [Uninstall measurement](/Docs/RN_UninstallMeasurement.md)
 - [Send consent for DMA compliance](/Docs/RN_CMP.md)
+- [Purchase Connector](/Docs/RN_PurchaseConnector.md)
 ##  🔗 Deep Linking
 - [Integration](/Docs/RN_DeepLinkIntegrate.md)
 - [***Expo*** Integration](/Docs/RN_ExpoDeepLinkIntegration.md)

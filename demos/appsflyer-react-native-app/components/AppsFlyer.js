@@ -14,11 +14,11 @@ export const AF_clickOnItem = 'af_click_on_item';
 
 const initOptions = {
   isDebug: true,
-  devKey: '6jJTVBNyc832U5D57Jvzmg',
+  devKey: 'Us4GmXxXx46Qed',
   onInstallConversionDataListener: true,
   timeToWaitForATTUserAuthorization: 10,
   onDeepLinkListener: true,
-  appId: '1201211633',
+  appId: '741993747',
 };
 
 // AppsFlyer initialization flow. ends with initSdk.
@@ -36,6 +36,7 @@ export function AFInit() {
   });
 }
 
+// AppsFlyer Purchase Connector initialization flow
 export function PCInit() {
   const purchaseConnectorConfig: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
     logSubscriptions: true,

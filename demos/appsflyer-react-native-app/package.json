@@ -21,7 +21,7 @@
     "react-native-gesture-handler": "^1.10.3",
     "react-native-iap": "^12.15.4",
     "react-native-safe-area-context": "^3.3.2",
-    "react-native-screens": "^3.34.0",
+    "react-native-screens": "3.25.0",
     "react-native-vector-icons": "8.1.0"
   },
   "devDependencies": {

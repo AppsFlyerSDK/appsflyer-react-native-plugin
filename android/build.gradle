@@ -37,6 +37,15 @@ android {
 
         buildConfigField 'boolean', 'INCLUDE_CONNECTOR', includeConnector.toString()
     }
+
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java']
+            java.srcDirs += includeConnector ? ['src/main/includeConnector'] : ['src/main/excludeConnector']
+        }
+        includeConnector ? ['src/main/includeConnector'] : ['src/main/excludeConnector']
+    }
+    
     lintOptions {
         warning 'InvalidPackage'
     }

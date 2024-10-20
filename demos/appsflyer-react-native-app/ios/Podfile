@@ -4,7 +4,7 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 platform :ios, '13.0'
 
 # Uncomment the following for using PurchaseConnector
-$AppsFlyerPurchaseConnector = true
+# $AppsFlyerPurchaseConnector = true
 
 target 'AppsFlyerExample' do
   config = use_native_modules!
@@ -25,8 +25,20 @@ target 'AppsFlyerExample' do
   # Note that if you have use_frameworks! enabled, Flipper will not work and
   # you should disable the next line.
   # use_flipper!()
-
+  
+  # Post install process to make sure that all the pods with minimum deploymeny target 12
   post_install do |installer|
-    react_native_post_install(installer)
+  react_native_post_install(installer)
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12'
+    end
+    case target.name
+    when 'RCT-Folly'
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0'
+      end
+    end
+   end
   end
 end

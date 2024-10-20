@@ -28,7 +28,6 @@ import {
 } from 'react-native-iap';
 import {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
 
-
 const Stack = createStackNavigator();
 
 try {
@@ -44,33 +43,29 @@ LogBox.ignoreLogs([
 ]);
 
 // Test items (hardcoded)
+/*
 const items = Platform.select({
-  ios: [
-    'one1',
-    'non.cons2',
-    'auto.renew',
-    'non.renew',
-    'cons.test',
-    'nonconsumable.purchase1',
-    'autorenewable.purchase1',
-    'nonrenewing.purchase1',
-  ],
+  ios: ['com.appsflyer.inapppurchase.non.cons', 'com.appsflyer.inapppurchase.cons', 'com.appsflyer.inapppurchase.two'],
   android: ['noa_coin1', 'paz_test', 'btc'],
 });
 
-const subscriptions = ['cheap', 'intro'];
-
+const subscriptions = Platform.select({
+  ios: ['com.appsflyer.inapppurchase.non.renew', 'com.appsflyer.inapppurchase.auto.renew'],
+  android: ['cheap', 'intro'],
+});
+*/
 class App extends Component {
+  /*
   purchaseUpdateSubscription = null;
   purchaseErrorSubscription = null;
 
   componentDidMount() {
     this.setupIAP();
   }
-
+  
   setupIAP = async () => {
     try {
-      await initConnection();
+      await initConnection().then(() => {});
       if (Platform.OS == 'android') {
         await flushFailedPurchasesCachedAsPendingAndroid().catch(() => {
           console.warn(
@@ -78,6 +73,8 @@ class App extends Component {
           );
         });
       }
+      console.log('[RNPurchaseConnector] Items: >>', items);
+      console.log('[RNPurchaseConnector] Subscriptions: >>', subscriptions);
 
       await getProducts({skus: items})
         .then(res => {
@@ -90,42 +87,42 @@ class App extends Component {
         .then(res => {
           console.log('[Subscriptions] >> ', res);
         })
-        .catch((err) => {
-         console.log('[Error finding Subscriptions] >> ', err);
-       });
-        this.purchaseUpdateSubscription = purchaseUpdatedListener(
-         async purchase => {
-           try {
-             console.log('purchaseUpdatedListener', purchase);
-             const receipt = purchase.transactionReceipt;
-             if (receipt) {
-               // Check if the purchased product is a subscription or a consumable item
-               const isSubscription = subscriptions.includes(purchase.productId);
-               const isConsumable = items.includes(purchase.productId);
-       
-               console.log('[Receipt] >> ', receipt);
-               if (isSubscription || isConsumable) {
-                 await finishTransaction({
-                   purchase: purchase,
-                   isConsumable: isConsumable, // true for consumables, false for subscriptions
-                 }).catch(error => {
-                   console.warn('Error finishing transaction:', error);
-                 });
-               } else {
-                 // Handle the case where the purchase is non-consumable and not a subscription.
-                 await finishTransaction({
-                   purchase: purchase,
-                   isConsumable: false,
-                 }).catch(error => {
-                   console.warn('Error finishing transaction:', error);
-                 });
-               }
-             }
-           } catch (error) {
-             console.warn('Error in purchaseUpdatedListener', error);
-           }
-         },
-       );
+        .catch(err => {
+          console.log('[Error finding Subscriptions] >> ', err);
+        });
+      this.purchaseUpdateSubscription = purchaseUpdatedListener(
+        async purchase => {
+          try {
+            console.log('purchaseUpdatedListener', purchase);
+            const receipt = purchase.transactionReceipt;
+            if (receipt) {
+              // Check if the purchased product is a subscription or a consumable item
+              const isSubscription = subscriptions.includes(purchase.productId);
+              const isConsumable = items.includes(purchase.productId);
+
+              console.log('[Receipt] >> ', receipt);
+              if (isSubscription || isConsumable) {
+                await finishTransaction({
+                  purchase: purchase,
+                  isConsumable: isConsumable, // true for consumables, false for subscriptions
+                }).catch(error => {
+                  console.warn('Error finishing transaction:', error);
+                });
+              } else {
+                // Handle the case where the purchase is non-consumable and not a subscription.
+                await finishTransaction({
+                  purchase: purchase,
+                  isConsumable: false,
+                }).catch(error => {
+                  console.warn('Error finishing transaction:', error);
+                });
+              }
+            }
+          } catch (error) {
+            console.warn('Error in purchaseUpdatedListener', error);
+          }
+        },
+      );
 
       this.purchaseErrorSubscription = purchaseErrorListener(error => {
         console.warn('purchaseErrorListener', error);
@@ -148,6 +145,7 @@ class App extends Component {
 
     endConnection();
   }
+  */
 
   render() {
     return (
@@ -170,7 +168,8 @@ class App extends Component {
               title: 'The AppsFlyer Shop!',
             }}
           />
-          <Stack.Screen name="Cart" component={withIAPContext(Cart)} />
+          {/* <Stack.Screen name="Cart" component={withIAPContext(Cart)} /> */}
+          <Stack.Screen name="Cart" component={Cart} />
           <Stack.Screen
             name="Item"
             component={Item}

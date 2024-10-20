@@ -1,7 +1,7 @@
 import {
   NativeEventEmitter,
   NativeModules,
-} from "react-native";
+} from "demos/appsflyer-react-native-app/node_modules/react-native";
 import AppsFlyerConstants from "./PurchaseConnector/constants/constants";
 import InAppPurchaseValidationResult from "./PurchaseConnector/models/in_app_purchase_validation_result";
 import ValidationFailureData from "./PurchaseConnector/models/validation_failure_data";
@@ -160,20 +160,22 @@ AppsFlyerPurchaseConnector.onInAppValidationResultFailure = (onFailure) => {
   };
 };
 
-AppsFlyerPurchaseConnector.setOnReceivePurchaseRevenueValidationInfo = (
+AppsFlyerPurchaseConnector.onReceivePurchaseRevenueValidationInfo = (
   callback
 ) => {
+  if (typeof callback !== "function") {
+    throw new Error("The callback must be a function");
+  }
+
   const revenueValidationListener = purchaseConnectorEventEmitter.addListener(
     AppsFlyerConstants.DID_RECEIVE_PURCHASE_REVENUE_VALIDATION_INFO,
     (info) => {
-      if (callback && typeof callback === "function") {
         try {
-          const validationInfo = JSON.parse(info);
+          const validationInfo = JSON.stringify(info);
           callback(validationInfo, null);
         } catch (error) {
           callback(null, error);
         }
-      }
     }
   );
 

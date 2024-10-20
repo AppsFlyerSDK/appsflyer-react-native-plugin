@@ -13,7 +13,6 @@ import {
 import {Card, ListItem, Button, FAB, Badge} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import appsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
-//import appsFlyer from 'react-native-appsflyer';
 
 import {
   PCInit,
@@ -166,7 +165,7 @@ const HomeScreen = ({navigation}) => {
       }
     });
     AFInit();
-    PCInit();
+    //PCInit();
 
     return () => {
       AFGCDListener();
@@ -175,7 +174,8 @@ const HomeScreen = ({navigation}) => {
   }, []);
 
   useEffect(() => {}, [itemsInCart]);
-
+  
+  /*
   const handleValidationSuccess = (validationResult) => {
     console.log('>> ValidationSuccess: ', validationResult);
   };
@@ -192,20 +192,42 @@ const HomeScreen = ({navigation}) => {
     console.log('>> handleSubscriptionValidationFailure: ', subscriptionValidationResult);
   }
 
+  const handleOnReceivePurchaseRevenueValidationInfo = (validationResult) => {
+    console.log('>> handleOnReceivePurchaseRevenueValidationInfo: ', validationResult);
+  }
+
+  
   useEffect(() => {
-   const validationSuccessListener = AppsFlyerPurchaseConnector.onInAppValidationResultSuccess(handleValidationSuccess);
-   const validationFailureListener = AppsFlyerPurchaseConnector.onInAppValidationResultFailure(handleValidationFailure);
-   const subscriptionValidationSuccessListener = AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess(handleSubscriptionValidationSuccess);
-   const subscriptionValidationFailureListener = AppsFlyerPurchaseConnector.onSubscriptionValidationResultFailure(handleSubscriptionValidationFailure);
-    
+    let validationSuccessListener;
+    let validationFailureListener;
+    let subscriptionValidationSuccessListener;
+    let subscriptionValidationFailureListener;
+    let purchaseRevenueValidationListener;
+  
+    if (Platform.OS === 'android') {
+      validationSuccessListener = AppsFlyerPurchaseConnector.onInAppValidationResultSuccess(handleValidationSuccess);
+      validationFailureListener = AppsFlyerPurchaseConnector.onInAppValidationResultFailure(handleValidationFailure);
+      subscriptionValidationSuccessListener = AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess(handleSubscriptionValidationSuccess);
+      subscriptionValidationFailureListener = AppsFlyerPurchaseConnector.onSubscriptionValidationResultFailure(handleSubscriptionValidationFailure);
+    } else {
+      console.log('>> Creating purchaseRevenueValidationListener ');
+      purchaseRevenueValidationListener = AppsFlyerPurchaseConnector.onReceivePurchaseRevenueValidationInfo(handleOnReceivePurchaseRevenueValidationInfo);
+    }
+  
+    // Cleanup function
     return () => {
-      validationSuccessListener();
-      validationFailureListener();
-      subscriptionValidationSuccessListener();
-      subscriptionValidationFailureListener();
+      if (Platform.OS === 'android') {
+        if (validationSuccessListener) validationSuccessListener.remove();
+        if (validationFailureListener) validationFailureListener.remove();
+        if (subscriptionValidationSuccessListener) subscriptionValidationSuccessListener.remove();
+        if (subscriptionValidationFailureListener) subscriptionValidationFailureListener.remove();
+      } else {
+        if (purchaseRevenueValidationListener) purchaseRevenueValidationListener.remove();
+      }
     };
   }, []);
- 
+  */
+
   return (
     <View style={styles.container}>
       <WelcomeModal

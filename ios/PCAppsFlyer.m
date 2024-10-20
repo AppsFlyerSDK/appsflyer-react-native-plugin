@@ -1,14 +1,16 @@
 #import "PCAppsFlyer.h"
-#import "RNAppsFlyer.h"
-#import <PurchaseConnector/PurchaseConnector.h>
 
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 
+static NSString *const TAG = @"[AppsFlyer_PurchaseConnector] ";
+
+#if __has_include(<PurchaseConnector/PurchaseConnector.h>)
+#import <PurchaseConnector/PurchaseConnector.h>
+
 @implementation PCAppsFlyer
 @synthesize bridge = _bridge;
 
-static NSString *const TAG = @"[AppsFlyer_PurchaseConnector] ";
 static NSString *const logSubscriptionsKey = @"logSubscriptions";
 static NSString *const logInAppsKey = @"logInApps";
 static NSString *const sandboxKey = @"sandbox";
@@ -80,7 +82,11 @@ RCT_EXPORT_METHOD(stopObservingTransactions:(RCTPromiseResolveBlock)resolve
 - (void)didReceivePurchaseRevenueValidationInfo:(nullable NSDictionary *)validationInfo error:(nullable NSError *)error {
     // Send the validation info and error back to React Native.
     // Call this function from the main thread.
-    [self sendEventWithName:@"onDidReceivePurchaseRevenueValidationInfo" body:@{@"validationInfo": validationInfo ?: [NSNull null], @"error": [self errorAsDictionary:error] ?: [NSNull null]}];
+    if (error){
+        [self sendEventWithName:@"onDidReceivePurchaseRevenueValidationInfo" body:@{@"validationInfo": validationInfo ?: [NSNull null], @"error": [self errorAsDictionary:error] ?: [NSNull null]}];
+    }else {
+        [self sendEventWithName:@"onDidReceivePurchaseRevenueValidationInfo" body:@{@"validationInfo": validationInfo ?: [NSNull null]}];
+    }
 }
 
 - (NSDictionary *)errorAsDictionary:(NSError *)error {
@@ -98,3 +104,42 @@ RCT_EXPORT_METHOD(stopObservingTransactions:(RCTPromiseResolveBlock)resolve
 }
 
 @end
+
+#else
+// IMPORTANT: This stub implementation is necessary to prevent compilation errors and runtime crashes.
+// It ensures that the plugin functions properly even if the Purchase Connector is not actively utilized on the React Native side.
+@implementation PCAppsFlyer
+@synthesize bridge = _bridge;
+
+RCT_EXPORT_MODULE();
+
+- (void)notifyConnectorDisabled:(RCTPromiseResolveBlock)resolve {
+    NSString *infoMessage = @"PurchaseConnector functionality is not available. This operation is a no-op.";
+    NSLog(@"%@%@", TAG, infoMessage);
+    resolve(nil);
+}
+
+// Fallback for methods
+RCT_EXPORT_METHOD(create:(NSDictionary *)config
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    [self notifyConnectorDisabled:resolve];
+}
+
+RCT_EXPORT_METHOD(startObservingTransactions:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    [self notifyConnectorDisabled:resolve];
+}
+
+RCT_EXPORT_METHOD(stopObservingTransactions:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    [self notifyConnectorDisabled:resolve];
+}
+
+// Required by RCTEventEmitter:
+- (NSArray<NSString *> *)supportedEvents {
+    return @[@"onDidReceivePurchaseRevenueValidationInfo"];
+}
+@end
+
+#endif

@@ -126,8 +126,7 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "com.appsflyer.billing2"
-        //applicationId "com.appsflyerexample"
+        applicationId "com.appsflyerexample"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
