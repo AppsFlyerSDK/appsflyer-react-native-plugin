@@ -1,5 +1,5 @@
 /* @flow weak */
-
+import { NativeEventEmitter, NativeModules } from "react-native";
 import React, {useState, useEffect} from 'react';
 import {
   View,
@@ -12,8 +12,10 @@ import {
 } from 'react-native';
 import {Card, ListItem, Button, FAB, Badge} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import appsFlyer from 'react-native-appsflyer';
+import appsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
+
 import {
+  PCInit,
   AFInit,
   AFLogEvent,
   AF_clickOnItem,
@@ -138,7 +140,7 @@ const HomeScreen = ({navigation}) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     AFGCDListener = appsFlyer.onInstallConversionData(res => {
       const isFirstLaunch = res?.data?.is_first_launch;
-
+      console.log(">> onInstallConversionData: " , res);
       if (isFirstLaunch && JSON.parse(isFirstLaunch) === true) {
         setIsFirstLaunch(true);
       } else {
@@ -148,6 +150,7 @@ const HomeScreen = ({navigation}) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     AFUDLListener = appsFlyer.onDeepLink(res => {
+      console.log(">> onDeepLink: " , res);
       if (res?.deepLinkStatus !== 'NOT_FOUND') {
         const productName = res?.data?.af_productName;
         const product = getProductByName(productName);
@@ -162,6 +165,7 @@ const HomeScreen = ({navigation}) => {
       }
     });
     AFInit();
+    //PCInit();
 
     return () => {
       AFGCDListener();
@@ -170,6 +174,59 @@ const HomeScreen = ({navigation}) => {
   }, []);
 
   useEffect(() => {}, [itemsInCart]);
+  
+  /*
+  const handleValidationSuccess = (validationResult) => {
+    console.log('>> ValidationSuccess: ', validationResult);
+  };
+
+  const handleValidationFailure = (validationResult) => {
+    console.log('>> ValidationFailure: ', validationResult);
+  }
+
+  const handleSubscriptionValidationSuccess = (subscriptionValidationResult) => {
+    console.log('>> handleSubscriptionValidationSuccess: ', subscriptionValidationResult);
+  };
+
+  const handleSubscriptionValidationFailure = (subscriptionValidationResult) => {
+    console.log('>> handleSubscriptionValidationFailure: ', subscriptionValidationResult);
+  }
+
+  const handleOnReceivePurchaseRevenueValidationInfo = (validationResult) => {
+    console.log('>> handleOnReceivePurchaseRevenueValidationInfo: ', validationResult);
+  }
+
+  
+  useEffect(() => {
+    let validationSuccessListener;
+    let validationFailureListener;
+    let subscriptionValidationSuccessListener;
+    let subscriptionValidationFailureListener;
+    let purchaseRevenueValidationListener;
+  
+    if (Platform.OS === 'android') {
+      validationSuccessListener = AppsFlyerPurchaseConnector.onInAppValidationResultSuccess(handleValidationSuccess);
+      validationFailureListener = AppsFlyerPurchaseConnector.onInAppValidationResultFailure(handleValidationFailure);
+      subscriptionValidationSuccessListener = AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess(handleSubscriptionValidationSuccess);
+      subscriptionValidationFailureListener = AppsFlyerPurchaseConnector.onSubscriptionValidationResultFailure(handleSubscriptionValidationFailure);
+    } else {
+      console.log('>> Creating purchaseRevenueValidationListener ');
+      purchaseRevenueValidationListener = AppsFlyerPurchaseConnector.onReceivePurchaseRevenueValidationInfo(handleOnReceivePurchaseRevenueValidationInfo);
+    }
+  
+    // Cleanup function
+    return () => {
+      if (Platform.OS === 'android') {
+        if (validationSuccessListener) validationSuccessListener.remove();
+        if (validationFailureListener) validationFailureListener.remove();
+        if (subscriptionValidationSuccessListener) subscriptionValidationSuccessListener.remove();
+        if (subscriptionValidationFailureListener) subscriptionValidationFailureListener.remove();
+      } else {
+        if (purchaseRevenueValidationListener) purchaseRevenueValidationListener.remove();
+      }
+    };
+  }, []);
+  */
 
   return (
     <View style={styles.container}>
