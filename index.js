@@ -1,7 +1,7 @@
 import {
   NativeEventEmitter,
   NativeModules,
-} from "demos/appsflyer-react-native-app/node_modules/react-native";
+} from "react-native";
 import AppsFlyerConstants from "./PurchaseConnector/constants/constants";
 import InAppPurchaseValidationResult from "./PurchaseConnector/models/in_app_purchase_validation_result";
 import ValidationFailureData from "./PurchaseConnector/models/validation_failure_data";
