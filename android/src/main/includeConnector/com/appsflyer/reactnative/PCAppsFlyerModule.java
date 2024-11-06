@@ -2,6 +2,7 @@ package com.appsflyer.reactnative;
 
 import android.util.Log;
 
+import com.appsflyer.api.PurchaseClient;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -9,10 +10,10 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableArray;
 
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
@@ -96,16 +97,8 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
         @Override
         public void onResponse(Map<String, Object> response) {
             if (response != null) {
-                WritableArray writableArray = Arguments.createArray();
-                for (Map.Entry<String, Object> entry : response.entrySet()) {
-                    if (entry.getValue() instanceof Map<?, ?>) {
-                        Map<String, Object> productData = (Map<String, Object>) entry.getValue();
-                        WritableMap writableMap = RNUtil.toWritableMap(productData);
-                        writableArray.pushMap(writableMap);
-                    }
-                }
-
-                handleSuccess(EVENT_SUBSCRIPTION_VALIDATION_SUCCESS, writableArray);
+                WritableMap writableMap = RNUtil.toWritableMap(response);
+                handleSuccess(EVENT_SUBSCRIPTION_VALIDATION_SUCCESS, writableMap);
             }
         }
     };
@@ -137,16 +130,16 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     private void sendEvent(String eventName, Object params) {
-    ReactApplicationContext context = reactContext.get(); // Retrieve the context from WeakReference
-
-    if (context != null && context.hasActiveReactInstance()) { // Ensure context is not null and active
-        Log.d("ReactNativeJS", "Event: " + eventName + ", params: " + params.toString());
-        context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-               .emit(eventName, params);
-    } else {
-        Log.d("ReactNativeJS", "Skipping event: " + eventName + " (ReactContext is null or inactive)");
+        ReactApplicationContext context = reactContext.get(); // Retrieve the context from WeakReference
+        if (context != null && context.hasActiveReactInstance()) { // Ensure context is not null and active
+            Log.d("ReactNativeJS", "Event: " + eventName + ", params: " + params.toString());
+            context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                   .emit(eventName, params);
+        } else {
+            Log.d("ReactNativeJS", "Skipping event: " + eventName + " (ReactContext is null or inactive)");
+        }
     }
-}
+
     private WritableMap errorToMap(Throwable error) {
         JSONObject errorJson = new JSONObject(this.throwableToMap(error));
         WritableMap errorMap = RNUtil.jsonToWritableMap(errorJson);
