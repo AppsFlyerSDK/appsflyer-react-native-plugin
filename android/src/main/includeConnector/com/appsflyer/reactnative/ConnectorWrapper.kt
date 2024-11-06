@@ -9,8 +9,6 @@ import com.appsflyer.internal.models.SubscriptionPurchase
 import com.appsflyer.internal.models.SubscriptionValidationResult
 import com.appsflyer.internal.models.ValidationFailureData
 
-interface MappedValidationResultListener : PurchaseClient.ValidationResultListener<Map<String, Any>>
-
 /**
  * A connector class that wraps the Android purchase connector client.
  *
