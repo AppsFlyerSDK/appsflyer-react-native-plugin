@@ -1,85 +1,299 @@
-import { NativeEventEmitter, NativeModules } from 'react-native';
+import {
+  NativeEventEmitter,
+  NativeModules,
+} from "react-native";
+import AppsFlyerConstants from "./PurchaseConnector/constants/constants";
+import InAppPurchaseValidationResult from "./PurchaseConnector/models/in_app_purchase_validation_result";
+import ValidationFailureData from "./PurchaseConnector/models/validation_failure_data";
+import SubscriptionValidationResult from "./PurchaseConnector/models/subscription_validation_result";
 
 const { RNAppsFlyer } = NativeModules;
 const appsFlyer = {};
 const eventsMap = {};
 const appsFlyerEventEmitter = new NativeEventEmitter(RNAppsFlyer);
 
+//Purchase Connector native bridge objects
+const { PCAppsFlyer } = NativeModules;
+const AppsFlyerPurchaseConnector = {};
+const pcEventsMap = {};
+const purchaseConnectorEventEmitter = new NativeEventEmitter(PCAppsFlyer);
+
+function startObservingTransactions() {
+  PCAppsFlyer.startObservingTransactions();
+}
+
+AppsFlyerPurchaseConnector.startObservingTransactions =
+  startObservingTransactions;
+
+function stopObservingTransactions() {
+  PCAppsFlyer.stopObservingTransactions();
+}
+
+AppsFlyerPurchaseConnector.stopObservingTransactions =
+  stopObservingTransactions;
+
+AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess = (
+  onSuccess
+) => {
+  if (typeof onSuccess !== "function") {
+    throw new Error("onSuccess callback must be a function");
+  }
+
+  const subValidationSuccessListener =
+    purchaseConnectorEventEmitter.addListener(
+      AppsFlyerConstants.SUBSCRIPTION_VALIDATION_SUCCESS,
+      (result) => {
+        try {
+          const validationResult =
+            SubscriptionValidationResult.fromJson(result);
+          onSuccess(validationResult);
+        } catch (error) {
+          console.error(
+            "Failed to parse subscription validation result:",
+            error
+          );
+        }
+      }
+    );
+
+  pcEventsMap[AppsFlyerConstants.SUBSCRIPTION_VALIDATION_SUCCESS] =
+    subValidationSuccessListener;
+
+  return function remove() {
+    subValidationSuccessListener.remove();
+  };
+};
+
+AppsFlyerPurchaseConnector.onSubscriptionValidationResultFailure = (
+  onFailure
+) => {
+  if (typeof onFailure !== "function") {
+    throw new Error("onFailure callback must be a function");
+  }
+
+  const subValidationFailureListener =
+    purchaseConnectorEventEmitter.addListener(
+      AppsFlyerConstants.SUBSCRIPTION_VALIDATION_FAILURE,
+      (validationResult) => {
+        try {
+          const failureValidationResult =
+            ValidationFailureData.fromJson(validationResult);
+          onFailure(
+            new Error("Failed to parse subscription validation result")
+          );
+        } catch (error) {
+          console.error(
+            "Failed to handle subscription validation result:",
+            error
+          );
+        }
+      }
+    );
+
+  pcEventsMap[AppsFlyerConstants.SUBSCRIPTION_VALIDATION_FAILURE] =
+    subValidationFailureListener;
+
+  return function remove() {
+    subValidationFailureListener.remove();
+  };
+};
+
+AppsFlyerPurchaseConnector.onInAppValidationResultSuccess = (onSuccess) => {
+  if (typeof onSuccess !== "function") {
+    throw new Error("onSuccess callback must be a function");
+  }
+
+  const inAppValidationSuccessListener =
+    purchaseConnectorEventEmitter.addListener(
+      AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_SUCCESS,
+      (validationResult) => {
+        try {
+          const purchaseValidationResult =
+            InAppPurchaseValidationResult.fromJson(validationResult);
+          onSuccess(purchaseValidationResult);
+        } catch (error) {
+          console.error(
+            "Failed to handle in-app purchase validation result:",
+            error
+          );
+        }
+      }
+    );
+
+  pcEventsMap[AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_SUCCESS] =
+    inAppValidationSuccessListener;
+
+  return function remove() {
+    inAppValidationSuccessListener.remove();
+  };
+};
+
+AppsFlyerPurchaseConnector.onInAppValidationResultFailure = (onFailure) => {
+  if (typeof onFailure !== "function") {
+    throw new Error("onFailure callback must be a function");
+  }
+
+  const inAppValidationFailureListener =
+    purchaseConnectorEventEmitter.addListener(
+      AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_FAILURE,
+      (validationResult) => {
+        try {
+          const failureValidationResult =
+            ValidationFailureData.fromJson(validationResult);
+          onFailure(
+            new Error("Failed to parse in-app purchase validation result")
+          );
+        } catch (error) {
+          console.error(
+            "Failed to handle in-app purchase validation result:",
+            error
+          );
+        }
+      }
+    );
+
+  pcEventsMap[AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_FAILURE] =
+    inAppValidationFailureListener;
+
+  return function remove() {
+    inAppValidationFailureListener.remove();
+  };
+};
+
+AppsFlyerPurchaseConnector.onReceivePurchaseRevenueValidationInfo = (
+  callback
+) => {
+  if (typeof callback !== "function") {
+    throw new Error("The callback must be a function");
+  }
+
+  const revenueValidationListener = purchaseConnectorEventEmitter.addListener(
+    AppsFlyerConstants.DID_RECEIVE_PURCHASE_REVENUE_VALIDATION_INFO,
+    (info) => {
+        try {
+          const validationInfo = JSON.stringify(info);
+          callback(validationInfo, null);
+        } catch (error) {
+          callback(null, error);
+        }
+    }
+  );
+
+  pcEventsMap[AppsFlyerConstants.DID_RECEIVE_PURCHASE_REVENUE_VALIDATION_INFO] =
+    revenueValidationListener;
+
+  return function remove() {
+    revenueValidationListener.remove();
+  };
+};
+
+const AppsFlyerPurchaseConnectorConfig = {
+  setConfig: ({ logSubscriptions, logInApps, sandbox }) => {
+    return {
+      logSubscriptions,
+      logInApps,
+      sandbox,
+    };
+  },
+};
+
+function create(config) {
+  if (!config) {
+    throw new MissingConfigurationException();
+  }
+  PCAppsFlyer.create(config);
+}
+
+AppsFlyerPurchaseConnector.create = create;
+export { AppsFlyerPurchaseConnector, AppsFlyerPurchaseConnectorConfig };
+/********************************************************/
+
 function initSdkCallback(options, successC, errorC) {
-	if (typeof options.appId !== 'string' && typeof options.appId !== 'undefined') {
-		return errorC('appId should be a string!');
-	}
-	if (typeof options.isDebug !== 'boolean' && typeof options.isDebug !== 'undefined') {
-		return errorC('isDebug should be a boolean!');
-	}
-	return RNAppsFlyer.initSdkWithCallBack(options, successC, errorC);
+  if (
+    typeof options.appId !== "string" &&
+    typeof options.appId !== "undefined"
+  ) {
+    return errorC("appId should be a string!");
+  }
+  if (
+    typeof options.isDebug !== "boolean" &&
+    typeof options.isDebug !== "undefined"
+  ) {
+    return errorC("isDebug should be a boolean!");
+  }
+  return RNAppsFlyer.initSdkWithCallBack(options, successC, errorC);
 }
 
 function initSdkPromise(options): Promise<string> {
-	if (typeof options.appId !== 'string' && typeof options.appId !== 'undefined') {
-		return Promise.reject('appId should be a string!');
-	}
-	if (typeof options.isDebug !== 'boolean' && typeof options.isDebug !== 'undefined') {
-		return Promise.reject('isDebug should be a boolean!');
-	}
-	return RNAppsFlyer.initSdkWithPromise(options);
+  if (
+    typeof options.appId !== "string" &&
+    typeof options.appId !== "undefined"
+  ) {
+    return Promise.reject("appId should be a string!");
+  }
+  if (
+    typeof options.isDebug !== "boolean" &&
+    typeof options.isDebug !== "undefined"
+  ) {
+    return Promise.reject("isDebug should be a boolean!");
+  }
+  return RNAppsFlyer.initSdkWithPromise(options);
 }
 
 function initSdk(options, success, error): Promise<string> {
-	if (success && error) {
-		//initSdk is a callback function
-		initSdkCallback(options, success, error);
-	} else if (!success) {
-		//initSdk is a promise function
-		return initSdkPromise(options);
-	}
+  if (success && error) {
+    //initSdk is a callback function
+    initSdkCallback(options, success, error);
+  } else if (!success) {
+    //initSdk is a promise function
+    return initSdkPromise(options);
+  }
 }
 
 appsFlyer.initSdk = initSdk;
 
 function logEventCallback(eventName, eventValues, successC, errorC) {
-	return RNAppsFlyer.logEvent(eventName, eventValues, successC, errorC);
+  return RNAppsFlyer.logEvent(eventName, eventValues, successC, errorC);
 }
 
 function logEventPromise(eventName, eventValues): Promise<string> {
-	return RNAppsFlyer.logEventWithPromise(eventName, eventValues);
+  return RNAppsFlyer.logEventWithPromise(eventName, eventValues);
 }
 
 function logEvent(eventName, eventValues, success, error): Promise<string> {
-	if (success && error) {
-		//logEvent is a callback function
-		logEventCallback(eventName, eventValues, success, error);
-	} else if (!success) {
-		// logEvent is a promise function
-		return logEventPromise(eventName, eventValues);
-	}
+  if (success && error) {
+    //logEvent is a callback function
+    logEventCallback(eventName, eventValues, success, error);
+  } else if (!success) {
+    // logEvent is a promise function
+    return logEventPromise(eventName, eventValues);
+  }
 }
 
 appsFlyer.logEvent = logEvent;
 
-
 export const MEDIATION_NETWORK = Object.freeze({
-	IRONSOURCE : "ironsource",
-	APPLOVIN_MAX : "applovinmax",
-	GOOGLE_ADMOB : "googleadmob",
-	FYBER : "fyber",
-	APPODEAL : "appodeal",
-	ADMOST : "Admost",
-	TOPON : "Topon",
-	TRADPLUS : "Tradplus",
-	YANDEX : "Yandex",
-	CHARTBOOST : "chartboost",
-	UNITY : "Unity",
-	TOPON_PTE : "toponpte",
-	CUSTOM_MEDIATION : "customMediation",
-	DIRECT_MONETIZATION_NETWORK : "directMonetizationNetwork"
+  IRONSOURCE: "ironsource",
+  APPLOVIN_MAX: "applovinmax",
+  GOOGLE_ADMOB: "googleadmob",
+  FYBER: "fyber",
+  APPODEAL: "appodeal",
+  ADMOST: "Admost",
+  TOPON: "Topon",
+  TRADPLUS: "Tradplus",
+  YANDEX: "Yandex",
+  CHARTBOOST: "chartboost",
+  UNITY: "Unity",
+  TOPON_PTE: "toponpte",
+  CUSTOM_MEDIATION: "customMediation",
+  DIRECT_MONETIZATION_NETWORK: "directMonetizationNetwork",
 });
 
 function logAdRevenue(adRevenueData) {
-	RNAppsFlyer.logAdRevenue(adRevenueData);
+  RNAppsFlyer.logAdRevenue(adRevenueData);
 }
 
-appsFlyer.logAdRevenue = logAdRevenue
+appsFlyer.logAdRevenue = logAdRevenue;
 
 /**
  * Manually record the location of the user
@@ -89,19 +303,26 @@ appsFlyer.logAdRevenue = logAdRevenue
  * @param callback success callback function
  */
 appsFlyer.logLocation = (longitude, latitude, callback) => {
-	if (longitude == null || latitude == null || longitude == '' || latitude == '') {
-		console.log('longitude or latitude are missing!');
-		return;
-	}
-	if (typeof longitude != 'number' || typeof latitude != 'number') {
-		longitude = parseFloat(longitude);
-		latitude = parseFloat(latitude);
-	}
-	if (callback) {
-		return RNAppsFlyer.logLocation(longitude, latitude, callback);
-	} else {
-		return RNAppsFlyer.logLocation(longitude, latitude, (result) => console.log(result));
-	}
+  if (
+    longitude == null ||
+    latitude == null ||
+    longitude == "" ||
+    latitude == ""
+  ) {
+    console.log("longitude or latitude are missing!");
+    return;
+  }
+  if (typeof longitude != "number" || typeof latitude != "number") {
+    longitude = parseFloat(longitude);
+    latitude = parseFloat(latitude);
+  }
+  if (callback) {
+    return RNAppsFlyer.logLocation(longitude, latitude, callback);
+  } else {
+    return RNAppsFlyer.logLocation(longitude, latitude, (result) =>
+      console.log(result)
+    );
+  }
 };
 
 /**
@@ -112,7 +333,7 @@ appsFlyer.logLocation = (longitude, latitude, callback) => {
  * @param errorC error callback function.
  */
 appsFlyer.setUserEmails = (options, successC, errorC) => {
-	return RNAppsFlyer.setUserEmails(options, successC, errorC);
+  return RNAppsFlyer.setUserEmails(options, successC, errorC);
 };
 
 /**
@@ -122,11 +343,13 @@ appsFlyer.setUserEmails = (options, successC, errorC) => {
  * @param successC success callback function.
  */
 appsFlyer.setAdditionalData = (additionalData, successC) => {
-	if (successC) {
-		return RNAppsFlyer.setAdditionalData(additionalData, successC);
-	} else {
-		return RNAppsFlyer.setAdditionalData(additionalData, (result) => console.log(result));
-	}
+  if (successC) {
+    return RNAppsFlyer.setAdditionalData(additionalData, successC);
+  } else {
+    return RNAppsFlyer.setAdditionalData(additionalData, (result) =>
+      console.log(result)
+    );
+  }
 };
 
 /**
@@ -135,7 +358,7 @@ appsFlyer.setAdditionalData = (additionalData, successC) => {
  * @callback callback function that returns (error,uid)
  */
 appsFlyer.getAppsFlyerUID = (callback) => {
-	return RNAppsFlyer.getAppsFlyerUID(callback);
+  return RNAppsFlyer.getAppsFlyerUID(callback);
 };
 
 /**
@@ -145,17 +368,19 @@ appsFlyer.getAppsFlyerUID = (callback) => {
  * @param successC success callback function.
  */
 appsFlyer.updateServerUninstallToken = (token, successC) => {
-	if (token == null) {
-		token = '';
-	}
-	if (typeof token != 'string') {
-		token = token.toString();
-	}
-	if (successC) {
-		return RNAppsFlyer.updateServerUninstallToken(token, successC);
-	} else {
-		return RNAppsFlyer.updateServerUninstallToken(token, (result) => console.log(result));
-	}
+  if (token == null) {
+    token = "";
+  }
+  if (typeof token != "string") {
+    token = token.toString();
+  }
+  if (successC) {
+    return RNAppsFlyer.updateServerUninstallToken(token, successC);
+  } else {
+    return RNAppsFlyer.updateServerUninstallToken(token, (result) =>
+      console.log(result)
+    );
+  }
 };
 
 /**
@@ -166,17 +391,19 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
  * @param successC callback function.
  */
 appsFlyer.setCustomerUserId = (userId, successC) => {
-	if (userId == null) {
-		userId = '';
-	}
-	if (typeof userId != 'string') {
-		userId = userId.toString();
-	}
-	if (successC) {
-		return RNAppsFlyer.setCustomerUserId(userId, successC);
-	} else {
-		return RNAppsFlyer.setCustomerUserId(userId, (result) => console.log(result));
-	}
+  if (userId == null) {
+    userId = "";
+  }
+  if (typeof userId != "string") {
+    userId = userId.toString();
+  }
+  if (successC) {
+    return RNAppsFlyer.setCustomerUserId(userId, successC);
+  } else {
+    return RNAppsFlyer.setCustomerUserId(userId, (result) =>
+      console.log(result)
+    );
+  }
 };
 
 /**
@@ -188,11 +415,11 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
  * @param successC callback function.
  */
 appsFlyer.stop = (isStopped, successC) => {
-	if (successC) {
-		return RNAppsFlyer.stop(isStopped, successC);
-	} else {
-		return RNAppsFlyer.stop(isStopped, (result) => console.log(result));
-	}
+  if (successC) {
+    return RNAppsFlyer.stop(isStopped, successC);
+  } else {
+    return RNAppsFlyer.stop(isStopped, (result) => console.log(result));
+  }
 };
 
 /**
@@ -205,7 +432,7 @@ appsFlyer.stop = (isStopped, successC) => {
  * @platform android
  */
 appsFlyer.setCollectIMEI = (isCollect, successC) => {
-	return RNAppsFlyer.setCollectIMEI(isCollect, successC);
+  return RNAppsFlyer.setCollectIMEI(isCollect, successC);
 };
 
 /**
@@ -218,7 +445,7 @@ appsFlyer.setCollectIMEI = (isCollect, successC) => {
  * @platform android
  */
 appsFlyer.setCollectAndroidID = (isCollect, successC) => {
-	return RNAppsFlyer.setCollectAndroidID(isCollect, successC);
+  return RNAppsFlyer.setCollectAndroidID(isCollect, successC);
 };
 
 /**
@@ -229,17 +456,19 @@ appsFlyer.setCollectAndroidID = (isCollect, successC) => {
  * @param successC callback function.
  */
 appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
-	if (oneLinkID == null) {
-		oneLinkID = '';
-	}
-	if (typeof oneLinkID != 'string') {
-		oneLinkID = oneLinkID.toString();
-	}
-	if (successC) {
-		return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, successC);
-	} else {
-		return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, (result) => console.log(result));
-	}
+  if (oneLinkID == null) {
+    oneLinkID = "";
+  }
+  if (typeof oneLinkID != "string") {
+    oneLinkID = oneLinkID.toString();
+  }
+  if (successC) {
+    return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, successC);
+  } else {
+    return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, (result) =>
+      console.log(result)
+    );
+  }
 };
 
 /**
@@ -251,7 +480,7 @@ appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
  * @param error error callback function.
  */
 appsFlyer.generateInviteLink = (parameters, success, error) => {
-	return RNAppsFlyer.generateInviteLink(parameters, success, error);
+  return RNAppsFlyer.generateInviteLink(parameters, success, error);
 };
 
 /**
@@ -263,18 +492,18 @@ appsFlyer.generateInviteLink = (parameters, success, error) => {
  * @param parameters additional params to be added to the attribution link
  */
 appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
-	if (appId == null || appId == '') {
-		console.log('appid is missing!');
-		return;
-	}
-	if (campaign == null) {
-		campaign = '';
-	}
-	if (typeof appId != 'string' || typeof campaign != 'string') {
-		appId = appId.toString();
-		campaign = campaign.toString();
-	}
-	return RNAppsFlyer.logCrossPromotionImpression(appId, campaign, parameters);
+  if (appId == null || appId == "") {
+    console.log("appid is missing!");
+    return;
+  }
+  if (campaign == null) {
+    campaign = "";
+  }
+  if (typeof appId != "string" || typeof campaign != "string") {
+    appId = appId.toString();
+    campaign = campaign.toString();
+  }
+  return RNAppsFlyer.logCrossPromotionImpression(appId, campaign, parameters);
 };
 
 /**
@@ -285,18 +514,18 @@ appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
  * @param params additional user params.
  */
 appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
-	if (appId == null || appId == '') {
-		console.log('appid is missing!');
-		return;
-	}
-	if (campaign == null) {
-		campaign = '';
-	}
-	if (typeof appId != 'string' || typeof campaign != 'string') {
-		appId = appId.toString();
-		campaign = campaign.toString();
-	}
-	return RNAppsFlyer.logCrossPromotionAndOpenStore(appId, campaign, params);
+  if (appId == null || appId == "") {
+    console.log("appid is missing!");
+    return;
+  }
+  if (campaign == null) {
+    campaign = "";
+  }
+  if (typeof appId != "string" || typeof campaign != "string") {
+    appId = appId.toString();
+    campaign = campaign.toString();
+  }
+  return RNAppsFlyer.logCrossPromotionAndOpenStore(appId, campaign, params);
 };
 
 /**
@@ -307,18 +536,20 @@ appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
  * @param successC success callback function.
  */
 appsFlyer.setCurrencyCode = (currencyCode, successC) => {
-	if (currencyCode == null || currencyCode == '') {
-		console.log('currencyCode is missing!');
-		return;
-	}
-	if (typeof currencyCode != 'string') {
-		currencyCode = currencyCode.toString();
-	}
-	if (successC) {
-		return RNAppsFlyer.setCurrencyCode(currencyCode, successC);
-	} else {
-		return RNAppsFlyer.setCurrencyCode(currencyCode, (result) => console.log(result));
-	}
+  if (currencyCode == null || currencyCode == "") {
+    console.log("currencyCode is missing!");
+    return;
+  }
+  if (typeof currencyCode != "string") {
+    currencyCode = currencyCode.toString();
+  }
+  if (successC) {
+    return RNAppsFlyer.setCurrencyCode(currencyCode, successC);
+  } else {
+    return RNAppsFlyer.setCurrencyCode(currencyCode, (result) =>
+      console.log(result)
+    );
+  }
 };
 
 /**
@@ -336,107 +567,122 @@ appsFlyer.setCurrencyCode = (currencyCode, successC) => {
  * @returns {remove: function - unregister listener}
  */
 appsFlyer.onInstallConversionData = (callback) => {
-	const listener = appsFlyerEventEmitter.addListener('onInstallConversionDataLoaded', (_data) => {
-		if (callback && typeof callback === typeof Function) {
-			try {
-				let data = JSON.parse(_data);
-				callback(data);
-			} catch (_error) {
-				//throw new AFParseJSONException("...");
-				//TODO: for today we return an error in callback
-				callback(new AFParseJSONException('Invalid data structure', _data));
-			}
-		}
-	});
+  const listener = appsFlyerEventEmitter.addListener(
+    "onInstallConversionDataLoaded",
+    (_data) => {
+      if (callback && typeof callback === typeof Function) {
+        try {
+          let data = JSON.parse(_data);
+          callback(data);
+        } catch (_error) {
+          //throw new AFParseJSONException("...");
+          //TODO: for today we return an error in callback
+          callback(new AFParseJSONException("Invalid data structure", _data));
+        }
+      }
+    }
+  );
 
-	eventsMap['onInstallConversionData'] = listener;
+  eventsMap["onInstallConversionData"] = listener;
 
-	// unregister listener (suppose should be called from componentWillUnmount() )
-	return function remove() {
-		listener.remove();
-	};
+  // unregister listener (suppose should be called from componentWillUnmount() )
+  return function remove() {
+    listener.remove();
+  };
 };
 
 appsFlyer.onInstallConversionFailure = (callback) => {
-	const listener = appsFlyerEventEmitter.addListener('onInstallConversionFailure', (_data) => {
-		if (callback && typeof callback === typeof Function) {
-			try {
-				let data = JSON.parse(_data);
-				callback(data);
-			} catch (_error) {
-				//throw new AFParseJSONException("...");
-				//TODO: for today we return an error in callback
-				callback(new AFParseJSONException('Invalid data structure', _data));
-			}
-		}
-	});
+  const listener = appsFlyerEventEmitter.addListener(
+    "onInstallConversionFailure",
+    (_data) => {
+      if (callback && typeof callback === typeof Function) {
+        try {
+          let data = JSON.parse(_data);
+          callback(data);
+        } catch (_error) {
+          //throw new AFParseJSONException("...");
+          //TODO: for today we return an error in callback
+          callback(new AFParseJSONException("Invalid data structure", _data));
+        }
+      }
+    }
+  );
 
-	eventsMap['onInstallConversionFailure'] = listener;
+  eventsMap["onInstallConversionFailure"] = listener;
 
-	// unregister listener (suppose should be called from componentWillUnmount() )
-	return function remove() {
-		listener.remove();
-	};
+  // unregister listener (suppose should be called from componentWillUnmount() )
+  return function remove() {
+    listener.remove();
+  };
 };
 
 appsFlyer.onAppOpenAttribution = (callback) => {
-	const listener = appsFlyerEventEmitter.addListener('onAppOpenAttribution', (_data) => {
-		if (callback && typeof callback === typeof Function) {
-			try {
-				let data = JSON.parse(_data);
-				callback(data);
-			} catch (_error) {
-				callback(new AFParseJSONException('Invalid data structure', _data));
-			}
-		}
-	});
+  const listener = appsFlyerEventEmitter.addListener(
+    "onAppOpenAttribution",
+    (_data) => {
+      if (callback && typeof callback === typeof Function) {
+        try {
+          let data = JSON.parse(_data);
+          callback(data);
+        } catch (_error) {
+          callback(new AFParseJSONException("Invalid data structure", _data));
+        }
+      }
+    }
+  );
 
-	eventsMap['onAppOpenAttribution'] = listener;
+  eventsMap["onAppOpenAttribution"] = listener;
 
-	// unregister listener (suppose should be called from componentWillUnmount() )
-	return function remove() {
-		listener.remove();
-	};
+  // unregister listener (suppose should be called from componentWillUnmount() )
+  return function remove() {
+    listener.remove();
+  };
 };
 
 appsFlyer.onAttributionFailure = (callback) => {
-	const listener = appsFlyerEventEmitter.addListener('onAttributionFailure', (_data) => {
-		if (callback && typeof callback === typeof Function) {
-			try {
-				let data = JSON.parse(_data);
-				callback(data);
-			} catch (_error) {
-				callback(new AFParseJSONException('Invalid data structure', _data));
-			}
-		}
-	});
+  const listener = appsFlyerEventEmitter.addListener(
+    "onAttributionFailure",
+    (_data) => {
+      if (callback && typeof callback === typeof Function) {
+        try {
+          let data = JSON.parse(_data);
+          callback(data);
+        } catch (_error) {
+          callback(new AFParseJSONException("Invalid data structure", _data));
+        }
+      }
+    }
+  );
 
-	eventsMap['onAttributionFailure'] = listener;
+  eventsMap["onAttributionFailure"] = listener;
 
-	// unregister listener (suppose should be called from componentWillUnmount() )
-	return function remove() {
-		listener.remove();
-	};
+  // unregister listener (suppose should be called from componentWillUnmount() )
+  return function remove() {
+    listener.remove();
+  };
 };
 
 appsFlyer.onDeepLink = (callback) => {
-	const listener = appsFlyerEventEmitter.addListener('onDeepLinking', (_data) => {
-		if (callback && typeof callback === typeof Function) {
-			try {
-				let data = JSON.parse(_data);
-				callback(data);
-			} catch (_error) {
-				callback(new AFParseJSONException('Invalid data structure', _data));
-			}
-		}
-	});
+  const listener = appsFlyerEventEmitter.addListener(
+    "onDeepLinking",
+    (_data) => {
+      if (callback && typeof callback === typeof Function) {
+        try {
+          let data = JSON.parse(_data);
+          callback(data);
+        } catch (_error) {
+          callback(new AFParseJSONException("Invalid data structure", _data));
+        }
+      }
+    }
+  );
 
-	eventsMap['onDeepLinking'] = listener;
+  eventsMap["onDeepLinking"] = listener;
 
-	// unregister listener (suppose should be called from componentWillUnmount() )
-	return function remove() {
-		listener.remove();
-	};
+  // unregister listener (suppose should be called from componentWillUnmount() )
+  return function remove() {
+    listener.remove();
+  };
 };
 
 /**
@@ -447,11 +693,13 @@ appsFlyer.onDeepLink = (callback) => {
  * @param successC success callback function.
  */
 appsFlyer.anonymizeUser = (shouldAnonymize, successC) => {
-	if (successC) {
-		return RNAppsFlyer.anonymizeUser(shouldAnonymize, successC);
-	} else {
-		return RNAppsFlyer.anonymizeUser(shouldAnonymize, (result) => console.log(result));
-	}
+  if (successC) {
+    return RNAppsFlyer.anonymizeUser(shouldAnonymize, successC);
+  } else {
+    return RNAppsFlyer.anonymizeUser(shouldAnonymize, (result) =>
+      console.log(result)
+    );
+  }
 };
 
 /**
@@ -463,7 +711,7 @@ appsFlyer.anonymizeUser = (shouldAnonymize, successC) => {
  * @param errorC error callback function.
  */
 appsFlyer.setOneLinkCustomDomains = (domains, successC, errorC) => {
-	return RNAppsFlyer.setOneLinkCustomDomains(domains, successC, errorC);
+  return RNAppsFlyer.setOneLinkCustomDomains(domains, successC, errorC);
 };
 
 /**
@@ -476,7 +724,7 @@ appsFlyer.setOneLinkCustomDomains = (domains, successC, errorC) => {
  * @param errorC error callback function.
  */
 appsFlyer.setResolveDeepLinkURLs = (urls, successC, errorC) => {
-	return RNAppsFlyer.setResolveDeepLinkURLs(urls, successC, errorC);
+  return RNAppsFlyer.setResolveDeepLinkURLs(urls, successC, errorC);
 };
 
 /**
@@ -489,10 +737,10 @@ appsFlyer.setResolveDeepLinkURLs = (urls, successC, errorC) => {
  * @param callback Result callback
  */
 appsFlyer.performOnAppAttribution = (urlString, successC, errorC) => {
-	if (typeof urlString != 'string') {
-		urlString = urlString.toString();
-	}
-	return RNAppsFlyer.performOnAppAttribution(urlString, successC, errorC);
+  if (typeof urlString != "string") {
+    urlString = urlString.toString();
+  }
+  return RNAppsFlyer.performOnAppAttribution(urlString, successC, errorC);
 };
 
 /**
@@ -502,7 +750,7 @@ appsFlyer.performOnAppAttribution = (urlString, successC, errorC) => {
  */
 
 appsFlyer.setSharingFilterForAllPartners = () => {
-	return appsFlyer.setSharingFilterForPartners(['all']);
+  return appsFlyer.setSharingFilterForPartners(["all"]);
 };
 
 /**
@@ -515,7 +763,7 @@ appsFlyer.setSharingFilterForAllPartners = () => {
  */
 
 appsFlyer.setSharingFilter = (partners, successC, errorC) => {
-	return appsFlyer.setSharingFilterForPartners(partners);
+  return appsFlyer.setSharingFilterForPartners(partners);
 };
 
 /**
@@ -523,7 +771,7 @@ appsFlyer.setSharingFilter = (partners, successC, errorC) => {
  * @param shouldDisable Flag to disable/enable IDFA collection
  */
 appsFlyer.disableAdvertisingIdentifier = (isDisable) => {
-	return RNAppsFlyer.disableAdvertisingIdentifier(isDisable);
+  return RNAppsFlyer.disableAdvertisingIdentifier(isDisable);
 };
 
 /**
@@ -532,7 +780,7 @@ appsFlyer.disableAdvertisingIdentifier = (isDisable) => {
  * @platform iOS only
  */
 appsFlyer.disableIDFVCollection = (shouldDisable) => {
-	return RNAppsFlyer.disableIDFVCollection(shouldDisable);
+  return RNAppsFlyer.disableIDFVCollection(shouldDisable);
 };
 
 /**
@@ -541,7 +789,7 @@ appsFlyer.disableIDFVCollection = (shouldDisable) => {
  * @platform iOS only
  */
 appsFlyer.disableCollectASA = (shouldDisable) => {
-	return RNAppsFlyer.disableCollectASA(shouldDisable);
+  return RNAppsFlyer.disableCollectASA(shouldDisable);
 };
 
 /**
@@ -552,11 +800,15 @@ appsFlyer.disableCollectASA = (shouldDisable) => {
  * @param errorC Error callback
  */
 appsFlyer.validateAndLogInAppPurchase = (purchaseInfo, successC, errorC) => {
-	return RNAppsFlyer.validateAndLogInAppPurchase(purchaseInfo, successC, errorC);
+  return RNAppsFlyer.validateAndLogInAppPurchase(
+    purchaseInfo,
+    successC,
+    errorC
+  );
 };
 
 appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
-	return RNAppsFlyer.setUseReceiptValidationSandbox(isSandbox);
+  return RNAppsFlyer.setUseReceiptValidationSandbox(isSandbox);
 };
 
 /**
@@ -567,7 +819,7 @@ appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
  * @param pushPayload
  */
 appsFlyer.sendPushNotificationData = (pushPayload, errorC = null) => {
-	return RNAppsFlyer.sendPushNotificationData(pushPayload, errorC);
+  return RNAppsFlyer.sendPushNotificationData(pushPayload, errorC);
 };
 
 /**
@@ -577,7 +829,7 @@ appsFlyer.sendPushNotificationData = (pushPayload, errorC = null) => {
  * @param successC: success callback
  */
 appsFlyer.setHost = (hostPrefix, hostName, successC) => {
-	RNAppsFlyer.setHost(hostPrefix, hostName, successC);
+  RNAppsFlyer.setHost(hostPrefix, hostName, successC);
 };
 
 /**
@@ -588,7 +840,7 @@ appsFlyer.setHost = (hostPrefix, hostName, successC) => {
  * @param errorC: error callback
  */
 appsFlyer.addPushNotificationDeepLinkPath = (path, successC, errorC) => {
-	RNAppsFlyer.addPushNotificationDeepLinkPath(path, successC, errorC);
+  RNAppsFlyer.addPushNotificationDeepLinkPath(path, successC, errorC);
 };
 
 /**
@@ -596,7 +848,7 @@ appsFlyer.addPushNotificationDeepLinkPath = (path, successC, errorC) => {
  * @param isDisabled
  */
 appsFlyer.disableSKAD = (disableSkad) => {
-	return RNAppsFlyer.disableSKAD(disableSkad);
+  return RNAppsFlyer.disableSKAD(disableSkad);
 };
 
 /**
@@ -604,16 +856,16 @@ appsFlyer.disableSKAD = (disableSkad) => {
  * @param language
  */
 appsFlyer.setCurrentDeviceLanguage = (language) => {
-	if (typeof language === 'string') {
-		return RNAppsFlyer.setCurrentDeviceLanguage(language);
-	}
+  if (typeof language === "string") {
+    return RNAppsFlyer.setCurrentDeviceLanguage(language);
+  }
 };
 
 /**
  *  Used by advertisers to exclude specified networks/integrated partners from getting data.
  */
 appsFlyer.setSharingFilterForPartners = (partners) => {
-	return RNAppsFlyer.setSharingFilterForPartners(partners);
+  return RNAppsFlyer.setSharingFilterForPartners(partners);
 };
 /**
  * Allows sending custom data for partner integration purposes.
@@ -621,9 +873,9 @@ appsFlyer.setSharingFilterForPartners = (partners) => {
  * @param partnerData: Customer data, depends on the integration configuration with the specific partner.
  */
 appsFlyer.setPartnerData = (partnerId, partnerData) => {
-	if (typeof partnerId === 'string' && typeof partnerData === 'object') {
-		return RNAppsFlyer.setPartnerData(partnerId, partnerData);
-	}
+  if (typeof partnerId === "string" && typeof partnerData === "object") {
+    return RNAppsFlyer.setPartnerData(partnerId, partnerData);
+  }
 };
 
 /**
@@ -632,65 +884,76 @@ appsFlyer.setPartnerData = (partnerId, partnerData) => {
  * @param parameters: Parameters to append to the deeplink url after it passed validation.
  */
 appsFlyer.appendParametersToDeepLinkingURL = (contains, parameters) => {
-	if (typeof contains === 'string' && typeof parameters === 'object') {
-		return RNAppsFlyer.appendParametersToDeepLinkingURL(contains, parameters);
-	}
+  if (typeof contains === "string" && typeof parameters === "object") {
+    return RNAppsFlyer.appendParametersToDeepLinkingURL(contains, parameters);
+  }
 };
 
 appsFlyer.setDisableNetworkData = (disable) => {
-	return RNAppsFlyer.setDisableNetworkData(disable);
+  return RNAppsFlyer.setDisableNetworkData(disable);
 };
 
 appsFlyer.startSdk = () => {
-	return RNAppsFlyer.startSdk();
+  return RNAppsFlyer.startSdk();
 };
 
 appsFlyer.performOnDeepLinking = () => {
-	return RNAppsFlyer.performOnDeepLinking();
+  return RNAppsFlyer.performOnDeepLinking();
 };
 
 /**
  * instruct the SDK to collect the TCF data from the device.
- * @param enabled: if the sdk should collect the TCF data. true/false 
+ * @param enabled: if the sdk should collect the TCF data. true/false
  */
-appsFlyer.enableTCFDataCollection= (enabled) => {
-	return RNAppsFlyer.enableTCFDataCollection(enabled);
-}
+appsFlyer.enableTCFDataCollection = (enabled) => {
+  return RNAppsFlyer.enableTCFDataCollection(enabled);
+};
 
 /**
  * If your app does not use a CMP compatible with TCF v2.2, use the SDK API detailed below to provide the consent data directly to the SDK.
  * @param  consentData: AppsFlyerConsent object.
  */
 appsFlyer.setConsentData = (consentData) => {
-	return RNAppsFlyer.setConsentData(consentData);
-}
+  return RNAppsFlyer.setConsentData(consentData);
+};
 
 function AFParseJSONException(_message, _data) {
-	this.message = _message;
-	this.data = _data;
-	this.name = 'AFParseJSONException';
+  this.message = _message;
+  this.data = _data;
+  this.name = "AFParseJSONException";
 }
 
 // Consent object
 export const AppsFlyerConsent = (function () {
-    // Private constructor
-    function AppsFlyerConsent(isUserSubjectToGDPR, hasConsentForDataUsage, hasConsentForAdsPersonalization) {
-        this.isUserSubjectToGDPR = isUserSubjectToGDPR;
-        this.hasConsentForDataUsage = hasConsentForDataUsage;
-        this.hasConsentForAdsPersonalization = hasConsentForAdsPersonalization;
-    }
+  // Private constructor
+  function AppsFlyerConsent(
+    isUserSubjectToGDPR,
+    hasConsentForDataUsage,
+    hasConsentForAdsPersonalization
+  ) {
+    this.isUserSubjectToGDPR = isUserSubjectToGDPR;
+    this.hasConsentForDataUsage = hasConsentForDataUsage;
+    this.hasConsentForAdsPersonalization = hasConsentForAdsPersonalization;
+  }
 
-    return {
-        // Factory method for GDPR user
-        forGDPRUser: function(hasConsentForDataUsage, hasConsentForAdsPersonalization) {
-            return new AppsFlyerConsent(true, hasConsentForDataUsage, hasConsentForAdsPersonalization);
-        },
+  return {
+    // Factory method for GDPR user
+    forGDPRUser: function (
+      hasConsentForDataUsage,
+      hasConsentForAdsPersonalization
+    ) {
+      return new AppsFlyerConsent(
+        true,
+        hasConsentForDataUsage,
+        hasConsentForAdsPersonalization
+      );
+    },
 
-        // Factory method for non GDPR user
-        forNonGDPRUser: function() {
-            return new AppsFlyerConsent(false, null, null);
-        }
-    };
+    // Factory method for non GDPR user
+    forNonGDPRUser: function () {
+      return new AppsFlyerConsent(false, null, null);
+    },
+  };
 })();
 
 export default appsFlyer;
