@@ -13,25 +13,7 @@ import {
 const Cart = ({route, navigation}) => {
   const {productList, removeProductFromCart, checkout} = route.params;
 
-  // Test items (hardcoded)
   /*
-  const items = Platform.select({
-    ios: [
-      'com.appsflyer.inapppurchase.non.cons',
-      'com.appsflyer.inapppurchase.cons',
-      'com.appsflyer.inapppurchase.two',
-    ],
-    android: ['noa_coin1', 'paz_test', 'btc'],
-  });
-
-  const subscriptions = Platform.select({
-    ios: [
-      'com.appsflyer.inapppurchase.non.renew',
-      'com.appsflyer.inapppurchase.auto.renew',
-    ],
-    android: ['cheap', 'intro'],
-  });
-
   // Added methods
   const purchase = async (sku: string) => {
     try {
@@ -88,9 +70,6 @@ const Cart = ({route, navigation}) => {
   const handleCheckout = () => {
     if (productList.length !== 0) {
       checkout();
-      //Handle purchase or subscription for testing AF-PC in-app validation
-      //purchase(items[0]);
-      //subscribe(subscriptions[0]);
       navigation.goBack();
     } else {
       Alert.alert(

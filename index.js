@@ -160,7 +160,7 @@ AppsFlyerPurchaseConnector.onInAppValidationResultFailure = (onFailure) => {
   };
 };
 
-AppsFlyerPurchaseConnector.onReceivePurchaseRevenueValidationInfo = (
+AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo = (
   callback
 ) => {
   if (typeof callback !== "function") {

@@ -6,7 +6,7 @@ import SubscriptionValidationResult from "../models/subscription_validation_resu
 import {
   OnResponse,
   OnFailure,
-  onReceivePurchaseRevenueValidationInfo,
+  OnReceivePurchaseRevenueValidationInfo,
 } from "../utils/connector_callbacks";
 
 declare module "react-native-appsflyer" {
@@ -192,8 +192,8 @@ declare module "react-native-appsflyer" {
     onInAppValidationResultFailure(
       callback: (data:onFailure) => any
     ): () => void;
-    onReceivePurchaseRevenueValidationInfo(
-      callback: onReceivePurchaseRevenueValidationInfo
+    OnReceivePurchaseRevenueValidationInfo(
+      callback: OnReceivePurchaseRevenueValidationInfo
     ): void;
   }
 

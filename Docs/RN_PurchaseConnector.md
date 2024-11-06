@@ -5,8 +5,7 @@ For more information please check the following pages:
 * [Android Purchase Connector](https://dev.appsflyer.com/hc/docs/purchase-connector-android)
 * [iOS Purchase Connector](https://dev.appsflyer.com/hc/docs/purchase-connector-ios)
 
-🛠 In order for us to provide optimal support, we would kindly ask you to submit any issues to
-support@appsflyer.com
+🛠 You can contact AppsFlyer support through the Customer Assistant Chatbot for assistance with troubleshooting issues or product guidance. To do so, please follow this article: https://support.appsflyer.com/hc/en-us/articles/23583984402193-Using-the-Customer-Assistant-Chatbot.
 
 > *When submitting an issue please specify your AppsFlyer sign-up (account) email , your app ID , production steps, logs, code snippets and any additional relevant information.*
 
@@ -205,7 +204,7 @@ You can register listeners to get the validation results once getting a response
 
 The AppsFlyer SDK React Native plugin acts as a bridge between your React Native app and the underlying native SDKs provided by AppsFlyer. It's crucial to understand that the native infrastructure of iOS and Android is quite different, and so is the AppsFlyer SDK built on top of them. These differences are reflected in how you would handle callbacks separately for each platform.
 
-In the iOS environment, there is a single callback method  `didReceivePurchaseRevenueValidationInfo`  to handle both subscriptions and in-app purchases. You set this callback using  `onReceivePurchaseRevenueValidationInfo`.
+In the iOS environment, there is a single callback method  `didReceivePurchaseRevenueValidationInfo`  to handle both subscriptions and in-app purchases. You set this callback using  `OnReceivePurchaseRevenueValidationInfo`.
 
 On the other hand, Android segregates callbacks for subscriptions and in-app purchases. It provides two separate listener methods -  `onSubscriptionValidationResultSuccess` and `onSubscriptionValidationResultFailure`  for subscriptions and  `onInAppValidationResultSuccess` and `onInAppValidationResultFailure`  for in-app purchases. These listener methods register callback handlers for  `OnResponse`  (executed when a successful response is received) and  `OnFailure`  (executed when a failure occurs, including due to a network exception or non-200/OK response from the server).
 
@@ -267,7 +266,7 @@ const handleOnReceivePurchaseRevenueValidationInfo = (validationResult) => {
     let purchaseRevenueValidationListener;
   
     if (Platform.OS === 'ios') {
-      purchaseRevenueValidationListener = AppsFlyerPurchaseConnector.onReceivePurchaseRevenueValidationInfo(handleOnReceivePurchaseRevenueValidationInfo);
+      purchaseRevenueValidationListener = AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo(handleOnReceivePurchaseRevenueValidationInfo);
     }
     };
   }, []);
@@ -351,7 +350,7 @@ const handleValidationSuccess = (validationResult) => {
       subscriptionValidationFailureListener = AppsFlyerPurchaseConnector.onSubscriptionValidationResultFailure(handleSubscriptionValidationFailure);
     } else {
       console.log('>> Creating purchaseRevenueValidationListener ');
-      purchaseRevenueValidationListener = AppsFlyerPurchaseConnector.onReceivePurchaseRevenueValidationInfo(handleOnReceivePurchaseRevenueValidationInfo);
+      purchaseRevenueValidationListener = AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo(handleOnReceivePurchaseRevenueValidationInfo);
     }
   
     // Cleanup function

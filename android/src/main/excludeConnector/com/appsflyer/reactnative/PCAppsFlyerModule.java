@@ -11,13 +11,8 @@ import com.facebook.react.bridge.ReactMethod;
 
 public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
-    private ReactApplicationContext reactContext;
-    private Application application;
-
     public PCAppsFlyerModule(ReactApplicationContext reactContext) {
         super(reactContext);
-        this.reactContext = reactContext;
-        this.application = (Application) reactContext.getApplicationContext();
         Log.d("AppsFlyer", "PurchaseConnector inclusion status: " + BuildConfig.INCLUDE_CONNECTOR);
     }
 
