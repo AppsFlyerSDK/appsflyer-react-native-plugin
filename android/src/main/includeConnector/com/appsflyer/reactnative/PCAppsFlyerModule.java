@@ -19,12 +19,7 @@ import java.util.Map;
 import java.util.Arrays;
 
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
-
-public interface MappedValidationResultListener extends PurchaseClient.ValidationResultListener<Map<String, Object>> {
-    void onResponse(Map<String, Object> response);
-
-    void onFailure(String result, Throwable error);
-}
+import com.appsflyer.reactnative.MappedValidationResultListener;
 
 public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
