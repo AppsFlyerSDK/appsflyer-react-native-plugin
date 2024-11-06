@@ -20,7 +20,7 @@ import java.util.Arrays;
 
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 
-interface MappedValidationResultListener extends PurchaseClient.ValidationResultListener<Map<String, Object>> {
+public interface MappedValidationResultListener extends PurchaseClient.ValidationResultListener<Map<String, Object>> {
     void onResponse(Map<String, Object> response);
 
     void onFailure(String result, Throwable error);
