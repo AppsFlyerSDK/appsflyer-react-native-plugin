@@ -45,12 +45,7 @@ class ConnectorWrapper(
                 }
             }).setInAppValidationResultListener(object : PurchaseClient.InAppPurchaseValidationResultListener {
                 override fun onResponse(result: Map<String, InAppPurchaseValidationResult>?) {
-                    val firstEntry = result?.values?.firstOrNull()?.toJsonMap()
-                    if (firstEntry != null) {
-                        inAppListener.onResponse(firstEntry)
-                    } else {
-                        inAppListener.onResponse(emptyMap())
-                    }
+                    inAppListener.onResponse(result?.entries?.associate { (k, v) -> k to v.toJsonMap() })
                 }
                 override fun onFailure(result: String, error: Throwable?) {
                     inAppListener.onFailure(result, error)

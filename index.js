@@ -44,8 +44,8 @@ AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess = (
       AppsFlyerConstants.SUBSCRIPTION_VALIDATION_SUCCESS,
       (result) => {
         try {
-          const validationResult =
-            SubscriptionValidationResult.fromJson(result);
+          const firstEntryValue = Object.values(result)[0];
+          const validationResult = SubscriptionValidationResult.fromJson(firstEntryValue);
           onSuccess(validationResult);
         } catch (error) {
           console.error(
@@ -108,8 +108,8 @@ AppsFlyerPurchaseConnector.onInAppValidationResultSuccess = (onSuccess) => {
       AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_SUCCESS,
       (validationResult) => {
         try {
-          const purchaseValidationResult =
-            InAppPurchaseValidationResult.fromJson(validationResult);
+          const firstEntryValue = Object.values(result)[0];
+          const purchaseValidationResult = InAppPurchaseValidationResult.fromJson(firstEntryValue);
           onSuccess(purchaseValidationResult);
         } catch (error) {
           console.error(
