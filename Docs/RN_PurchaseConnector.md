@@ -258,8 +258,12 @@ import appsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
 ```javascript
 import appsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
 
-const handleOnReceivePurchaseRevenueValidationInfo = (validationResult) => {
-    console.log('>> handleOnReceivePurchaseRevenueValidationInfo: ', validationResult);
+const handleOnReceivePurchaseRevenueValidationInfo = (validationInfo, error) => {
+    if (error) {
+      console.error("Error during purchase validation:", error);
+    } else {
+      console.log("Validation Info:", validationInfo);
+    }
   }
   
   useEffect(() => {
@@ -331,8 +335,12 @@ const handleValidationSuccess = (validationResult) => {
     console.log('>> handleSubscriptionValidationFailure: ', subscriptionValidationResult);
   }
 
-  const handleOnReceivePurchaseRevenueValidationInfo = (validationResult) => {
-    console.log('>> handleOnReceivePurchaseRevenueValidationInfo: ', validationResult);
+  const handleOnReceivePurchaseRevenueValidationInfo = (validationInfo, error) => {
+    if (error) {
+      console.error("Error during purchase validation:", error);
+    } else {
+      console.log("Validation Info:", validationInfo);
+    }
   }
 
   

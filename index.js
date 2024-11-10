@@ -166,10 +166,17 @@ AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo = (
     AppsFlyerConstants.DID_RECEIVE_PURCHASE_REVENUE_VALIDATION_INFO,
     (info) => {
       try {
-        const validationInfo = JSON.stringify(info);
-        callback(validationInfo, null);
+        if (info.error) {
+          callback(null, info.error);
+        }else{
+          const validationInfo = JSON.stringify(info);
+          callback(validationInfo, null);
+        }
       } catch (error) {
-        callback(null, error);
+        console.error(
+          "Failed to handle iOS validation result:",
+          error
+        );      
       }
     }
   );

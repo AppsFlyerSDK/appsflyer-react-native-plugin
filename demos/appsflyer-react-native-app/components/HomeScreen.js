@@ -192,8 +192,12 @@ const HomeScreen = ({navigation}) => {
     console.log('>> handleSubscriptionValidationFailure: ', subscriptionValidationResult);
   }
 
-  const handleOnReceivePurchaseRevenueValidationInfo = (validationResult) => {
-    console.log('>> handleOnReceivePurchaseRevenueValidationInfo: ', validationResult);
+  const handleOnReceivePurchaseRevenueValidationInfo = (validationInfo, error) => {
+    if (error) {
+      console.error("Error during purchase validation:", error);
+    } else {
+      console.log("Validation Info:", validationInfo);
+    }
   }
 
   
@@ -211,7 +215,7 @@ const HomeScreen = ({navigation}) => {
       subscriptionValidationFailureListener = AppsFlyerPurchaseConnector.onSubscriptionValidationResultFailure(handleSubscriptionValidationFailure);
     } else {
       console.log('>> Creating purchaseRevenueValidationListener ');
-      purchaseRevenueValidationListener = AppsFlyerPurchaseConnector.onReceivePurchaseRevenueValidationInfo(handleOnReceivePurchaseRevenueValidationInfo);
+      purchaseRevenueValidationListener = AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo(handleOnReceivePurchaseRevenueValidationInfo);
     }
   
     // Cleanup function
