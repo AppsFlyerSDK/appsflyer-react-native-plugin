@@ -1,7 +1,4 @@
-import {
-  NativeEventEmitter,
-  NativeModules,
-} from "react-native";
+import { NativeEventEmitter, NativeModules } from "react-native";
 import AppsFlyerConstants from "./PurchaseConnector/constants/constants";
 import InAppPurchaseValidationResult from "./PurchaseConnector/models/in_app_purchase_validation_result";
 import ValidationFailureData from "./PurchaseConnector/models/validation_failure_data";
@@ -45,7 +42,8 @@ AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess = (
       (result) => {
         try {
           const firstEntryValue = Object.values(result)[0];
-          const validationResult = SubscriptionValidationResult.fromJson(firstEntryValue);
+          const validationResult =
+            SubscriptionValidationResult.fromJson(firstEntryValue);
           onSuccess(validationResult);
         } catch (error) {
           console.error(
@@ -74,13 +72,11 @@ AppsFlyerPurchaseConnector.onSubscriptionValidationResultFailure = (
   const subValidationFailureListener =
     purchaseConnectorEventEmitter.addListener(
       AppsFlyerConstants.SUBSCRIPTION_VALIDATION_FAILURE,
-      (validationResult) => {
+      (result) => {
         try {
           const failureValidationResult =
-            ValidationFailureData.fromJson(validationResult);
-          onFailure(
-            new Error("Failed to parse subscription validation result")
-          );
+            ValidationFailureData.fromJson(result);
+          onFailure(failureValidationResult);
         } catch (error) {
           console.error(
             "Failed to handle subscription validation result:",
@@ -106,10 +102,11 @@ AppsFlyerPurchaseConnector.onInAppValidationResultSuccess = (onSuccess) => {
   const inAppValidationSuccessListener =
     purchaseConnectorEventEmitter.addListener(
       AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_SUCCESS,
-      (validationResult) => {
+      (result) => {
         try {
           const firstEntryValue = Object.values(result)[0];
-          const purchaseValidationResult = InAppPurchaseValidationResult.fromJson(firstEntryValue);
+          const purchaseValidationResult =
+            InAppPurchaseValidationResult.fromJson(firstEntryValue);
           onSuccess(purchaseValidationResult);
         } catch (error) {
           console.error(
@@ -136,13 +133,11 @@ AppsFlyerPurchaseConnector.onInAppValidationResultFailure = (onFailure) => {
   const inAppValidationFailureListener =
     purchaseConnectorEventEmitter.addListener(
       AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_FAILURE,
-      (validationResult) => {
+      (result) => {
         try {
           const failureValidationResult =
-            ValidationFailureData.fromJson(validationResult);
-          onFailure(
-            new Error("Failed to parse in-app purchase validation result")
-          );
+            ValidationFailureData.fromJson(result);
+          onFailure(failureValidationResult);
         } catch (error) {
           console.error(
             "Failed to handle in-app purchase validation result:",
@@ -170,12 +165,12 @@ AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo = (
   const revenueValidationListener = purchaseConnectorEventEmitter.addListener(
     AppsFlyerConstants.DID_RECEIVE_PURCHASE_REVENUE_VALIDATION_INFO,
     (info) => {
-        try {
-          const validationInfo = JSON.stringify(info);
-          callback(validationInfo, null);
-        } catch (error) {
-          callback(null, error);
-        }
+      try {
+        const validationInfo = JSON.stringify(info);
+        callback(validationInfo, null);
+      } catch (error) {
+        callback(null, error);
+      }
     }
   );
 
