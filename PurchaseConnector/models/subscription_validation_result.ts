@@ -1,13 +1,7 @@
 import { SubscriptionPurchase } from "./subscription_purchase";
 import { ValidationFailureData } from "./validation_failure_data";
 
-type SubscriptionValidationResultArgs = {
-  success: boolean;
-  subscriptionPurchase?: SubscriptionPurchase;
-  failureData?: ValidationFailureData;
-};
-
-class SubscriptionValidationResult {
+export default class SubscriptionValidationResult {
   success: boolean;
   subscriptionPurchase?: SubscriptionPurchase;
   failureData?: ValidationFailureData;
@@ -22,23 +16,15 @@ class SubscriptionValidationResult {
     this.failureData = failureData;
   }
 
-  static fromJson(json: { [key: string]: any }): SubscriptionValidationResult {
-    const subscriptionPurchaseInstance = json.subscriptionPurchase
-      ? SubscriptionPurchase.fromJson(json.subscriptionPurchase)
-      : undefined;
-
-    const failureDataInstance = json.failureData
-      ? ValidationFailureData.fromJson(json.failureData)
-      : undefined;
-
+  static fromJson(json: any): SubscriptionValidationResult {
     return new SubscriptionValidationResult(
       json.success,
-      subscriptionPurchaseInstance,
-      failureDataInstance
+      json.subscriptionPurchase,
+      json.failureData
     );
   }
 
-  toJson(): SubscriptionValidationResultArgs {
+  toJson(): any {
     return {
       success: this.success,
       subscriptionPurchase: this.subscriptionPurchase,
@@ -46,5 +32,3 @@ class SubscriptionValidationResult {
     };
   }
 }
-
-export default SubscriptionValidationResult;
