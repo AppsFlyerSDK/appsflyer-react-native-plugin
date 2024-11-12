@@ -37,22 +37,26 @@ AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess = (
   }
 
   const subValidationSuccessListener =
-    purchaseConnectorEventEmitter.addListener(
-      AppsFlyerConstants.SUBSCRIPTION_VALIDATION_SUCCESS,
-      (result) => {
-        try {
-          const firstEntryValue = Object.values(result)[0];
-          const validationResult =
-            SubscriptionValidationResult.fromJson(firstEntryValue);
-          onSuccess(validationResult);
-        } catch (error) {
-          console.error(
-            "Failed to parse subscription validation result:",
-            error
-          );
-        }
+  purchaseConnectorEventEmitter.addListener(
+    AppsFlyerConstants.SUBSCRIPTION_VALIDATION_SUCCESS,
+    (result) => {
+      try {
+        const parsedResults = Object.entries(result).reduce(
+          (acc, [purchaseToken, validationResult]) => {
+            acc[purchaseToken] = SubscriptionValidationResult.fromJson(validationResult);
+            return acc;
+          },
+          {}
+        );
+        onSuccess(parsedResults);
+      } catch (error) {
+        console.error(
+          "Failed to parse subscription validation results:",
+          error
+        );
       }
-    );
+    }
+  );
 
   pcEventsMap[AppsFlyerConstants.SUBSCRIPTION_VALIDATION_SUCCESS] =
     subValidationSuccessListener;
@@ -104,13 +108,17 @@ AppsFlyerPurchaseConnector.onInAppValidationResultSuccess = (onSuccess) => {
       AppsFlyerConstants.IN_APP_PURCHASE_VALIDATION_SUCCESS,
       (result) => {
         try {
-          const firstEntryValue = Object.values(result)[0];
-          const purchaseValidationResult =
-            InAppPurchaseValidationResult.fromJson(firstEntryValue);
-          onSuccess(purchaseValidationResult);
+          const parsedResults = Object.entries(result).reduce(
+            (acc, [purchaseToken, validationResult]) => {
+              acc[purchaseToken] = InAppPurchaseValidationResult.fromJson(validationResult);
+              return acc;
+            },
+            {}
+          );
+          onSuccess(parsedResults);
         } catch (error) {
           console.error(
-            "Failed to handle in-app purchase validation result:",
+            "Failed to handle in-app purchase validation results:",
             error
           );
         }
