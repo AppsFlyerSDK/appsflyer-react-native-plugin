@@ -19,11 +19,5 @@ jobs:
           issue-number: ${{ github.event.issue.number }}
           body: |
             👋 Hi @${{ github.event.issue.user.login }} and Thank you for reaching out to us.
-            In order for us to provide optimal support, please submit a ticket to our support team at support@appsflyer.com.
-            When submitting the ticket, please specify:
-            - ✅ your AppsFlyer sign-up (account) email
-            - ✅ app ID
-            - ✅ production steps
-            - ✅ logs
-            - ✅ code snippets
-            - ✅ and any additional relevant information.
+            You can contact AppsFlyer support through the Customer Assistant Chatbot for assistance with troubleshooting issues or product guidance.
+            To do so, please follow [this article](https://support.appsflyer.com/hc/en-us/articles/23583984402193-Using-the-Customer-Assistant-Chatbot).
