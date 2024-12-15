@@ -38,7 +38,7 @@ The list of available methods for this plugin is described below.
   - [disableAdvertisingIdentifier](#disableadvertisingidentifier)
   - [enableTCFDataCollection](#enabletcfdatacollection)
   - [setConsentData](#setconsentdata)
-  - [logAdRevenue from v6.15.1](#logadrevenue-from-v6151)
+  - [logAdRevenue](#logadrevenue)
     - [Parameters](#parameters)
     - [Usage Example for React Native:](#usage-example-for-react-native)
 - [Android Only APIs](#android-only-apis)
@@ -801,7 +801,7 @@ let GDPRUser = AppsFlyerConsent.forGDPRUser(true, false);
 appsFlyer.setConsentData(nonGDPRUser /**or**/ GDPRUser);
 ```
 
-### logAdRevenue from v6.15.1
+### logAdRevenue
 `logAdRevenue(data: AFAdRevenueData): void`
 
 Use this method to log your ad revenue.</br>
