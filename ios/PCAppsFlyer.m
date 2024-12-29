@@ -43,11 +43,14 @@ RCT_EXPORT_METHOD(create:(NSDictionary *)config
     BOOL sandbox = [config[sandboxKey] boolValue];
   
     [connector setIsSandbox:sandbox];
-
-    if (logSubscriptions) {
+    
+    if (logSubscriptions && logInApps) {
+    [connector setAutoLogPurchaseRevenue:AFSDKAutoLogPurchaseRevenueOptionsAutoRenewableSubscriptions | AFSDKAutoLogPurchaseRevenueOptionsInAppPurchases];
+    }
+    else if (logSubscriptions) {
         [connector setAutoLogPurchaseRevenue:AFSDKAutoLogPurchaseRevenueOptionsAutoRenewableSubscriptions];
     }
-    if (logInApps) {
+    else if (logInApps) {
         [connector setAutoLogPurchaseRevenue:AFSDKAutoLogPurchaseRevenueOptionsInAppPurchases];
     }
 
