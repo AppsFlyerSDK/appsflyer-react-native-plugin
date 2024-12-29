@@ -12,8 +12,9 @@
 
 ### <a id="plugin-build-for"> This plugin is built for
 
-- Android AppsFlyer SDK **v6.13.0**
-- iOS AppsFlyer SDK **v6.13.1**
+- Android AppsFlyer SDK **v6.15.1**
+- iOS AppsFlyer SDK **v6.15.1**
+- Tested with React-Native **v0.62.0** (older versions might be supported)
 
 ## <a id="breaking-changes"> ❗❗ Breaking changes when updating to v6.x.x❗❗
 
@@ -46,24 +47,27 @@ And removed the following ones:
 
 If you have used 1 of the removed APIs, please check the integration guide for the updated instructions.
 
- ---
+---
 
- ##  🚀 Getting Started
+## 🚀 Getting Started
+
 - [Installation](/Docs/RN_Installation.md)
-- [***Expo*** Installation](/Docs/RN_ExpoInstallation.md)
+- [**_Expo_** Installation](/Docs/RN_ExpoInstallation.md)
 - [Integration](/Docs/RN_Integration.md)
 - [Test integration](/Docs/RN_Testing.md)
 - [In-app events](/Docs/RN_InAppEvents.md)
 - [Uninstall measurement](/Docs/RN_UninstallMeasurement.md)
 - [Send consent for DMA compliance](/Docs/RN_CMP.md)
+- [Purchase Connector](/Docs/RN_PurchaseConnector.md)
 ##  🔗 Deep Linking
 - [Integration](/Docs/RN_DeepLinkIntegrate.md)
-- [***Expo*** Integration](/Docs/RN_ExpoDeepLinkIntegration.md)
+- [**_Expo_** Integration](/Docs/RN_ExpoDeepLinkIntegration.md)
 - [Unified Deep Link (UDL)](/Docs/RN_UnifiedDeepLink.md)
 - [User Invite](/Docs/RN_UserInvite.md)
+
 ## 🧪 Sample Apps
+
 - [React-Native Sample App](/demos/appsflyer-react-native-app)
 - [🆕 Expo Sample App](https://github.com/AppsFlyerSDK/appsflyer-expo-sample-app)
 
 ### [API reference](/Docs/RN_API.md)
-
