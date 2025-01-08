@@ -23,7 +23,20 @@ target 'AppsFlyerExample' do
   # you should disable the next line.
   # use_flipper!()
 
+  # Post install process to make sure that all the pods with minimum deploymeny target 12
   post_install do |installer|
-    react_native_post_install(installer)
+  react_native_post_install(installer)
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12'
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', '_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION']
+    end
+    case target.name
+    when 'RCT-Folly'
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0'
+      end
+    end
+    end
   end
 end

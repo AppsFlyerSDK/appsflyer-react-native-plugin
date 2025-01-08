@@ -12,6 +12,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		758FBD406B8A60C781CB65C7 /* libPods-AppsFlyerExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3772C10A05F15474D2AE8E5B /* libPods-AppsFlyerExample.a */; };
+		7EEAAD9F2D2D7980006F2316 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 7EEAAD9E2D2D7980006F2316 /* main.jsbundle */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		8A99A8955B526C01707AFBFA /* libPods-AppsFlyerExample-AppsFlyerExampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C982642725666DF8D1E1F96 /* libPods-AppsFlyerExample-AppsFlyerExampleTests.a */; };
 /* End PBXBuildFile section */
@@ -39,6 +40,7 @@
 		1C982642725666DF8D1E1F96 /* libPods-AppsFlyerExample-AppsFlyerExampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AppsFlyerExample-AppsFlyerExampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3772C10A05F15474D2AE8E5B /* libPods-AppsFlyerExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AppsFlyerExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5CAE30CF50FDE233EFB84891 /* Pods-AppsFlyerExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsFlyerExample.release.xcconfig"; path = "Target Support Files/Pods-AppsFlyerExample/Pods-AppsFlyerExample.release.xcconfig"; sourceTree = "<group>"; };
+		7EEAAD9E2D2D7980006F2316 /* main.jsbundle */ = {isa = PBXFileReference; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = AppsFlyerExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		BE4C6B4402435E3245DA5B5C /* Pods-AppsFlyerExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsFlyerExample.debug.xcconfig"; path = "Target Support Files/Pods-AppsFlyerExample/Pods-AppsFlyerExample.debug.xcconfig"; sourceTree = "<group>"; };
 		C6E030350442BE719CA4C6F7 /* Pods-AppsFlyerExample-AppsFlyerExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsFlyerExample-AppsFlyerExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-AppsFlyerExample-AppsFlyerExampleTests/Pods-AppsFlyerExample-AppsFlyerExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				7EEAAD9E2D2D7980006F2316 /* main.jsbundle */,
 				13B07FAE1A68108700A75B9A /* AppsFlyerExample */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* AppsFlyerExampleTests */,
@@ -243,6 +246,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7EEAAD9F2D2D7980006F2316 /* main.jsbundle in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 			);
@@ -263,7 +267,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
-			shellScript = "set -e\n\nexport NODE_BINARY=/Users/amit.levy/.nvm/versions/node/v21.7.3/bin/node\n";
+			shellScript = "set -e\n\nexport NODE_BINARY=/usr/local/bin/node\n";
 		};
 		4721923C614EE6D1A58C11F1 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
