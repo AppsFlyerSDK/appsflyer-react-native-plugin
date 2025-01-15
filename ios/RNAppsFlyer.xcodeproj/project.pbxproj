@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7E215B402D3683B60088EE50 /* PCAppsFlyer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E215B3E2D3683B60088EE50 /* PCAppsFlyer.m */; };
+		7E215B412D3683B60088EE50 /* TransactionFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E215B3F2D3683B60088EE50 /* TransactionFetcher.swift */; };
+		7E215B422D3683B60088EE50 /* AppsFlyerAttribution.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E215B372D3683B60088EE50 /* AppsFlyerAttribution.m */; };
+		7E215B4B2D37AFF60088EE50 /* RNAppsFlyer-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = 7E215B492D37AEE10088EE50 /* RNAppsFlyer-Bridging-Header.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		B3E7B58A1CC2AC0600A0062D /* RNAppsFlyer.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNAppsFlyer.m */; };
 /* End PBXBuildFile section */
 
@@ -24,6 +28,18 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRNAppsFlyer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNAppsFlyer.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7E215B352D3683B60088EE50 /* AFAdRevenueData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AFAdRevenueData.h; sourceTree = "<group>"; };
+		7E215B362D3683B60088EE50 /* AppsFlyerAttribution.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerAttribution.h; sourceTree = "<group>"; };
+		7E215B372D3683B60088EE50 /* AppsFlyerAttribution.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppsFlyerAttribution.m; sourceTree = "<group>"; };
+		7E215B382D3683B60088EE50 /* AppsFlyerConsent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerConsent.h; sourceTree = "<group>"; };
+		7E215B392D3683B60088EE50 /* AppsFlyerDeepLink.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerDeepLink.h; sourceTree = "<group>"; };
+		7E215B3A2D3683B60088EE50 /* AppsFlyerDeepLinkObserver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerDeepLinkObserver.h; sourceTree = "<group>"; };
+		7E215B3B2D3683B60088EE50 /* AppsFlyerDeepLinkResult.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerDeepLinkResult.h; sourceTree = "<group>"; };
+		7E215B3C2D3683B60088EE50 /* AppsFlyerLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerLib.h; sourceTree = "<group>"; };
+		7E215B3D2D3683B60088EE50 /* PCAppsFlyer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PCAppsFlyer.h; sourceTree = "<group>"; };
+		7E215B3E2D3683B60088EE50 /* PCAppsFlyer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PCAppsFlyer.m; sourceTree = "<group>"; };
+		7E215B3F2D3683B60088EE50 /* TransactionFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFetcher.swift; sourceTree = "<group>"; };
+		7E215B492D37AEE10088EE50 /* RNAppsFlyer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNAppsFlyer-Bridging-Header.h"; sourceTree = "<group>"; };
 		943704C6209F6734005B3A22 /* AppsFlyerShareInviteHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppsFlyerShareInviteHelper.h; sourceTree = "<group>"; };
 		943704C7209F6734005B3A22 /* AppsFlyerLinkGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppsFlyerLinkGenerator.h; sourceTree = "<group>"; };
 		943704C9209F6735005B3A22 /* AppsFlyerCrossPromotionHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppsFlyerCrossPromotionHelper.h; sourceTree = "<group>"; };
@@ -53,22 +69,54 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				7E215B352D3683B60088EE50 /* AFAdRevenueData.h */,
+				7E215B362D3683B60088EE50 /* AppsFlyerAttribution.h */,
+				7E215B372D3683B60088EE50 /* AppsFlyerAttribution.m */,
+				7E215B382D3683B60088EE50 /* AppsFlyerConsent.h */,
+				7E215B392D3683B60088EE50 /* AppsFlyerDeepLink.h */,
+				7E215B3A2D3683B60088EE50 /* AppsFlyerDeepLinkObserver.h */,
+				7E215B3B2D3683B60088EE50 /* AppsFlyerDeepLinkResult.h */,
+				7E215B3C2D3683B60088EE50 /* AppsFlyerLib.h */,
+				7E215B3D2D3683B60088EE50 /* PCAppsFlyer.h */,
+				7E215B3E2D3683B60088EE50 /* PCAppsFlyer.m */,
+				7E215B3F2D3683B60088EE50 /* TransactionFetcher.swift */,
 				943704C9209F6735005B3A22 /* AppsFlyerCrossPromotionHelper.h */,
 				943704C7209F6734005B3A22 /* AppsFlyerLinkGenerator.h */,
 				943704C6209F6734005B3A22 /* AppsFlyerShareInviteHelper.h */,
 				B3E7B5881CC2AC0600A0062D /* RNAppsFlyer.h */,
 				B3E7B5891CC2AC0600A0062D /* RNAppsFlyer.m */,
+				7E215B492D37AEE10088EE50 /* RNAppsFlyer-Bridging-Header.h */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				7E215B4C2D37B0770088EE50 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
+		7E215B4C2D37B0770088EE50 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		7E215B4A2D37AFE20088EE50 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7E215B4B2D37AFF60088EE50 /* RNAppsFlyer-Bridging-Header.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		58B511DA1A9E6C8500147676 /* RNAppsFlyer */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "RNAppsFlyer" */;
 			buildPhases = (
+				7E215B4A2D37AFE20088EE50 /* Headers */,
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
 				58B511D91A9E6C8500147676 /* CopyFiles */,
@@ -121,6 +169,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				B3E7B58A1CC2AC0600A0062D /* RNAppsFlyer.m in Sources */,
+				7E215B402D3683B60088EE50 /* PCAppsFlyer.m in Sources */,
+				7E215B412D3683B60088EE50 /* TransactionFetcher.swift in Sources */,
+				7E215B422D3683B60088EE50 /* AppsFlyerAttribution.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
