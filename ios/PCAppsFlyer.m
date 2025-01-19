@@ -7,7 +7,6 @@ static NSString *const TAG = @"[AppsFlyer_PurchaseConnector] ";
 
 #if __has_include(<PurchaseConnector/PurchaseConnector.h>)
 #import <PurchaseConnector/PurchaseConnector.h>
-#import "RNAppsFlyer-Swift.h"
 
 @implementation PCAppsFlyer
 @synthesize bridge = _bridge;

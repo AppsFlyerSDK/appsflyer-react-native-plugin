@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.platform         = :ios, "12.0"
   s.static_framework = true
   s.dependency 'React'
-
+  
   # AppsFlyerPurchaseConnector
   if defined?($AppsFlyerPurchaseConnector) && ($AppsFlyerPurchaseConnector == true)
     Pod::UI.puts "#{s.name}: Including PurchaseConnector."

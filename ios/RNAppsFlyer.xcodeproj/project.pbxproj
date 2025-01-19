@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		7E215B402D3683B60088EE50 /* PCAppsFlyer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E215B3E2D3683B60088EE50 /* PCAppsFlyer.m */; };
-		7E215B412D3683B60088EE50 /* TransactionFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E215B3F2D3683B60088EE50 /* TransactionFetcher.swift */; };
 		7E215B422D3683B60088EE50 /* AppsFlyerAttribution.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E215B372D3683B60088EE50 /* AppsFlyerAttribution.m */; };
 		7E215B4B2D37AFF60088EE50 /* RNAppsFlyer-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = 7E215B492D37AEE10088EE50 /* RNAppsFlyer-Bridging-Header.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		7E64BC5B2D3D0DB10030E1A6 /* TransactionFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E64BC5A2D3D0DB10030E1A6 /* TransactionFetcher.swift */; };
 		B3E7B58A1CC2AC0600A0062D /* RNAppsFlyer.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNAppsFlyer.m */; };
 /* End PBXBuildFile section */
 
@@ -38,8 +38,8 @@
 		7E215B3C2D3683B60088EE50 /* AppsFlyerLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerLib.h; sourceTree = "<group>"; };
 		7E215B3D2D3683B60088EE50 /* PCAppsFlyer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PCAppsFlyer.h; sourceTree = "<group>"; };
 		7E215B3E2D3683B60088EE50 /* PCAppsFlyer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PCAppsFlyer.m; sourceTree = "<group>"; };
-		7E215B3F2D3683B60088EE50 /* TransactionFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFetcher.swift; sourceTree = "<group>"; };
 		7E215B492D37AEE10088EE50 /* RNAppsFlyer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNAppsFlyer-Bridging-Header.h"; sourceTree = "<group>"; };
+		7E64BC5A2D3D0DB10030E1A6 /* TransactionFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFetcher.swift; sourceTree = "<group>"; };
 		943704C6209F6734005B3A22 /* AppsFlyerShareInviteHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppsFlyerShareInviteHelper.h; sourceTree = "<group>"; };
 		943704C7209F6734005B3A22 /* AppsFlyerLinkGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppsFlyerLinkGenerator.h; sourceTree = "<group>"; };
 		943704C9209F6735005B3A22 /* AppsFlyerCrossPromotionHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppsFlyerCrossPromotionHelper.h; sourceTree = "<group>"; };
@@ -69,6 +69,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				7E64BC5A2D3D0DB10030E1A6 /* TransactionFetcher.swift */,
 				7E215B352D3683B60088EE50 /* AFAdRevenueData.h */,
 				7E215B362D3683B60088EE50 /* AppsFlyerAttribution.h */,
 				7E215B372D3683B60088EE50 /* AppsFlyerAttribution.m */,
@@ -79,7 +80,6 @@
 				7E215B3C2D3683B60088EE50 /* AppsFlyerLib.h */,
 				7E215B3D2D3683B60088EE50 /* PCAppsFlyer.h */,
 				7E215B3E2D3683B60088EE50 /* PCAppsFlyer.m */,
-				7E215B3F2D3683B60088EE50 /* TransactionFetcher.swift */,
 				943704C9209F6735005B3A22 /* AppsFlyerCrossPromotionHelper.h */,
 				943704C7209F6734005B3A22 /* AppsFlyerLinkGenerator.h */,
 				943704C6209F6734005B3A22 /* AppsFlyerShareInviteHelper.h */,
@@ -170,7 +170,7 @@
 			files = (
 				B3E7B58A1CC2AC0600A0062D /* RNAppsFlyer.m in Sources */,
 				7E215B402D3683B60088EE50 /* PCAppsFlyer.m in Sources */,
-				7E215B412D3683B60088EE50 /* TransactionFetcher.swift in Sources */,
+				7E64BC5B2D3D0DB10030E1A6 /* TransactionFetcher.swift in Sources */,
 				7E215B422D3683B60088EE50 /* AppsFlyerAttribution.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -256,6 +256,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				DEFINES_MODULE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -277,6 +278,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				DEFINES_MODULE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,

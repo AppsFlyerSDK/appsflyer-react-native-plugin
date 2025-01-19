@@ -12,6 +12,8 @@
 #import <objc/message.h>
 #if __has_include(<AppsFlyerLib/AppsFlyerLib.h>) // from Pod
 #import <AppsFlyerLib/AppsFlyerLib.h>
+@class PCAppsFlyer;
+
 #else
 #import "AppsFlyerLib.h"
 #endif

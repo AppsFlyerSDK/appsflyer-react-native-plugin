@@ -11,5 +11,7 @@
 
 #import <Foundation/Foundation.h>
 #import <PurchaseConnector/PurchaseConnector.h>
+#import <React/RCTBridgeModule.h>
+#import <React/RCTViewManager.h>
 
 #endif /* _RNAppsFlyer_Bridging_Header_h */

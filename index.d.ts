@@ -166,9 +166,9 @@ declare module "react-native-appsflyer" {
   /**
    * PurchaseConnector
    */
-  export const StoreKitVersion = {
-    SK1: "SK1",
-    SK2: "SK2",
+  export enum StoreKitVersion {
+    SK1,
+    SK2,
   };
   
   export interface PurchaseConnectorConfig {

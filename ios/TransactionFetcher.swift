@@ -1,7 +1,16 @@
+//
+//  TransactionFetcher.swift
+//  RNAppsFlyer
+//
+//  Created by Amit Levy on 19/01/2025.
+//  Copyright © 2025 Facebook. All rights reserved.
+//
+
 import Foundation
 import StoreKit
-import PurchaseConnector
 
+#if canImport(PurchaseConnector)
+import PurchaseConnector
 @objc class TransactionFetcher: NSObject {
     @objc static func fetchTransaction(withId transactionId: String, completion: @escaping (AFSDKTransactionSK2?) -> Void) {
         Task {
@@ -25,3 +34,4 @@ import PurchaseConnector
         }
     }
 }
+#endif

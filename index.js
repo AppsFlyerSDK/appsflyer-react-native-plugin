@@ -203,6 +203,11 @@ function logConsumableTransaction(transactionId){
 
 AppsFlyerPurchaseConnector.logConsumableTransaction = logConsumableTransaction;
 
+export const StoreKitVersion = Object.freeze({
+  SK1: "SK1",
+  SK2: "SK2",
+});
+
 const AppsFlyerPurchaseConnectorConfig = {
   setConfig: ({ logSubscriptions, logInApps, sandbox, storeKitVersion }) => {
     return {
