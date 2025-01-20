@@ -9,7 +9,7 @@
 #import <objc/message.h>
 #if __has_include(<PurchaseConnector/PurchaseConnector.h>)
 #import <PurchaseConnector/PurchaseConnector.h>
-
+@class TransactionFetcher;
 @interface PCAppsFlyer: RCTEventEmitter <RCTBridgeModule, AppsFlyerPurchaseRevenueDelegate, AppsFlyerPurchaseRevenueDataSource>
 // This is the PCAppsFlyer if the AppsFlyerPurchaseConnector is set to true in the podfile
 @end

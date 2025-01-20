@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.homepage         = pkg["homepage"]
   s.author           = pkg["author"]
   s.source           = { :git => pkg["repository"]["url"] }
-  s.source_files     = 'ios/**/*.{h,m}'
+  s.source_files     = 'ios/**/*.{h,m,swift}'
   s.platform         = :ios, "12.0"
   s.static_framework = true
   s.dependency 'React'
