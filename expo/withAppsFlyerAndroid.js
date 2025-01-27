@@ -2,7 +2,7 @@ const {withMainActivity} = require('@expo/config-plugins')
 
 function overrideOnNewIntent(contents, packageName = ''){
     let nextContent = contents
-    const intentImportString = 'import android.content.intent'
+    const intentImportString = 'import android.content.Intent'
 
     if (!nextContent.includes(intentImportString)){
         const packageString = `${packageName}\n`
