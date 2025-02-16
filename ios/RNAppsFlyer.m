@@ -499,7 +499,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
     return NSClassFromString(@"EXAppDelegateWrapper") != nil;
 }
 
-RCT_EXPORT_METHOD(anonymizeUser: (BOOL *)b callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(anonymizeUser: (BOOL)b callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerLib shared].anonymizeUser = b;
     callback(@[SUCCESS]);
 }

@@ -148,6 +148,7 @@ android {
             keyPassword 'android'
         }
     }
+    namespace 'com.appsflyerexample'
     buildTypes {
         debug {
             signingConfig signingConfigs.debug

@@ -50,7 +50,7 @@ declare module "react-native-appsflyer" {
     export type UnifiedDeepLinkData = {
         status: "success" | "failure",
         type: "onDeepLinking",
-        deepLinkStatus: 'FOUND' | 'NOT_FOUND' | 'Error',
+        deepLinkStatus: 'FOUND' | 'NOT_FOUND' | 'ERROR',
         isDeferred: boolean,
         data: {
             campaign: string;
