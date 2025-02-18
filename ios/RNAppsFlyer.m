@@ -14,7 +14,7 @@ RCT_EXPORT_METHOD(initSdkWithCallBack: (NSDictionary*)initSdkOptions
     NSError* error = nil;
     error = [self callSdkInternal:initSdkOptions];
     if (error == nil){
-        successCallback(@[SUCCESS]);
+        successCallback(@[AF_SUCCESS]);
     }else{
         errorCallback(error);
     }
@@ -27,7 +27,7 @@ RCT_EXPORT_METHOD(initSdkWithPromise: (NSDictionary*)initSdkOptions
     NSError* error = nil;
     error = [self callSdkInternal:initSdkOptions];
     if (error == nil){
-        resolve(@[SUCCESS]);
+        resolve(@[AF_SUCCESS]);
     }else{
         reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);    }
 }
@@ -141,7 +141,7 @@ RCT_EXPORT_METHOD(logEvent: (NSString *)eventName eventValues:(NSDictionary *)ev
             errorCallback(@[error.localizedDescription]);
             return;
         }
-        successCallback(@[SUCCESS]);
+        successCallback(@[AF_SUCCESS]);
     }];
 }
 
@@ -159,7 +159,7 @@ RCT_EXPORT_METHOD(logEventWithPromise: (NSString *)eventName eventValues:(NSDict
             reject([NSString stringWithFormat: @"%ld", (long)error.code], error.domain, error);
             return;
         }
-        resolve(@[SUCCESS]);
+        resolve(@[AF_SUCCESS]);
     }];
 }
 
@@ -238,18 +238,18 @@ RCT_EXPORT_METHOD(getAppsFlyerUID: (RCTResponseSenderBlock)callback) {
 
 RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setCustomerUserID:userId];
-    callback(@[SUCCESS]);
+    callback(@[AF_SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(stop: (BOOL)isStopped callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerLib shared].isStopped  = isStopped;
-     callback(@[SUCCESS]);
+     callback(@[AF_SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(logLocation: (double)longitude latitude:(double)latitude callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] logLocation:longitude latitude:latitude];
     NSArray *events = @[[NSNumber numberWithDouble:longitude], [NSNumber numberWithDouble:latitude]];
-    callback(@[SUCCESS, events]);
+    callback(@[AF_SUCCESS, events]);
 }
 
 RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
@@ -288,7 +288,7 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
     }
     else{
         [[AppsFlyerLib shared] setUserEmails:emails withCryptType:emailsCryptType];
-        successCallback(@[SUCCESS]);
+        successCallback(@[AF_SUCCESS]);
     }
 }
 
@@ -301,19 +301,19 @@ RCT_EXPORT_METHOD(setUserEmails: (NSDictionary*)options
 
 RCT_EXPORT_METHOD(setAdditionalData: (NSDictionary *)additionalData callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setAdditionalData:additionalData];
-    callback(@[SUCCESS]);
+    callback(@[AF_SUCCESS]);
 }
 
 //USER INVITES
 
 RCT_EXPORT_METHOD(setAppInviteOneLinkID: (NSString *)oneLinkID callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerLib shared].appInviteOneLinkID = oneLinkID;
-    callback(@[SUCCESS]);
+    callback(@[AF_SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(setCurrencyCode: (NSString *)currencyCode callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setCurrencyCode:currencyCode];
-     callback(@[SUCCESS]);
+     callback(@[AF_SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(generateInviteLink: (NSDictionary *)inviteLinkOptions
@@ -501,7 +501,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 
 RCT_EXPORT_METHOD(anonymizeUser: (BOOL)b callback:(RCTResponseSenderBlock)callback) {
     [AppsFlyerLib shared].anonymizeUser = b;
-    callback(@[SUCCESS]);
+    callback(@[AF_SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(updateServerUninstallToken: (NSString *)deviceToken callback:(RCTResponseSenderBlock)callback) {
@@ -517,21 +517,21 @@ RCT_EXPORT_METHOD(updateServerUninstallToken: (NSString *)deviceToken callback:(
         [deviceTokenData appendBytes:&whole_byte length:1];
     }
     [[AppsFlyerLib shared] registerUninstall:deviceTokenData];
-    callback(@[SUCCESS]);
+    callback(@[AF_SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(setOneLinkCustomDomains:(NSArray *) domains
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
     [[AppsFlyerLib shared] setOneLinkCustomDomains:domains];
-    successCallback(@[SUCCESS]);
+    successCallback(@[AF_SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(setResolveDeepLinkURLs:(NSArray *) urls
                   successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
     [[AppsFlyerLib shared] setResolveDeepLinkURLs:urls];
-    successCallback(@[SUCCESS]);
+    successCallback(@[AF_SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(performOnAppAttribution:(NSString *) urlString
@@ -543,7 +543,7 @@ RCT_EXPORT_METHOD(performOnAppAttribution:(NSString *) urlString
         errorCallback(error);
     } else {
         [[AppsFlyerLib shared] performOnAppAttributionWithURL:url];
-        successCallback(@[SUCCESS]);
+        successCallback(@[AF_SUCCESS]);
     }
 }
 
@@ -606,16 +606,16 @@ RCT_EXPORT_METHOD(sendPushNotificationData: (NSDictionary*)pushPayload errorCall
 
 RCT_EXPORT_METHOD(setHost: (NSString*)hostPrefix hostName: (NSString*)hostName successCallback :(RCTResponseSenderBlock)successCallback) {
     [[AppsFlyerLib shared] setHost:hostName withHostPrefix:hostPrefix];
-    successCallback(@[SUCCESS]);
+    successCallback(@[AF_SUCCESS]);
 }
 
 RCT_EXPORT_METHOD(addPushNotificationDeepLinkPath: (NSArray*)path successCallback :(RCTResponseSenderBlock)successCallback
                   errorCallback:(RCTResponseErrorBlock)errorCallback) {
     [[AppsFlyerLib shared] addPushNotificationDeepLinkPath: path];
-    successCallback(@[SUCCESS]);
+    successCallback(@[AF_SUCCESS]);
 }
 
-RCT_EXPORT_METHOD(disableSKAD: (BOOL *)b ) {
+RCT_EXPORT_METHOD(disableSKAD: (BOOL)b ) {
     [AppsFlyerLib shared].disableSKAdNetwork = b;
     if (b){
         NSLog(@"[DEBUG] AppsFlyer: SKADNetwork is disabled");
@@ -636,7 +636,7 @@ RCT_EXPORT_METHOD(appendParametersToDeepLinkingURL:(NSString *)contains partnerD
     [[AppsFlyerLib shared] appendParametersToDeepLinkingURLWithString:contains parameters:parameters];
 }
 
-RCT_EXPORT_METHOD(enableTCFDataCollection:(BOOL *)enabled) {
+RCT_EXPORT_METHOD(enableTCFDataCollection:(BOOL)enabled) {
     [[AppsFlyerLib shared] enableTCFDataCollection:enabled];
 }
 

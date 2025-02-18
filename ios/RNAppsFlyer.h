@@ -27,7 +27,7 @@ static NSString *const NO_DEVKEY_FOUND              = @"No 'devKey' found or its
 static NSString *const NO_APPID_FOUND               = @"No 'appId' found or its empty";
 static NSString *const NO_EVENT_NAME_FOUND          = @"No 'eventName' found or its empty";
 static NSString *const EMPTY_OR_CORRUPTED_LIST      = @"No arguments found or list is corrupted";
-static NSString *const SUCCESS                      = @"Success";
+static NSString *const AF_SUCCESS                   = @"Success";
 static NSString *const INVALID_URI                  = @"Invalid URI";
 static NSString *const IOS_14_ONLY                  = @"Feature only supported on iOS 14 and above";
 

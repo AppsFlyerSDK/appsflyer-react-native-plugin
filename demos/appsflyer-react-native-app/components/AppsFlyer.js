@@ -21,7 +21,12 @@ const initOptions = {
 export function AFInit() {
   if (Platform.OS == 'ios') {
     appsFlyer.setCurrentDeviceLanguage("EN");
+    appsFlyer.disableSKAD(true);
   }
+
+  appsFlyer.anonymizeUser(true);
+  appsFlyer.enableTCFDataCollection(true);
+
   appsFlyer.setAppInviteOneLinkID('oW4R');
   appsFlyer.initSdk(initOptions, null, null);
 }
