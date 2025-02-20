@@ -60,8 +60,8 @@ appsFlyer.logEvent = logEvent;
 
 export const MEDIATION_NETWORK = Object.freeze({
 	IRONSOURCE : "ironsource",
-	APPLOVIN_MAX : "applovinmax",
-	GOOGLE_ADMOB : "googleadmob",
+	APPLOVIN_MAX : "applovin_max",
+	GOOGLE_ADMOB : "google_admob",
 	FYBER : "fyber",
 	APPODEAL : "appodeal",
 	ADMOST : "Admost",
@@ -70,9 +70,9 @@ export const MEDIATION_NETWORK = Object.freeze({
 	YANDEX : "Yandex",
 	CHARTBOOST : "chartboost",
 	UNITY : "Unity",
-	TOPON_PTE : "toponpte",
-	CUSTOM_MEDIATION : "customMediation",
-	DIRECT_MONETIZATION_NETWORK : "directMonetizationNetwork"
+	TOPON_PTE : "topon_pte",
+	CUSTOM_MEDIATION : "custom_mediation",
+	DIRECT_MONETIZATION_NETWORK : "direct_monetization_network"
 });
 
 function logAdRevenue(adRevenueData) {

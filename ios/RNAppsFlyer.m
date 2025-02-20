@@ -196,9 +196,9 @@ RCT_EXPORT_METHOD(logAdRevenue:(NSDictionary *)adRevenueDictionary)
     
     // Use literals to map the mediation network string to the corresponding enum value
     NSDictionary<NSString *, NSNumber *> *mediationNetworkMappings = @{
-        @"googleadmob": @(AppsFlyerAdRevenueMediationNetworkTypeGoogleAdMob),
+        @"google_admob": @(AppsFlyerAdRevenueMediationNetworkTypeGoogleAdMob),
         @"ironsource": @(AppsFlyerAdRevenueMediationNetworkTypeIronSource),
-        @"applovinmax": @(AppsFlyerAdRevenueMediationNetworkTypeApplovinMax),
+        @"applovin_max": @(AppsFlyerAdRevenueMediationNetworkTypeApplovinMax),
         @"fyber": @(AppsFlyerAdRevenueMediationNetworkTypeFyber),
         @"appodeal": @(AppsFlyerAdRevenueMediationNetworkTypeAppodeal),
         @"admost": @(AppsFlyerAdRevenueMediationNetworkTypeAdmost),
@@ -207,9 +207,9 @@ RCT_EXPORT_METHOD(logAdRevenue:(NSDictionary *)adRevenueDictionary)
         @"yandex": @(AppsFlyerAdRevenueMediationNetworkTypeYandex),
         @"chartboost": @(AppsFlyerAdRevenueMediationNetworkTypeChartBoost),
         @"unity": @(AppsFlyerAdRevenueMediationNetworkTypeUnity),
-        @"toponpte": @(AppsFlyerAdRevenueMediationNetworkTypeToponPte),
-        @"custom": @(AppsFlyerAdRevenueMediationNetworkTypeCustom),
-        @"directmonetization": @(AppsFlyerAdRevenueMediationNetworkTypeDirectMonetization),
+        @"topon_pte": @(AppsFlyerAdRevenueMediationNetworkTypeToponPte),
+        @"custom_mediation": @(AppsFlyerAdRevenueMediationNetworkTypeCustom),
+        @"direct_monetization_network": @(AppsFlyerAdRevenueMediationNetworkTypeDirectMonetization),
     };
     
     NSNumber *mediationNetworkEnumNumber = mediationNetworkMappings[mediationNetworkString.lowercaseString];
