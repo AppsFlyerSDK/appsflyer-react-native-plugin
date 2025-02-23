@@ -21,7 +21,12 @@ const initOptions = {
 export function AFInit() {
   if (Platform.OS == 'ios') {
     appsFlyer.setCurrentDeviceLanguage("EN");
+    appsFlyer.disableSKAD(true);
   }
+
+  appsFlyer.anonymizeUser(true);
+  appsFlyer.enableTCFDataCollection(true);
+
   appsFlyer.setAppInviteOneLinkID('oW4R');
   appsFlyer.initSdk(initOptions, null, null);
 }
@@ -35,7 +40,7 @@ export function AFLogEvent(name, values) {
 export function AFLogAdRevenue(){
   const adRevenueData = {
     monetizationNetwork: 'AF-AdNetwork',
-    mediationNetwork: MEDIATION_NETWORK.IRONSOURCE,
+    mediationNetwork: MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK,
     currencyIso4217Code: 'USD',
     revenue: 1.23, 
     additionalParameters : {
