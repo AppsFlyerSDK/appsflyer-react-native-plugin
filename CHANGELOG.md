@@ -1,19 +1,3 @@
-## 6.16.0
-Release date: *2025-02-23*
-
-### Android
-- Updated Android minimum SDK version to 21.
-- Updated Gradle to 8.2.0 in demo app for testing and added `namespace` in `android/build.gradle` ([#583](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/issues/583), [#561](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/issues/561)).
-- Updated Expo documentation with `customAndroidManifest` to overcome build failure with React Native 0.76 & Expo 52 ([#586](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/issues/586#issuecomment-2520223121)).
-- Fixed typo in UDL type definition ([#575](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/issues/575)).
-- Fixed typo in mediation network `[logAdRevenue]` for both Android and iOS.
-
-### iOS
-- Fixed `anonymizeUser` boolean bug related to New Architecture ([#584](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/issues/584)).
-- Fixed a conflict with the `SUCCESS` symbol declared in another third-party library (New Architecture & React Native 0.76) ([#596](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/pull/596)).
-- Updated import typo related to AFAdRevenueData ([#602](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/issues/602)).
-- Fixed other boolean values to pass by value instead of reference.
-
 ## 6.15.3
  Release date: *2025-01-8*
 
