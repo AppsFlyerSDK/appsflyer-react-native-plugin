@@ -51,6 +51,12 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
             boolean logInApps = config.getBoolean("logInApps");
             boolean sandbox = config.getBoolean("sandbox");
 
+            // Optional: Log that storeKitVersion is ignored on Android (for debugging purposes)
+            if (config.hasKey("storeKitVersion")) {
+                String storeKitVersion = config.getString("storeKitVersion");
+                Log.d(TAG, "storeKitVersion (" + storeKitVersion + ") is ignored on Android.");
+            }
+
             MappedValidationResultListener arsListener = this.arsListener;
             MappedValidationResultListener viapListener = this.viapListener;
 
