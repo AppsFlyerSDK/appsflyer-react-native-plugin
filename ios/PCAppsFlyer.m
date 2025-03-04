@@ -7,6 +7,7 @@ static NSString *const TAG = @"[AppsFlyer_PurchaseConnector] ";
 
 #if __has_include(<PurchaseConnector/PurchaseConnector.h>)
 #import <PurchaseConnector/PurchaseConnector.h>
+#import <react_native_appsflyer-Swift.h>
 
 @implementation PCAppsFlyer
 @synthesize bridge = _bridge;
@@ -72,30 +73,33 @@ RCT_EXPORT_METHOD(create:(NSDictionary *)config
 RCT_EXPORT_METHOD(logConsumableTransaction:(NSString *)transactionId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    NSLog(@"%@Logging consumable transaction with ID: %@", TAG, transactionId);
+    NSLog(@"Logging consumable transaction with ID: %@", transactionId);
     
     if (connector == nil) {
         reject(connectorNotConfiguredMessage, connectorNotConfiguredMessage, nil);
         return;
     }
 
-    // Call the Swift method via the TransactionFetcher class
-    /*
-    [TransactionFetcher fetchTransactionWithId:transactionId completion:^(AFSDKTransactionSK2 * _Nullable afTransaction) {
-        if (afTransaction) {
-            // Use the fetched transaction
-            [connector logConsumableTransaction:afTransaction];
-            NSLog(@"Logged transaction: %@", transactionId);
-            resolve(nil);
-        } else {
-            // Handle the case where the transaction was not found
-            NSError *error = [NSError errorWithDomain:@"PCAppsFlyer"
-                                                 code:404
-                                             userInfo:@{NSLocalizedDescriptionKey: @"Transaction not found"}];
-            reject(@"transaction_not_found", @"Transaction not found", error);
-        }
-    }];
-    */
+    if (@available(iOS 15.0, *)) {
+        AFTransactionFetcher *fetcher = [AFTransactionFetcher new];
+        [fetcher fetchTransactionWithTransactionId:transactionId completion:^(AFSDKTransactionSK2 * _Nullable afTransaction) {
+            if (afTransaction) {
+                [connector logConsumableTransaction:afTransaction];
+                NSLog(@"Logged transaction: %@", transactionId);
+                resolve(nil);
+            } else {
+                NSError *error = [NSError errorWithDomain:@"PCAppsFlyer"
+                                                     code:404
+                                                 userInfo:@{NSLocalizedDescriptionKey: @"Transaction not found"}];
+                reject(@"transaction_not_found", @"Transaction not found", error);
+            }
+        }];
+    } else {
+        NSError *error = [NSError errorWithDomain:@"PCAppsFlyer"
+                                             code:501
+                                         userInfo:@{NSLocalizedDescriptionKey: @"iOS version not supported"}];
+        reject(@"ios_version_not_supported", @"iOS version not supported", error);
+    }
 }
 
 RCT_EXPORT_METHOD(startObservingTransactions:(RCTPromiseResolveBlock)resolve
