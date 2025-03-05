@@ -20,6 +20,18 @@ Pod::Spec.new do |s|
   if defined?($AppsFlyerPurchaseConnector) && ($AppsFlyerPurchaseConnector == true)
     Pod::UI.puts "#{s.name}: Including PurchaseConnector."
     s.dependency 'PurchaseConnector', '6.15.2'
+    s.exclude_files = [
+      "ios/AFAdRevenueData.h",
+      "ios/AppsFlyerConsent.h",
+      "ios/AppsFlyerCrossPromotionHelper.h",
+      "ios/AppsFlyerDeepLink.h",
+      "ios/AppsFlyerDeepLinkObserver.h",
+      "ios/AppsFlyerDeepLinkResult.h",
+      "ios/AppsFlyerLinkGenerator.h",
+      "ios/AppsFlyerShareInviteHelper.h",
+      "ios/AppsFlyerLib.h"
+    ]
+
   end
 
   # AppsFlyerFramework
