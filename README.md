@@ -17,7 +17,7 @@
 - Tested with React-Native **v0.62.0** (older versions might be supported)
 
 ## <a id="breaking-changes"> ❗❗ Breaking changes when updating to v6.x.x❗❗
-- Starting from version `6.16.0`, Android minimum SDK version is 21. 
+- Starting from version `6.16.2`, Android minimum SDK version is 21. 
 <br/>Potential Build Issues: If you are using Android Gradle Plugin (AGP) below 8.2.0, you may encounter build errors on Android.
 <br/>To resolve this, refer to the [Android Build Error Due to AGP Version](./Docs/RN_Installation.md#android-build-error-due-to-agp-version).
 

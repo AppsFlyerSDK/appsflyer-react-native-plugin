@@ -672,25 +672,45 @@ function AFParseJSONException(_message, _data) {
 }
 
 // Consent object
-export const AppsFlyerConsent = (function () {
-    // Private constructor
-    function AppsFlyerConsent(isUserSubjectToGDPR, hasConsentForDataUsage, hasConsentForAdsPersonalization) {
+export class AppsFlyerConsent {
+    /**
+     * Creates an instance of AppsFlyerConsent.
+     * @param {boolean} [isUserSubjectToGDPR] - Indicates whether GDPR applies to the user.
+     * @param {boolean} [hasConsentForDataUsage] - Indicates whether the user has consented to data usage.
+     * @param {boolean} [hasConsentForAdsPersonalization] - Indicates whether the user has consented to ads personalization.
+     * @param {boolean} [hasConsentForAdStorage] - Indicates whether the user has consented to ad storage.
+     */
+    constructor(
+        isUserSubjectToGDPR,
+        hasConsentForDataUsage,
+        hasConsentForAdsPersonalization,
+        hasConsentForAdStorage
+    ) {
         this.isUserSubjectToGDPR = isUserSubjectToGDPR;
         this.hasConsentForDataUsage = hasConsentForDataUsage;
         this.hasConsentForAdsPersonalization = hasConsentForAdsPersonalization;
+        this.hasConsentForAdStorage = hasConsentForAdStorage;
     }
 
-    return {
-        // Factory method for GDPR user
-        forGDPRUser: function(hasConsentForDataUsage, hasConsentForAdsPersonalization) {
-            return new AppsFlyerConsent(true, hasConsentForDataUsage, hasConsentForAdsPersonalization);
-        },
+    /**
+     * @deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.
+     */
+    static forGDPRUser(hasConsentForDataUsage, hasConsentForAdsPersonalization) {
+        console.warn(
+            'AppsFlyerConsent.forGDPRUser is deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.'
+        );
+        return new AppsFlyerConsent(true, hasConsentForDataUsage, hasConsentForAdsPersonalization);
+    }
 
-        // Factory method for non GDPR user
-        forNonGDPRUser: function() {
-            return new AppsFlyerConsent(false, null, null);
-        }
-    };
-})();
+    /**
+     * @deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.
+     */
+    static forNonGDPRUser() {
+        console.warn(
+            'AppsFlyerConsent.forNonGDPRUser is deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.'
+        );
+        return new AppsFlyerConsent(false);
+    }
+}
 
 export default appsFlyer;

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import android.util.Log;
 
@@ -876,17 +877,41 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setConsentData(ReadableMap consentData) {
-        JSONObject JSONConsentData = RNUtil.readableMapToJson(consentData);
-        boolean isUserSubjectToGDPR = JSONConsentData.optBoolean("isUserSubjectToGDPR");
-        boolean hasConsentForDataUsage = JSONConsentData.optBoolean("hasConsentForDataUsage");
-        boolean hasConsentForAdsPersonalization = JSONConsentData.optBoolean("hasConsentForAdsPersonalization");
-        AppsFlyerConsent consentObject;
-        if (isUserSubjectToGDPR) {
-            consentObject = AppsFlyerConsent.forGDPRUser(hasConsentForDataUsage, hasConsentForAdsPersonalization);
-        } else {
-            consentObject = AppsFlyerConsent.forNonGDPRUser();
+    public void setConsentData(@Nullable ReadableMap consentData) {
+        if (consentData == null) {
+            Log.e("AppsFlyer", "consentData is null");
+            return;
         }
+
+        JSONObject JSONConsentData = RNUtil.readableMapToJson(consentData);
+        if (JSONConsentData == null) {
+            Log.e("AppsFlyer", "Failed to convert consentData to JSON");
+            return;
+        }
+
+        Boolean isUserSubjectToGDPR = JSONConsentData.has("isUserSubjectToGDPR") && !JSONConsentData.isNull("isUserSubjectToGDPR")
+                ? JSONConsentData.optBoolean("isUserSubjectToGDPR")
+                : null;
+
+        Boolean hasConsentForDataUsage = JSONConsentData.has("hasConsentForDataUsage") && !JSONConsentData.isNull("hasConsentForDataUsage")
+                ? JSONConsentData.optBoolean("hasConsentForDataUsage")
+                : null;
+
+        Boolean hasConsentForAdsPersonalization = JSONConsentData.has("hasConsentForAdsPersonalization") && !JSONConsentData.isNull("hasConsentForAdsPersonalization")
+                ? JSONConsentData.optBoolean("hasConsentForAdsPersonalization")
+                : null;
+
+        Boolean hasConsentForAdStorage = JSONConsentData.has("hasConsentForAdStorage") && !JSONConsentData.isNull("hasConsentForAdStorage")
+                ? JSONConsentData.optBoolean("hasConsentForAdStorage")
+                : null;
+
+        AppsFlyerConsent consentObject = new AppsFlyerConsent(
+                isUserSubjectToGDPR,
+                hasConsentForDataUsage,
+                hasConsentForAdsPersonalization,
+                hasConsentForAdStorage
+        );
+
         AppsFlyerLib.getInstance().setConsentData(consentObject);
     }
 
