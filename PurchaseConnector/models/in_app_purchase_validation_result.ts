@@ -1,15 +1,15 @@
 import { ProductPurchase } from "./product_purchase";
-import { ValidationFailureData } from "./validation_failure_data";
+import { ValidationFailureDataJson } from "./validation_failure_data";
 
 export default class InAppPurchaseValidationResult {
     success: boolean;
     productPurchase?: ProductPurchase;
-    failureData?: ValidationFailureData;
+    failureData?: ValidationFailureDataJson;
   
     constructor(
       success: boolean,
       productPurchase?: ProductPurchase,
-      failureData?: ValidationFailureData
+      failureData?: ValidationFailureDataJson
     ) {
       this.success = success;
       this.productPurchase = productPurchase;

@@ -1,15 +1,15 @@
 import { SubscriptionPurchase } from "./subscription_purchase";
-import { ValidationFailureData } from "./validation_failure_data";
+import { ValidationFailureDataJson } from "./validation_failure_data";
 
 export default class SubscriptionValidationResult {
   success: boolean;
   subscriptionPurchase?: SubscriptionPurchase;
-  failureData?: ValidationFailureData;
+  failureData?: ValidationFailureDataJson;
 
   constructor(
     success: boolean,
     subscriptionPurchase?: SubscriptionPurchase,
-    failureData?: ValidationFailureData
+    failureData?: ValidationFailureDataJson
   ) {
     this.success = success;
     this.subscriptionPurchase = subscriptionPurchase;

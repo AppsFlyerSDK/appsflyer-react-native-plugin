@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "esnext", // Specifies the ECMAScript target version
+        "module": "commonjs", // Specifies the module code generation method
+        "jsx": "react-native", // Supports JSX in React Native
+        "strict": true, // Enables strict type-checking options
+        "esModuleInterop": true, // Enables compatibility between CommonJS and ES Modules
+        "skipLibCheck": true, // Skips type checking of declaration files
+        "forceConsistentCasingInFileNames": true, // Ensures consistent casing in file names
+        "noEmit": true // Prevents the compiler from emitting output files
+    },
+    "include": ["src/**/*", "__tests__/**/*"], // Includes application source code and tests
+    "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js"] // Excludes unnecessary files
+}
