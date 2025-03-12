@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7E7F839A2D75E11A009693C2 /* AppsFlyerAttribution.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F83912D75E11A009693C2 /* AppsFlyerAttribution.m */; };
+		7E7F839C2D75E1F5009693C2 /* AFTransactionFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F839B2D75E1F5009693C2 /* AFTransactionFetcher.swift */; };
+		7E7F83A02D75E943009693C2 /* PCAppsFlyer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F839F2D75E943009693C2 /* PCAppsFlyer.m */; };
 		B3E7B58A1CC2AC0600A0062D /* RNAppsFlyer.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNAppsFlyer.m */; };
 /* End PBXBuildFile section */
 
@@ -24,6 +27,18 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRNAppsFlyer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNAppsFlyer.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7E7F838F2D75E11A009693C2 /* AFAdRevenueData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AFAdRevenueData.h; sourceTree = "<group>"; };
+		7E7F83902D75E11A009693C2 /* AppsFlyerAttribution.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerAttribution.h; sourceTree = "<group>"; };
+		7E7F83912D75E11A009693C2 /* AppsFlyerAttribution.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppsFlyerAttribution.m; sourceTree = "<group>"; };
+		7E7F83922D75E11A009693C2 /* AppsFlyerConsent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerConsent.h; sourceTree = "<group>"; };
+		7E7F83932D75E11A009693C2 /* AppsFlyerDeepLink.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerDeepLink.h; sourceTree = "<group>"; };
+		7E7F83942D75E11A009693C2 /* AppsFlyerDeepLinkObserver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerDeepLinkObserver.h; sourceTree = "<group>"; };
+		7E7F83952D75E11A009693C2 /* AppsFlyerDeepLinkResult.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerDeepLinkResult.h; sourceTree = "<group>"; };
+		7E7F83962D75E11A009693C2 /* AppsFlyerLib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppsFlyerLib.h; sourceTree = "<group>"; };
+		7E7F83972D75E11A009693C2 /* PCAppsFlyer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PCAppsFlyer.h; sourceTree = "<group>"; };
+		7E7F839B2D75E1F5009693C2 /* AFTransactionFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AFTransactionFetcher.swift; sourceTree = "<group>"; };
+		7E7F839D2D75E257009693C2 /* RNAppsFlyer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNAppsFlyer-Bridging-Header.h"; sourceTree = "<group>"; };
+		7E7F839F2D75E943009693C2 /* PCAppsFlyer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PCAppsFlyer.m; sourceTree = "<group>"; };
 		943704C6209F6734005B3A22 /* AppsFlyerShareInviteHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppsFlyerShareInviteHelper.h; sourceTree = "<group>"; };
 		943704C7209F6734005B3A22 /* AppsFlyerLinkGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppsFlyerLinkGenerator.h; sourceTree = "<group>"; };
 		943704C9209F6735005B3A22 /* AppsFlyerCrossPromotionHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppsFlyerCrossPromotionHelper.h; sourceTree = "<group>"; };
@@ -56,8 +71,20 @@
 				943704C9209F6735005B3A22 /* AppsFlyerCrossPromotionHelper.h */,
 				943704C7209F6734005B3A22 /* AppsFlyerLinkGenerator.h */,
 				943704C6209F6734005B3A22 /* AppsFlyerShareInviteHelper.h */,
+				7E7F838F2D75E11A009693C2 /* AFAdRevenueData.h */,
+				7E7F83922D75E11A009693C2 /* AppsFlyerConsent.h */,
+				7E7F83932D75E11A009693C2 /* AppsFlyerDeepLink.h */,
+				7E7F83942D75E11A009693C2 /* AppsFlyerDeepLinkObserver.h */,
+				7E7F83952D75E11A009693C2 /* AppsFlyerDeepLinkResult.h */,
+				7E7F83962D75E11A009693C2 /* AppsFlyerLib.h */,
+				7E7F83902D75E11A009693C2 /* AppsFlyerAttribution.h */,
+				7E7F83912D75E11A009693C2 /* AppsFlyerAttribution.m */,
+				7E7F83972D75E11A009693C2 /* PCAppsFlyer.h */,
+				7E7F839F2D75E943009693C2 /* PCAppsFlyer.m */,
 				B3E7B5881CC2AC0600A0062D /* RNAppsFlyer.h */,
 				B3E7B5891CC2AC0600A0062D /* RNAppsFlyer.m */,
+				7E7F839D2D75E257009693C2 /* RNAppsFlyer-Bridging-Header.h */,
+				7E7F839B2D75E1F5009693C2 /* AFTransactionFetcher.swift */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -121,6 +148,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				B3E7B58A1CC2AC0600A0062D /* RNAppsFlyer.m in Sources */,
+				7E7F839A2D75E11A009693C2 /* AppsFlyerAttribution.m in Sources */,
+				7E7F839C2D75E1F5009693C2 /* AFTransactionFetcher.swift in Sources */,
+				7E7F83A02D75E943009693C2 /* PCAppsFlyer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -204,7 +234,9 @@
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
+				DEFINES_MODULE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -216,7 +248,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RNAppsFlyer;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "RNAppsFlyer-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/RNAppsFlyer-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -225,7 +257,9 @@
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
+				DEFINES_MODULE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -237,7 +271,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = RNAppsFlyer;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "RNAppsFlyer-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/RNAppsFlyer-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

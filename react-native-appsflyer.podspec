@@ -10,15 +10,28 @@ Pod::Spec.new do |s|
   s.homepage         = pkg["homepage"]
   s.author           = pkg["author"]
   s.source           = { :git => pkg["repository"]["url"] }
-  s.source_files     = 'ios/**/*.{h,m}'
+  s.source_files     = 'ios/**/*.{h,m,swift}'
   s.platform         = :ios, "12.0"
   s.static_framework = true
+  s.swift_version    = '5.0'
   s.dependency 'React'
 
   # AppsFlyerPurchaseConnector
   if defined?($AppsFlyerPurchaseConnector) && ($AppsFlyerPurchaseConnector == true)
     Pod::UI.puts "#{s.name}: Including PurchaseConnector."
     s.dependency 'PurchaseConnector', '6.15.2'
+    s.exclude_files = [
+      "ios/AFAdRevenueData.h",
+      "ios/AppsFlyerConsent.h",
+      "ios/AppsFlyerCrossPromotionHelper.h",
+      "ios/AppsFlyerDeepLink.h",
+      "ios/AppsFlyerDeepLinkObserver.h",
+      "ios/AppsFlyerDeepLinkResult.h",
+      "ios/AppsFlyerLinkGenerator.h",
+      "ios/AppsFlyerShareInviteHelper.h",
+      "ios/AppsFlyerLib.h"
+    ]
+
   end
 
   # AppsFlyerFramework

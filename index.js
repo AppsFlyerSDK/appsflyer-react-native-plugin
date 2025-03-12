@@ -15,6 +15,11 @@ const AppsFlyerPurchaseConnector = {};
 const pcEventsMap = {};
 const purchaseConnectorEventEmitter = new NativeEventEmitter(PCAppsFlyer);
 
+export const StoreKitVersion = {
+  SK1: "SK1",
+  SK2: "SK2",
+};
+
 function startObservingTransactions() {
   PCAppsFlyer.startObservingTransactions();
 }
@@ -197,12 +202,19 @@ AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo = (
   };
 };
 
+function logConsumableTransaction(transactionId){
+  PCAppsFlyer.logConsumableTransaction(transactionId);
+};
+
+AppsFlyerPurchaseConnector.logConsumableTransaction = logConsumableTransaction;
+
 const AppsFlyerPurchaseConnectorConfig = {
-  setConfig: ({ logSubscriptions, logInApps, sandbox }) => {
+  setConfig: ({ logSubscriptions, logInApps, sandbox, storeKitVersion }) => {
     return {
       logSubscriptions,
       logInApps,
       sandbox,
+      storeKitVersion: storeKitVersion || StoreKitVersion.SK1, // Default to SK1 if not provided
     };
   },
 };

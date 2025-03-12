@@ -166,10 +166,16 @@ declare module "react-native-appsflyer" {
   /**
    * PurchaseConnector
    */
+  export const StoreKitVersion = {
+    SK1: "SK1",
+    SK2: "SK2",
+  };
+
   export interface PurchaseConnectorConfig {
     logSubscriptions: boolean;
     logInApps: boolean;
     sandbox: boolean;
+    storeKitVersion?: keyof typeof StoreKitVersion; // Optional property
   }
 
   export const AppsFlyerPurchaseConnectorConfig: {
@@ -180,6 +186,7 @@ declare module "react-native-appsflyer" {
     create(config: PurchaseConnectorConfig): void;
     startObservingTransactions(): void;
     stopObservingTransactions(): void;
+    logConsumableTransaction(transactionId: string): void;
     onSubscriptionValidationResultSuccess(
       callback: (data:OnResponse<SubscriptionValidationResult>) => any
     ): () => void;

@@ -7,6 +7,7 @@ static NSString *const TAG = @"[AppsFlyer_PurchaseConnector] ";
 
 #if __has_include(<PurchaseConnector/PurchaseConnector.h>)
 #import <PurchaseConnector/PurchaseConnector.h>
+#import <react_native_appsflyer-Swift.h>
 
 @implementation PCAppsFlyer
 @synthesize bridge = _bridge;
@@ -14,6 +15,7 @@ static NSString *const TAG = @"[AppsFlyer_PurchaseConnector] ";
 static NSString *const logSubscriptionsKey = @"logSubscriptions";
 static NSString *const logInAppsKey = @"logInApps";
 static NSString *const sandboxKey = @"sandbox";
+static NSString *const storeKitKey = @"storeKitVersion";
 static NSString *const connectorAlreadyConfiguredMessage = @"Connector already configured";
 static NSString *const connectorNotConfiguredMessage = @"Connector not configured, did you call `create` first?";
 
@@ -41,8 +43,18 @@ RCT_EXPORT_METHOD(create:(NSDictionary *)config
     BOOL logSubscriptions = [config[logSubscriptionsKey] boolValue];
     BOOL logInApps = [config[logInAppsKey] boolValue];
     BOOL sandbox = [config[sandboxKey] boolValue];
-  
+    NSString *storeKitVersion = config[storeKitKey]; 
+
     [connector setIsSandbox:sandbox];
+
+    // Set the StoreKitVersion (default to SK1 if not provided or invalid)
+    if ([storeKitVersion isEqualToString:@"SK2"]) {
+        [connector setStoreKitVersion:AFSDKStoreKitVersionSK2];
+        NSLog(@"%@Configure PurchaseConnector with StoreKit2 Version", TAG);
+    } else {
+        [connector setStoreKitVersion:AFSDKStoreKitVersionSK1];
+        NSLog(@"%@Configure PurchaseConnector with StoreKit1 Version", TAG);
+    }
     
     if (logSubscriptions && logInApps) {
     [connector setAutoLogPurchaseRevenue:AFSDKAutoLogPurchaseRevenueOptionsAutoRenewableSubscriptions | AFSDKAutoLogPurchaseRevenueOptionsInAppPurchases];
@@ -56,6 +68,38 @@ RCT_EXPORT_METHOD(create:(NSDictionary *)config
 
     NSLog(@"%@Purchase Connector is configured successfully.", TAG);
     resolve(nil);
+}
+
+RCT_EXPORT_METHOD(logConsumableTransaction:(NSString *)transactionId
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    NSLog(@"Logging consumable transaction with ID: %@", transactionId);
+    
+    if (connector == nil) {
+        reject(connectorNotConfiguredMessage, connectorNotConfiguredMessage, nil);
+        return;
+    }
+
+    if (@available(iOS 15.0, *)) {
+        AFTransactionFetcher *fetcher = [AFTransactionFetcher new];
+        [fetcher fetchTransactionWithTransactionId:transactionId completion:^(AFSDKTransactionSK2 * _Nullable afTransaction) {
+            if (afTransaction) {
+                [connector logConsumableTransaction:afTransaction];
+                NSLog(@"Logged transaction: %@", transactionId);
+                resolve(nil);
+            } else {
+                NSError *error = [NSError errorWithDomain:@"PCAppsFlyer"
+                                                     code:404
+                                                 userInfo:@{NSLocalizedDescriptionKey: @"Transaction not found"}];
+                reject(@"transaction_not_found", @"Transaction not found", error);
+            }
+        }];
+    } else {
+        NSError *error = [NSError errorWithDomain:@"PCAppsFlyer"
+                                             code:501
+                                         userInfo:@{NSLocalizedDescriptionKey: @"iOS version not supported"}];
+        reject(@"ios_version_not_supported", @"iOS version not supported", error);
+    }
 }
 
 RCT_EXPORT_METHOD(startObservingTransactions:(RCTPromiseResolveBlock)resolve
