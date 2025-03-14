@@ -60,7 +60,7 @@ appsFlyer.logEvent = logEvent;
 
 export const MEDIATION_NETWORK = Object.freeze({
 	IRONSOURCE : "ironsource",
-	APPLOVIN_MAX : "applovinmax",
+	APPLOVIN_MAX : "applovin_max",
 	GOOGLE_ADMOB : "googleadmob",
 	FYBER : "fyber",
 	APPODEAL : "appodeal",
