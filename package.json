@@ -1,6 +1,6 @@
 {
   "name": "react-native-appsflyer",
-  "version": "6.15.3",
+  "version": "6.16.2-rc1",
   "description": "React Native Appsflyer plugin",
   "main": "index.js",
   "types": "index.d.ts",
@@ -30,7 +30,8 @@
     "url": "https://github.com/AppsFlyerSDK/react-native-appsflyer/issues"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.12.7",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.3",
     "babel-jest": "^26.6.3",
     "jest": "26.6.3",
     "react": "16.11.0",
@@ -40,20 +41,5 @@
   },
   "resolutions": {
     "react-native/@jest/create-cache-key-function": "^27.0.2"
-  },
-  "jest": {
-    "modulePathIgnorePatterns": [
-      "<rootDir>/demos/"
-    ],
-    "testMatch": [
-      "<rootDir>/__tests__/index.test.js?(x)"
-    ],
-    "preset": "react-native",
-    "transform": {
-      "^.+\\.js$": "<rootDir>/node_modules/react-native/jest/preprocessor.js"
-    },
-    "setupFiles": [
-      "<rootDir>/__tests__/setup.js"
-    ]
   }
 }

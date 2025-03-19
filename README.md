@@ -17,6 +17,7 @@
 - Tested with React-Native **v0.62.0** (older versions might be supported)
 
 ## <a id="breaking-changes"> ❗❗ Breaking changes when updating to v6.x.x❗❗
+- From version `6.16.2`, `AppsFlyerConsent.forGDPRUser` and `AppsFlyerConsent.forNonGDPRUser` have been **deprecated**. Use the new `AppsFlyerConsent` constructor instead. See [Deprecation Notice](/Docs/RN_CMP.md#deprecation-notice).
 
 - From version `6.15.1`, upgraded to targetSDKVersion 34, Java 17, and Gradle 8.7 in [AppsFlyer Android SDK v6.15.1](https://support.appsflyer.com/hc/en-us/articles/115001256006-AppsFlyer-Android-SDK-release-notes).
 
