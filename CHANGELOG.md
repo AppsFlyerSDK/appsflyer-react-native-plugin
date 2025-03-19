@@ -1,3 +1,9 @@
+## 6.16.2
+ Release date: *2025-03-19*
+
+- SDK > React Native plugin > No enum constant com.appsflyer.MediationNetwork.xxx" error on Android with some mediation networks' names have _ (underscore) character
+- React Native >> Update Plugin to v6.16.2
+
 ## 6.15.3
  Release date: *2025-01-8*
 
