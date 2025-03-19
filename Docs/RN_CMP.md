@@ -59,81 +59,123 @@ A CMP compatible with TCF v2.2 collects DMA consent data and stores it in NSUser
     }
  },[])
 ```
-## Manually collect consent data
-If your app does not use a CMP compatible with TCF v2.2, use the SDK API detailed below to provide the consent data directly to the SDK.
 
-### When GDPR applies to the user
-If GDPR applies to the user, perform the following:
+### Manually Collecting Consent Data
 
-1. Given that GDPR is applicable to the user, determine whether the consent data is already stored for this session.
-    1. If there is no consent data stored, show the consent dialog to capture the user consent decision.
-    2. If there is consent data stored continue to the next step.
-2. To transfer the consent data to the SDK create an AppsFlyerConsent object using `forGDPRUser` method that accepts the following parameters:<br>
-    `hasConsentForDataUsage: boolean` - Indicates whether the user has consented to use their data for advertising purposes.<br>
-    `hasConsentForAdsPersonalization: boolean` - Indicates whether the user has consented to use their data for personalized advertising.
-3. Call `appsFlyer.setConsentData(consentData)` with the AppsFlyerConsent object.
-4. Call `appsFlyer.initSdk()`.
+If your app does not use a TCF v2.2-compatible CMP, you must manually provide the consent data using the SDK API.
+
+How to Set Consent Data: </br>
+1.	Determine GDPR Applicability:
+    *	If GDPR applies, check whether consent data is already stored.
+    *	If not stored, show a consent dialog to obtain user consent.
+2.	Create an AppsFlyerConsent object with the relevant parameters.
+3.	Pass the consent data to the SDK using appsFlyer.setConsentData(consentData).
+4.	Initialize the SDK with appsFlyer.initSdk().
+
+#### Setting Consent Data for Users
+
+<b>When GDPR Applies</b>
+
+If GDPR applies to the user, create an AppsFlyerConsent object with the user’s preferences.
 ```javascript
-import appsFlyer, {AppsFlyerConsent} from 'react-native-appsflyer';
+import appsFlyer, { AppsFlyerConsent } from 'react-native-appsflyer';
 
 useEffect(() => {
     const option = {
-    isDebug: true,
-    devKey: 'UxXxXxXxXd',
-    onInstallConversionDataListener: true,
-    onDeepLinkListener: true,
-    timeToWaitForATTUserAuthorization: 10,
+        isDebug: true,
+        devKey: 'UxXxXxXxXd',
+        onInstallConversionDataListener: true,
+        onDeepLinkListener: true,
+        timeToWaitForATTUserAuthorization: 10,
     };
 
-    // user consent data
-    let consentData = AppsFlyerConsent.forGDPRUser(true, false);
+    // User has given consent
+    const consentData = new AppsFlyerConsent(true, true, true, true);
 
+    // Send consent data to the SDK
     appsFlyer.setConsentData(consentData);
 
-    //start appsflyer
+    // Start AppsFlyer SDK
     appsFlyer.initSdk(
-      option,
-      res => {
-        console.log(res);
-      },
-      err => {
-        console.log(err);
-      },
+        option,
+        res => console.log(res),
+        err => console.log(err)
     );
- },[])
+}, []);
 ```
-### When GDPR does not apply to the user
 
-If GDPR doesn’t apply to the user perform the following:
-1. Create an AppsFlyerConsent object using `forNonGDPRUser` method that doesn't accepts any parameters
-2. Call `appsFlyer.setConsentData(consentData)` with the AppsFlyerConsent object.
-3. Call `appsFlyer.initSdk()`.
+<b>When GDPR Does Not Apply</b>
+
+If GDPR does not apply to the user, simply mark it as such in the AppsFlyerConsent object.
 ```javascript
-import appsFlyer, {AppsFlyerConsent} from 'react-native-appsflyer';
+import appsFlyer, { AppsFlyerConsent } from 'react-native-appsflyer';
 
 useEffect(() => {
     const option = {
-    isDebug: true,
-    devKey: 'UxXxXxXxXd',
-    onInstallConversionDataListener: true,
-    onDeepLinkListener: true,
-    timeToWaitForATTUserAuthorization: 10,
+        isDebug: true,
+        devKey: 'UxXxXxXxXd',
+        onInstallConversionDataListener: true,
+        onDeepLinkListener: true,
+        timeToWaitForATTUserAuthorization: 10,
     };
 
     // GDPR does not apply to the user
-   let consentData = AppsFlyerConsent.forNonGDPRUser();
+    const consentData = new AppsFlyerConsent(false);
 
-   appsFlyer.setConsentData(consentData);
+    // Send consent data to the SDK
+    appsFlyer.setConsentData(consentData);
 
-    //start appsflyer
+    // Start AppsFlyer SDK
     appsFlyer.initSdk(
-      option,
-      res => {
-        console.log(res);
-      },
-      err => {
-        console.log(err);
-      },
+        option,
+        res => console.log(res),
+        err => console.log(err)
     );
- },[])
+}, []);
 ```
+
+### Consent Object API
+
+```javascript
+//AppsFlyerConsent Constructor:
+
+new AppsFlyerConsent(
+    isUserSubjectToGDPR,          // Boolean (optional) - Whether GDPR applies to the user
+    hasConsentForDataUsage,       // Boolean (optional) - Consent for data usage
+    hasConsentForAdsPersonalization, // Boolean (optional) - Consent for ads personalization
+    hasConsentForAdStorage        // Boolean (optional) - Consent for ad storage
+);
+
+//Example Cases:
+
+// Full consent for GDPR user
+const consent1 = new AppsFlyerConsent(true, true, true, true);
+
+// No consent for GDPR user
+const consent2 = new AppsFlyerConsent(true, false, false, false);
+
+// Non-GDPR user
+const consent3 = new AppsFlyerConsent(false);
+
+// AppsFlyerConsent object support the following cases if they are needed.
+const consent4 = new AppsFlyerConsent(true);
+const consent5 = new AppsFlyerConsent(true, true);
+const consent6 = new AppsFlyerConsent(null, true, true, true);
+const consent7 = new AppsFlyerConsent(true, null, true, true);
+const consent8 = new AppsFlyerConsent(true, true, null, true);
+const consent9 = new AppsFlyerConsent(true, true, true, null);
+const consent10 = new AppsFlyerConsent(true, true, false, true);
+const consent11 = new AppsFlyerConsent(false, true, false, false);
+const consent12 = new AppsFlyerConsent(null, null, null, null);
+const consent13 = new AppsFlyerConsent();
+```
+
+### Deprecation Notice
+
+The following methods have been deprecated since SDK version 6.16.2 and should no longer be used:
+```javascript
+// Deprecated since 6.16.2
+AppsFlyerConsent.forGDPRUser(true, false);
+AppsFlyerConsent.forNonGDPRUser();
+```
+Instead, use the new AppsFlyerConsent constructor.
