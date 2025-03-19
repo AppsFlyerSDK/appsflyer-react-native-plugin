@@ -137,45 +137,6 @@ So `getPackages()` should look like:
     }
 ```
 
-## Android Build Error Due to AGP Version
-
-If you encounter the following error while building your project:
-```
-Execution failed for task ':app:mergeExtDexDebug'.
-> Could not resolve all files for configuration ':app:debugRuntimeClasspath'.
-   > Failed to transform af-android-sdk-6.16.0.aar (com.appsflyer:af-android-sdk:6.16.0) to match attributes {artifactType=android-dex, asm-transformed-variant=NONE, dexing-enable-desugaring=true, dexing-is-debuggable=true, dexing-min-sdk=21, org.gradle.category=library, org.gradle.dependency.bundling=external, org.gradle.libraryelements=aar, org.gradle.status=release, org.gradle.usage=java-runtime}.
-      > Execution failed for DexingWithClasspathTransform: /Users/amit.levy/.gradle/caches/transforms-3/fb46dcab411d99e4e97f01029413cab1/transformed/jetified-af-android-sdk-6.16.0-runtime.jar.
-         > Error while dexing.
-```
-
-This error occurs if you are using Android Gradle Plugin (AGP) below 8.2.0 due to a known bug in R8.
-Google has already resolved this issue
-[see Google Issue Tracker](https://issuetracker.google.com/issues/290412574?pli=1).
-
-
-### Solutions
-
-To fix this issue, you have two options:
-1. Upgrade AGP to 8.2.0+ (Recommended):
-  <br/>Updating AGP to 8.2.0 or later ensures compatibility with the latest R8 version.<br/>Sync and rebuild your project
-
-2. Manually Override the R8 Version
-<br/>If upgrading AGP is not an option, you can manually set an external newer R8 version to override the bundled one.
-<br/> Open android/build.gradle and add this inside the buildscript {} block then sync and rebuild your project:
-```
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            url = uri("https://storage.googleapis.com/r8-releases/raw")
-        }
-    }
-    dependencies {
-        classpath("com.android.tools:r8:8.2.26")
-    }
-}
-```
-
 ## Add strict-mode for App-kids
 Starting from version **6.1.10** iOS SDK comes in two variants: **Strict** mode and **Regular** mode. Please read more [here](https://dev.appsflyer.com/hc/docs/install-ios-sdk#strict-mode-sdk)
 

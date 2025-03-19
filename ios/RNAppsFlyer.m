@@ -640,20 +640,36 @@ RCT_EXPORT_METHOD(enableTCFDataCollection:(BOOL)enabled) {
     [[AppsFlyerLib shared] enableTCFDataCollection:enabled];
 }
 
-RCT_EXPORT_METHOD(setConsentData:(NSDictionary *)consentDictionary) {
-    if (![consentDictionary isKindOfClass:[NSNull null]]) {
-        BOOL isUserSubjectToGDPR = [consentDictionary[@"isUserSubjectToGDPR"] boolValue];
-        
-        AppsFlyerConsent *consentData;
-        if (isUserSubjectToGDPR){
-            BOOL hasConsentForDataUsage = [consentDictionary[@"hasConsentForDataUsage"] boolValue];
-            BOOL hasConsentForAdsPersonalization = [consentDictionary[@"hasConsentForAdsPersonalization"] boolValue];
-            consentData = [[AppsFlyerConsent alloc] initForGDPRUserWithHasConsentForDataUsage:hasConsentForDataUsage hasConsentForAdsPersonalization:hasConsentForAdsPersonalization];
-        } else {
-            consentData = [[AppsFlyerConsent alloc] initNonGDPRUser];
+RCT_EXPORT_METHOD(setConsentData:(nullable NSDictionary *)consentDictionary) {
+    if (consentDictionary && [consentDictionary isKindOfClass:[NSDictionary class]]) {
+        NSNumber *isUserSubjectToGDPR = consentDictionary[@"isUserSubjectToGDPR"];
+        if ([isUserSubjectToGDPR isKindOfClass:[NSNull class]]) {
+            isUserSubjectToGDPR = nil;
         }
-         
+        
+        NSNumber *hasConsentForDataUsage = consentDictionary[@"hasConsentForDataUsage"];
+        if ([hasConsentForDataUsage isKindOfClass:[NSNull class]]) {
+            hasConsentForDataUsage = nil;
+        }
+        
+        NSNumber *hasConsentForAdsPersonalization = consentDictionary[@"hasConsentForAdsPersonalization"];
+        if ([hasConsentForAdsPersonalization isKindOfClass:[NSNull class]]) {
+            hasConsentForAdsPersonalization = nil;
+        }
+        
+        NSNumber *hasConsentForAdStorage = consentDictionary[@"hasConsentForAdStorage"];
+        if ([hasConsentForAdStorage isKindOfClass:[NSNull class]]) {
+            hasConsentForAdStorage = nil;
+        }
+        
+        AppsFlyerConsent *consentData = [[AppsFlyerConsent alloc] initWithIsUserSubjectToGDPR:isUserSubjectToGDPR
+                                                                       hasConsentForDataUsage:hasConsentForDataUsage
+                                                             hasConsentForAdsPersonalization:hasConsentForAdsPersonalization
+                                                                       hasConsentForAdStorage:hasConsentForAdStorage];
+        
         [[AppsFlyerLib shared] setConsentData:consentData];
+    } else {
+        NSLog(@"Invalid consentDictionary provided: %@", consentDictionary);
     }
 }
 

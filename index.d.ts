@@ -114,11 +114,44 @@ declare module "react-native-appsflyer" {
         brandDomain?: string;
     }
 
-    export const AppsFlyerConsent: {
-        forGDPRUser: (hasConsentForDataUsage: boolean, hasConsentForAdsPersonalization: boolean) => AppsFlyerConsentType;
-        forNonGDPRUser: () => AppsFlyerConsentType;
+    export class AppsFlyerConsent {
+        isUserSubjectToGDPR?: boolean;
+        hasConsentForDataUsage?: boolean;
+        hasConsentForAdsPersonalization?: boolean;
+        hasConsentForAdStorage?: boolean;
+
+        /**
+         * Creates an instance of AppsFlyerConsent.
+         * @param isUserSubjectToGDPR - Indicates whether GDPR applies to the user.
+         * @param hasConsentForDataUsage - Indicates whether the user has consented to data usage.
+         * @param hasConsentForAdsPersonalization - Indicates whether the user has consented to ads personalization.
+         * @param hasConsentForAdStorage - Indicates whether the user has consented to ad storage.
+         */
+        constructor(
+            isUserSubjectToGDPR?: boolean,
+            hasConsentForDataUsage?: boolean,
+            hasConsentForAdsPersonalization?: boolean,
+            hasConsentForAdStorage?: boolean
+        ) {}
+
+        /**
+         * @deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.
+         */
+        static forGDPRUser(hasConsentForDataUsage: boolean, hasConsentForAdsPersonalization: boolean): AppsFlyerConsent {
+            return new AppsFlyerConsent(true, hasConsentForDataUsage, hasConsentForAdsPersonalization);
+        }
+
+        /**
+         * @deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.
+         */
+        static forNonGDPRUser(): AppsFlyerConsent {
+            return new AppsFlyerConsent(false);
+        }
     }
 
+    /**
+     * @deprecated since version 6.16.2. Use the AppsFlyerConsent class instead for a more integrated approach to consent management.
+     */
     export interface AppsFlyerConsentType {
         isUserSubjectToGDPR: boolean;
         hasConsentForDataUsage?: boolean;
@@ -190,7 +223,7 @@ declare module "react-native-appsflyer" {
         appendParametersToDeepLinkingURL(contains: string, parameters: object): void
         startSdk(): void
         enableTCFDataCollection(enabled: boolean): void
-        setConsentData(consentData: AppsFlyerConsentType): void
+        setConsentData(consentData: AppsFlyerConsent): void;
         logAdRevenue(adRevenueData: AFAdRevenueData) : void
         /**
          * For iOS Only
