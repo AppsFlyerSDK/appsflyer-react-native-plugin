@@ -12,6 +12,8 @@
 
 @interface PCAppsFlyer: RCTEventEmitter <RCTBridgeModule, AppsFlyerPurchaseRevenueDelegate, AppsFlyerPurchaseRevenueDataSource>
 // This is the PCAppsFlyer if the AppsFlyerPurchaseConnector is set to true in the podfile
+@property (nonatomic, strong) NSDictionary *purchaseRevenueParams;
+@property (nonatomic, strong) NSDictionary *purchaseRevenueStoreKit2Params;
 @end
 
 #else

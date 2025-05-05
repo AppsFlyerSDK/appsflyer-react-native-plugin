@@ -8,6 +8,8 @@ import com.appsflyer.internal.models.InAppPurchaseValidationResult
 import com.appsflyer.internal.models.SubscriptionPurchase
 import com.appsflyer.internal.models.SubscriptionValidationResult
 import com.appsflyer.internal.models.ValidationFailureData
+import com.appsflyer.internal.models.SubscriptionPurchaseEvent
+import com.appsflyer.internal.models.InAppPurchaseEvent
 
 /**
  * A connector class that wraps the Android purchase connector client.
@@ -33,8 +35,11 @@ class ConnectorWrapper(
 ) :
     PurchaseClient {
     private val connector =
-        PurchaseClient.Builder(context, Store.GOOGLE).setSandbox(sandbox).logSubscriptions(logSubs)
-            .autoLogInApps(logInApps).setSubscriptionValidationResultListener(object :
+        PurchaseClient.Builder(context, Store.GOOGLE)
+            .setSandbox(sandbox)
+            .logSubscriptions(logSubs)
+            .autoLogInApps(logInApps)
+            .setSubscriptionValidationResultListener(object :
                 PurchaseClient.SubscriptionPurchaseValidationResultListener {
                 override fun onResponse(result: Map<String, SubscriptionValidationResult>?) {
                     subsListener.onResponse(result?.entries?.associate { (k, v) -> k to v.toJsonMap() })
@@ -43,7 +48,8 @@ class ConnectorWrapper(
                 override fun onFailure(result: String, error: Throwable?) {
                     subsListener.onFailure(result, error)
                 }
-            }).setInAppValidationResultListener(object : PurchaseClient.InAppPurchaseValidationResultListener {
+            })
+            .setInAppValidationResultListener(object : PurchaseClient.InAppPurchaseValidationResultListener {
                 override fun onResponse(result: Map<String, InAppPurchaseValidationResult>?) {
                     inAppListener.onResponse(result?.entries?.associate { (k, v) -> k to v.toJsonMap() })
                 }
@@ -63,6 +69,33 @@ class ConnectorWrapper(
      */
     override fun stopObservingTransactions() = connector.stopObservingTransactions()
 
+    /**
+     * Sets the data source for subscription purchase events.
+     * This allows adding additional parameters to subscription purchase events.
+     *
+     * @param dataSource A function that returns additional parameters for subscription purchases
+     */
+    fun setSubscriptionPurchaseEventDataSource(dataSource: (List<SubscriptionPurchaseEvent>) -> Map<String, Any>) {
+        connector.setSubscriptionPurchaseEventDataSource(object : PurchaseClient.SubscriptionPurchaseEventDataSource {
+            override fun onNewPurchases(purchaseEvents: List<SubscriptionPurchaseEvent>): Map<String, Any> {
+                return dataSource(purchaseEvents)
+            }
+        })
+    }
+
+    /**
+     * Sets the data source for in-app purchase events.
+     * This allows adding additional parameters to in-app purchase events.
+     *
+     * @param dataSource A function that returns additional parameters for in-app purchases
+     */
+    fun setInAppPurchaseEventDataSource(dataSource: (List<InAppPurchaseEvent>) -> Map<String, Any>) {
+        connector.setInAppPurchaseEventDataSource(object : PurchaseClient.InAppPurchaseEventDataSource {
+            override fun onNewPurchases(purchaseEvents: List<InAppPurchaseEvent>): Map<String, Any> {
+                return dataSource(purchaseEvents)
+            }
+        })
+    }
 
     /**
      * Converts [SubscriptionPurchase] to a Json map, which then is delivered to SDK's method response.

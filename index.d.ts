@@ -182,11 +182,49 @@ declare module "react-native-appsflyer" {
     setConfig(config: PurchaseConnectorConfig): PurchaseConnectorConfig;
   };
 
+  // iOS interfaces
+
+  //PurchaseRevenueDataSourceSK1
+  export interface PurchaseRevenueDataSource {
+    purchaseRevenueAdditionalParametersForProducts?: (
+      products: any[], // SKProduct array
+      transactions: any[] // SKPaymentTransaction array
+    ) => { [key: string]: any } | null;
+  }
+  
+  // PurchaseRevenueDataSourceStoreKit2
+  export interface PurchaseRevenueDataSourceStoreKit2 {
+    purchaseRevenueAdditionalParametersStoreKit2ForProducts: (
+      products: any[], // AFSDKProductSK2 array
+      transactions: any[] // AFSDKTransactionSK2 array
+    ) => { [key: string]: any } | null;
+  }
+
+  // Android interfaces
+  export interface SubscriptionPurchaseEventDataSource {
+    onNewPurchases: (purchaseEvents: any[]) => { [key: string]: any };
+  }
+
+  export interface InAppPurchaseEventDataSource {
+    onNewPurchases: (purchaseEvents: any[]) => { [key: string]: any };
+  }
+
   export interface PurchaseConnector {
     create(config: PurchaseConnectorConfig): void;
     startObservingTransactions(): void;
     stopObservingTransactions(): void;
+ 
+    // iOS methods
     logConsumableTransaction(transactionId: string): void;
+
+    OnReceivePurchaseRevenueValidationInfo(
+      callback: OnReceivePurchaseRevenueValidationInfo
+    ): void;
+
+    setPurchaseRevenueDataSource: (dataSource: PurchaseRevenueDataSource) => void;
+    setPurchaseRevenueDataSourceStoreKit2: (dataSource: PurchaseRevenueDataSourceStoreKit2) => void;
+
+    // Android methods
     onSubscriptionValidationResultSuccess(
       callback: (data:OnResponse<SubscriptionValidationResult>) => any
     ): () => void;
@@ -199,9 +237,9 @@ declare module "react-native-appsflyer" {
     onInAppValidationResultFailure(
       callback: (data:onFailure) => any
     ): () => void;
-    OnReceivePurchaseRevenueValidationInfo(
-      callback: OnReceivePurchaseRevenueValidationInfo
-    ): void;
+
+    setSubscriptionPurchaseEventDataSource: (dataSource: SubscriptionPurchaseEventDataSource) => void;
+    setInAppPurchaseEventDataSource: (dataSource: InAppPurchaseEventDataSource) => void;
   }
 
   export const AppsFlyerPurchaseConnector: PurchaseConnector;

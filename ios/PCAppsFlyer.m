@@ -126,6 +126,39 @@ RCT_EXPORT_METHOD(stopObservingTransactions:(RCTPromiseResolveBlock)resolve
     }
 }
 
+// Method to set parameters from React Native
+RCT_EXPORT_METHOD(setPurchaseRevenueDataSource:(NSDictionary *)dataSource)
+{
+    if (!dataSource) {
+        NSLog(@"%@dataSource is required", TAG);
+        return;
+    }
+    self.purchaseRevenueParams = dataSource;
+}
+
+RCT_EXPORT_METHOD(setPurchaseRevenueDataSourceStoreKit2:(NSDictionary *)dataSource)
+{
+    if (!dataSource) {
+        NSLog(@"%@dataSource is required", TAG);
+        return;
+    }
+    self.purchaseRevenueStoreKit2Params = dataSource;
+}
+
+// Delegate method for StoreKit1
+- (NSDictionary *)purchaseRevenueAdditionalParametersForProducts:(NSSet<SKProduct *> *)products 
+                                                   transactions:(NSSet<SKPaymentTransaction *> *)transactions {
+    // Simply return the parameters that were set from React Native
+    return self.purchaseRevenueParams;
+}
+
+// Delegate method for StoreKit2
+- (NSDictionary *)purchaseRevenueAdditionalParametersStoreKit2ForProducts:(NSSet<AFSDKProductSK2 *> *)products 
+                                                           transactions:(NSSet<AFSDKTransactionSK2 *> *)transactions {
+    // Simply return the parameters that were set from React Native
+    return self.purchaseRevenueStoreKit2Params;
+}
+
 - (void)didReceivePurchaseRevenueValidationInfo:(nullable NSDictionary *)validationInfo error:(nullable NSError *)error {
     // Send the validation info and error back to React Native.
     // Call this function from the main thread.
