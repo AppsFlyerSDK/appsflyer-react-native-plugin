@@ -83,15 +83,11 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
             // Set up the data sources if they were previously set
             if (subscriptionPurchaseParams != null) {
-                connectorWrapper.setSubscriptionPurchaseEventDataSource(purchaseEvents -> {
-                    return subscriptionPurchaseParams;
-                });
+                connectorWrapper.setSubscriptionPurchaseEventDataSource(subscriptionPurchaseParams);
             }
 
             if (inAppPurchaseParams != null) {
-                connectorWrapper.setInAppPurchaseEventDataSource(purchaseEvents -> {
-                    return inAppPurchaseParams;
-                });
+                connectorWrapper.setInAppPurchaseEventDataSource(inAppPurchaseParams);
             }
 
             Log.d(TAG, "The Purchase Connector initiated successfully.");
@@ -136,9 +132,7 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
             return;
         }
         subscriptionPurchaseParams = RNUtil.toMap(dataSource);
-        connectorWrapper.setSubscriptionPurchaseEventDataSource(purchaseEvents -> {
-            return subscriptionPurchaseParams;
-        });
+        connectorWrapper.setSubscriptionPurchaseEventDataSource(subscriptionPurchaseParams);
     }
 
     @ReactMethod
@@ -157,9 +151,7 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
             return;
         }
         inAppPurchaseParams = RNUtil.toMap(dataSource);
-        connectorWrapper.setInAppPurchaseEventDataSource(purchaseEvents -> {
-            return inAppPurchaseParams;
-        });
+        connectorWrapper.setInAppPurchaseEventDataSource(inAppPurchaseParams);
     }
 
     // Initialization of the ARSListener

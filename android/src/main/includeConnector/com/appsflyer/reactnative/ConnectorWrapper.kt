@@ -8,8 +8,6 @@ import com.appsflyer.internal.models.InAppPurchaseValidationResult
 import com.appsflyer.internal.models.SubscriptionPurchase
 import com.appsflyer.internal.models.SubscriptionValidationResult
 import com.appsflyer.internal.models.ValidationFailureData
-import com.appsflyer.internal.models.SubscriptionPurchaseEvent
-import com.appsflyer.internal.models.InAppPurchaseEvent
 
 /**
  * A connector class that wraps the Android purchase connector client.
@@ -34,6 +32,9 @@ class ConnectorWrapper(
     inAppListener: MappedValidationResultListener,
 ) :
     PurchaseClient {
+    private var subscriptionDataSource: Map<String, Any> = mapOf()
+    private var inAppDataSource: Map<String, Any> = mapOf()
+
     private val connector =
         PurchaseClient.Builder(context, Store.GOOGLE)
             .setSandbox(sandbox)
@@ -57,6 +58,8 @@ class ConnectorWrapper(
                     inAppListener.onFailure(result, error)
                 }
             })
+            .setSubscriptionPurchaseEventDataSource(PurchaseClient.SubscriptionPurchaseEventDataSource { _ -> subscriptionDataSource })
+            .setInAppPurchaseEventDataSource(PurchaseClient.InAppPurchaseEventDataSource { _ -> inAppDataSource })
             .build()
 
     /**
@@ -73,30 +76,22 @@ class ConnectorWrapper(
      * Sets the data source for subscription purchase events.
      * This allows adding additional parameters to subscription purchase events.
      *
-     * @param dataSource A function that returns additional parameters for subscription purchases
+     * @param dataSource A map of additional parameters for subscription purchases
      */
-    fun setSubscriptionPurchaseEventDataSource(dataSource: (List<SubscriptionPurchaseEvent>) -> Map<String, Any>) {
-        connector.setSubscriptionPurchaseEventDataSource(object : PurchaseClient.SubscriptionPurchaseEventDataSource {
-            override fun onNewPurchases(purchaseEvents: List<SubscriptionPurchaseEvent>): Map<String, Any> {
-                return dataSource(purchaseEvents)
-            }
-        })
+    fun setSubscriptionPurchaseEventDataSource(dataSource: Map<String, Any>) {
+        subscriptionDataSource = dataSource
     }
 
     /**
      * Sets the data source for in-app purchase events.
      * This allows adding additional parameters to in-app purchase events.
      *
-     * @param dataSource A function that returns additional parameters for in-app purchases
+     * @param dataSource A map of additional parameters for in-app purchases
      */
-    fun setInAppPurchaseEventDataSource(dataSource: (List<InAppPurchaseEvent>) -> Map<String, Any>) {
-        connector.setInAppPurchaseEventDataSource(object : PurchaseClient.InAppPurchaseEventDataSource {
-            override fun onNewPurchases(purchaseEvents: List<InAppPurchaseEvent>): Map<String, Any> {
-                return dataSource(purchaseEvents)
-            }
-        })
+    fun setInAppPurchaseEventDataSource(dataSource: Map<String, Any>) {
+        inAppDataSource = dataSource
     }
-
+    
     /**
      * Converts [SubscriptionPurchase] to a Json map, which then is delivered to SDK's method response.
      *
