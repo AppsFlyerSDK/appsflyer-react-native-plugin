@@ -153,7 +153,7 @@ RCT_EXPORT_METHOD(setPurchaseRevenueDataSourceStoreKit2:(NSDictionary *)dataSour
 }
 
 // Delegate method for StoreKit2
-- (NSDictionary *)purchaseRevenueAdditionalParametersStoreKit2ForProducts:(NSSet<AFSDKProductSK2 *> *)products 
+- (NSDictionary<NSString *, id> *)purchaseRevenueAdditionalParametersStoreKit2ForProducts:(NSSet<AFSDKProductSK2 *> *)products 
                                                            transactions:(NSSet<AFSDKTransactionSK2 *> *)transactions {
     // Simply return the parameters that were set from React Native
     return self.purchaseRevenueStoreKit2Params;
