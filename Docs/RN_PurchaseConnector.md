@@ -30,6 +30,15 @@ For more information please check the following pages:
   - [iOS](#ios)
 * [ProGuard Rules for Android](#proguard-rules-for-android)
 * [Full Code Example](#full-code-example)
+* [Purchase Revenue Data Sources](#purchase-revenue-data-sources)
+  - [iOS Data Sources](#ios-data-sources)
+    - [StoreKit1 Data Source](#storekit1-data-source)
+    - [StoreKit2 Data Source](#storekit2-data-source)
+  - [Android Data Sources](#android-data-sources)
+    - [Subscription Purchase Data Source](#subscription-purchase-data-source)
+    - [In-App Purchase Data Source](#in-app-purchase-data-source)
+  - [Platform-Specific Implementation](#platform-specific-implementation)
+  - [Important Notes](#important-notes)
 
 ## <a id="important-note"></a>Important Note ⚠️ ⚠️
 
@@ -378,3 +387,155 @@ const handleValidationSuccess = (validationResult) => {
 
 //AppsFlyerPurchaseConnector.stopObservingTransactions();
 ```
+
+## <a id="purchase-revenue-data-sources"></a>Purchase Revenue Data Sources
+
+The Purchase Connector allows you to add additional parameters to your purchase events through data sources. These parameters will be included in the purchase events sent to AppsFlyer.
+
+### <a id="ios-data-sources"></a>iOS Data Sources
+
+For iOS, there are two types of data sources:
+
+1. **StoreKit1 Data Source**: For traditional in-app purchases
+2. **StoreKit2 Data Source**: For iOS 15.0 and later, supporting the newer StoreKit2 framework
+
+#### StoreKit1 Data Source
+```javascript
+// Set additional parameters for StoreKit1 purchases
+AppsFlyerPurchaseConnector.setPurchaseRevenueDataSource({
+  additionalParameters: {
+    user_id: '12345',
+    user_type: 'premium',
+    purchase_source: 'app_store',
+    custom_param1: 'value1',
+    custom_param2: 'value2'
+  }
+});
+```
+
+#### StoreKit2 Data Source
+```javascript
+// Set additional parameters for StoreKit2 purchases
+AppsFlyerPurchaseConnector.setPurchaseRevenueDataSourceStoreKit2({
+  products: [
+    { product_id: 'com.app.subscription.monthly' },
+    { product_id: 'com.app.subscription.yearly' }
+  ],
+  transactions: [
+    { transaction_id: 'transaction123' },
+    { transaction_id: 'transaction456' }
+  ]
+});
+```
+
+### <a id="android-data-sources"></a>Android Data Sources
+
+For Android, there are two types of data sources:
+
+1. **Subscription Purchase Data Source**: For subscription purchases
+2. **In-App Purchase Data Source**: For one-time in-app purchases
+
+#### Subscription Purchase Data Source
+```javascript
+// Set additional parameters for subscription purchases
+AppsFlyerPurchaseConnector.setSubscriptionPurchaseEventDataSource({
+  additionalParameters: {
+    user_id: '12345',
+    user_type: 'premium',
+    purchase_source: 'play_store',
+    custom_param1: 'value1',
+    custom_param2: 'value2'
+  }
+});
+```
+
+#### In-App Purchase Data Source
+```javascript
+// Set additional parameters for in-app purchases
+AppsFlyerPurchaseConnector.setInAppPurchaseEventDataSource({
+  additionalParameters: {
+    user_id: '12345',
+    user_type: 'premium',
+    purchase_source: 'play_store',
+    custom_param1: 'value1',
+    custom_param2: 'value2'
+  }
+});
+```
+
+### <a id="platform-specific-implementation"></a>Platform-Specific Implementation
+
+When implementing these data sources in your app, you should consider the platform differences:
+
+```javascript
+import { Platform } from 'react-native';
+import AppsFlyerPurchaseConnector from 'react-native-appsflyer-plugin';
+
+const setupPurchaseDataSources = () => {
+  if (Platform.OS === 'ios') {
+    // iOS StoreKit1 data source
+    AppsFlyerPurchaseConnector.setPurchaseRevenueDataSource({
+      additionalParameters: {
+        user_id: '12345',
+        user_type: 'premium',
+        purchase_source: 'app_store'
+      }
+    });
+
+    // iOS StoreKit2 data source (iOS 15.0+)
+    AppsFlyerPurchaseConnector.setPurchaseRevenueDataSourceStoreKit2({
+      products: [
+        { product_id: 'com.app.subscription.monthly' }
+      ],
+      transactions: [
+        { transaction_id: 'transaction123' }
+      ]
+    });
+  } else if (Platform.OS === 'android') {
+    // Android subscription data source
+    AppsFlyerPurchaseConnector.setSubscriptionPurchaseEventDataSource({
+      additionalParameters: {
+        user_id: '12345',
+        user_type: 'premium',
+        purchase_source: 'play_store'
+      }
+    });
+
+    // Android in-app purchase data source
+    AppsFlyerPurchaseConnector.setInAppPurchaseEventDataSource({
+      additionalParameters: {
+        user_id: '12345',
+        user_type: 'premium',
+        purchase_source: 'play_store'
+      }
+    });
+  }
+};
+```
+
+### <a id="important-notes"></a>Important Notes
+
+1. **iOS StoreKit2**: The StoreKit2 data source is only available on iOS 15.0 and later. Make sure to check the iOS version before using it.
+
+2. **Parameter Structure**: 
+   - For iOS StoreKit1 and Android, use the `additionalParameters` object to add custom parameters
+   - For iOS StoreKit2, use the `products` and `transactions` arrays to specify product and transaction IDs
+
+3. **Timing**: Set up the data sources after creating the Purchase Connector instance but before starting to observe transactions:
+
+```javascript
+// 1. Create the connector
+await AppsFlyerPurchaseConnector.create({
+  logSubscriptions: true,
+  logInApps: true,
+  sandbox: __DEV__
+});
+
+// 2. Set up data sources
+setupPurchaseDataSources();
+
+// 3. Start observing transactions
+await AppsFlyerPurchaseConnector.startObservingTransactions();
+```
+
+4. **Validation**: The parameters you set will be included in the purchase events sent to AppsFlyer. You can verify this in the AppsFlyer dashboard under the purchase events section.

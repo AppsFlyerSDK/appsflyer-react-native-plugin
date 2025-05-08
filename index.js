@@ -34,6 +34,7 @@ function stopObservingTransactions() {
 AppsFlyerPurchaseConnector.stopObservingTransactions =
   stopObservingTransactions;
 
+// Purchase Connector Android methods
 AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess = (
   onSuccess
 ) => {
@@ -168,6 +169,27 @@ AppsFlyerPurchaseConnector.onInAppValidationResultFailure = (onFailure) => {
   };
 };
 
+AppsFlyerPurchaseConnector.setSubscriptionPurchaseEventDataSource = (dataSource) => {
+	if (!dataSource || typeof dataSource !== 'object') {
+		throw new Error('dataSource must be an object');
+	}
+	PCAppsFlyer.setSubscriptionPurchaseEventDataSource(dataSource);
+};
+  
+AppsFlyerPurchaseConnector.setInAppPurchaseEventDataSource = (dataSource) => {
+	if (!dataSource || typeof dataSource !== 'object') {
+		throw new Error('dataSource must be an object');
+	}
+	PCAppsFlyer.setInAppPurchaseEventDataSource(dataSource);
+};
+
+// Purchase Connector iOS methods
+function logConsumableTransaction(transactionId){
+	PCAppsFlyer.logConsumableTransaction(transactionId);
+};
+  
+AppsFlyerPurchaseConnector.logConsumableTransaction = logConsumableTransaction;
+
 AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo = (
   callback
 ) => {
@@ -202,11 +224,20 @@ AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo = (
   };
 };
 
-function logConsumableTransaction(transactionId){
-  PCAppsFlyer.logConsumableTransaction(transactionId);
+AppsFlyerPurchaseConnector.setPurchaseRevenueDataSource = (dataSource) => {
+	if (!dataSource || typeof dataSource !== 'object') {
+		throw new Error('dataSource must be an object');
+	}
+	PCAppsFlyer.setPurchaseRevenueDataSource(dataSource);
+};
+  
+AppsFlyerPurchaseConnector.setPurchaseRevenueDataSourceStoreKit2 = (dataSource) => {
+	if (!dataSource || typeof dataSource !== 'object') {
+	  throw new Error('dataSource must be an object');
+	}
+	PCAppsFlyer.setPurchaseRevenueDataSourceStoreKit2(dataSource);
 };
 
-AppsFlyerPurchaseConnector.logConsumableTransaction = logConsumableTransaction;
 
 const AppsFlyerPurchaseConnectorConfig = {
   setConfig: ({ logSubscriptions, logInApps, sandbox, storeKitVersion }) => {
