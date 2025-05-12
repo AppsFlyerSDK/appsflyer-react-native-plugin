@@ -64,7 +64,7 @@ export function AFLogEvent(name, values) {
 export function AFLogAdRevenue() {
   const adRevenueData = {
     monetizationNetwork: 'AF-AdNetwork',
-    mediationNetwork: MEDIATION_NETWORK.IRONSOURCE,
+    mediationNetwork: MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK,
     currencyIso4217Code: 'USD',
     revenue: 1.23,
     additionalParameters: {
