@@ -9,52 +9,53 @@ hidden: false
 ## APIs
 
 The list of available methods for this plugin is described below.
+- [APIs](#apis)
 - [Android and iOS APIs](#android-and-ios-apis)
-    - [initSDK](#initsdk)
-    - [startSdk](#startsdk)
-    - [logEvent](#logevent)
-    - [setCustomerUserId](#setcustomeruserid)
-    - [stop](#stop)
-    - [setAppInviteOneLinkID](#setappinviteonelinkid)
-    - [setAdditionalData](#setadditionaldata)
-    - [setResolveDeepLinkURLs](#setresolvedeeplinkurls)
-    - [setOneLinkCustomDomain](#setonelinkcustomdomain)
-    - [setCurrencyCode](#setcurrencycode)
-    - [logLocation](#loglocation)
-    - [anonymizeUser](#anonymizeuser)
-    - [getAppsFlyerUID](#getappsflyeruid)
-    - [setHost](#sethost)
-    - [setUserEmails](#setuseremails)
-    - [generateInviteLink](#generateinvitelink)
-    - [setSharingFilterForAllPartners](#setsharingfilterforallpartners) *Deprecated*
-    - [setSharingFilter](#setsharingfilter) *Deprecated*
-    - [setSharingFilterForPartners](#setsharingfilterforpartners)
-    - [validateAndLogInAppPurchase](#validateandloginapppurchase)
-    - [updateServerUninstallToken](#updateserveruninstalltoken)
-    - [sendPushNotificationData](#sendpushnotificationdata)
-    - [addPushNotificationDeepLinkPath](#addpushnotificationdeeplinkpath)
-    - [appendParametersToDeepLinkingURL](#appendparameterstodeeplinkingurl)
-    - [disableAdvertisingIdentifier](#disableAdvertisingIdentifier)
-    - [enableTCFDataCollection](#enableTCFDataCollection)
-    - [setConsentData](#setConsentData)
-    - [logAdRevenue](#logAdRevenue)
+  - [initSdk](#initsdk)
+  - [startSdk](#startsdk)
+  - [logEvent](#logevent)
+  - [setCustomerUserId](#setcustomeruserid)
+  - [stop](#stop)
+  - [setAppInviteOneLinkID](#setappinviteonelinkid)
+  - [setAdditionalData](#setadditionaldata)
+  - [setResolveDeepLinkURLs](#setresolvedeeplinkurls)
+  - [setOneLinkCustomDomains](#setonelinkcustomdomains)
+  - [setCurrencyCode](#setcurrencycode)
+  - [logLocation](#loglocation)
+  - [anonymizeUser](#anonymizeuser)
+  - [getAppsFlyerUID](#getappsflyeruid)
+  - [setHost](#sethost)
+  - [setUserEmails](#setuseremails)
+  - [generateInviteLink](#generateinvitelink)
+  - [setSharingFilterForAllPartners](#setsharingfilterforallpartners)
+  - [setSharingFilter](#setsharingfilter)
+  - [setSharingFilterForPartners](#setsharingfilterforpartners)
+  - [validateAndLogInAppPurchase](#validateandloginapppurchase)
+  - [updateServerUninstallToken](#updateserveruninstalltoken)
+  - [sendPushNotificationData](#sendpushnotificationdata)
+  - [addPushNotificationDeepLinkPath](#addpushnotificationdeeplinkpath)
+  - [appendParametersToDeepLinkingURL](#appendparameterstodeeplinkingurl)
+  - [disableAdvertisingIdentifier](#disableadvertisingidentifier)
+  - [enableTCFDataCollection](#enabletcfdatacollection)
+  - [setConsentData](#setconsentdata)
+  - [logAdRevenue](#logadrevenue)
 - [Android Only APIs](#android-only-apis)
-    - [setCollectAndroidID](#setcollectandroidid)
-    - [setCollectIMEI](#setcollectimei)
-    - [setDisableNetworkData](#setdisablenetworkdata)
-    - [performOnDeepLinking](#performondeeplinking)
+  - [setCollectAndroidID](#setcollectandroidid)
+  - [setCollectIMEI](#setcollectimei)
+  - [setDisableNetworkData `setDisableNetworkData(disable)`](#setdisablenetworkdata-setdisablenetworkdatadisable)
+  - [performOnDeepLinking](#performondeeplinking)
 - [iOS Only APIs](#ios-only-apis)
-    - [disableCollectASA](#disablecollectasa)
-    - [setUseReceiptValidationSandbox](#setusereceiptvalidationsandbox)
-    - [disableSKAD](#disableskad)
-    - [setCurrentDeviceLanguage](#setcurrentdevicelanguage)
-    - [disableIDFVCollection](#disableidfvcollection)
+  - [disableCollectASA](#disablecollectasa)
+  - [disableIDFVCollection](#disableidfvcollection)
+  - [setUseReceiptValidationSandbox](#setusereceiptvalidationsandbox)
+  - [disableSKAD](#disableskad)
+  - [setCurrentDeviceLanguage](#setcurrentdevicelanguage)
 - [AppsFlyerConversionData](#appsflyerconversiondata)
-    - [onInstallConversionData](#oninstallconversiondata)
-    - [onInstallConversionFailure](#oninstallconversionfailure)
-    - [onAppOpenAttribution](#onappopenattribution)
-    - [onAttributionFailure](#onattributionfailure)
-    - [onDeepLink](#ondeeplink)
+  - [onInstallConversionData](#oninstallconversiondata)
+  - [onInstallConversionFailure](#oninstallconversionfailure)
+  - [onAppOpenAttribution](#onappopenattribution)
+  - [onAttributionFailure](#onattributionfailure)
+  - [onDeepLink](#ondeeplink)
 ---
 
 ## Android and iOS APIs
@@ -109,7 +110,7 @@ appsFlyer.initSdk(
 ```
 ---
 
-#### startSdk
+### startSdk
 `startSdk()`
 
 In version 6.9.1 of the react-native-appslfyer SDK we added the option of splitting between the initialization stage and start stage. All you need to do is add the property manualStart: true to the init object, and later call appsFlyer.startSdk() whenever you decide. If this property is set to false or doesn’t exist, the sdk will start after calling `appsFlyer.initSdk(...)`.
@@ -147,7 +148,7 @@ appsFlyer.initSdk(
 ```
 ---
 
-#### logEvent
+### logEvent
 `logEvent(eventName, eventValues, success, error)`
 
 In-App Events provide insight on what is happening in your app. It is recommended to take the time and define the events you want to measure to allow you to measure ROI (Return on Investment) and LTV (Lifetime Value).
@@ -798,20 +799,18 @@ let GDPRUser = AppsFlyerConsent.forGDPRUser(true, false);
 appsFlyer.setConsentData(nonGDPRUser /**or**/ GDPRUser);
 ```
 
-### logAdRevenue - Since 6.15.1
+### logAdRevenue
 `logAdRevenue(data: AFAdRevenueData): void`
 
 Use this method to log your ad revenue.</br>
 By attributing ad revenue, app owners gain the complete view of user LTV and campaign ROI.
 Ad revenue is generated by displaying ads on rewarded videos, offer walls, interstitials, and banners in an app.
 
-#### Parameters
-
 | Param          | Type                                                       |
 | -------------- | ---------------------------------------------------------- |
 | **`data`**     | `AFAdRevenueData`        |
 
-#### Usage Example for React Native:
+*Example:*
 
 ```javascript
 const adRevenueData = {

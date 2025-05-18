@@ -13,7 +13,7 @@
 #import <AppsFlyerLib/AppsFlyerDeepLinkResult.h>
 #import <AppsFlyerLib/AppsFlyerDeepLink.h>
 #import <AppsFlyerLib/AppsFlyerConsent.h>
-#import <AppsFlyerLib/AppsFlyerAdRevenueData.h>
+#import <AppsFlyerLib/AFAdRevenueData.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -1,3 +1,9 @@
+## 6.15.3
+ Release date: *2025-01-8*
+
+- React Native >> Update iOS SDK to v6.15.3
+- React native >> Update Android SDK to v6.15.2
+
 ## 6.15.1
  Release date: *2024-09-15*
 
