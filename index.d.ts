@@ -55,26 +55,26 @@ declare module "react-native-appsflyer" {
     };
   };
 
-  export type UnifiedDeepLinkData = {
-    status: "success" | "failure";
-    type: "onDeepLinking";
-    deepLinkStatus: "FOUND" | "NOT_FOUND" | "Error";
-    isDeferred: boolean;
-    data: {
-      campaign: string;
-      deep_link_value: string;
-      deep_link_sub1?: string;
-      media_source: string;
-      pid?: string;
-      link: string;
-      af_sub1?: string;
-      af_sub2?: string;
-      af_sub3?: string;
-      af_sub4?: string;
-      af_sub5?: string;
-      [key: string]: any;
-    };
-  };
+    export type UnifiedDeepLinkData = {
+        status: "success" | "failure",
+        type: "onDeepLinking",
+        deepLinkStatus: 'FOUND' | 'NOT_FOUND' | 'ERROR',
+        isDeferred: boolean,
+        data: {
+            campaign: string;
+            deep_link_value: string;
+            deep_link_sub1?: string;
+            media_source: string;
+            pid?: string;
+            link: string,
+            af_sub1?: string;
+            af_sub2?: string;
+            af_sub3?: string;
+            af_sub4?: string;
+            af_sub5?: string;
+            [key: string]: any;
+        }
+    }
 
   export enum AF_EMAIL_CRYPT_TYPE {
     NONE,
@@ -122,19 +122,49 @@ declare module "react-native-appsflyer" {
     brandDomain?: string;
   }
 
-  export const AppsFlyerConsent: {
-    forGDPRUser: (
-      hasConsentForDataUsage: boolean,
-      hasConsentForAdsPersonalization: boolean
-    ) => AppsFlyerConsentType;
-    forNonGDPRUser: () => AppsFlyerConsentType;
-  };
+    export class AppsFlyerConsent {
+        isUserSubjectToGDPR?: boolean;
+        hasConsentForDataUsage?: boolean;
+        hasConsentForAdsPersonalization?: boolean;
+        hasConsentForAdStorage?: boolean;
 
-  export interface AppsFlyerConsentType {
-    isUserSubjectToGDPR: boolean;
-    hasConsentForDataUsage?: boolean;
-    hasConsentForAdsPersonalization?: boolean;
-  }
+        /**
+         * Creates an instance of AppsFlyerConsent.
+         * @param isUserSubjectToGDPR - Indicates whether GDPR applies to the user.
+         * @param hasConsentForDataUsage - Indicates whether the user has consented to data usage.
+         * @param hasConsentForAdsPersonalization - Indicates whether the user has consented to ads personalization.
+         * @param hasConsentForAdStorage - Indicates whether the user has consented to ad storage.
+         */
+        constructor(
+            isUserSubjectToGDPR?: boolean,
+            hasConsentForDataUsage?: boolean,
+            hasConsentForAdsPersonalization?: boolean,
+            hasConsentForAdStorage?: boolean
+        ) {}
+
+        /**
+         * @deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.
+         */
+        static forGDPRUser(hasConsentForDataUsage: boolean, hasConsentForAdsPersonalization: boolean): AppsFlyerConsent {
+            return new AppsFlyerConsent(true, hasConsentForDataUsage, hasConsentForAdsPersonalization);
+        }
+
+        /**
+         * @deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.
+         */
+        static forNonGDPRUser(): AppsFlyerConsent {
+            return new AppsFlyerConsent(false);
+        }
+    }
+
+    /**
+     * @deprecated since version 6.16.2. Use the AppsFlyerConsent class instead for a more integrated approach to consent management.
+     */
+    export interface AppsFlyerConsentType {
+        isUserSubjectToGDPR: boolean;
+        hasConsentForDataUsage?: boolean;
+        hasConsentForAdsPersonalization?: boolean;
+    }
 
   //Log Ad Revenue Section
   export enum MEDIATION_NETWORK {
@@ -182,11 +212,49 @@ declare module "react-native-appsflyer" {
     setConfig(config: PurchaseConnectorConfig): PurchaseConnectorConfig;
   };
 
+  // iOS interfaces
+
+  //PurchaseRevenueDataSourceSK1
+  export interface PurchaseRevenueDataSource {
+    purchaseRevenueAdditionalParametersForProducts?: (
+      products: any[], // SKProduct array
+      transactions: any[] // SKPaymentTransaction array
+    ) => { [key: string]: any } | null;
+  }
+  
+  // PurchaseRevenueDataSourceStoreKit2
+  export interface PurchaseRevenueDataSourceStoreKit2 {
+    purchaseRevenueAdditionalParametersStoreKit2ForProducts: (
+      products: any[], // AFSDKProductSK2 array
+      transactions: any[] // AFSDKTransactionSK2 array
+    ) => { [key: string]: any } | null;
+  }
+
+  // Android interfaces
+  export interface SubscriptionPurchaseEventDataSource {
+    onNewPurchases: (purchaseEvents: any[]) => { [key: string]: any };
+  }
+
+  export interface InAppPurchaseEventDataSource {
+    onNewPurchases: (purchaseEvents: any[]) => { [key: string]: any };
+  }
+
   export interface PurchaseConnector {
     create(config: PurchaseConnectorConfig): void;
     startObservingTransactions(): void;
     stopObservingTransactions(): void;
+ 
+    // iOS methods
     logConsumableTransaction(transactionId: string): void;
+
+    OnReceivePurchaseRevenueValidationInfo(
+      callback: OnReceivePurchaseRevenueValidationInfo
+    ): void;
+
+    setPurchaseRevenueDataSource: (dataSource: PurchaseRevenueDataSource) => void;
+    setPurchaseRevenueDataSourceStoreKit2: (dataSource: PurchaseRevenueDataSourceStoreKit2) => void;
+
+    // Android methods
     onSubscriptionValidationResultSuccess(
       callback: (data:OnResponse<SubscriptionValidationResult>) => any
     ): () => void;
@@ -199,9 +267,9 @@ declare module "react-native-appsflyer" {
     onInAppValidationResultFailure(
       callback: (data:onFailure) => any
     ): () => void;
-    OnReceivePurchaseRevenueValidationInfo(
-      callback: OnReceivePurchaseRevenueValidationInfo
-    ): void;
+
+    setSubscriptionPurchaseEventDataSource: (dataSource: SubscriptionPurchaseEventDataSource) => void;
+    setInAppPurchaseEventDataSource: (dataSource: InAppPurchaseEventDataSource) => void;
   }
 
   export const AppsFlyerPurchaseConnector: PurchaseConnector;

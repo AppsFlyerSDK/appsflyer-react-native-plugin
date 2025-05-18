@@ -32,9 +32,15 @@ class ConnectorWrapper(
     inAppListener: MappedValidationResultListener,
 ) :
     PurchaseClient {
+    private var subscriptionDataSource: Map<String, Any> = mapOf()
+    private var inAppDataSource: Map<String, Any> = mapOf()
+
     private val connector =
-        PurchaseClient.Builder(context, Store.GOOGLE).setSandbox(sandbox).logSubscriptions(logSubs)
-            .autoLogInApps(logInApps).setSubscriptionValidationResultListener(object :
+        PurchaseClient.Builder(context, Store.GOOGLE)
+            .setSandbox(sandbox)
+            .logSubscriptions(logSubs)
+            .autoLogInApps(logInApps)
+            .setSubscriptionValidationResultListener(object :
                 PurchaseClient.SubscriptionPurchaseValidationResultListener {
                 override fun onResponse(result: Map<String, SubscriptionValidationResult>?) {
                     subsListener.onResponse(result?.entries?.associate { (k, v) -> k to v.toJsonMap() })
@@ -43,7 +49,8 @@ class ConnectorWrapper(
                 override fun onFailure(result: String, error: Throwable?) {
                     subsListener.onFailure(result, error)
                 }
-            }).setInAppValidationResultListener(object : PurchaseClient.InAppPurchaseValidationResultListener {
+            })
+            .setInAppValidationResultListener(object : PurchaseClient.InAppPurchaseValidationResultListener {
                 override fun onResponse(result: Map<String, InAppPurchaseValidationResult>?) {
                     inAppListener.onResponse(result?.entries?.associate { (k, v) -> k to v.toJsonMap() })
                 }
@@ -51,6 +58,8 @@ class ConnectorWrapper(
                     inAppListener.onFailure(result, error)
                 }
             })
+            .setSubscriptionPurchaseEventDataSource(PurchaseClient.SubscriptionPurchaseEventDataSource { _ -> subscriptionDataSource })
+            .setInAppPurchaseEventDataSource(PurchaseClient.InAppPurchaseEventDataSource { _ -> inAppDataSource })
             .build()
 
     /**
@@ -63,7 +72,26 @@ class ConnectorWrapper(
      */
     override fun stopObservingTransactions() = connector.stopObservingTransactions()
 
+    /**
+     * Sets the data source for subscription purchase events.
+     * This allows adding additional parameters to subscription purchase events.
+     *
+     * @param dataSource A map of additional parameters for subscription purchases
+     */
+    fun setSubscriptionPurchaseEventDataSource(dataSource: Map<String, Any>) {
+        subscriptionDataSource = dataSource
+    }
 
+    /**
+     * Sets the data source for in-app purchase events.
+     * This allows adding additional parameters to in-app purchase events.
+     *
+     * @param dataSource A map of additional parameters for in-app purchases
+     */
+    fun setInAppPurchaseEventDataSource(dataSource: Map<String, Any>) {
+        inAppDataSource = dataSource
+    }
+    
     /**
      * Converts [SubscriptionPurchase] to a Json map, which then is delivered to SDK's method response.
      *

@@ -38,6 +38,75 @@ expo install react-native-appsflyer
     ],
 ...
 ```
+### Fix for build failure with RN 0.76 and Expo 52
+To ensure seamless integration of the AppsFlyer plugin in your Expo-managed project, it’s essential to handle modifications to the AndroidManifest.xml correctly. Since direct edits to the AndroidManifest.xml aren’t feasible in the managed workflow, you’ll need to create a custom configuration to include the necessary changes.
+
+### Handling dataExtractionRules Conflict
+
+When building your Expo app with the AppsFlyer plugin, you might encounter a build error related to the `dataExtractionRules` attribute. This issue arises due to a conflict between the `dataExtractionRules `defined in your project’s `AndroidManifest.xml` and the one included in the AppsFlyer SDK.
+
+<b>Solution:</b> Creating a Custom Plugin to Modify `AndroidManifest.xml`
+
+To resolve this, you can create a custom Expo config plugin that modifies the AndroidManifest.xml during the build process. This approach allows you to adjust the manifest without directly editing it, maintaining compatibility with the managed workflow.
+
+Steps to Implement the Custom Plugin:
+1. Create the Plugin File:
+    -	In your project’s root directory, create a file named withCustomAndroidManifest.js.
+2.	Define the Plugin Function:
+	  -	In withCustomAndroidManifest.js, define a function that uses Expo’s withAndroidManifest to modify the manifest. This function will remove the conflicting dataExtractionRules attribute.
+
+```js
+// withCustomAndroidManifest.js
+const { withAndroidManifest } = require('@expo/config-plugins');
+
+module.exports = function withCustomAndroidManifest(config) {
+  return withAndroidManifest(config, async (config) => {
+    const androidManifest = config.modResults;
+    const manifest = androidManifest.manifest;
+    
+    // Ensure xmlns:tools is present in the <manifest> tag
+    if (!manifest.$['xmlns:tools']) {
+      manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
+    }
+
+    const application = manifest.application[0];
+
+    // Add tools:replace attribute for dataExtractionRules and fullBackupContent
+    application['$']['tools:replace'] = 'android:dataExtractionRules, android:fullBackupContent';
+
+    // Set dataExtractionRules and fullBackupContent as attributes within <application>
+    application['$']['android:dataExtractionRules'] = '@xml/secure_store_data_extraction_rules';
+    application['$']['android:fullBackupContent'] = '@xml/secure_store_backup_rules';
+
+    return config;
+  });
+};
+
+```
+
+3.	Update app.json or app.config.js:
+	  -	In your app configuration file, include the custom plugin to ensure it’s executed during the build process.
+
+```json
+// app.json
+{
+  "expo": {
+    // ... other configurations ...
+    "plugins": [
+      "./withCustomAndroidManifest.js",
+      [
+        "react-native-appsflyer",
+        {
+          "shouldUseStrictMode": true
+        }
+      ]
+    ]
+  }
+}
+```
+
+By implementing this custom plugin, you can resolve the dataExtractionRules conflict without directly modifying the AndroidManifest.xml.
+
 ## The AD_ID permission for android apps
 In v6.8.0 of the AppsFlyer SDK, we added the normal permission com.google.android.gms.permission.AD_ID to the SDK's AndroidManifest, 
 to allow the SDK to collect the Android Advertising ID on apps targeting API 33.

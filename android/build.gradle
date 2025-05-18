@@ -23,11 +23,12 @@ apply plugin: 'kotlin-android' // Apply Kotlin Android plugin
 def includeConnector = project.hasProperty('appsflyer.enable_purchase_connector') ? project.property('appsflyer.enable_purchase_connector').toBoolean() : false // Moved outside of android block
 
 android {
+    namespace "com.appsflyer.reactnative"
     compileSdkVersion safeExtGet('compileSdkVersion', 34)
     buildToolsVersion safeExtGet('buildToolsVersion', '34.0.0')
 
     defaultConfig {
-        minSdkVersion safeExtGet('minSdkVersion', 16)
+        minSdkVersion safeExtGet('minSdkVersion', 21)
         targetSdkVersion safeExtGet('targetSdkVersion', 34)
         versionCode 1
         versionName "1.0"
@@ -69,9 +70,9 @@ repositories {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10" // Add Kotlin standard library
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    api "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.15.1')}"
+    api "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.15.2')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.2')}"
     if (includeConnector){
-        implementation 'com.appsflyer:purchase-connector:2.0.1'
+        implementation 'com.appsflyer:purchase-connector:2.1.1'
     }
 }
