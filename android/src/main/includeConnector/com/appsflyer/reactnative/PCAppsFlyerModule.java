@@ -24,7 +24,7 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
     //WeakReference prevents memory leaks by allowing the garbage collector to collect the ReactApplicationContext when it's no longer needed.
     private WeakReference<ReactApplicationContext> reactContext;
-    private boolean isModuleEnabled;
+    private boolean isPurchaseConnectorModuleEnabled;
     private ConnectorWrapper connectorWrapper;
     private String TAG = "AppsFlyer_" + PLUGIN_VERSION;
 
@@ -34,8 +34,8 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
     public PCAppsFlyerModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = new WeakReference<>(reactContext);
-        this.isModuleEnabled = BuildConfig.INCLUDE_CONNECTOR;
-        Log.d("AppsFlyer_", "PurchaseConnector inclusion status: " + this.isModuleEnabled);
+        this.isPurchaseConnectorModuleEnabled = BuildConfig.INCLUDE_CONNECTOR;
+        Log.d("AppsFlyer_", "PurchaseConnector inclusion status: " + this.isPurchaseConnectorModuleEnabled);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void create(ReadableMap config) {
-        if (!isModuleEnabled) {
+        if (!isPurchaseConnectorModuleEnabled) {
             Log.e(TAG, "PurchaseConnector is not enabled. Please enable it in your build.gradle");
             return;
         }
@@ -98,7 +98,7 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void startObservingTransactions() {
-        if (!isModuleEnabled || connectorWrapper == null) {
+        if (!isPurchaseConnectorModuleEnabled || connectorWrapper == null) {
             Log.e(TAG, "PurchaseConnector is not enabled or not initialized");
             return;
         }
@@ -108,7 +108,7 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void stopObservingTransactions() {
-        if (!isModuleEnabled || connectorWrapper == null) {
+        if (!isPurchaseConnectorModuleEnabled || connectorWrapper == null) {
             Log.e(TAG, "PurchaseConnector is not enabled or not initialized");
             return;
         }
@@ -118,7 +118,7 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setSubscriptionPurchaseEventDataSource(ReadableMap dataSource) {
-        if (!isModuleEnabled) {
+        if (!isPurchaseConnectorModuleEnabled) {
             Log.e(TAG, "PurchaseConnector is not enabled");
             return;
         }
@@ -137,7 +137,7 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setInAppPurchaseEventDataSource(ReadableMap dataSource) {
-        if (!isModuleEnabled) {
+        if (!isPurchaseConnectorModuleEnabled) {
             Log.e(TAG, "PurchaseConnector is not enabled");
             return;
         }

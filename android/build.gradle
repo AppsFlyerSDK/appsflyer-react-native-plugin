@@ -73,6 +73,6 @@ dependencies {
     api "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.15.2')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.2')}"
     if (includeConnector){
-        implementation 'com.appsflyer:purchase-connector:2.1.0'
+        implementation 'com.appsflyer:purchase-connector:2.1.1'
     }
 }
