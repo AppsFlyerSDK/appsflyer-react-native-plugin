@@ -15,7 +15,7 @@ function initSdkCallback(options, successC, errorC) {
 	return RNAppsFlyer.initSdkWithCallBack(options, successC, errorC);
 }
 
-function initSdkPromise(options): Promise<string> {
+function initSdkPromise(options) {
 	if (typeof options.appId !== 'string' && typeof options.appId !== 'undefined') {
 		return Promise.reject('appId should be a string!');
 	}
@@ -25,7 +25,7 @@ function initSdkPromise(options): Promise<string> {
 	return RNAppsFlyer.initSdkWithPromise(options);
 }
 
-function initSdk(options, success, error): Promise<string> {
+function initSdk(options, success, error) {
 	if (success && error) {
 		//initSdk is a callback function
 		initSdkCallback(options, success, error);
@@ -41,11 +41,11 @@ function logEventCallback(eventName, eventValues, successC, errorC) {
 	return RNAppsFlyer.logEvent(eventName, eventValues, successC, errorC);
 }
 
-function logEventPromise(eventName, eventValues): Promise<string> {
+function logEventPromise(eventName, eventValues) {
 	return RNAppsFlyer.logEventWithPromise(eventName, eventValues);
 }
 
-function logEvent(eventName, eventValues, success, error): Promise<string> {
+function logEvent(eventName, eventValues, success, error) {
 	if (success && error) {
 		//logEvent is a callback function
 		logEventCallback(eventName, eventValues, success, error);
