@@ -70,7 +70,7 @@ repositories {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10" // Add Kotlin standard library
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    api "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.16.2')}"
+    api "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.17.0')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.2')}"
     if (includeConnector){
         implementation 'com.appsflyer:purchase-connector:2.1.1'

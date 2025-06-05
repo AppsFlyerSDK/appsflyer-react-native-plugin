@@ -277,7 +277,7 @@ function initSdkCallback(options, successC, errorC) {
   return RNAppsFlyer.initSdkWithCallBack(options, successC, errorC);
 }
 
-function initSdkPromise(options): Promise<string> {
+function initSdkPromise(options) {
   if (
     typeof options.appId !== "string" &&
     typeof options.appId !== "undefined"
@@ -293,7 +293,7 @@ function initSdkPromise(options): Promise<string> {
   return RNAppsFlyer.initSdkWithPromise(options);
 }
 
-function initSdk(options, success, error): Promise<string> {
+function initSdk(options, success, error) {
   if (success && error) {
     //initSdk is a callback function
     initSdkCallback(options, success, error);
@@ -309,11 +309,11 @@ function logEventCallback(eventName, eventValues, successC, errorC) {
   return RNAppsFlyer.logEvent(eventName, eventValues, successC, errorC);
 }
 
-function logEventPromise(eventName, eventValues): Promise<string> {
+function logEventPromise(eventName, eventValues) {
   return RNAppsFlyer.logEventWithPromise(eventName, eventValues);
 }
 
-function logEvent(eventName, eventValues, success, error): Promise<string> {
+function logEvent(eventName, eventValues, success, error) {
   if (success && error) {
     //logEvent is a callback function
     logEventCallback(eventName, eventValues, success, error);
@@ -437,7 +437,7 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
 };
 
 /**
- * Setting your own customer ID enables you to cross-reference your own unique ID with AppsFlyer’s unique ID and the other devices’ IDs.
+ * Setting your own customer ID enables you to cross-reference your own unique ID with AppsFlyer's unique ID and the other devices' IDs.
  * This ID is available in AppsFlyer CSV reports along with Postback APIs for cross-referencing with your internal IDs.
  *
  * @param {string} userId Customer ID for client.
