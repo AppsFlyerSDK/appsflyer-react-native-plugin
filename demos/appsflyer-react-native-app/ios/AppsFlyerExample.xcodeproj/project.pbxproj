@@ -11,8 +11,9 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		16B4DFEB0C59658B8FE94085 /* libPods-AppsFlyerExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D28800373012A08DB5A8DA9B /* libPods-AppsFlyerExample.a */; };
-		7EEAAD9F2D2D7980006F2316 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 7EEAAD9E2D2D7980006F2316 /* main.jsbundle */; };
+		758FBD406B8A60C781CB65C7 /* libPods-AppsFlyerExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3772C10A05F15474D2AE8E5B /* libPods-AppsFlyerExample.a */; };
+		7EA0589E2CBD4C08003E6A23 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 7EA0589D2CBD4BEB003E6A23 /* main.jsbundle */; };
+		7EA0589F2CBE4FCA003E6A23 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E0676042CABDEBC0055F176 /* StoreKit.framework */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		9814E2884017CE2F8F3BAA9E /* libPods-AppsFlyerExample-AppsFlyerExampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 972E1865E201F523B65B5135 /* libPods-AppsFlyerExample-AppsFlyerExampleTests.a */; };
 /* End PBXBuildFile section */
@@ -37,8 +38,11 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = AppsFlyerExample/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = AppsFlyerExample/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = AppsFlyerExample/main.m; sourceTree = "<group>"; };
-		243DD5E4FB76F2C1D4E83B8C /* Pods-AppsFlyerExample-AppsFlyerExampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsFlyerExample-AppsFlyerExampleTests.release.xcconfig"; path = "Target Support Files/Pods-AppsFlyerExample-AppsFlyerExampleTests/Pods-AppsFlyerExample-AppsFlyerExampleTests.release.xcconfig"; sourceTree = "<group>"; };
-		7EEAAD9E2D2D7980006F2316 /* main.jsbundle */ = {isa = PBXFileReference; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
+		1C982642725666DF8D1E1F96 /* libPods-AppsFlyerExample-AppsFlyerExampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AppsFlyerExample-AppsFlyerExampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3772C10A05F15474D2AE8E5B /* libPods-AppsFlyerExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AppsFlyerExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5CAE30CF50FDE233EFB84891 /* Pods-AppsFlyerExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsFlyerExample.release.xcconfig"; path = "Target Support Files/Pods-AppsFlyerExample/Pods-AppsFlyerExample.release.xcconfig"; sourceTree = "<group>"; };
+		7E0676042CABDEBC0055F176 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		7EA0589D2CBD4BEB003E6A23 /* main.jsbundle */ = {isa = PBXFileReference; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = AppsFlyerExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		972E1865E201F523B65B5135 /* libPods-AppsFlyerExample-AppsFlyerExampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-AppsFlyerExample-AppsFlyerExampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7C25798B6EC8E96E5D5E977 /* Pods-AppsFlyerExample-AppsFlyerExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AppsFlyerExample-AppsFlyerExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-AppsFlyerExample-AppsFlyerExampleTests/Pods-AppsFlyerExample-AppsFlyerExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -62,7 +66,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				16B4DFEB0C59658B8FE94085 /* libPods-AppsFlyerExample.a in Frameworks */,
+				758FBD406B8A60C781CB65C7 /* libPods-AppsFlyerExample.a in Frameworks */,
+				7EA0589F2CBE4FCA003E6A23 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,6 +94,7 @@
 		13B07FAE1A68108700A75B9A /* AppsFlyerExample */ = {
 			isa = PBXGroup;
 			children = (
+				7EA0589D2CBD4BEB003E6A23 /* main.jsbundle */,
 				EDCF29CA26F74C8F000729D4 /* AppsFlyerExample.entitlements */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -103,6 +109,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7E0676042CABDEBC0055F176 /* StoreKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				D28800373012A08DB5A8DA9B /* libPods-AppsFlyerExample.a */,
 				972E1865E201F523B65B5135 /* libPods-AppsFlyerExample-AppsFlyerExampleTests.a */,
@@ -246,7 +253,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7EEAAD9F2D2D7980006F2316 /* main.jsbundle in Resources */,
+				7EA0589E2CBD4C08003E6A23 /* main.jsbundle in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 			);
@@ -349,7 +356,7 @@
 		};
 		FD10A7F022414F080027D42C /* Start Packager */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 8;
 			files = (
 			);
 			inputFileListPaths = (
@@ -361,7 +368,7 @@
 			);
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
 			shellScript = "export RCT_METRO_PORT=\"${RCT_METRO_PORT:=8081}\"\necho \"export RCT_METRO_PORT=${RCT_METRO_PORT}\" > \"${SRCROOT}/../node_modules/react-native/scripts/.packager.env\"\nif [ -z \"${RCT_NO_LAUNCH_PACKAGER+xxx}\" ] ; then\n  if nc -w 5 -z localhost ${RCT_METRO_PORT} ; then\n    if ! curl -s \"http://localhost:${RCT_METRO_PORT}/status\" | grep -q \"packager-status:running\" ; then\n      echo \"Port ${RCT_METRO_PORT} already in use, packager is either not running or not running correctly\"\n      exit 2\n    fi\n  else\n    open \"$SRCROOT/../node_modules/react-native/scripts/launchPackager.command\" || echo \"Can't start packager automatically\"\n  fi\nfi\n";
 			showEnvVarsInLog = 0;
@@ -472,7 +479,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.AppsFlyer.AppsFlyerExample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.appsflyerexample;
 				PRODUCT_NAME = AppsFlyerExample;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -501,7 +508,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.AppsFlyer.AppsFlyerExample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.appsflyerexample;
 				PRODUCT_NAME = AppsFlyerExample;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
