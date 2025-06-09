@@ -1,8 +1,29 @@
-const { withDangerousMod, withAppDelegate, WarningAggregator } = require('@expo/config-plugins');
+const { withAppDelegate, withDangerousMod, withXcodeProject, WarningAggregator } = require('@expo/config-plugins');
 const { mergeContents } = require('@expo/config-plugins/build/utils/generateCode');
 const { getAppDelegate } = require('@expo/config-plugins/build/ios/Paths');
 const fs = require('fs');
 const path = require('path');
+
+function getBridgingHeaderPathFromXcode(project) {
+  const buildConfigs = project.pbxXCBuildConfigurationSection();
+
+  for (const key in buildConfigs) {
+    const config = buildConfigs[key];
+    if (
+      typeof config === 'object' &&
+      config.buildSettings &&
+      config.buildSettings['SWIFT_OBJC_BRIDGING_HEADER']
+    ) {
+      const bridgingHeaderPath = config.buildSettings[
+        'SWIFT_OBJC_BRIDGING_HEADER'
+      ].replace(/"/g, '');
+
+      return bridgingHeaderPath;
+    }
+  }
+
+  return null;
+}
 
 function modifyObjcAppDelegate(appDelegate) {
   const RNAPPSFLYER_IMPORT = `#import <RNAppsFlyer.h>\n`;
@@ -88,47 +109,48 @@ function withAppsFlyerAppDelegate(config) {
   });
 }
 
-function withIosBridgingHeader(config) {
-  return withDangerousMod(config, [
-    'ios',
-    async (config) => {
-      const projectRoot = config.modRequest.projectRoot;
-      const projectName = config.modRequest.projectName || config.name;
-      const appDelegate = getAppDelegate(projectRoot);
+const withIosBridgingHeader = (config) => {
+  return withXcodeProject(config, (action) => {
+    const projectRoot = action.modRequest.projectRoot;
+    const appDelegate = getAppDelegate(projectRoot);
 
-      if (appDelegate.language === 'swift') {
-        const bridgingHeaderPath = path.join(
-          config.modRequest.platformProjectRoot,
-          config.name,
-          `${projectName}-Bridging-Header.h`,
-        );
+    if (appDelegate.language === 'swift') {
+      const bridgingHeaderPath = getBridgingHeaderPathFromXcode(
+        action.modResults,
+      );
 
-        if (fs.existsSync(bridgingHeaderPath)) {
-          let content = fs.readFileSync(bridgingHeaderPath, 'utf8');
-          const appsFlyerImport = '#import <RNAppsFlyer.h>';
+      const bridgingHeaderFilePath = path.join(
+        action.modRequest.platformProjectRoot,
+        bridgingHeaderPath,
+      );
 
-          if (!content.includes(appsFlyerImport)) {
-            content += `${appsFlyerImport}\n`;
-            fs.writeFileSync(bridgingHeaderPath, content);
-          }
-        } else {
-          WarningAggregator.addWarningIOS(
-            'withIosBridgingHeader',
+      if (fs.existsSync(bridgingHeaderFilePath)) {
+        let content = fs.readFileSync(bridgingHeaderFilePath, 'utf8');
+        const appsFlyerImport = '#import <RNAppsFlyer.h>';
+
+        if (!content.includes(appsFlyerImport)) {
+          content += `${appsFlyerImport}\n`;
+          fs.writeFileSync(bridgingHeaderFilePath, content);
+        }
+
+        return action;
+      }
+
+      WarningAggregator.addWarningIOS(
+        'withIosBridgingHeader',
 `
 Failed to detect ${bridgingHeaderPath} file. Please add AppsFlyer integration manually:
 #import <RNAppsFlyer.h>
 
 Supported format: Expo SDK default template
 `
-          );
-        }
+      );
 
-        return config;
-      }
+      return action; 
+    }
 
-      return config;
-    },
-  ]);
+    return action;
+  });
 };
 
 function withPodfile(config, shouldUseStrictMode) {
