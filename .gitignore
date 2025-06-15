@@ -69,3 +69,5 @@ demos/appsflyer-expo-app/yarn.lock
 
 demos/appsflyer-react-native-app/ios/.xcode.env
 demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcodeproj/project.pbxproj
+
+.cursor/*
