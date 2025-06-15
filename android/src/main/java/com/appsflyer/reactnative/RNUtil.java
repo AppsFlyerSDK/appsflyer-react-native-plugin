@@ -2,6 +2,7 @@ package com.appsflyer.reactnative;
 
 import android.os.Bundle;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
@@ -29,6 +30,60 @@ import javax.annotation.Nullable;
  */
 public class RNUtil {
     private RNUtil() {
+    }
+
+    // Helper method to convert a Map<String, Object> to a WritableMap
+    public static WritableMap toWritableMap(Map<String, Object> map) {
+        WritableMap writableMap = Arguments.createMap();
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            // Handle various data types
+            if (value == null) {
+                writableMap.putNull(key);
+            } else if (value instanceof Boolean) {
+                writableMap.putBoolean(key, (Boolean) value);
+            } else if (value instanceof Double) {
+                writableMap.putDouble(key, (Double) value);
+            } else if (value instanceof Integer) {
+                writableMap.putInt(key, (Integer) value);
+            } else if (value instanceof String) {
+                writableMap.putString(key, (String) value);
+            } else if (value instanceof Map) {
+                writableMap.putMap(key, toWritableMap((Map<String, Object>) value));
+            } else if (value instanceof List) {
+                writableMap.putArray(key, toWritableArray((List<Object>) value));
+            }
+        }
+
+        return writableMap;
+    }
+
+    // Helper method to convert a List<Object> to a WritableArray
+    public static WritableArray toWritableArray(List<Object> list) {
+        WritableArray writableArray = Arguments.createArray();
+
+        for (Object value : list) {
+            if (value == null) {
+                writableArray.pushNull();
+            } else if (value instanceof Boolean) {
+                writableArray.pushBoolean((Boolean) value);
+            } else if (value instanceof Double) {
+                writableArray.pushDouble((Double) value);
+            } else if (value instanceof Integer) {
+                writableArray.pushInt((Integer) value);
+            } else if (value instanceof String) {
+                writableArray.pushString((String) value);
+            } else if (value instanceof Map) {
+                writableArray.pushMap(toWritableMap((Map<String, Object>) value));
+            } else if (value instanceof List) {
+                writableArray.pushArray(toWritableArray((List<Object>) value));
+            }
+        }
+
+        return writableArray;
     }
 
     /**

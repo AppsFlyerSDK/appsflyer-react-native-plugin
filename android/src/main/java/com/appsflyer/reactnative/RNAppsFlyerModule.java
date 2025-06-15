@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.Locale;
 
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnDeepLinking;
@@ -400,7 +401,14 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        MediationNetwork mediationNetwork = MediationNetwork.valueOf(mediationNetworkValue.toUpperCase());
+        MediationNetwork mediationNetwork;
+        try {
+            mediationNetwork = MediationNetwork.valueOf(mediationNetworkValue.toUpperCase(Locale.ENGLISH));
+        } catch (IllegalArgumentException e) {
+            Log.d("AppsFlyer", "Invalid mediation network: " + mediationNetworkValue);
+            return;
+        }
+        
         if (mediationNetwork == null) {
             Log.d("AppsFlyer", "Invalid mediation network");
             return;
@@ -696,7 +704,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void setSharingFilterForPartners(ReadableArray partnersArray) {
         List<Object> partnersList = RNUtil.toList(partnersArray);
         if(partnersList == null) {
-          AppsFlyerLib.getInstance().setSharingFilterForPartners(null);
+          AppsFlyerLib.getInstance().setSharingFilterForPartners((String[]) null);
         } else{
           try {
               String[] partners = partnersList.toArray(new String[partnersList.size()]);
