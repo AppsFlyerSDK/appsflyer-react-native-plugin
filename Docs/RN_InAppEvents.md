@@ -17,6 +17,10 @@ Find more info about recording events [here](https://dev.appsflyer.com/hc/docs/i
 
 ## Send Event
 
+> 📘 Note
+>
+> For events with **revenue**, including in-app purchases, subscriptions, and ad revenue events, AppsFlyer customers with an ROI360 subscription should avoid using the `AFInAppEvents.REVENUE`(`af_revenue`) parameter in their in-app events. Doing so can result in duplicate revenue being reported. Instead, they should utilize the  [ad revenue SDK API](https://dev.appsflyer.com/hc/docs/rn_api#logadrevenue).
+
 **`logEvent(eventName, eventValues, success, error)`**
 
 | parameter    | type     | description                                   |
