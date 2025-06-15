@@ -6,7 +6,7 @@ package com.appsflyer.reactnative;
 
 public class RNAppsFlyerConstants {
 
-    final static String PLUGIN_VERSION = "6.16.2";
+    final static String PLUGIN_VERSION = "6.17.0";
     final static String NO_DEVKEY_FOUND = "No 'devKey' found or its empty";
     final static String UNKNOWN_ERROR = "AF Unknown Error";
     final static String SUCCESS = "Success";
@@ -58,5 +58,11 @@ public class RNAppsFlyerConstants {
     final static String AF_MEDIATION_NETWORK = "mediationNetwork";
     final static String AF_ADDITIONAL_PARAMETERS = "additionalParameters";
 
+    //Purchase Connector
+    final static String EVENT_SUBSCRIPTION_VALIDATION_SUCCESS = "subscriptionValidationSuccess";
+    final static String EVENT_SUBSCRIPTION_VALIDATION_FAILURE = "subscriptionValidationFailure";
+    final static String EVENT_IN_APP_PURCHASE_VALIDATION_SUCCESS = "inAppPurchaseValidationSuccess";
+    final static String EVENT_IN_APP_PURCHASE_VALIDATION_FAILURE = "inAppPurchaseValidationFailure";
+    final static String ENABLE_MODULE_MESSAGE = "Please set appsflyer.enable_purchase_connector to true in your gradle.properties file.";
 }
 

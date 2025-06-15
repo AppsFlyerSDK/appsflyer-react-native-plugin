@@ -38,6 +38,7 @@ android/gradlew.bat
 android/gradle
 android/gradlew
 android/.project
+android/.settings
 
 # node.js
 #
@@ -66,4 +67,5 @@ demos/appsflyer-expo-app/.expo
 demos/appsflyer-expo-app/node_modules
 demos/appsflyer-expo-app/yarn.lock
 
+demos/appsflyer-react-native-app/ios/.xcode.env
 demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcodeproj/project.pbxproj

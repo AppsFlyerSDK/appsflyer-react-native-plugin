@@ -704,7 +704,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void setSharingFilterForPartners(ReadableArray partnersArray) {
         List<Object> partnersList = RNUtil.toList(partnersArray);
         if(partnersList == null) {
-          AppsFlyerLib.getInstance().setSharingFilterForPartners(null);
+          AppsFlyerLib.getInstance().setSharingFilterForPartners((String[]) null);
         } else{
           try {
               String[] partners = partnersList.toArray(new String[partnersList.size()]);
