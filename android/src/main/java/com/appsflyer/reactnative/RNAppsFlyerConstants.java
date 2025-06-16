@@ -6,7 +6,7 @@ package com.appsflyer.reactnative;
 
 public class RNAppsFlyerConstants {
 
-    final static String PLUGIN_VERSION = "6.17.0";
+    final static String PLUGIN_VERSION = "6.17.01";
     final static String NO_DEVKEY_FOUND = "No 'devKey' found or its empty";
     final static String UNKNOWN_ERROR = "AF Unknown Error";
     final static String SUCCESS = "Success";
