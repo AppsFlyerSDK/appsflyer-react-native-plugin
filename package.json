@@ -1,6 +1,6 @@
 {
   "name": "react-native-appsflyer",
-  "version": "6.17.0",
+  "version": "6.17.01",
   "description": "React Native Appsflyer plugin",
   "main": "index.js",
   "types": "index.d.ts",
