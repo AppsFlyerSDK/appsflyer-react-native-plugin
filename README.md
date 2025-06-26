@@ -13,40 +13,18 @@
 ### <a id="plugin-build-for"> This plugin is built for
 
 - Android AppsFlyer SDK **v6.17.0**
-- iOS AppsFlyer SDK **v6.17.0**
+- iOS AppsFlyer SDK **v6.17.1**
 - Tested with React-Native **v0.62.0** (older versions might be supported)
 
-## <a id="breaking-changes"> ❗❗ Breaking changes when updating to v6.x.x❗❗
-- From version `6.16.2`, `AppsFlyerConsent.forGDPRUser` and `AppsFlyerConsent.forNonGDPRUser` have been **deprecated**. Use the new `AppsFlyerConsent` constructor instead. See [Deprecation Notice](/Docs/RN_CMP.md#deprecation-notice).
+## <a id="release-updates"> Release Updates
 
-- From version `6.15.1`, upgraded to targetSDKVersion 34, Java 17, and Gradle 8.7 in [AppsFlyer Android SDK v6.15.1](https://support.appsflyer.com/hc/en-us/articles/115001256006-AppsFlyer-Android-SDK-release-notes).
+- Starting with version 6.17.1 the plugin supports the Purchase Connector for validating and measuring Subscription and In-app purchase events. Integration guide can be found [here](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/blob/master/Docs/RN_PurchaseConnector.md).
 
-- From version `6.15.1`, iOS Minimum deployment target is set to 12.0.
+- Starting with version `6.16.2`, `AppsFlyerConsent.forGDPRUser` and `AppsFlyerConsent.forNonGDPRUser` have been **deprecated**. Use the new `AppsFlyerConsent` constructor instead. See [Deprecation Notice](/Docs/RN_CMP.md#deprecation-notice).
 
-- From version `6.3.0`, we use `xcframework` for iOS platform. Then you need to use cocoapods version >= 1.10
+- Starting with version `6.15.1`, upgraded to targetSDKVersion 34, Java 17, and Gradle 8.7 in [AppsFlyer Android SDK v6.15.1](https://support.appsflyer.com/hc/en-us/articles/115001256006-AppsFlyer-Android-SDK-release-notes).
 
-- From version `6.2.30`, `logCrossPromotionAndOpenStore` api will register as `af_cross_promotion` instead of `af_app_invites` in your dashboard.<br>
-  Click on a link that was generated using `generateInviteLink` api will be register as `af_app_invites`.
-
-- From version `6.0.0` we have renamed the following APIs:
-
-| Old API                       | New API                       |
-| ----------------------------- | ----------------------------- |
-| trackEvent                    | logEvent                      |
-| trackLocation                 | logLocation                   |
-| stopTracking                  | stop                          |
-| trackCrossPromotionImpression | logCrossPromotionImpression   |
-| trackAndOpenStore             | logCrossPromotionAndOpenStore |
-| setDeviceTrackingDisabled     | anonymizeUser                 |
-| AppsFlyerTracker              | AppsFlyerLib                  |
-
-And removed the following ones:
-
-- trackAppLaunch -> no longer needed. See new init guide
-- sendDeepLinkData -> no longer needed. See new init guide
-- enableUninstallTracking -> no longer needed. See new uninstall measurement guide
-
-If you have used 1 of the removed APIs, please check the integration guide for the updated instructions.
+- Starting with version `6.15.1`, iOS Minimum deployment target is set to 12.0.
 
 ---
 

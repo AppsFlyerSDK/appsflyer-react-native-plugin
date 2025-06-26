@@ -22,7 +22,7 @@
 @end
 
 
-static NSString *const kAppsFlyerPluginVersion      = @"6.17.01";
+static NSString *const kAppsFlyerPluginVersion      = @"6.17.1";
 static NSString *const NO_DEVKEY_FOUND              = @"No 'devKey' found or its empty";
 static NSString *const NO_APPID_FOUND               = @"No 'appId' found or its empty";
 static NSString *const NO_EVENT_NAME_FOUND          = @"No 'eventName' found or its empty";
