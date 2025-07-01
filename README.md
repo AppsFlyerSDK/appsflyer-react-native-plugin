@@ -18,7 +18,11 @@
 
 ## <a id="release-updates"> Release Updates
 
-- Starting with version 6.17.1 the plugin supports the Purchase Connector for validating and measuring Subscription and In-app purchase events. Integration guide can be found [here](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/blob/master/Docs/RN_PurchaseConnector.md).
+- Starting with version `6.17.1` the plugin supports the Purchase Connector for validating and measuring Subscription and In-app purchase events. Integration guide can be found [here](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/blob/master/Docs/RN_PurchaseConnector.md).
+
+- Starting with version `6.17.1` the TypeScript interfaces for Purchase Connector data sources have been simplified and are now **breaking changes**:
+    - `PurchaseRevenueDataSource.purchaseRevenueAdditionalParametersForProducts()` function has been replaced with `additionalParameters` object
+    - `PurchaseRevenueDataSourceStoreKit2.purchaseRevenueAdditionalParametersStoreKit2ForProducts()` function has been replaced with `additionalParameters` object
 
 - Starting with version `6.16.2`, `AppsFlyerConsent.forGDPRUser` and `AppsFlyerConsent.forNonGDPRUser` have been **deprecated**. Use the new `AppsFlyerConsent` constructor instead. See [Deprecation Notice](/Docs/RN_CMP.md#deprecation-notice).
 
