@@ -216,18 +216,12 @@ declare module "react-native-appsflyer" {
 
   //PurchaseRevenueDataSourceSK1
   export interface PurchaseRevenueDataSource {
-    purchaseRevenueAdditionalParametersForProducts?: (
-      products: any[], // SKProduct array
-      transactions: any[] // SKPaymentTransaction array
-    ) => { [key: string]: any } | null;
+    additionalParameters?: { [key: string]: any };
   }
   
   // PurchaseRevenueDataSourceStoreKit2
   export interface PurchaseRevenueDataSourceStoreKit2 {
-    purchaseRevenueAdditionalParametersStoreKit2ForProducts: (
-      products: any[], // AFSDKProductSK2 array
-      transactions: any[] // AFSDKTransactionSK2 array
-    ) => { [key: string]: any } | null;
+    additionalParameters?: { [key: string]: any };
   }
 
   // Android interfaces
