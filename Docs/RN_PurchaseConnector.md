@@ -38,14 +38,15 @@ For more information please check the following pages:
     - [Subscription Purchase Data Source](#subscription-purchase-data-source)
     - [In-App Purchase Data Source](#in-app-purchase-data-source)
   - [Platform-Specific Implementation](#platform-specific-implementation)
+  - [Logging Consumable Transactions](#logging-consumable-transactions)
   - [Important Notes](#important-notes)
 
 ## <a id="important-note"></a>Important Note ⚠️ ⚠️
 
 The Purchase Connector feature of the AppsFlyer SDK depends on specific libraries provided by Google and Apple for managing in-app purchases:
 
--   For Android, it depends on the  [Google Play Billing Library](https://developer.android.com/google/play/billing/integrate) (Supported versions: 5.x.x - 6.x.x).
--   For iOS, it depends on  [StoreKit](https://developer.apple.com/documentation/storekit).
+-   For Android, it depends on the  [Google Play Billing Library](https://developer.android.com/google/play/billing/integrate) (Supported versions: 5.x.x - 7.x.x).
+-   For iOS, it depends on  [StoreKit](https://developer.apple.com/documentation/storekit) (Supported versions: StoreKit1 and StoreKit2 (beta)).
 
 However, these dependencies aren't actively included with the SDK. This means that the responsibility of managing these dependencies and including the necessary libraries in your project falls on you as the consumer of the SDK.
 
@@ -86,6 +87,7 @@ To properly set up the configuration object, you must specify certain parameters
 - `logSubscriptions`: If set to `true`, the connector logs all subscription events.
 - `logInApps`: If set to `true`, the connector logs all in-app purchase events.
 - `sandbox`: If set to `true`, transactions are tested in a sandbox environment. Be sure to set this to `false` in production.
+- `storeKitVersion`: (iOS only) Specifies which StoreKit version to use. Defaults to `StoreKitVersion.SK1` if not specified. Use `StoreKitVersion.SK2` for iOS 15.0+ features.
 
 Here's an example usage:
 
@@ -93,12 +95,31 @@ Here's an example usage:
 import appsFlyer, {
   AppsFlyerPurchaseConnector,
   AppsFlyerPurchaseConnectorConfig,
+  StoreKitVersion,
 } from 'react-native-appsflyer';
 
+// Example 1: StoreKit1 (default if storeKitVersion is not specified)
 const purchaseConnectorConfig: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
     logSubscriptions: true,
     logInApps: true,
     sandbox: true,
+    // storeKitVersion defaults to StoreKit1 if not specified
+  });
+
+// Example 2: Explicitly setting StoreKit1
+const purchaseConnectorConfigSK1: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
+    logSubscriptions: true,
+    logInApps: true,
+    sandbox: true,
+    storeKitVersion: StoreKitVersion.SK1
+  });
+
+// Example 3: StoreKit2 (iOS 15.0+)
+const purchaseConnectorConfigSK2: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
+    logSubscriptions: true,
+    logInApps: true,
+    sandbox: true,
+    storeKitVersion: StoreKitVersion.SK2
   });
 
 //Create the object
@@ -125,6 +146,7 @@ For example:
     logSubscriptions: true,
     logInApps: true,
     sandbox: true,
+    storeKitVersion: StoreKitVersion.SK1  // This will be ignored since instance already exists
   });
 
   // purchaseConnector1 and purchaseConnector2 point to the same instance
@@ -145,14 +167,26 @@ Start the SDK instance to observe transactions. </br>
         import appsFlyer, {
         AppsFlyerPurchaseConnector,
         AppsFlyerPurchaseConnectorConfig,
+        StoreKitVersion,
         } from 'react-native-appsflyer';
 
         appsFlyer.startSdk();
+        
+        // StoreKit1 example (default behavior)
         const purchaseConnectorConfig: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
-            logSubscriptions: true,
-            logInApps: true,
-            sandbox: true,
+          logSubscriptions: true,
+          logInApps: true,
+          sandbox: true,
+          // storeKitVersion: StoreKitVersion.SK1 // Optional - SK1 is default
         });
+
+        // StoreKit2 example (iOS 15.0+)
+        // const purchaseConnectorConfig: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
+        //   logSubscriptions: true,
+        //   logInApps: true,
+        //   sandbox: true,
+        //   storeKitVersion: StoreKitVersion.SK2
+        // });
 
         //Create the object
         AppsFlyerPurchaseConnector.create(purchaseConnectorConfig);
@@ -199,10 +233,20 @@ const purchaseConnectorConfig = {
 And integrating both options into the example you provided would look like this:
 
 ```javascript
+// StoreKit1 configuration (default)
 const purchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
   logSubscriptions: true, // Enable automatic logging of subscription events
   logInApps: true,        // Enable automatic logging of in-app purchase events
   sandbox: true,          // Additional configuration option
+  // storeKitVersion: StoreKitVersion.SK1 // Optional - defaults to SK1
+});
+
+// StoreKit2 configuration (iOS 15.0+)
+const purchaseConnectorConfigSK2 = AppsFlyerPurchaseConnectorConfig.setConfig({
+  logSubscriptions: true, // Enable automatic logging of subscription events
+  logInApps: true,        // Enable automatic logging of in-app purchase events
+  sandbox: true,          // Additional configuration option
+  storeKitVersion: StoreKitVersion.SK2 // Required for StoreKit2
 });
 ```
 
@@ -318,15 +362,20 @@ Add following keep rules to your  `proguard-rules.pro`  file:
 
 ## <a id="full-code-example"></a>Full Code Example
 ```javascript
-const purchaseConnectorConfig: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
+import appsFlyer, {
+  StoreKitVersion,
+  AppsFlyerPurchaseConnector,
+  AppsFlyerPurchaseConnectorConfig,
+} from 'react-native-appsflyer';
+
+const purchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
     logSubscriptions: true,
     logInApps: true,
     sandbox: true,
+    storeKitVersion: StoreKitVersion.SK2
   });
   
-  AppsFlyerPurchaseConnector.create(
-    purchaseConnectorConfig,
-  );
+  AppsFlyerPurchaseConnector.create(purchaseConnectorConfig);
     
 const handleValidationSuccess = (validationResult) => {
     console.log('>> ValidationSuccess: ', validationResult);
@@ -417,14 +466,13 @@ AppsFlyerPurchaseConnector.setPurchaseRevenueDataSource({
 ```javascript
 // Set additional parameters for StoreKit2 purchases
 AppsFlyerPurchaseConnector.setPurchaseRevenueDataSourceStoreKit2({
-  products: [
-    { product_id: 'com.app.subscription.monthly' },
-    { product_id: 'com.app.subscription.yearly' }
-  ],
-  transactions: [
-    { transaction_id: 'transaction123' },
-    { transaction_id: 'transaction456' }
-  ]
+  additionalParameters: {
+    user_id: '12345',
+    user_type: 'premium',
+    purchase_source: 'app_store',
+    custom_param1: 'value1',
+    custom_param2: 'value2'
+  }
 });
 ```
 
@@ -469,7 +517,7 @@ When implementing these data sources in your app, you should consider the platfo
 
 ```javascript
 import { Platform } from 'react-native';
-import AppsFlyerPurchaseConnector from 'react-native-appsflyer-plugin';
+import { AppsFlyerPurchaseConnector } from 'react-native-appsflyer';
 
 const setupPurchaseDataSources = () => {
   if (Platform.OS === 'ios') {
@@ -484,12 +532,11 @@ const setupPurchaseDataSources = () => {
 
     // iOS StoreKit2 data source (iOS 15.0+)
     AppsFlyerPurchaseConnector.setPurchaseRevenueDataSourceStoreKit2({
-      products: [
-        { product_id: 'com.app.subscription.monthly' }
-      ],
-      transactions: [
-        { transaction_id: 'transaction123' }
-      ]
+      additionalParameters: {
+        user_id: '12345',
+        user_type: 'premium',
+        purchase_source: 'app_store'
+      }
     });
   } else if (Platform.OS === 'android') {
     // Android subscription data source
@@ -513,6 +560,59 @@ const setupPurchaseDataSources = () => {
 };
 ```
 
+
+### <a id="logging-consumable-transactions"></a>Logging Consumable Transactions
+
+On iOS 15 and above, consumable in-app purchases are handled via StoreKit 2. The behavior depends on your iOS version:
+
+- **On iOS 18 and later:**  
+  Apple introduced a new Info.plist flag: `SKIncludeConsumableInAppPurchaseHistory`.  
+  - If you set `SKIncludeConsumableInAppPurchaseHistory` to `YES` in your Info.plist, automatic collection will happen.
+  - If the flag is not present or is set to `NO`, you must manually log consumable transactions as shown below.
+
+- **On iOS 15–17:**  
+  Consumable purchases must always be logged manually.
+
+To manually log consumable transactions, use the `logConsumableTransaction` method after finishing the transaction:
+
+```javascript
+import { Platform } from 'react-native';
+import { AppsFlyerPurchaseConnector } from 'react-native-appsflyer';
+
+// Purchase update listener
+purchaseUpdatedListener((purchase) => {
+  console.log("🛒 Purchase updated:", purchase.productId, "Transaction ID:", purchase.transactionId);
+  const isConsumable = consumablesItems.includes(purchase.productId);
+  
+  finishTransaction({ purchase, isConsumable })
+    .then((res) => {
+      console.log("✅ finishTransaction success:", res);
+      console.log("🔍 Expecting AppsFlyer validation callback for:", purchase.productId);
+      
+      // Log consumable transaction for iOS
+      if (Platform.OS === 'ios' && isConsumable && purchase.transactionId) {
+        AppsFlyerPurchaseConnector.logConsumableTransaction(purchase.transactionId);
+        console.log("📝 Consumable transaction logged:", purchase.transactionId);
+      }
+    })
+    .catch((error) => {
+      console.warn("❌ Error finishing transaction:", error);
+    });
+});
+```
+
+### Method Signature
+
+```javascript
+AppsFlyerPurchaseConnector.logConsumableTransaction(transactionId: string): void
+```
+
+**Parameters:**
+- `transactionId` (string): The unique transaction identifier from the App Store transaction
+
+**Note:** This method is iOS-specific and should only be called on iOS devices. On Android, consumable transactions are automatically handled by the Purchase Connector.
+
+
 ### <a id="important-notes"></a>Important Notes
 
 1. **iOS StoreKit2**: The StoreKit2 data source is only available on iOS 15.0 and later. Make sure to check the iOS version before using it.
@@ -525,11 +625,21 @@ const setupPurchaseDataSources = () => {
 
 ```javascript
 // 1. Create the connector
-await AppsFlyerPurchaseConnector.create({
+// StoreKit1 (default)
+AppsFlyerPurchaseConnector.create({
   logSubscriptions: true,
   logInApps: true,
-  sandbox: __DEV__
+  sandbox: __DEV__,
+  // storeKitVersion: StoreKitVersion.SK1 // Optional - defaults to SK1
 });
+
+// OR for StoreKit2 (iOS 15.0+)
+// AppsFlyerPurchaseConnector.create({
+//   logSubscriptions: true,
+//   logInApps: true,
+//   sandbox: __DEV__,
+//   storeKitVersion: StoreKitVersion.SK2
+// });
 
 // 2. Set up data sources
 setupPurchaseDataSources();
@@ -537,5 +647,3 @@ setupPurchaseDataSources();
 // 3. Start observing transactions
 await AppsFlyerPurchaseConnector.startObservingTransactions();
 ```
-
-4. **Validation**: The parameters you set will be included in the purchase events sent to AppsFlyer. You can verify this in the AppsFlyer dashboard under the purchase events section.
