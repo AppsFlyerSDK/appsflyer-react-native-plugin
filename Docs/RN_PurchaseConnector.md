@@ -1,4 +1,11 @@
-# React Native Purchase Connector
+---
+title: React Native Purchase Connector
+category: 5f9705393c689a065c409b23
+parentDoc: 645213236f53a00d4daa9230
+order: 13
+hidden: false
+---
+
 **At a glance:** Automatically validate and measure revenue from in-app purchases and auto-renewable subscriptions to get the full picture of your customers' life cycles and accurate ROAS measurements.
 For more information please check the following pages:
 *  [ROI360 in-app purchase (IAP) and subscription revenue measurement](https://support.appsflyer.com/hc/en-us/articles/7459048170769-ROI360-in-app-purchase-IAP-and-subscription-revenue-measurement?query=purchase)
@@ -8,38 +15,6 @@ For more information please check the following pages:
 🛠 You can contact AppsFlyer support through the Customer Assistant Chatbot for assistance with troubleshooting issues or product guidance. To do so, please follow this article: https://support.appsflyer.com/hc/en-us/articles/23583984402193-Using-the-Customer-Assistant-Chatbot.
 
 > *When submitting an issue please specify your AppsFlyer sign-up (account) email , your app ID , production steps, logs, code snippets and any additional relevant information.*
-
-## Table Of Content
-* [Important Note](#important-note)
-* [Adding The Connector To Your Project](#adding-the-connector-to-your-project)
-  - [How to Opt-In](#how-to-opt-in)
-  - [What Happens if You Use PurchaseConnector Files Without Opting In?](#important-callout-what-happens-if-you-use-the-purchase-connector-files-without-opting-in)
-* [Basic Integration Of The Connector](#basic-integration-of-the-connector)
-  - [Create PurchaseConnector Instance](#create-purchaseconnector-instance)
-  - [Start Observing Transactions](#start-observing-transactions)
-  - [Stop Observing Transactions](#stop-observing-transactions)
-  - [Log Subscriptions](#log-subscriptions)
-  - [Log In App Purchases](#log-in-app-purchases)
-* [Register Validation Results Listeners](#register-validation-results-listeners)
-  - [Cross-Platform Considerations](#cross-platform-considerations)
-  - [Android Callback Types](#android-callback-types)
-  - [Android - Subscription and In Apps Validation Result Listener](#android---subscription-and-inapps-validation-result-listener)
-  - [iOS Combined Validation Result Listener](#ios-combined-validation-result-listener)
-* [Testing the Integration](#testing-the-integration)
-  - [Android](#android)
-  - [iOS](#ios)
-* [ProGuard Rules for Android](#proguard-rules-for-android)
-* [Full Code Example](#full-code-example)
-* [Purchase Revenue Data Sources](#purchase-revenue-data-sources)
-  - [iOS Data Sources](#ios-data-sources)
-    - [StoreKit1 Data Source](#storekit1-data-source)
-    - [StoreKit2 Data Source](#storekit2-data-source)
-  - [Android Data Sources](#android-data-sources)
-    - [Subscription Purchase Data Source](#subscription-purchase-data-source)
-    - [In-App Purchase Data Source](#in-app-purchase-data-source)
-  - [Platform-Specific Implementation](#platform-specific-implementation)
-  - [Logging Consumable Transactions](#logging-consumable-transactions)
-  - [Important Notes](#important-notes)
 
 ## <a id="important-note"></a>Important Note ⚠️ ⚠️
 
