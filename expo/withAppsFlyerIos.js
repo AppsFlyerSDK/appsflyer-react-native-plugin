@@ -153,36 +153,65 @@ Supported format: Expo SDK default template
   });
 };
 
-function withPodfile(config, shouldUseStrictMode) {
+function withPodfile(config, shouldUseStrictMode, shouldUsePurchaseConnector) {
   return withDangerousMod(config, [
     'ios',
     async (config) => {
       const filePath = path.join(config.modRequest.platformProjectRoot, 'Podfile');
       const contents = fs.readFileSync(filePath, 'utf-8');
 
-      const mergedPodfileWithStrictMode = mergeContents({
-        tag: 'AppsFlyer Strict Mode',
-        src: contents,
-        newSrc: `$RNAppsFlyerStrictMode=${shouldUseStrictMode}`,
-        anchor: 'use_expo_modules!',
-        offset: 0,
-        comment: '#',
-      });
+      let mergedContents = { contents, didMerge: true };
 
-      if (!mergedPodfileWithStrictMode.didMerge) {
-        console.log("ERROR: Cannot add AppsFlyer strict mode to the project's ios/Podfile because it's malformed. Please report this with a copy of your project Podfile.");
-        return config;
+      // Check if Strict Mode flag already exists
+      if (!contents.includes('$RNAppsFlyerStrictMode')) {
+        mergedContents = mergeContents({
+          tag: 'AppsFlyer Strict Mode',
+          src: mergedContents.contents,
+          newSrc: `$RNAppsFlyerStrictMode=${shouldUseStrictMode}`,
+          anchor: 'use_expo_modules!',
+          offset: 0,
+          comment: '#',
+        });
+
+        if (!mergedContents.didMerge) {
+          console.log("ERROR: Cannot add AppsFlyer strict mode to the project's ios/Podfile because it's malformed. Please report this with a copy of your project Podfile.");
+          return config;
+        }
+      } else {
+        console.log("INFO: $RNAppsFlyerStrictMode already exists in Podfile, skipping auto-assignment.");
       }
 
-      fs.writeFileSync(filePath, mergedPodfileWithStrictMode.contents);
+      // Check if Purchase Connector flag already exists
+      if (!contents.includes('$AppsFlyerPurchaseConnector')) {
+        mergedContents = mergeContents({
+          tag: 'AppsFlyer Purchase Connector',
+          src: mergedContents.contents,
+          newSrc: `$AppsFlyerPurchaseConnector=${shouldUsePurchaseConnector}`,
+          anchor: 'use_expo_modules!',
+          offset: mergedContents.contents.includes('$RNAppsFlyerStrictMode') ? 1 : 0,
+          comment: '#',
+        });
+
+        if (!mergedContents.didMerge) {
+          console.log("ERROR: Cannot add AppsFlyer Purchase Connector to the project's ios/Podfile because it's malformed. Please report this with a copy of your project Podfile.");
+          return config;
+        }
+      } else {
+        console.log("INFO: $AppsFlyerPurchaseConnector already exists in Podfile, skipping auto-assignment.");
+      }
+
+      fs.writeFileSync(filePath, mergedContents.contents);
 
       return config;
     },
   ]);
 }
 
-module.exports = function withAppsFlyerIos(config, shouldUseStrictMode) {
-  config = withPodfile(config, shouldUseStrictMode);
+module.exports = function withAppsFlyerIos(config, { 
+  shouldUseStrictMode = false, 
+  shouldUsePurchaseConnector = false 
+} = {}) {
+  config = withPodfile(config, shouldUseStrictMode, shouldUsePurchaseConnector);
   config = withIosBridgingHeader(config);
   config = withAppsFlyerAppDelegate(config);
   return config;
