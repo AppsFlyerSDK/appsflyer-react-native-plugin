@@ -1,0 +1,11 @@
+# This workflow triggers the org-wide reusable workflow to respond to newly opened issues
+on:
+  issues:
+    types:
+      - opened
+  workflow_dispatch:
+
+jobs:
+  add-comment:
+    uses: AppsFlyerSDK/github-common-workflow-and-template/.github/workflows/responseToSupportIssueOnOpen.yml@main
+    secrets: inherit 

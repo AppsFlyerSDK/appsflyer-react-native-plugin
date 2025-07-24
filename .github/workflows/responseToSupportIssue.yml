@@ -1,23 +1,11 @@
-# This workflow creates new comment from template to an issue
-# if it was labled as 'support'
-
-name: Add comment
+# This workflow triggers the org-wide reusable workflow to respond to issues labeled as 'support'
 on:
   issues:
     types:
       - labeled
+  workflow_dispatch:
+
 jobs:
   add-comment:
-    if: github.event.label.name == 'support'
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write
-    steps:
-      - name: Add comment
-        uses: peter-evans/create-or-update-comment@a35cf36e5301d70b76f316e867e7788a55a31dae
-        with:
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            👋 Hi @${{ github.event.issue.user.login }} and Thank you for reaching out to us.
-            You can contact AppsFlyer support through the Customer Assistant Chatbot for assistance with troubleshooting issues or product guidance.
-            To do so, please follow [this article](https://support.appsflyer.com/hc/en-us/articles/23583984402193-Using-the-Customer-Assistant-Chatbot).
+    uses: AppsFlyerSDK/github-common-workflow-and-template/.github/workflows/responseToSupportIssue.yml@main
+    secrets: inherit 
