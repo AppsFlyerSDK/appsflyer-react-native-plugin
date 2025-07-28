@@ -1,3 +1,5 @@
+// this is not used currently because of a bug in Expo 53 , please manually add appsflyer.enable_purchase_connector = true to the gradle.properties file in Order to use Purchase Connector feature in Android.
+/*
 const { withGradleProperties } = require('@expo/config-plugins');
 
 function withAppsFlyerGradleProperties(config) {
@@ -25,3 +27,4 @@ module.exports = function withAppsFlyerAndroid(config, {
 
   return config;
 };
+*/
