@@ -22,7 +22,11 @@ expo install react-native-appsflyer
 ...
 "plugins": [
       [
-        "react-native-appsflyer",{}
+        "react-native-appsflyer",
+        {
+          "shouldUseStrictMode": false,          // optional – kids-apps strict mode
+          "shouldUsePurchaseConnector": true     // NEW – enables Purchase Connector
+        }
       ]
     ],
 ...
@@ -112,3 +116,14 @@ In v6.8.0 of the AppsFlyer SDK, we added the normal permission com.google.androi
 to allow the SDK to collect the Android Advertising ID on apps targeting API 33.
 If your app is targeting children, you need to revoke this permission to comply with Google's Data policy.
 You can read more about it [here](https://docs.expo.dev/guides/permissions/#android).
+
+### Purchase Connector (optional)
+
+Setting `"shouldUsePurchaseConnector": true` will:
+
+* **iOS** – add the `PurchaseConnector` CocoaPod automatically  
+* **Android** – add `appsflyer.enable_purchase_connector=true` to `gradle.properties`
+
+> **Expo SDK 53 note**  
+> Due to a known Expo 53 issue, the Android will fail to apply. Manually add  
+> `appsflyer.enable_purchase_connector=true` to `android/gradle.properties`.
