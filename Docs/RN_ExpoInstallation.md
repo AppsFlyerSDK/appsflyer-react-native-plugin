@@ -123,7 +123,3 @@ Setting `"shouldUsePurchaseConnector": true` will:
 
 * **iOS** – add the `PurchaseConnector` CocoaPod automatically  
 * **Android** – add `appsflyer.enable_purchase_connector=true` to `gradle.properties`
-
-> **Expo SDK 53 note**  
-> Due to a known Expo 53 issue, the Android will fail to apply. Manually add  
-> `appsflyer.enable_purchase_connector=true` to `android/gradle.properties`.
