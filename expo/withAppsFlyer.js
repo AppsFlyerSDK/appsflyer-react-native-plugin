@@ -1,5 +1,12 @@
 const withAppsFlyerIos = require('./withAppsFlyerIos');
-module.exports = function withAppsFlyer(config, { shouldUseStrictMode = false } = {}) {
-	config = withAppsFlyerIos(config, shouldUseStrictMode);
-	return config;
+const withAppsFlyerAndroid = require('./withAppsFlyerAndroid');
+console.log('[AppsFlyerPlugin] Main plugin loaded');
+
+module.exports = function withAppsFlyer(config, { 
+  shouldUseStrictMode = false, 
+  shouldUsePurchaseConnector = false 
+} = {}) {
+  config = withAppsFlyerIos(config, { shouldUseStrictMode, shouldUsePurchaseConnector });
+  config = withAppsFlyerAndroid(config, { shouldUsePurchaseConnector });
+  return config;
 };
