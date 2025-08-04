@@ -777,6 +777,55 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void validateAndLogInAppPurchaseV2(ReadableMap purchaseDetails, ReadableMap additionalParameters, Callback callback) {
+        try {
+            String purchaseType = purchaseDetails.getString("purchaseType");
+            String purchaseToken = purchaseDetails.getString("transactionId");
+            String productId = purchaseDetails.getString("productId");
+
+            // Convert purchaseType string to AFPurchaseType enum
+            AFPurchaseType afPurchaseType;
+            if ("subscription".equals(purchaseType)) {
+                afPurchaseType = AFPurchaseType.SUBSCRIPTION;
+            } else {
+                afPurchaseType = AFPurchaseType.ONE_TIME_PURCHASE;
+            }
+
+            // Create AFPurchaseDetails object
+            AFPurchaseDetails afPurchaseDetails = new AFPurchaseDetails(afPurchaseType, purchaseToken, productId);
+
+            // Convert additionalParameters to Map
+            Map<String, String> additionalParamsMap = null;
+            if (additionalParameters != null) {
+                additionalParamsMap = RNUtil.toMap(additionalParameters);
+            }
+
+            AppsFlyerLib.getInstance().validateAndLogInAppPurchase(
+                    afPurchaseDetails,
+                    additionalParamsMap,
+                    new AppsFlyerInAppPurchaseValidationCallback() {
+                        @Override
+                        public void onSuccess() {
+                            if (callback != null) {
+                                callback.invoke("In App Purchase Validation completed successfully!");
+                            }
+                        }
+
+                        @Override
+                        public void onError(int errorCode, String errorMessage) {
+                            if (callback != null) {
+                                callback.invoke("Error: " + errorMessage);
+                            }
+                        }
+                    });
+        } catch (Exception e) {
+            if (callback != null) {
+                callback.invoke("Error: " + e.getMessage());
+            }
+        }
+    }
+
+    @ReactMethod
     public void sendPushNotificationData(ReadableMap pushPayload, Callback errorCallback) {
         JSONObject payload = RNUtil.readableMapToJson(pushPayload);
         String errorMsg;
@@ -877,6 +926,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         } else{
             Log.d("AppsFlyer", "performOnDeepLinking: activity is null!");
         }
+    }
+
+    @ReactMethod
+    public void disableAppSetId() {
+        AppsFlyerLib.getInstance().disableAppSetId();
     }
 
     @ReactMethod

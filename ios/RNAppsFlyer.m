@@ -565,6 +565,10 @@ RCT_EXPORT_METHOD(disableIDFVCollection: (BOOL)shouldDisable) {
     [[AppsFlyerLib shared] setDisableIDFVCollection:shouldDisable];
 }
 
+RCT_EXPORT_METHOD(disableAppSetId) {
+    NSLog(@"disableAppSetId is only relevant for Android platform");
+}
+
 RCT_EXPORT_METHOD(setUseReceiptValidationSandbox: (BOOL)isSandbox) {
     [AppsFlyerLib shared].useReceiptValidationSandbox = isSandbox;
 }
@@ -598,6 +602,54 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
         errorCallback(error);
     }
 
+}
+
+RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2: (NSDictionary*)purchaseDetails
+                  additionalParameters:(NSDictionary*)additionalParameters
+                  callback:(RCTResponseSenderBlock)callback) {
+    
+    if (!purchaseDetails || [purchaseDetails isKindOfClass:[NSNull class]]) {
+        if (callback) {
+            callback(@[@"Error: Purchase details are required"]);
+        }
+        return;
+    }
+    
+    NSString* purchaseType = [purchaseDetails objectForKey:@"purchaseType"];
+    NSString* productId = [purchaseDetails objectForKey:@"productId"];
+    NSString* transactionId = [purchaseDetails objectForKey:@"transactionId"];
+    
+    if (!purchaseType || !productId || !transactionId) {
+        if (callback) {
+            callback(@[@"Error: purchaseType, productId, and transactionId are required"]);
+        }
+        return;
+    }
+    
+    // Convert purchaseType string to enum
+    AFSDKPurchaseType afPurchaseType;
+    if ([purchaseType isEqualToString:@"subscription"]) {
+        afPurchaseType = AFSDKPurchaseTypeSubscription;
+    } else {
+        afPurchaseType = AFSDKPurchaseTypeOneTimePurchase;
+    }
+    
+    // Create AFSDKPurchaseDetails object
+    AFSDKPurchaseDetails* details = [[AFSDKPurchaseDetails alloc] initWithPurchaseType:afPurchaseType
+                                                                              productId:productId
+                                                                          transactionId:transactionId];
+    
+    [[AppsFlyerLib shared] validateAndLogInAppPurchase:details
+                                       extraEventValues:additionalParameters
+                                      completionHandler:^(AFSDKValidateAndLogResult * _Nullable result) {
+        if (callback) {
+            if (result && result.isValid) {
+                callback(@[@"In App Purchase Validation completed successfully!"]);
+            } else {
+                callback(@[@"Error: Purchase validation failed"]);
+            }
+        }
+    }];
 }
 
 RCT_EXPORT_METHOD(sendPushNotificationData: (NSDictionary*)pushPayload errorCallBack:(RCTResponseErrorBlock)errorCallBack) {

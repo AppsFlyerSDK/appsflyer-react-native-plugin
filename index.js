@@ -846,18 +846,26 @@ appsFlyer.disableCollectASA = (shouldDisable) => {
 };
 
 /**
- * Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.
- * Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases
- * @param purchaseInfo ReadableMap includes: String publicKey, String signature, String purchaseData, String price, String currency, JSONObject additionalParameters.
- * @param successC Success callback
- * @param errorC Error callback
+ * Validate and log in-app purchase with support for both legacy and new APIs.
+ * 
+ * - **Legacy API**: validateAndLogInAppPurchase(purchaseInfo, successC, errorC) 
+ * - **New API**: validateAndLogInAppPurchase(purchaseDetails, additionalParameters, callback) 
+ * 
+ * The method automatically detects which API to use based on the parameters:
+ * - If first parameter has 'purchaseType' property, uses new API
+ * - Otherwise, uses legacy API
  */
-appsFlyer.validateAndLogInAppPurchase = (purchaseInfo, successC, errorC) => {
-  return RNAppsFlyer.validateAndLogInAppPurchase(
-    purchaseInfo,
-    successC,
-    errorC
-  );
+appsFlyer.validateAndLogInAppPurchase = (param1, param2, param3) => {
+  // Detect which API to use based on the first parameter
+  if (param1 && typeof param1 === 'object' && param1.purchaseType) {
+    // New API: (purchaseDetails, additionalParameters, callback)
+    console.log('[AppsFlyer] Using new validateAndLogInAppPurchase API with AFPurchaseDetails');
+    return RNAppsFlyer.validateAndLogInAppPurchaseV2(param1, param2, param3);
+  } else {
+    // Legacy API: (purchaseInfo, successC, errorC)
+    console.log('[AppsFlyer] Using legacy validateAndLogInAppPurchase API');
+    return RNAppsFlyer.validateAndLogInAppPurchase(param1, param2, param3);
+  }
 };
 
 appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
@@ -952,6 +960,14 @@ appsFlyer.startSdk = () => {
 
 appsFlyer.performOnDeepLinking = () => {
   return RNAppsFlyer.performOnDeepLinking();
+};
+
+/**
+ * Disable the collection of AppSet ID.
+ * This method is only relevant for Android platform.
+ */
+appsFlyer.disableAppSetId = () => {
+  return RNAppsFlyer.disableAppSetId();
 };
 
 /**
