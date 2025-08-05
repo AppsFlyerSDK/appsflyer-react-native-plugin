@@ -845,6 +845,12 @@ appsFlyer.disableCollectASA = (shouldDisable) => {
   return RNAppsFlyer.disableCollectASA(shouldDisable);
 };
 
+// Export AFPurchaseType enum for the new validateAndLogInAppPurchase API
+export const AFPurchaseType = {
+  SUBSCRIPTION: "subscription",
+  ONE_TIME_PURCHASE: "one-time-purchase"
+};
+
 /**
  * Validate and log in-app purchase with support for both legacy and new APIs.
  * 
@@ -856,6 +862,10 @@ appsFlyer.disableCollectASA = (shouldDisable) => {
  * - Otherwise, uses legacy API
  */
 appsFlyer.validateAndLogInAppPurchase = (param1, param2, param3) => {
+  // Debug: Check if native methods exist
+  console.log('[AppsFlyer] RNAppsFlyer methods:', Object.keys(RNAppsFlyer));
+  console.log('[AppsFlyer] validateAndLogInAppPurchaseV2 exists:', typeof RNAppsFlyer.validateAndLogInAppPurchaseV2);
+  
   // Detect which API to use based on the first parameter
   if (param1 && typeof param1 === 'object' && param1.purchaseType) {
     // New API: (purchaseDetails, additionalParameters, callback)

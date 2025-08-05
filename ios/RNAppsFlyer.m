@@ -604,7 +604,7 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
 
 }
 
-RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2: (NSDictionary*)purchaseDetails
+RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2:(NSDictionary*)purchaseDetails
                   additionalParameters:(NSDictionary*)additionalParameters
                   callback:(RCTResponseSenderBlock)callback) {
     

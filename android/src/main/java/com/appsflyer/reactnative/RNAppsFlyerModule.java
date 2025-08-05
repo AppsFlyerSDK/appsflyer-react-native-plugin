@@ -25,6 +25,9 @@ import com.appsflyer.internal.platform_extension.PluginInfo;
 import com.appsflyer.share.CrossPromotionHelper;
 import com.appsflyer.share.LinkGenerator;
 import com.appsflyer.share.ShareInviteHelper;
+import com.appsflyer.AFPurchaseDetails;
+import com.appsflyer.AFPurchaseType;
+import com.appsflyer.AppsFlyerInAppPurchaseValidationCallback;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -785,7 +788,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
             // Convert purchaseType string to AFPurchaseType enum
             AFPurchaseType afPurchaseType;
-            if ("subscription".equals(purchaseType)) {
+            if ("subscription".equals(purchaseType.rawValue())) {
                 afPurchaseType = AFPurchaseType.SUBSCRIPTION;
             } else {
                 afPurchaseType = AFPurchaseType.ONE_TIME_PURCHASE;
