@@ -852,30 +852,41 @@ export const AFPurchaseType = {
 };
 
 /**
- * Validate and log in-app purchase with support for both legacy and new APIs.
- * 
- * - **Legacy API**: validateAndLogInAppPurchase(purchaseInfo, successC, errorC) 
- * - **New API**: validateAndLogInAppPurchase(purchaseDetails, additionalParameters, callback) 
- * 
- * The method automatically detects which API to use based on the parameters:
- * - If first parameter has 'purchaseType' property, uses new API
- * - Otherwise, uses legacy API
+ * [LEGACY WARNING] This is the legacy validateAndLogInAppPurchase API.
  */
-appsFlyer.validateAndLogInAppPurchase = (param1, param2, param3) => {
-  // Debug: Check if native methods exist
-  console.log('[AppsFlyer] RNAppsFlyer methods:', Object.keys(RNAppsFlyer));
-  console.log('[AppsFlyer] validateAndLogInAppPurchaseV2 exists:', typeof RNAppsFlyer.validateAndLogInAppPurchaseV2);
+appsFlyer.validateAndLogInAppPurchase = (purchaseInfo, successCallback, errorCallback) => {
+  console.log('[AppsFlyer] Using legacy validateAndLogInAppPurchase API');
+  return RNAppsFlyer.validateAndLogInAppPurchase(purchaseInfo, successCallback, errorCallback);
+};
+
+/**
+ * New validateAndLogInAppPurchase API with AFPurchaseDetails support.
+ */
+appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters, callback) => {
+  console.log('[AppsFlyer] Using new validateAndLogInAppPurchaseV2 API with AFPurchaseDetails');
   
-  // Detect which API to use based on the first parameter
-  if (param1 && typeof param1 === 'object' && param1.purchaseType) {
-    // New API: (purchaseDetails, additionalParameters, callback)
-    console.log('[AppsFlyer] Using new validateAndLogInAppPurchase API with AFPurchaseDetails');
-    return RNAppsFlyer.validateAndLogInAppPurchaseV2(param1, param2, param3);
-  } else {
-    // Legacy API: (purchaseInfo, successC, errorC)
-    console.log('[AppsFlyer] Using legacy validateAndLogInAppPurchase API');
-    return RNAppsFlyer.validateAndLogInAppPurchase(param1, param2, param3);
+  if (callback && typeof callback === typeof Function) {
+    const listener = appsFlyerEventEmitter.addListener(
+      "onValidationResult",
+      (_data) => {
+        try {
+          let data = JSON.parse(_data);
+          callback(data);
+        } catch (_error) {
+          callback(new AFParseJSONException("Invalid data structure", _data));
+        }
+      }
+    );
+
+    eventsMap["onValidationResult"] = listener;
+
+    // unregister listener (suppose should be called from componentWillUnmount() )
+    return function remove() {
+      listener.remove();
+    };
   }
+  
+  return RNAppsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, additionalParameters);
 };
 
 appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {

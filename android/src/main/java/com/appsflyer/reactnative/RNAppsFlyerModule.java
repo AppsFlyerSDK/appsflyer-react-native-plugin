@@ -25,8 +25,8 @@ import com.appsflyer.internal.platform_extension.PluginInfo;
 import com.appsflyer.share.CrossPromotionHelper;
 import com.appsflyer.share.LinkGenerator;
 import com.appsflyer.share.ShareInviteHelper;
-import com.appsflyer.AFPurchaseDetails;
 import com.appsflyer.AFPurchaseType;
+import com.appsflyer.AFPurchaseDetails;
 import com.appsflyer.AppsFlyerInAppPurchaseValidationCallback;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
@@ -780,7 +780,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void validateAndLogInAppPurchaseV2(ReadableMap purchaseDetails, ReadableMap additionalParameters, Callback callback) {
+    public void validateAndLogInAppPurchaseV2(ReadableMap purchaseDetails, ReadableMap additionalParameters) {
         try {
             String purchaseType = purchaseDetails.getString("purchaseType");
             String purchaseToken = purchaseDetails.getString("transactionId");
@@ -788,7 +788,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
             // Convert purchaseType string to AFPurchaseType enum
             AFPurchaseType afPurchaseType;
-            if ("subscription".equals(purchaseType.rawValue())) {
+            if ("subscription".equals(purchaseType)) {
                 afPurchaseType = AFPurchaseType.SUBSCRIPTION;
             } else {
                 afPurchaseType = AFPurchaseType.ONE_TIME_PURCHASE;
@@ -808,23 +808,19 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                     additionalParamsMap,
                     new AppsFlyerInAppPurchaseValidationCallback() {
                         @Override
-                        public void onSuccess() {
-                            if (callback != null) {
-                                callback.invoke("In App Purchase Validation completed successfully!");
-                            }
+                        public void onInAppPurchaseValidationFinished(Map<String, Object> validationResult) {
+                            sendEvent(reactContext, "onValidationResult", validationResult.toString());
                         }
 
                         @Override
-                        public void onError(int errorCode, String errorMessage) {
-                            if (callback != null) {
-                                callback.invoke("Error: " + errorMessage);
-                            }
+                        public void onInAppPurchaseValidationError(Map<String, Object> validationError) {
+                            sendEvent(reactContext, "onValidationResult", validationError.toString());
                         }
                     });
         } catch (Exception e) {
-            if (callback != null) {
-                callback.invoke("Error: " + e.getMessage());
-            }
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            sendEvent(reactContext, "onValidationResult", error.toString());
         }
     }
 

@@ -604,14 +604,11 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
 
 }
 
-RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2:(NSDictionary*)purchaseDetails
-                  additionalParameters:(NSDictionary*)additionalParameters
-                  callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2: (NSDictionary*)purchaseDetails
+                  additionalParameters:(NSDictionary*)additionalParameters) {
     
     if (!purchaseDetails || [purchaseDetails isKindOfClass:[NSNull class]]) {
-        if (callback) {
-            callback(@[@"Error: Purchase details are required"]);
-        }
+        [self sendEventWithName:@"onValidationResult" body:@"{\"error\": \"Purchase details are required\"}"];
         return;
     }
     
@@ -620,9 +617,7 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2:(NSDictionary*)purchaseDetails
     NSString* transactionId = [purchaseDetails objectForKey:@"transactionId"];
     
     if (!purchaseType || !productId || !transactionId) {
-        if (callback) {
-            callback(@[@"Error: purchaseType, productId, and transactionId are required"]);
-        }
+        [self sendEventWithName:@"onValidationResult" body:@"{\"error\": \"purchaseType, productId, and transactionId are required\"}"];
         return;
     }
     
@@ -642,12 +637,10 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2:(NSDictionary*)purchaseDetails
     [[AppsFlyerLib shared] validateAndLogInAppPurchase:details
                                        extraEventValues:additionalParameters
                                       completionHandler:^(AFSDKValidateAndLogResult * _Nullable result) {
-        if (callback) {
-            if (result && result.isValid) {
-                callback(@[@"In App Purchase Validation completed successfully!"]);
-            } else {
-                callback(@[@"Error: Purchase validation failed"]);
-            }
+        if (result && result.isValid) {
+            [self sendEventWithName:@"onValidationResult" body:@"{\"result\": true, \"message\": \"In App Purchase Validation completed successfully!\"}"];
+        } else {
+            [self sendEventWithName:@"onValidationResult" body:@"{\"error\": \"Purchase validation failed\"}"];
         }
     }];
 }

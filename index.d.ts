@@ -376,12 +376,13 @@ declare module "react-native-appsflyer" {
     ): Response<string>;
     /**
      * [NEW API] This is the new validateAndLogInAppPurchase API with AFPurchaseDetails.
+     * Uses event emitter pattern for callback handling.
      */
-    validateAndLogInAppPurchase(
+    validateAndLogInAppPurchaseV2(
       purchaseDetails: AFPurchaseDetails,
       additionalParameters?: object,
       callback?: AppsFlyerInAppPurchaseValidationCallback
-    ): void;
+    ): (() => void) | void;
 
     updateServerUninstallToken(token: string, successC?: SuccessCB): void;
     sendPushNotificationData(pushPayload: object, errorC?: ErrorCB): void;
