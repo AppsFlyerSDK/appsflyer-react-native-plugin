@@ -738,6 +738,36 @@ appsFlyer.onDeepLink = (callback) => {
   };
 };
 
+
+/**
+ * New validateAndLogInAppPurchase API with AFPurchaseDetails support.
+ */
+appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters , callback) => {
+  const listener = appsFlyerEventEmitter.addListener("onValidationResult", (_data) => {
+    if (callback && typeof callback === 'function') {
+      if (typeof _data === 'string') {
+        try {
+          const parsed = JSON.parse(_data);
+          callback(parsed);
+        } catch {
+          callback(new AFParseJSONException('Invalid JSON string', _data));
+        }
+      } else {
+        callback(_data);
+      }
+    }
+  });
+
+  eventsMap["onValidationResult"] = listener;
+
+  RNAppsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, additionalParameters);
+
+  // unregister listener (suppose should be called from componentWillUnmount() )
+  return function remove() {
+    listener.remove();
+  };
+};
+
 /**
  * Anonymize user Data.
  * Use this API during the SDK Initialization to explicitly anonymize a user's installs, events and sessions.
@@ -857,36 +887,6 @@ export const AFPurchaseType = {
 appsFlyer.validateAndLogInAppPurchase = (purchaseInfo, successCallback, errorCallback) => {
   console.log('[AppsFlyer] Using legacy validateAndLogInAppPurchase API');
   return RNAppsFlyer.validateAndLogInAppPurchase(purchaseInfo, successCallback, errorCallback);
-};
-
-/**
- * New validateAndLogInAppPurchase API with AFPurchaseDetails support.
- */
-appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters, callback) => {
-  console.log('[AppsFlyer] Using new validateAndLogInAppPurchaseV2 API with AFPurchaseDetails');
-  
-  if (callback && typeof callback === typeof Function) {
-    const listener = appsFlyerEventEmitter.addListener(
-      "onValidationResult",
-      (_data) => {
-        try {
-          let data = JSON.parse(_data);
-          callback(data);
-        } catch (_error) {
-          callback(new AFParseJSONException("Invalid data structure", _data));
-        }
-      }
-    );
-
-    eventsMap["onValidationResult"] = listener;
-
-    // unregister listener (suppose should be called from componentWillUnmount() )
-    return function remove() {
-      listener.remove();
-    };
-  }
-  
-  return RNAppsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, additionalParameters);
 };
 
 appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {

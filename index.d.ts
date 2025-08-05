@@ -113,11 +113,6 @@ declare module "react-native-appsflyer" {
     productId: string;
   }
 
-  export interface AppsFlyerInAppPurchaseValidationCallback {
-    onSuccess?: (result?: any) => void;
-    onError?: (error?: any) => void;
-  }
-
   export interface SetEmailsOptions {
     emails?: string[];
     emailsCryptType: AF_EMAIL_CRYPT_TYPE | 0 | 3;
@@ -380,9 +375,9 @@ declare module "react-native-appsflyer" {
      */
     validateAndLogInAppPurchaseV2(
       purchaseDetails: AFPurchaseDetails,
-      additionalParameters?: object,
-      callback?: AppsFlyerInAppPurchaseValidationCallback
-    ): (() => void) | void;
+      additionalParameters?: { [key: string]: any },
+      callback?: (data: any) => void
+    ): void;
 
     updateServerUninstallToken(token: string, successC?: SuccessCB): void;
     sendPushNotificationData(pushPayload: object, errorC?: ErrorCB): void;

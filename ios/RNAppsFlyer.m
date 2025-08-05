@@ -476,7 +476,7 @@ RCT_EXPORT_METHOD(logCrossPromotionAndOpenStore: (NSString *)appID
 }
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[afOnAttributionFailure,afOnAppOpenAttribution,afOnInstallConversionFailure, afOnInstallConversionDataLoaded, afOnDeepLinking];
+    return @[afOnAttributionFailure,afOnAppOpenAttribution,afOnInstallConversionFailure, afOnInstallConversionDataLoaded, afOnDeepLinking, afOnValidationResult];
 }
 
 -(void) reportOnFailure:(NSString *)errorMessage type:(NSString*) type {
@@ -608,7 +608,7 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2: (NSDictionary*)purchaseDetails
                   additionalParameters:(NSDictionary*)additionalParameters) {
     
     if (!purchaseDetails || [purchaseDetails isKindOfClass:[NSNull class]]) {
-        [self sendEventWithName:@"onValidationResult" body:@"{\"error\": \"Purchase details are required\"}"];
+        [self sendEventWithName:afOnValidationResult body:@"{\"error\": \"Purchase details are required\"}"];
         return;
     }
     
@@ -617,7 +617,7 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2: (NSDictionary*)purchaseDetails
     NSString* transactionId = [purchaseDetails objectForKey:@"transactionId"];
     
     if (!purchaseType || !productId || !transactionId) {
-        [self sendEventWithName:@"onValidationResult" body:@"{\"error\": \"purchaseType, productId, and transactionId are required\"}"];
+        [self sendEventWithName:afOnValidationResult body:@"{\"error\": \"purchaseType, productId, and transactionId are required\"}"];
         return;
     }
     
@@ -629,20 +629,21 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2: (NSDictionary*)purchaseDetails
         afPurchaseType = AFSDKPurchaseTypeOneTimePurchase;
     }
     
-    // Create AFSDKPurchaseDetails object
-    AFSDKPurchaseDetails* details = [[AFSDKPurchaseDetails alloc] initWithPurchaseType:afPurchaseType
-                                                                              productId:productId
-                                                                          transactionId:transactionId];
-    
-    [[AppsFlyerLib shared] validateAndLogInAppPurchase:details
-                                       extraEventValues:additionalParameters
-                                      completionHandler:^(AFSDKValidateAndLogResult * _Nullable result) {
-        if (result && result.isValid) {
-            [self sendEventWithName:@"onValidationResult" body:@"{\"result\": true, \"message\": \"In App Purchase Validation completed successfully!\"}"];
-        } else {
-            [self sendEventWithName:@"onValidationResult" body:@"{\"error\": \"Purchase validation failed\"}"];
-        }
-    }];
+    AFSDKPurchaseDetails* details = [[AFSDKPurchaseDetails alloc] initWithProductId:productId transactionId:transactionId purchaseType:afPurchaseType];
+
+    [[AppsFlyerLib shared] validateAndLogInAppPurchase:details purchaseAdditionalDetails:additionalParameters completion:^(NSDictionary * _Nullable response, NSError * _Nullable error) {
+            if (error == nil) {
+                BOOL valid = [response[@"result"] boolValue];
+                if (valid) {
+                    [self sendEventWithName:afOnValidationResult body:@"{\"result\": true, \"message\": \"In App Purchase Validation completed successfully!\"}"];
+                } else {
+                    NSString *msg = response[@"message"] ?: @"Purchase validation failed";
+                    [self sendEventWithName:afOnValidationResult body:@"{\"result\": false, \"message\": \"Purchase validation failed\"}"];
+                }
+            } else {
+                [self sendEventWithName:afOnValidationResult body:[NSString stringWithFormat:@"{\"error\": \"%@\"}", error.localizedDescription]];
+            }
+        }];
 }
 
 RCT_EXPORT_METHOD(sendPushNotificationData: (NSDictionary*)pushPayload errorCallBack:(RCTResponseErrorBlock)errorCallBack) {
