@@ -878,7 +878,7 @@ appsFlyer.disableCollectASA = (shouldDisable) => {
 // Export AFPurchaseType enum for the new validateAndLogInAppPurchase API
 export const AFPurchaseType = {
   SUBSCRIPTION: "subscription",
-  ONE_TIME_PURCHASE: "one-time-purchase"
+  ONE_TIME_PURCHASE: "one_time_purchase"
 };
 
 /**

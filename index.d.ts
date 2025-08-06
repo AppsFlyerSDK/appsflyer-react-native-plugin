@@ -104,7 +104,7 @@ declare module "react-native-appsflyer" {
 
   export enum AFPurchaseType {
     SUBSCRIPTION = "subscription",
-    ONE_TIME_PURCHASE = "one-time-purchase"
+    ONE_TIME_PURCHASE = "one_time_purchase"
   }
 
   export interface AFPurchaseDetails {
