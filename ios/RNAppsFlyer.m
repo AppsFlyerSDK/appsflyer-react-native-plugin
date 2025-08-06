@@ -607,8 +607,7 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchase: (NSDictionary*)purchaseInfo
 RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2: (NSDictionary*)purchaseDetails
                   additionalParameters:(NSDictionary*)additionalParameters) {
     
-    if (!purchaseDetails || [purchaseDetails isKindOfClass:[NSNull class]]) {
-        [self sendEventWithName:afOnValidationResult body:@"{\"error\": \"Purchase details are required\"}"];
+    if (![self validatePurchaseDetails:purchaseDetails]) {
         return;
     }
     
@@ -616,34 +615,85 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2: (NSDictionary*)purchaseDetails
     NSString* productId = [purchaseDetails objectForKey:@"productId"];
     NSString* transactionId = [purchaseDetails objectForKey:@"transactionId"];
     
-    if (!purchaseType || !productId || !transactionId) {
-        [self sendEventWithName:afOnValidationResult body:@"{\"error\": \"purchaseType, productId, and transactionId are required\"}"];
-        return;
-    }
-    
-    // Convert purchaseType string to enum
-    AFSDKPurchaseType afPurchaseType;
-    if ([purchaseType isEqualToString:@"subscription"]) {
-        afPurchaseType = AFSDKPurchaseTypeSubscription;
-    } else {
-        afPurchaseType = AFSDKPurchaseTypeOneTimePurchase;
-    }
-    
+    AFSDKPurchaseType afPurchaseType = [self convertPurchaseType:purchaseType];
     AFSDKPurchaseDetails* details = [[AFSDKPurchaseDetails alloc] initWithProductId:productId transactionId:transactionId purchaseType:afPurchaseType];
+    NSDictionary<NSString*, NSString*>* stringMap = [self convertToStringMap:additionalParameters];
 
-    [[AppsFlyerLib shared] validateAndLogInAppPurchaseWithPurchaseDetails:details purchaseAdditionalDetails:additionalParameters completion:^(NSDictionary * _Nullable response, NSError * _Nullable error) {
+    [[AppsFlyerLib shared] validateAndLogInAppPurchase:details purchaseAdditionalDetails:stringMap completion:^(NSDictionary * _Nullable response, NSError * _Nullable error) {
             if (error == nil) {
-                BOOL valid = [response[@"result"] boolValue];
-                if (valid) {
-                    [self sendEventWithName:afOnValidationResult body:@"{\"result\": true, \"message\": \"In App Purchase Validation completed successfully!\"}"];
-                } else {
-                    NSString *msg = response[@"message"] ?: @"Purchase validation failed";
-                    [self sendEventWithName:afOnValidationResult body:@"{\"result\": false, \"message\": \"Purchase validation failed\"}"];
-                }
+                [self handleValidationResponse:response];
             } else {
-                [self sendEventWithName:afOnValidationResult body:[NSString stringWithFormat:@"{\"error\": \"%@\"}", error.localizedDescription]];
+                [self sendValidationError:error.localizedDescription];
             }
         }];
+}
+
+// MARK: - Helper Methods
+
+- (BOOL)validatePurchaseDetails:(NSDictionary*)purchaseDetails {
+    if (!purchaseDetails || [purchaseDetails isKindOfClass:[NSNull class]]) {
+        [self sendValidationError:@"Purchase details are required"];
+        return NO;
+    }
+    
+    NSString* purchaseType = [purchaseDetails objectForKey:@"purchaseType"];
+    NSString* productId = [purchaseDetails objectForKey:@"productId"];
+    NSString* transactionId = [purchaseDetails objectForKey:@"transactionId"];
+    
+    if (!purchaseType || !productId || !transactionId) {
+        [self sendValidationError:@"purchaseType, productId, and transactionId are required"];
+        return NO;
+    }
+    
+    return YES;
+}
+
+- (AFSDKPurchaseType)convertPurchaseType:(NSString*)purchaseType {
+    if ([purchaseType isEqualToString:@"subscription"]) {
+        return AFSDKPurchaseTypeSubscription;
+    } else {
+        return AFSDKPurchaseTypeOneTimePurchase;
+    }
+}
+
+- (NSDictionary<NSString*, NSString*>*)convertToStringMap:(NSDictionary*)additionalParameters {
+    NSMutableDictionary<NSString*, NSString*>* stringMap = [[NSMutableDictionary alloc] init];
+    if (additionalParameters && ![additionalParameters isKindOfClass:[NSNull class]]) {
+        for (NSString* key in additionalParameters) {
+            id value = additionalParameters[key];
+            if (value && ![value isKindOfClass:[NSNull class]]) {
+                stringMap[key] = [value description];
+            }
+        }
+    }
+    return stringMap;
+}
+
+- (void)handleValidationResponse:(NSDictionary*)response {
+    NSString* firstKey = [[response allKeys] firstObject];
+    if (firstKey && response[firstKey] && [response[firstKey] isKindOfClass:[NSDictionary class]]) {
+        NSDictionary* productData = response[firstKey];
+        BOOL valid = [productData[@"result"] boolValue];
+        
+        NSString* responseJson = [self convertToJsonString:response];
+        [self sendEventWithName:afOnValidationResult body:responseJson];
+    } else {
+        [self sendValidationError:@"Invalid response format"];
+    }
+}
+
+- (NSString*)convertToJsonString:(NSDictionary*)dictionary {
+    NSError* jsonError;
+    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:&jsonError];
+    if (!jsonError && jsonData) {
+        return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    }
+    return @"{\"error\": \"Failed to serialize response\"}";
+}
+
+- (void)sendValidationError:(NSString*)errorMessage {
+    NSString* errorJson = [NSString stringWithFormat:@"{\"error\": \"%@\"}", errorMessage];
+    [self sendEventWithName:afOnValidationResult body:errorJson];
 }
 
 RCT_EXPORT_METHOD(sendPushNotificationData: (NSDictionary*)pushPayload errorCallBack:(RCTResponseErrorBlock)errorCallBack) {
