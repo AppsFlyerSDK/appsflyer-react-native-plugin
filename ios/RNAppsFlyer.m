@@ -631,7 +631,7 @@ RCT_EXPORT_METHOD(validateAndLogInAppPurchaseV2: (NSDictionary*)purchaseDetails
     
     AFSDKPurchaseDetails* details = [[AFSDKPurchaseDetails alloc] initWithProductId:productId transactionId:transactionId purchaseType:afPurchaseType];
 
-    [[AppsFlyerLib shared] validateAndLogInAppPurchase:details purchaseAdditionalDetails:additionalParameters completion:^(NSDictionary * _Nullable response, NSError * _Nullable error) {
+    [[AppsFlyerLib shared] validateAndLogInAppPurchaseWithPurchaseDetails:details purchaseAdditionalDetails:additionalParameters completion:^(NSDictionary * _Nullable response, NSError * _Nullable error) {
             if (error == nil) {
                 BOOL valid = [response[@"result"] boolValue];
                 if (valid) {

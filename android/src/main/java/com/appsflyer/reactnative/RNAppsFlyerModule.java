@@ -782,46 +782,76 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void validateAndLogInAppPurchaseV2(ReadableMap purchaseDetails, ReadableMap additionalParameters) {
         try {
+            // Extract and validate required fields
             String purchaseType = purchaseDetails.getString("purchaseType");
             String purchaseToken = purchaseDetails.getString("transactionId");
             String productId = purchaseDetails.getString("productId");
 
-            // Convert purchaseType string to AFPurchaseType enum
-            AFPurchaseType afPurchaseType;
-            if ("subscription".equals(purchaseType)) {
-                afPurchaseType = AFPurchaseType.SUBSCRIPTION;
-            } else {
-                afPurchaseType = AFPurchaseType.ONE_TIME_PURCHASE;
+            if (purchaseType == null || purchaseToken == null || productId == null) {
+                sendValidationError("Missing required fields: purchaseType, transactionId, or productId");
+                return;
             }
 
-            // Create AFPurchaseDetails object
+            // Convert purchase type
+            AFPurchaseType afPurchaseType = "subscription".equals(purchaseType) 
+                ? AFPurchaseType.SUBSCRIPTION 
+                : AFPurchaseType.ONE_TIME_PURCHASE;
+
+            // Create purchase details
             AFPurchaseDetails afPurchaseDetails = new AFPurchaseDetails(afPurchaseType, purchaseToken, productId);
 
-            // Convert additionalParameters to Map
-            Map<String, String> additionalParamsMap = null;
-            if (additionalParameters != null) {
-                additionalParamsMap = RNUtil.toMap(additionalParameters);
-            }
+            // Convert additional parameters to string map
+            Map<String, String> additionalParams = convertReadableMapToStringMap(additionalParameters);
 
+            // Validate purchase
             AppsFlyerLib.getInstance().validateAndLogInAppPurchase(
-                    afPurchaseDetails,
-                    additionalParamsMap,
-                    new AppsFlyerInAppPurchaseValidationCallback() {
-                        @Override
-                        public void onInAppPurchaseValidationFinished(Map<String, Object> validationResult) {
-                            sendEvent(reactContext, "onValidationResult", validationResult.toString());
-                        }
+                afPurchaseDetails,
+                additionalParams,
+                new AppsFlyerInAppPurchaseValidationCallback() {
+                    @Override
+                    public void onInAppPurchaseValidationFinished(@NonNull Map<String, ?> result) {
+                        sendValidationResult(result);
+                    }
 
-                        @Override
-                        public void onInAppPurchaseValidationError(Map<String, Object> validationError) {
-                            sendEvent(reactContext, "onValidationResult", validationError.toString());
-                        }
-                    });
+                    @Override
+                    public void onInAppPurchaseValidationError(@NonNull Map<String, ?> error) {
+                        sendValidationResult(error);
+                    }
+                }
+            );
         } catch (Exception e) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            sendEvent(reactContext, "onValidationResult", error.toString());
+            sendValidationError("Validation failed: " + e.getMessage());
         }
+    }
+
+    private Map<String, String> convertReadableMapToStringMap(ReadableMap readableMap) {
+        Map<String, String> result = new HashMap<>();
+        if (readableMap == null) {
+            return result;
+        }
+
+        ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
+        while (iterator.hasNextKey()) {
+            String key = iterator.nextKey();
+            Object value = readableMap.getDynamic(key);
+            result.put(key, value != null ? value.toString() : null);
+        }
+        return result;
+    }
+
+    private void sendValidationResult(Map<String, ?> data) {
+        try {
+            JSONObject json = new JSONObject(data);
+            sendEvent(reactContext, afOnValidationResult, json.toString());
+        } catch (Exception e) {
+            sendEvent(reactContext, afOnValidationResult, data.toString());
+        }
+    }
+
+    private void sendValidationError(String errorMessage) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", errorMessage);
+        sendValidationResult(error);
     }
 
     @ReactMethod

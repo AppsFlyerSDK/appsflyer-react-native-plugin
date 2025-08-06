@@ -30,6 +30,7 @@ public class RNAppsFlyerConstants {
     final static String afOnInstallConversionFailure = "onInstallConversionFailure";
     final static String afOnInstallConversionDataLoaded = "onInstallConversionDataLoaded";
     final static String afOnDeepLinking = "onDeepLinking";
+    final static String afOnValidationResult = "onValidationResult";
 
     final static String INVITE_FAIL = "Could not create invite link";
     final static String INVITE_CHANNEL = "channel";
