@@ -37,7 +37,7 @@
     "react": "16.11.0",
     "react-native": "0.62.3",
     "react-test-renderer": "16.11.0",
-    "ts-jest": "^29.2.6",
+    "ts-jest": "^29.4.1",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.2"
   },

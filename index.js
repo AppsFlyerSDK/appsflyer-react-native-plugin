@@ -1013,6 +1013,9 @@ function AFParseJSONException(_message, _data) {
   this.name = "AFParseJSONException";
 }
 
+// Export AFParseJSONException for testing
+export { AFParseJSONException };
+
 // Consent object
 export class AppsFlyerConsent {
     /**
