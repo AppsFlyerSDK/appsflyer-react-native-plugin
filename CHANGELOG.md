@@ -1,10 +1,11 @@
-## 6.17.21
+## 6.17.3
  Release date: *2025-08-08*
 
 - React Native >> Add new `disableAppSetId` API for Android platform
 - React Native >> Add new `validateAndLogInAppPurchase` API with AFPurchaseDetails support
-- React Native >> Update Android SDK to 6.17.2
-- React Native >> Update Plugin to v6.17.21
+- React Native >> Update Android SDK to 6.17.3
+- React Native >> Update iOS SDK to 6.17.3
+- React Native >> Update Plugin to v6.17.3
 
 ## 6.17.2
  Release date: *2025-07-30*
