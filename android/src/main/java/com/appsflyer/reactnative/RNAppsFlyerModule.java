@@ -850,8 +850,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     private void sendValidationError(String errorMessage) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("error", errorMessage);
+        Map<String, Object> error = Collections.singletonMap("error", errorMessage);
         sendValidationResult(error);
     }
 
