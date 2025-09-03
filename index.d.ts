@@ -102,6 +102,17 @@ declare module "react-native-appsflyer" {
     additionalParameters?: object;
   }
 
+  export enum AFPurchaseType {
+    SUBSCRIPTION = "subscription",
+    ONE_TIME_PURCHASE = "one_time_purchase"
+  }
+
+  export interface AFPurchaseDetails {
+    purchaseType: AFPurchaseType;
+    transactionId: string; //aka PurchaseToken
+    productId: string;
+  }
+
   export interface SetEmailsOptions {
     emails?: string[];
     emailsCryptType: AF_EMAIL_CRYPT_TYPE | 0 | 3;
@@ -350,11 +361,25 @@ declare module "react-native-appsflyer" {
       latitude: number,
       successC?: SuccessCB
     ): void;
+    /**
+     * [LEGACY WARNING] This is the legacy validateAndLogInAppPurchase API.
+     */
     validateAndLogInAppPurchase(
       purchaseInfo: InAppPurchase,
       successC: SuccessCB,
       errorC: ErrorCB
     ): Response<string>;
+    /**
+     * [NEW API] This is the new validateAndLogInAppPurchase API with AFPurchaseDetails.
+     * Uses event emitter pattern for callback handling.
+     
+    validateAndLogInAppPurchaseV2(
+      purchaseDetails: AFPurchaseDetails,
+      additionalParameters?: { [key: string]: any },
+      callback?: (data: any) => void
+    ): void;
+    */
+   
     updateServerUninstallToken(token: string, successC?: SuccessCB): void;
     sendPushNotificationData(pushPayload: object, errorC?: ErrorCB): void;
     setHost(hostPrefix: string, hostName: string, success: SuccessCB): void;
@@ -390,6 +415,7 @@ declare module "react-native-appsflyer" {
     setCollectAndroidID(isCollect: boolean, successC?: SuccessCB): void;
     setDisableNetworkData(disable: boolean): void;
     performOnDeepLinking(): void;
+    disableAppSetId(): void;
   };
 
   export default appsFlyer;

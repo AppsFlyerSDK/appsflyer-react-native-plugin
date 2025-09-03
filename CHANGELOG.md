@@ -1,3 +1,34 @@
+## 6.17.5
+ Release date: *2025-09-04*
+
+- React Native >> Add new `disableAppSetId` API for Android platform
+- React Native >> Preparing new `validateAndLogInAppPurchase` beta API with AFPurchaseDetails support
+- React Native >> Update Android SDK to 6.17.3
+- React Native >> Update iOS SDK to 6.17.5
+- React Native >> Update Plugin to v6.17.5
+
+## 6.17.2
+ Release date: *2025-07-30*
+
+- React Native >> Add Purchase Connector and Swift AppDelegate support to Expo config plugin
+- React Native >> expo 53 and RN 0.79 support
+- React Native >> Add Expo Android Purchase Connector support
+- React Native >> Fix withAppsFlyerAndroid configuration
+- React Native >> Update Plugin to v6.17.2
+
+## 6.17.1
+ Release date: *2025-07-01*
+
+- React Native >> Update iOS Purchase Connector to 6.17.1
+- React Native >> Update Plugin to v6.17.1
+
+## 6.17.0
+ Release date: *2025-06-15*
+
+- React Native >> Add Purchase Connector support with StoreKit2 option
+- React Native >> Update iOS & Android SDKs to 6.17.0
+- React Native >> Update Plugin to v6.17.0
+
 ## 6.16.2
  Release date: *2025-03-19*
 
