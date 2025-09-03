@@ -738,6 +738,38 @@ appsFlyer.onDeepLink = (callback) => {
   };
 };
 
+
+/**
+ * TODO: Remove comment when the API is stable
+ * New validateAndLogInAppPurchase API with AFPurchaseDetails support.
+ *
+appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters , callback) => {
+  const listener = appsFlyerEventEmitter.addListener("onValidationResult", (_data) => {
+    if (callback && typeof callback === 'function') {
+      if (typeof _data === 'string') {
+        try {
+          const parsed = JSON.parse(_data);
+          callback(parsed);
+        } catch {
+          callback(new AFParseJSONException('Invalid JSON string', _data));
+        }
+      } else {
+        callback(_data);
+      }
+    }
+  });
+
+  eventsMap["onValidationResult"] = listener;
+
+  RNAppsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, additionalParameters);
+
+  // unregister listener (suppose should be called from componentWillUnmount() )
+  return function remove() {
+    listener.remove();
+  };
+};
+ */
+
 /**
  * Anonymize user Data.
  * Use this API during the SDK Initialization to explicitly anonymize a user's installs, events and sessions.
@@ -845,19 +877,18 @@ appsFlyer.disableCollectASA = (shouldDisable) => {
   return RNAppsFlyer.disableCollectASA(shouldDisable);
 };
 
+// Export AFPurchaseType enum for the new validateAndLogInAppPurchase API
+export const AFPurchaseType = {
+  SUBSCRIPTION: "subscription",
+  ONE_TIME_PURCHASE: "one_time_purchase"
+};
+
 /**
- * Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.
- * Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases
- * @param purchaseInfo ReadableMap includes: String publicKey, String signature, String purchaseData, String price, String currency, JSONObject additionalParameters.
- * @param successC Success callback
- * @param errorC Error callback
+ * [LEGACY WARNING] This is the legacy validateAndLogInAppPurchase API.
  */
-appsFlyer.validateAndLogInAppPurchase = (purchaseInfo, successC, errorC) => {
-  return RNAppsFlyer.validateAndLogInAppPurchase(
-    purchaseInfo,
-    successC,
-    errorC
-  );
+appsFlyer.validateAndLogInAppPurchase = (purchaseInfo, successCallback, errorCallback) => {
+  console.log('[AppsFlyer] Using legacy validateAndLogInAppPurchase API');
+  return RNAppsFlyer.validateAndLogInAppPurchase(purchaseInfo, successCallback, errorCallback);
 };
 
 appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
@@ -955,6 +986,14 @@ appsFlyer.performOnDeepLinking = () => {
 };
 
 /**
+ * Disable the collection of AppSet ID.
+ * This method is only relevant for Android platform.
+ */
+appsFlyer.disableAppSetId = () => {
+  return RNAppsFlyer.disableAppSetId();
+};
+
+/**
  * instruct the SDK to collect the TCF data from the device.
  * @param enabled: if the sdk should collect the TCF data. true/false
  */
@@ -975,6 +1014,9 @@ function AFParseJSONException(_message, _data) {
   this.data = _data;
   this.name = "AFParseJSONException";
 }
+
+// Export AFParseJSONException for testing
+export { AFParseJSONException };
 
 // Consent object
 export class AppsFlyerConsent {

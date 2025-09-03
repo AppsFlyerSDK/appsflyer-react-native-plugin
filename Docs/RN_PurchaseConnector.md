@@ -21,7 +21,7 @@ For more information please check the following pages:
 The Purchase Connector feature of the AppsFlyer SDK depends on specific libraries provided by Google and Apple for managing in-app purchases:
 
 -   For Android, it depends on the  [Google Play Billing Library](https://developer.android.com/google/play/billing/integrate) (Supported versions: 5.x.x - 7.x.x).
--   For iOS, it depends on  [StoreKit](https://developer.apple.com/documentation/storekit) (Supported versions: StoreKit1 and StoreKit2 (beta)).
+-   For iOS, it depends on  [StoreKit](https://developer.apple.com/documentation/storekit) (Supported versions: StoreKit1 and StoreKit2).
 
 However, these dependencies aren't actively included with the SDK. This means that the responsibility of managing these dependencies and including the necessary libraries in your project falls on you as the consumer of the SDK.
 
@@ -52,6 +52,19 @@ Once you set these properties, the Purchase Validation feature will be integrate
 The files for the Purchase Validation feature are always included in the plugin. If you try to use these JS APIs without opting into the feature, the APIs will not have effect because the corresponding native code necessary for them to function will not be included in your project.
 
 In such cases, you'll likely experience errors or exceptions when trying to use functionalities provided by the Purchase Validation feature. To avoid these issues, ensure that you opt-in to the feature if you intend to use any related APIs.
+
+
+## <a id="proguard-rules-for-android"></a>ProGuard Rules for Android
+
+If you are using ProGuard to obfuscate your APK for Android, you need to ensure that it doesn't interfere with the functionality of AppsFlyer SDK and its Purchase Connector feature.
+
+Add following keep rules to your  `proguard-rules.pro`  file:
+
+```groovy
+-keep  class  com.appsflyer.** { *; }  
+-keep  class  kotlin.jvm.internal.Intrinsics{ *; }  
+-keep  class  kotlin.collections.**{ *; }
+```
 
 ## <a id="basic-integration-of-the-connector"></a>Basic Integration Of The Connector
 ### <a id="create-purchaseconnector-instance"></a>Create PurchaseConnector Instance
@@ -225,6 +238,58 @@ const purchaseConnectorConfigSK2 = AppsFlyerPurchaseConnectorConfig.setConfig({
 });
 ```
 
+### <a id="logging-consumable-transactions"></a>Logging Consumable Transactions
+
+On iOS 15 and above, consumable in-app purchases are handled via StoreKit 2. The behavior depends on your iOS version:
+
+- **On iOS 18 and later:**  
+  Apple introduced a new Info.plist flag: `SKIncludeConsumableInAppPurchaseHistory`.  
+  - If you set `SKIncludeConsumableInAppPurchaseHistory` to `YES` in your Info.plist, automatic collection will happen.
+  - If the flag is not present or is set to `NO`, you must manually log consumable transactions as shown below.
+
+- **On iOS 15–17:**  
+  Consumable purchases must always be logged manually.
+
+To manually log consumable transactions, use the `logConsumableTransaction` method after finishing the transaction:
+
+```javascript
+import { Platform } from 'react-native';
+import { AppsFlyerPurchaseConnector } from 'react-native-appsflyer';
+
+// Purchase update listener
+purchaseUpdatedListener((purchase) => {
+  console.log("🛒 Purchase updated:", purchase.productId, "Transaction ID:", purchase.transactionId);
+  const isConsumable = consumablesItems.includes(purchase.productId);
+  
+  finishTransaction({ purchase, isConsumable })
+    .then((res) => {
+      console.log("✅ finishTransaction success:", res);
+      console.log("🔍 Expecting AppsFlyer validation callback for:", purchase.productId);
+      
+      // Log consumable transaction for iOS
+      if (Platform.OS === 'ios' && isConsumable && purchase.transactionId) {
+        AppsFlyerPurchaseConnector.logConsumableTransaction(purchase.transactionId);
+        console.log("📝 Consumable transaction logged:", purchase.transactionId);
+      }
+    })
+    .catch((error) => {
+      console.warn("❌ Error finishing transaction:", error);
+    });
+});
+```
+
+### Method Signature
+
+```javascript
+AppsFlyerPurchaseConnector.logConsumableTransaction(transactionId: string): void
+```
+
+**Parameters:**
+- `transactionId` (string): The unique transaction identifier from the App Store transaction
+
+**Note:** This method is iOS-specific and should only be called on iOS devices. On Android, consumable transactions are automatically handled by the Purchase Connector.
+
+
 ## <a id="register-validation-results-listeners"></a>Register Validation Results Listeners
 You can register listeners to get the validation results once getting a response from AppsFlyer servers to let you know if the purchase was validated successfully.</br>
 
@@ -302,37 +367,6 @@ const handleOnReceivePurchaseRevenueValidationInfo = (validationInfo, error) => 
     }
     };
   }, []);
-```
-
-
-## <a id="testing-the-integration"></a>Testing the Integration
-
-With the AppsFlyer SDK, you can select which environment will be used for validation - either **production** or **sandbox**. By default, the environment is set to production. However, while testing your app, you should use the sandbox environment.
-
-### <a id="android"></a>Android
-
-For Android, testing your integration with the [Google Play Billing Library](https://developer.android.com/google/play/billing/test) should use the sandbox environment.
-
-To set the environment to sandbox in React Native, just set the `sandbox` parameter in the `PurchaseConnectorConfig` to `true` when instantiating `PurchaseConnector`.
-
-Remember to switch the environment back to production (set `sandbox` to `false`) before uploading your app to the Google Play Store.
-
-### <a id="ios"></a>iOS
-
-To test purchases in an iOS environment on a real device with a TestFlight sandbox account, you also need to set `sandbox` to `true`.
-
-> *IMPORTANT NOTE: Before releasing your app to production please be sure to set `sandbox` to `false`. If a production purchase event is sent in sandbox mode, your event will not be validated properly! *
-
-## <a id="proguard-rules-for-android"></a>ProGuard Rules for Android
-
-If you are using ProGuard to obfuscate your APK for Android, you need to ensure that it doesn't interfere with the functionality of AppsFlyer SDK and its Purchase Connector feature.
-
-Add following keep rules to your  `proguard-rules.pro`  file:
-
-```groovy
--keep  class  com.appsflyer.** { *; }  
--keep  class  kotlin.jvm.internal.Intrinsics{ *; }  
--keep  class  kotlin.collections.**{ *; }
 ```
 
 ## <a id="full-code-example"></a>Full Code Example
@@ -535,59 +569,6 @@ const setupPurchaseDataSources = () => {
 };
 ```
 
-
-### <a id="logging-consumable-transactions"></a>Logging Consumable Transactions
-
-On iOS 15 and above, consumable in-app purchases are handled via StoreKit 2. The behavior depends on your iOS version:
-
-- **On iOS 18 and later:**  
-  Apple introduced a new Info.plist flag: `SKIncludeConsumableInAppPurchaseHistory`.  
-  - If you set `SKIncludeConsumableInAppPurchaseHistory` to `YES` in your Info.plist, automatic collection will happen.
-  - If the flag is not present or is set to `NO`, you must manually log consumable transactions as shown below.
-
-- **On iOS 15–17:**  
-  Consumable purchases must always be logged manually.
-
-To manually log consumable transactions, use the `logConsumableTransaction` method after finishing the transaction:
-
-```javascript
-import { Platform } from 'react-native';
-import { AppsFlyerPurchaseConnector } from 'react-native-appsflyer';
-
-// Purchase update listener
-purchaseUpdatedListener((purchase) => {
-  console.log("🛒 Purchase updated:", purchase.productId, "Transaction ID:", purchase.transactionId);
-  const isConsumable = consumablesItems.includes(purchase.productId);
-  
-  finishTransaction({ purchase, isConsumable })
-    .then((res) => {
-      console.log("✅ finishTransaction success:", res);
-      console.log("🔍 Expecting AppsFlyer validation callback for:", purchase.productId);
-      
-      // Log consumable transaction for iOS
-      if (Platform.OS === 'ios' && isConsumable && purchase.transactionId) {
-        AppsFlyerPurchaseConnector.logConsumableTransaction(purchase.transactionId);
-        console.log("📝 Consumable transaction logged:", purchase.transactionId);
-      }
-    })
-    .catch((error) => {
-      console.warn("❌ Error finishing transaction:", error);
-    });
-});
-```
-
-### Method Signature
-
-```javascript
-AppsFlyerPurchaseConnector.logConsumableTransaction(transactionId: string): void
-```
-
-**Parameters:**
-- `transactionId` (string): The unique transaction identifier from the App Store transaction
-
-**Note:** This method is iOS-specific and should only be called on iOS devices. On Android, consumable transactions are automatically handled by the Purchase Connector.
-
-
 ### <a id="important-notes"></a>Important Notes
 
 1. **iOS StoreKit2**: The StoreKit2 data source is only available on iOS 15.0 and later. Make sure to check the iOS version before using it.
@@ -622,3 +603,21 @@ setupPurchaseDataSources();
 // 3. Start observing transactions
 await AppsFlyerPurchaseConnector.startObservingTransactions();
 ```
+
+## <a id="testing-the-integration"></a>Testing the Integration
+
+With the AppsFlyer SDK, you can select which environment will be used for validation - either **production** or **sandbox**. By default, the environment is set to production. However, while testing your app, you should use the sandbox environment.
+
+### <a id="android"></a>Android
+
+For Android, testing your integration with the [Google Play Billing Library](https://developer.android.com/google/play/billing/test) should use the sandbox environment.
+
+To set the environment to sandbox in React Native, just set the `sandbox` parameter in the `PurchaseConnectorConfig` to `true` when instantiating `PurchaseConnector`.
+
+Remember to switch the environment back to production (set `sandbox` to `false`) before uploading your app to the Google Play Store.
+
+### <a id="ios"></a>iOS
+
+To test purchases in an iOS environment on a real device with a TestFlight sandbox account, you also need to set `sandbox` to `true`.
+
+> *IMPORTANT NOTE: Before releasing your app to production please be sure to set `sandbox` to `false`. If a production purchase event is sent in sandbox mode, your event will not be validated properly! *

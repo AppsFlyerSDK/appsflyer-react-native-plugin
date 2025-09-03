@@ -1,0 +1,89 @@
+name: AppsFlyer Issue
+description: File an issue for AppsFlyer
+labels: []
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **⚠️ Before submitting, please read:**
+        **For the fastest and most effective support, please contact the AppsFlyer support team using the Customer Assistant Chatbot. Only open a GitHub issue here if you believe this is a widespread bug affecting multiple users.**
+        
+        👉 When you open a GitHub issue, please also open a support ticket with AppsFlyer support, and make sure to include a link to this GitHub issue in your support ticket. This helps us coordinate and resolve your problem more efficiently.
+        
+        For troubleshooting or product guidance, use the [Customer Assistant Chatbot](https://support.appsflyer.com/hc/en-us/articles/23583984402193-Using-the-Customer-Assistant-Chatbot) as described in [this article](https://support.appsflyer.com/hc/en-us/articles/23583984402193-Using-the-Customer-Assistant-Chatbot).
+        
+        ---
+        ℹ Please fill out this form as completely as possible to help us resolve your issue quickly.
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin Version
+      description: What version of the AppsFlyer plugin are you using? (e.g. 6.17.0)
+      placeholder: e.g. 6.17.0
+    validations:
+      required: true
+
+  - type: input
+    id: app-id
+    attributes:
+      label: App ID
+      description: (Optional) Your app's ID. This helps us identify your account and provide optimal support.
+      placeholder: e.g. com.example.app or id1234567890
+    validations:
+      required: false
+
+  - type: input
+    id: email
+    attributes:
+      label: Email
+      description: (Optional) Your AppsFlyer account email. This helps us identify your account and provide optimal support.
+      placeholder: e.g. user@example.com
+    validations:
+      required: false
+
+  - type: input
+    id: platform
+    attributes:
+      label: Platform(s)
+      description: On which platform(s) are you having the issue? (e.g. iOS, Android)
+      placeholder: e.g. iOS, Android
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-did-you-do
+    attributes:
+      label: What did you do?
+      description: Describe the steps you took before encountering the issue.
+      placeholder: e.g. Ran `pod install`
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: What did you expect to happen?
+      description: Describe what you expected to happen.
+      placeholder: e.g. Event to be logged
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: What happened instead?
+      description: Describe what actually happened.
+      placeholder: e.g. No uninstalls on my dashboard
+    validations:
+      required: true
+
+  - type: textarea
+    id: other-info
+    attributes:
+      label: Any other relevant information
+      description: Add any other context about the problem here.
+      placeholder: e.g. The issue started when we upgraded the plugin to the latest version
+    validations:
+      required: false 
