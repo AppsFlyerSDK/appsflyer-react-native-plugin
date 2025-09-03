@@ -31,7 +31,7 @@ The list of available methods for this plugin is described below.
   - [setSharingFilter](#setsharingfilter)
   - [setSharingFilterForPartners](#setsharingfilterforpartners)
   - [validateAndLogInAppPurchase](#validateandloginapppurchase)
-  - [validateAndLogInAppPurchase(NEW)](#validateandloginapppurchasev2)
+<!--  - [validateAndLogInAppPurchase(NEW)](#validateandloginapppurchasev2) -->
   - [updateServerUninstallToken](#updateserveruninstalltoken)
   - [sendPushNotificationData](#sendpushnotificationdata)
   - [addPushNotificationDeepLinkPath](#addpushnotificationdeeplinkpath)
@@ -628,7 +628,7 @@ appsFlyer.validateAndLogInAppPurchase(info, res => console.log(res), err => cons
 ```
 
 ---
-
+<!--
 ## New In-App Purchase Validation API
 The new `validateAndLogInAppPurchase` API uses `AFPurchaseDetails` and `AFPurchaseType` enum for structured purchase validation.
 
@@ -667,13 +667,13 @@ const additionalParams = {
   currency: "USD"
 };
 
-appsFlyer.validateAndLogInAppPurchase(
+appsFlyer.validateAndLogInAppPurchaseV2(
   purchaseDetails,
   additionalParams,
   (result) => console.log(result)
 );
 ```
-
+-->
 ---
 
 ### updateServerUninstallToken

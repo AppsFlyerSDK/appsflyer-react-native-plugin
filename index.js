@@ -740,8 +740,9 @@ appsFlyer.onDeepLink = (callback) => {
 
 
 /**
+ * TODO: Remove comment when the API is stable
  * New validateAndLogInAppPurchase API with AFPurchaseDetails support.
- */
+ *
 appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters , callback) => {
   const listener = appsFlyerEventEmitter.addListener("onValidationResult", (_data) => {
     if (callback && typeof callback === 'function') {
@@ -767,6 +768,7 @@ appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters
     listener.remove();
   };
 };
+ */
 
 /**
  * Anonymize user Data.
