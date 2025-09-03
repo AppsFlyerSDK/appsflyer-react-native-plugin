@@ -6,7 +6,7 @@ package com.appsflyer.reactnative;
 
 public class RNAppsFlyerConstants {
 
-    final static String PLUGIN_VERSION = "6.17.2";
+    final static String PLUGIN_VERSION = "6.17.5";
     final static String NO_DEVKEY_FOUND = "No 'devKey' found or its empty";
     final static String UNKNOWN_ERROR = "AF Unknown Error";
     final static String SUCCESS = "Success";
@@ -30,6 +30,7 @@ public class RNAppsFlyerConstants {
     final static String afOnInstallConversionFailure = "onInstallConversionFailure";
     final static String afOnInstallConversionDataLoaded = "onInstallConversionDataLoaded";
     final static String afOnDeepLinking = "onDeepLinking";
+    final static String afOnValidationResult = "onValidationResult";
 
     final static String INVITE_FAIL = "Could not create invite link";
     final static String INVITE_CHANNEL = "channel";

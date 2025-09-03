@@ -31,6 +31,7 @@ The list of available methods for this plugin is described below.
   - [setSharingFilter](#setsharingfilter)
   - [setSharingFilterForPartners](#setsharingfilterforpartners)
   - [validateAndLogInAppPurchase](#validateandloginapppurchase)
+<!--  - [validateAndLogInAppPurchase(NEW)](#validateandloginapppurchasev2) -->
   - [updateServerUninstallToken](#updateserveruninstalltoken)
   - [sendPushNotificationData](#sendpushnotificationdata)
   - [addPushNotificationDeepLinkPath](#addpushnotificationdeeplinkpath)
@@ -44,6 +45,7 @@ The list of available methods for this plugin is described below.
   - [setCollectIMEI](#setcollectimei)
   - [setDisableNetworkData `setDisableNetworkData(disable)`](#setdisablenetworkdata-setdisablenetworkdatadisable)
   - [performOnDeepLinking](#performondeeplinking)
+  - [disableAppSetId](#disableappsetid)
 - [iOS Only APIs](#ios-only-apis)
   - [disableCollectASA](#disablecollectasa)
   - [disableIDFVCollection](#disableidfvcollection)
@@ -626,6 +628,53 @@ appsFlyer.validateAndLogInAppPurchase(info, res => console.log(res), err => cons
 ```
 
 ---
+<!--
+## New In-App Purchase Validation API
+The new `validateAndLogInAppPurchase` API uses `AFPurchaseDetails` and `AFPurchaseType` enum for structured purchase validation.
+
+### AFPurchaseType Enum
+
+```javascript
+import { AFPurchaseType } from 'react-native-appsflyer';
+
+AFPurchaseType.SUBSCRIPTION        // "subscription"
+AFPurchaseType.ONE_TIME_PURCHASE   // "one-time-purchase"
+```
+
+### AFPurchaseDetails Interface
+
+```typescript
+interface AFPurchaseDetails {
+  purchaseType: AFPurchaseType;    // Type of purchase
+  transactionId: string;           // Unique transaction identifier
+  productId: string;               // Product identifier
+}
+```
+
+### Usage Example
+
+```javascript
+import appsFlyer, { AFPurchaseType } from 'react-native-appsflyer';
+
+const purchaseDetails = {
+  purchaseType: AFPurchaseType.SUBSCRIPTION,
+  transactionId: "google_play_purchase_token_123",
+  productId: "com.example.app.premium_monthly"
+};
+
+const additionalParams = {
+  revenue: 9.99,
+  currency: "USD"
+};
+
+appsFlyer.validateAndLogInAppPurchaseV2(
+  purchaseDetails,
+  additionalParams,
+  (result) => console.log(result)
+);
+```
+-->
+---
 
 ### updateServerUninstallToken
 `updateServerUninstallToken(token, callback)`
@@ -948,6 +997,25 @@ if (Platform.OS == 'android') {
 
 appsFlyer.startSdk(); // <--- Here we send launch
 ```
+
+### disableAppSetId 
+`disableAppSetId()`
+
+**Disable the collection of AppSet ID.**<br/>
+**Must be called before calling start.**<br/>
+
+*Example:*
+```javascript
+if (Platform.OS == 'android') {
+  appsFlyer.disableAppSetId();
+  appsFlyer.initSdk({
+    devKey: 'K2***********99',
+    isDebug: false,
+    appId: '41*****44',
+  });
+}
+```
+
 ## iOS Only APIs
 
 ### disableCollectASA 

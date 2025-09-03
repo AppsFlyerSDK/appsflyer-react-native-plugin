@@ -12,6 +12,9 @@ import androidx.annotation.Nullable;
 
 import android.util.Log;
 
+import java.util.Collections;
+import java.util.Map;
+
 import com.appsflyer.attribution.AppsFlyerRequestListener;
 import com.appsflyer.deeplink.DeepLinkListener;
 import com.appsflyer.deeplink.DeepLinkResult;
@@ -25,6 +28,9 @@ import com.appsflyer.internal.platform_extension.PluginInfo;
 import com.appsflyer.share.CrossPromotionHelper;
 import com.appsflyer.share.LinkGenerator;
 import com.appsflyer.share.ShareInviteHelper;
+import com.appsflyer.AFPurchaseType;
+import com.appsflyer.AFPurchaseDetails;
+import com.appsflyer.AppsFlyerInAppPurchaseValidationCallback;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -34,6 +40,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import org.json.JSONArray;
@@ -777,6 +784,80 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void validateAndLogInAppPurchaseV2(ReadableMap purchaseDetails, ReadableMap additionalParameters) {
+        try {
+            // Extract and validate required fields
+            String purchaseType = purchaseDetails.getString("purchaseType");
+            String purchaseToken = purchaseDetails.getString("transactionId");
+            String productId = purchaseDetails.getString("productId");
+
+            if (purchaseType == null || purchaseToken == null || productId == null) {
+                sendValidationError("Missing required fields: purchaseType, transactionId, or productId");
+                return;
+            }
+
+            // Convert purchase type
+            AFPurchaseType afPurchaseType = "subscription".equals(purchaseType) 
+                ? AFPurchaseType.SUBSCRIPTION 
+                : AFPurchaseType.ONE_TIME_PURCHASE;
+
+            // Create purchase details
+            AFPurchaseDetails afPurchaseDetails = new AFPurchaseDetails(afPurchaseType, purchaseToken, productId);
+
+            // Convert additional parameters to string map
+            Map<String, String> additionalParams = convertReadableMapToStringMap(additionalParameters);
+
+            // Validate purchase
+            AppsFlyerLib.getInstance().validateAndLogInAppPurchase(
+                afPurchaseDetails,
+                additionalParams,
+                new AppsFlyerInAppPurchaseValidationCallback() {
+                    @Override
+                    public void onInAppPurchaseValidationFinished(@NonNull Map<String, ?> result) {
+                        sendValidationResult(result);
+                    }
+
+                    @Override
+                    public void onInAppPurchaseValidationError(@NonNull Map<String, ?> error) {
+                        sendValidationResult(error);
+                    }
+                }
+            );
+        } catch (Exception e) {
+            sendValidationError("Validation failed: " + e.getMessage());
+        }
+    }
+
+    private Map<String, String> convertReadableMapToStringMap(ReadableMap readableMap) {
+        Map<String, String> result = new HashMap<>();
+        if (readableMap == null) {
+            return result;
+        }
+
+        ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
+        while (iterator.hasNextKey()) {
+            String key = iterator.nextKey();
+            Object value = readableMap.getDynamic(key);
+            result.put(key, value != null ? value.toString() : null);
+        }
+        return result;
+    }
+
+    private void sendValidationResult(Map<String, ?> data) {
+        try {
+            JSONObject json = new JSONObject(data);
+            sendEvent(reactContext, afOnValidationResult, json.toString());
+        } catch (Exception e) {
+            sendEvent(reactContext, afOnValidationResult, data.toString());
+        }
+    }
+
+    private void sendValidationError(String errorMessage) {
+        Map<String, Object> error = Collections.singletonMap("error", errorMessage);
+        sendValidationResult(error);
+    }
+
+    @ReactMethod
     public void sendPushNotificationData(ReadableMap pushPayload, Callback errorCallback) {
         JSONObject payload = RNUtil.readableMapToJson(pushPayload);
         String errorMsg;
@@ -877,6 +958,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         } else{
             Log.d("AppsFlyer", "performOnDeepLinking: activity is null!");
         }
+    }
+
+    @ReactMethod
+    public void disableAppSetId() {
+        AppsFlyerLib.getInstance().disableAppSetId();
     }
 
     @ReactMethod
