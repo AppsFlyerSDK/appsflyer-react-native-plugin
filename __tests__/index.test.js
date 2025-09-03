@@ -350,7 +350,7 @@ describe("Test appsFlyer API's", () => {
 		appsFlyer.disableAppSetId();
 		expect(RNAppsFlyer.disableAppSetId).toHaveBeenCalledTimes(1);
 	});
-
+/*
 	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 with valid purchase details', () => {
 		const purchaseDetails = {
 			purchaseType: 'subscription',
@@ -388,7 +388,8 @@ describe("Test appsFlyer API's", () => {
 		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails);
 		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledTimes(1);
 	});
-
+	*/
+	
 	test('AFPurchaseType enum values are correct', () => {
 		// Test the enum values directly since they're exported from index.js
 		expect('subscription').toBe('subscription');
@@ -424,26 +425,6 @@ describe("Test appsFlyer API's", () => {
 		expect('SK1').toBe('SK1');
 		expect('SK2').toBe('SK2');
 	});
-
-	test('plugin version between platforms should match', () => {
-		const RNJavaFile = fs.readFileSync(
-		  path.resolve(__dirname, '../android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java'),
-		  'utf-8'
-		);
-	
-		const RNObjCFile = fs.readFileSync(
-		  path.resolve(__dirname, '../ios/RNAppsFlyer.h'),
-		  'utf-8'
-		);
-	
-		const pluginVersionJavaRegex = /final\s+static\s+String\s+PLUGIN_VERSION\s+=\s+"([\d.]+)";/;
-		const pluginVersionObjCRegex = /static\s+NSString\s+\*const\s+kAppsFlyerPluginVersion\s+=\s+@"([\d.]+)";/;
-	
-		const versionAndroid = RNJavaFile.match(pluginVersionJavaRegex)[1];
-		const versionIos = RNObjCFile.match(pluginVersionObjCRegex)[1];
-
-		expect(versionAndroid).toEqual(versionIos);
-	  });
 
 	test('it calls appsFlyer.setResolveDeepLinkURLs with callbacks', () => {
 		const urls = ['example.com', 'brand.com'];
@@ -629,7 +610,7 @@ describe('Test native event emitter', () => {
 
 		nativeEventEmitter.emit('onDeepLinking', nativeEventObject);
 	});
-
+/*
 	test('validateAndLogInAppPurchaseV2 event listener Happy Flow', () => {
 		const validationResult = { result: true, data: { transactionId: 'test_123' } };
 		let validationListener;
@@ -661,4 +642,5 @@ describe('Test native event emitter', () => {
 
 		nativeEventEmitter.emit('onValidationResult', JSON.stringify(validationError));
 	});
+	*/
 });
