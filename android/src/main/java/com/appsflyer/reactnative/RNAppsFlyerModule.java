@@ -12,6 +12,9 @@ import androidx.annotation.Nullable;
 
 import android.util.Log;
 
+import java.util.Collections;
+import java.util.Map;
+
 import com.appsflyer.attribution.AppsFlyerRequestListener;
 import com.appsflyer.deeplink.DeepLinkListener;
 import com.appsflyer.deeplink.DeepLinkResult;
