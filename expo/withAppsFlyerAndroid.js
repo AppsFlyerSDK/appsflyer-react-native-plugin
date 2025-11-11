@@ -51,8 +51,6 @@ function withCustomAndroidManifest(config) {
 module.exports = function withAppsFlyerAndroid(config, { shouldUsePurchaseConnector = false } = {}) {
   if (shouldUsePurchaseConnector) {
     config = addPurchaseConnectorFlag(config);
-  } else {
-    console.log('[AppsFlyerPlugin] Purchase Connector disabled, skipping gradle property injection');
   }
   
   // Always apply Android manifest modifications for secure data handling
