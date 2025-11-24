@@ -13,7 +13,7 @@
 ### <a id="plugin-build-for"> This plugin is built for
 
 - Android AppsFlyer SDK **v6.17.3**
-- iOS AppsFlyer SDK **v6.17.5**
+- iOS AppsFlyer SDK **v6.17.7**
 - Minimum tested with React-Native **v0.62.0** (older versions might be supported)
 
 ## <a id="release-updates"> Release Updates
