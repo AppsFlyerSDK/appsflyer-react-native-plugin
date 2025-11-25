@@ -6,6 +6,8 @@
   "types": "index.d.ts",
   "scripts": {
     "test": "jest --coverage",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "demo.ios": "npm run ios-pod; cd SampleApps/AppsFlyerExample; npm run ios",
     "demo.android": "cd SampleApps/AppsFlyerExample; npm run android",
     "ios-pod": "cd SampleApps/AppsFlyerExample/ios; pod install; cd ../"
@@ -32,7 +34,10 @@
   "devDependencies": {
     "@babel/preset-env": "^7.26.9",
     "@types/jest": "^29.5.14",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "babel-jest": "^29.7.0",
+    "eslint": "^8.57.1",
     "jest": "^29.7.0",
     "react": "16.11.0",
     "react-native": "0.62.3",

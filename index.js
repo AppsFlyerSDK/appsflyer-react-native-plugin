@@ -3,6 +3,7 @@ import AppsFlyerConstants from "./PurchaseConnector/constants/constants";
 import InAppPurchaseValidationResult from "./PurchaseConnector/models/in_app_purchase_validation_result";
 import ValidationFailureData from "./PurchaseConnector/models/validation_failure_data";
 import SubscriptionValidationResult from "./PurchaseConnector/models/subscription_validation_result";
+import { MissingConfigurationException } from "./PurchaseConnector/models/missing_configuration_exception";
 
 const { RNAppsFlyer } = NativeModules;
 const appsFlyer = {};
@@ -186,7 +187,7 @@ AppsFlyerPurchaseConnector.setInAppPurchaseEventDataSource = (dataSource) => {
 // Purchase Connector iOS methods
 function logConsumableTransaction(transactionId){
 	PCAppsFlyer.logConsumableTransaction(transactionId);
-};
+}
   
 AppsFlyerPurchaseConnector.logConsumableTransaction = logConsumableTransaction;
 
@@ -233,7 +234,7 @@ AppsFlyerPurchaseConnector.setPurchaseRevenueDataSource = (dataSource) => {
   
 AppsFlyerPurchaseConnector.setPurchaseRevenueDataSourceStoreKit2 = (dataSource) => {
 	if (!dataSource || typeof dataSource !== 'object') {
-	  throw new Error('dataSource must be an object');
+		throw new Error('dataSource must be an object');
 	}
 	PCAppsFlyer.setPurchaseRevenueDataSourceStoreKit2(dataSource);
 };
@@ -847,7 +848,7 @@ appsFlyer.setSharingFilterForAllPartners = () => {
  * @param errorC Error callback
  */
 
-appsFlyer.setSharingFilter = (partners, successC, errorC) => {
+appsFlyer.setSharingFilter = (partners, _successC, _errorC) => {
   return appsFlyer.setSharingFilterForPartners(partners);
 };
 

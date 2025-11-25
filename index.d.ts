@@ -1,13 +1,13 @@
 /**
  * Typescript Definition Sync with v5.1.1
  **/
-import { InAppPurchaseValidationResult } from "../models/in_app_purchase_validation_result";
-import SubscriptionValidationResult from "../models/subscription_validation_result";
+import InAppPurchaseValidationResult from "./PurchaseConnector/models/in_app_purchase_validation_result";
+import SubscriptionValidationResult from "./PurchaseConnector/models/subscription_validation_result";
 import {
   OnResponse,
   OnFailure,
   OnReceivePurchaseRevenueValidationInfo,
-} from "../utils/connector_callbacks";
+} from "./PurchaseConnector/utils/connector_callbacks";
 
 declare module "react-native-appsflyer" {
   type Response<T> = void | Promise<T>;
@@ -151,21 +151,17 @@ declare module "react-native-appsflyer" {
             hasConsentForDataUsage?: boolean,
             hasConsentForAdsPersonalization?: boolean,
             hasConsentForAdStorage?: boolean
-        ) {}
+        );
 
         /**
          * @deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.
          */
-        static forGDPRUser(hasConsentForDataUsage: boolean, hasConsentForAdsPersonalization: boolean): AppsFlyerConsent {
-            return new AppsFlyerConsent(true, hasConsentForDataUsage, hasConsentForAdsPersonalization);
-        }
+        static forGDPRUser(hasConsentForDataUsage: boolean, hasConsentForAdsPersonalization: boolean): AppsFlyerConsent;
 
         /**
          * @deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.
          */
-        static forNonGDPRUser(): AppsFlyerConsent {
-            return new AppsFlyerConsent(false);
-        }
+        static forNonGDPRUser(): AppsFlyerConsent;
     }
 
     /**
@@ -201,15 +197,15 @@ declare module "react-native-appsflyer" {
     mediationNetwork: MEDIATION_NETWORK;
     currencyIso4217Code: string;
     revenue: number;
-    additionalParameters?: StringMap;
+    additionalParameters?: { [key: string]: any };
   }
 
   /**
    * PurchaseConnector
    */
-  export const StoreKitVersion = {
-    SK1: "SK1",
-    SK2: "SK2",
+  export const StoreKitVersion: {
+    readonly SK1: "SK1";
+    readonly SK2: "SK2";
   };
 
   export interface PurchaseConnectorConfig {
@@ -264,13 +260,13 @@ declare module "react-native-appsflyer" {
       callback: (data:OnResponse<SubscriptionValidationResult>) => any
     ): () => void;
     onSubscriptionValidationResultFailure(
-      callback: (data:onFailure) => any
+      callback: (data:OnFailure) => any
     ): () => void;
     onInAppValidationResultSuccess(
       callback: (data:OnResponse<InAppPurchaseValidationResult>) => any
     ): () => void;
     onInAppValidationResultFailure(
-      callback: (data:onFailure) => any
+      callback: (data:OnFailure) => any
     ): () => void;
 
     setSubscriptionPurchaseEventDataSource: (dataSource: SubscriptionPurchaseEventDataSource) => void;
@@ -397,7 +393,7 @@ declare module "react-native-appsflyer" {
     ): void;
     startSdk(): void;
     enableTCFDataCollection(enabled: boolean): void;
-    setConsentData(consentData: AppsFlyerConsentType): void;
+    setConsentData(consentData: AppsFlyerConsent): void;
     logAdRevenue(adRevenueData: AFAdRevenueData): void;
     /**
      * For iOS Only
@@ -420,3 +416,14 @@ declare module "react-native-appsflyer" {
 
   export default appsFlyer;
 }
+
+// Explicit ambient declarations for ESLint compatibility
+// ESLint's import resolver doesn't recognize exports inside 'declare module' blocks.
+// These top-level declarations allow ESLint to detect the exports.
+declare const StoreKitVersion: { readonly SK1: "SK1"; readonly SK2: "SK2" };
+declare const AppsFlyerPurchaseConnector: any; // Type is defined in declare module above
+declare const AppsFlyerPurchaseConnectorConfig: any; // Type is defined in declare module above  
+declare const appsFlyer: any; // Type is defined in declare module above
+
+export { StoreKitVersion, AppsFlyerPurchaseConnector, AppsFlyerPurchaseConnectorConfig };
+export { appsFlyer as default };
