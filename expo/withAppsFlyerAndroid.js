@@ -30,17 +30,22 @@ function withCustomAndroidManifest(config) {
     const application = manifest.application[0];
 
     // Add tools:replace attribute for dataExtractionRules and fullBackupContent
+    // This allows AppsFlyer SDK's built-in backup rules to take precedence over
+    // conflicting rules in the app's manifest (see: https://dev.appsflyer.com/hc/docs/install-android-sdk#backup-rules)
     const existingReplace = application['$']['tools:replace'];
     if (existingReplace) {
-      const newReplace = existingReplace + ', android:dataExtractionRules, android:fullBackupContent';
-      application['$']['tools:replace'] = newReplace;
+      // Add to existing tools:replace if not already present
+      const replaceAttrs = existingReplace.split(',').map(s => s.trim());
+      if (!replaceAttrs.includes('android:dataExtractionRules')) {
+        replaceAttrs.push('android:dataExtractionRules');
+      }
+      if (!replaceAttrs.includes('android:fullBackupContent')) {
+        replaceAttrs.push('android:fullBackupContent');
+      }
+      application['$']['tools:replace'] = replaceAttrs.join(', ');
     } else {
       application['$']['tools:replace'] = 'android:dataExtractionRules, android:fullBackupContent';
     }
-
-    // Set dataExtractionRules and fullBackupContent as attributes within <application>
-    application['$']['android:dataExtractionRules'] = '@xml/secure_store_data_extraction_rules';
-    application['$']['android:fullBackupContent'] = '@xml/secure_store_backup_rules';
 
     console.log('[AppsFlyerPlugin] Android manifest modifications completed');
     
@@ -52,7 +57,8 @@ module.exports = function withAppsFlyerAndroid(config, { shouldUsePurchaseConnec
   if (shouldUsePurchaseConnector) {
     config = addPurchaseConnectorFlag(config);
   } 
-  // Always apply Android manifest modifications for secure data handling
+  // Apply Android manifest modifications to resolve backup rules conflicts with AppsFlyer SDK
+  // This ensures AppsFlyer SDK's built-in backup rules take precedence (see issue #631)
   config = withCustomAndroidManifest(config);
   
   return config;
