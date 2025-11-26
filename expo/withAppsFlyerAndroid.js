@@ -13,14 +13,19 @@ function addPurchaseConnectorFlag(config) {
   });
 }
 
-// withCustomAndroidManifest.js
-function withCustomAndroidManifest(config) {
-  return withAndroidManifest(config, async (config) => {
+// Opt-in backup rules handling
+function withCustomAndroidManifest(config, { preferAppsFlyerBackupRules = false } = {}) {
+  return withAndroidManifest(config, async (cfg) => {
     console.log('[AppsFlyerPlugin] Starting Android manifest modifications...');
-    
-    const androidManifest = config.modResults;
+
+    const androidManifest = cfg.modResults;
     const manifest = androidManifest.manifest;
-    
+
+    if (!manifest || !manifest.$ || !manifest.application || !manifest.application[0]) {
+      console.warn('[AppsFlyerPlugin] Unexpected manifest structure; skipping modifications');
+      return cfg;
+    }
+
     // Ensure xmlns:tools is present in the <manifest> tag
     if (!manifest.$['xmlns:tools']) {
       manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
@@ -28,38 +33,67 @@ function withCustomAndroidManifest(config) {
     }
 
     const application = manifest.application[0];
+    const appAttrs = application.$ || {};
 
-    // Add tools:replace attribute for dataExtractionRules and fullBackupContent
-    // This allows AppsFlyer SDK's built-in backup rules to take precedence over
-    // conflicting rules in the app's manifest (see: https://dev.appsflyer.com/hc/docs/install-android-sdk#backup-rules)
-    const existingReplace = application['$']['tools:replace'];
-    if (existingReplace) {
-      // Add to existing tools:replace if not already present
-      const replaceAttrs = existingReplace.split(',').map(s => s.trim());
-      if (!replaceAttrs.includes('android:dataExtractionRules')) {
-        replaceAttrs.push('android:dataExtractionRules');
+    const hasDataExtractionRules = appAttrs['android:dataExtractionRules'] !== undefined;
+    const hasFullBackupContent = appAttrs['android:fullBackupContent'] !== undefined;
+
+    if (!preferAppsFlyerBackupRules) {
+      // Default: do not touch backup attributes at all
+      if (hasDataExtractionRules || hasFullBackupContent) {
+        console.log(
+          '[AppsFlyerPlugin] App defines backup attributes; leaving them untouched (preferAppsFlyerBackupRules=false)'
+        );
+      } else {
+        console.log(
+          '[AppsFlyerPlugin] App does not define backup attributes; no changes required (preferAppsFlyerBackupRules=false)'
+        );
       }
-      if (!replaceAttrs.includes('android:fullBackupContent')) {
-        replaceAttrs.push('android:fullBackupContent');
+      console.log('[AppsFlyerPlugin] Android manifest modifications completed');
+      return cfg;
+    }
+
+    // preferAppsFlyerBackupRules === true
+    if (hasDataExtractionRules || hasFullBackupContent) {
+      // Remove conflicting attributes from app's manifest
+      // This allows AppsFlyer SDK's built-in backup rules to be used instead.
+      if (hasDataExtractionRules) {
+        delete appAttrs['android:dataExtractionRules'];
+        console.log(
+          '[AppsFlyerPlugin] Removed android:dataExtractionRules to use AppsFlyer SDK rules (preferAppsFlyerBackupRules=true)'
+        );
       }
-      application['$']['tools:replace'] = replaceAttrs.join(', ');
+
+      if (hasFullBackupContent) {
+        delete appAttrs['android:fullBackupContent'];
+        console.log(
+          '[AppsFlyerPlugin] Removed android:fullBackupContent to use AppsFlyer SDK rules (preferAppsFlyerBackupRules=true)'
+        );
+      }
     } else {
-      application['$']['tools:replace'] = 'android:dataExtractionRules, android:fullBackupContent';
+      console.log(
+        '[AppsFlyerPlugin] App does not define backup attributes; no conflict with AppsFlyer SDK (preferAppsFlyerBackupRules=true)'
+      );
     }
 
     console.log('[AppsFlyerPlugin] Android manifest modifications completed');
-    
-    return config;
+    return cfg;
   });
 }
 
-module.exports = function withAppsFlyerAndroid(config, { shouldUsePurchaseConnector = false } = {}) {
+// Main plugin export
+module.exports = function withAppsFlyerAndroid(
+  config,
+  {
+    shouldUsePurchaseConnector = false,
+    preferAppsFlyerBackupRules = false,
+  } = {}
+) {
   if (shouldUsePurchaseConnector) {
     config = addPurchaseConnectorFlag(config);
-  } 
-  // Apply Android manifest modifications to resolve backup rules conflicts with AppsFlyer SDK
-  // This ensures AppsFlyer SDK's built-in backup rules take precedence (see issue #631)
-  config = withCustomAndroidManifest(config);
-  
+  }
+
+  config = withCustomAndroidManifest(config, { preferAppsFlyerBackupRules });
+
   return config;
 };
