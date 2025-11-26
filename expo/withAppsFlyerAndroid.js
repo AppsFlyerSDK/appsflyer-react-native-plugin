@@ -16,8 +16,6 @@ function addPurchaseConnectorFlag(config) {
 // Opt-in backup rules handling
 function withCustomAndroidManifest(config, { preferAppsFlyerBackupRules = false } = {}) {
   return withAndroidManifest(config, async (cfg) => {
-    console.log('[AppsFlyerPlugin] Starting Android manifest modifications...');
-
     const androidManifest = cfg.modResults;
     const manifest = androidManifest.manifest;
 
@@ -29,7 +27,6 @@ function withCustomAndroidManifest(config, { preferAppsFlyerBackupRules = false 
     // Ensure xmlns:tools is present in the <manifest> tag
     if (!manifest.$['xmlns:tools']) {
       manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
-      console.log('[AppsFlyerPlugin] Added xmlns:tools namespace');
     }
 
     const application = manifest.application[0];
@@ -59,24 +56,15 @@ function withCustomAndroidManifest(config, { preferAppsFlyerBackupRules = false 
       // This allows AppsFlyer SDK's built-in backup rules to be used instead.
       if (hasDataExtractionRules) {
         delete appAttrs['android:dataExtractionRules'];
-        console.log(
-          '[AppsFlyerPlugin] Removed android:dataExtractionRules to use AppsFlyer SDK rules (preferAppsFlyerBackupRules=true)'
-        );
+        console.log('[AppsFlyerPlugin] Removed android:dataExtractionRules to use AppsFlyer SDK rules');
       }
 
       if (hasFullBackupContent) {
         delete appAttrs['android:fullBackupContent'];
-        console.log(
-          '[AppsFlyerPlugin] Removed android:fullBackupContent to use AppsFlyer SDK rules (preferAppsFlyerBackupRules=true)'
-        );
+        console.log('[AppsFlyerPlugin] Removed android:fullBackupContent to use AppsFlyer SDK rules');
       }
-    } else {
-      console.log(
-        '[AppsFlyerPlugin] App does not define backup attributes; no conflict with AppsFlyer SDK (preferAppsFlyerBackupRules=true)'
-      );
     }
 
-    console.log('[AppsFlyerPlugin] Android manifest modifications completed');
     return cfg;
   });
 }
