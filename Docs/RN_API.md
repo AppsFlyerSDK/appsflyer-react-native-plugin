@@ -824,12 +824,39 @@ appsFlyer.enableTCFDataCollection(true);
 ### setConsentData
 `setConsentData(consentObject): void`
 
-When GDPR applies to the user and your app does not use a CMP compatible with TCF v2.2, use this API to provide the consent data directly to the SDK.<br>
-The AppsFlyerConsent object has 2 methods:
+When GDPR applies to the user and your app does not use a CMP compatible with TCF v2.2, use this API to provide the consent data directly to the SDK.
 
-1. `AppsFlyerConsent.forNonGDPRUser`: Indicates that GDPR doesn’t apply to the user and generates nonGDPR consent object. This method doesn’t accept any parameters.
+**Recommended approach (since v6.16.2):**
+Use the `AppsFlyerConsent` constructor:
+
+```javascript
+import appsFlyer, {AppsFlyerConsent} from 'react-native-appsflyer';
+
+// Full consent for GDPR user
+const consent1 = new AppsFlyerConsent(true, true, true, true);
+
+// No consent for GDPR user
+const consent2 = new AppsFlyerConsent(true, false, false, false);
+
+// Non-GDPR user
+const consent3 = new AppsFlyerConsent(false);
+
+appsFlyer.setConsentData(consent1);
+```
+
+**Constructor parameters:**
+| parameter       | type     | description                      |
+| ----------      |----------|------------------                |
+| isUserSubjectToGDPR  | boolean  | Whether GDPR applies to the user (required)       |
+| hasConsentForDataUsage  | boolean  | Consent for data usage (optional)       |
+| hasConsentForAdsPersonalization  | boolean  | Consent for ads personalization (optional)       |
+| hasConsentForAdStorage  | boolean  | Consent for ad storage (optional)       |
+
+**Deprecated approach (still supported):**
+The AppsFlyerConsent object has 2 deprecated methods:
+
+1. `AppsFlyerConsent.forNonGDPRUser`: Indicates that GDPR doesn't apply to the user and generates nonGDPR consent object. This method doesn't accept any parameters.
 2. `AppsFlyerConsent.forGDPRUser`: create an AppsFlyerConsent object with 2 parameters:
-
 
 | parameter       | type     | description                      |
 | ----------      |----------|------------------                |
