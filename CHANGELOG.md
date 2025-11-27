@@ -1,3 +1,15 @@
+## 6.17.8
+Release date: *TBD*
+
+- React Native >> Fixed callback double-invocation crash in React Native New Architecture on Android (prevents fatal errors when callbacks are invoked multiple times)
+- React Native >> Fixed Expo Android build failure related to missing secure_store XML resources
+- React Native >> Added optional `preferAppsFlyerBackupRules` flag for Expo Android manifest backup rules handling
+- React Native >> Changed Expo Android default behavior to no longer modify app's backup rules (use `preferAppsFlyerBackupRules: true` to opt-in)
+- React Native >> Enhanced iOS Swift header import with fallback for different CocoaPods configurations
+- React Native >> Fixed TypeScript definition issues (`onFailure` → `OnFailure` type name, import paths)
+- React Native >> Added ESLint configuration and lint scripts for code quality
+- React Native >> Update Plugin to v6.17.8
+
 ## 6.17.5
  Release date: *2025-09-04*
 
