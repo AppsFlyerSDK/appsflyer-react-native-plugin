@@ -350,7 +350,6 @@ describe("Test appsFlyer API's", () => {
 		appsFlyer.disableAppSetId();
 		expect(RNAppsFlyer.disableAppSetId).toHaveBeenCalledTimes(1);
 	});
-/*
 	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 with valid purchase details', () => {
 		const purchaseDetails = {
 			purchaseType: 'subscription',
@@ -388,7 +387,19 @@ describe("Test appsFlyer API's", () => {
 		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails);
 		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledTimes(1);
 	});
-	*/
+
+	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 with null additional parameters', () => {
+		const purchaseDetails = {
+			purchaseType: 'one_time_purchase',
+			transactionId: 'test_transaction_null',
+			productId: 'test_product_null'
+		};
+		const callback = jest.fn();
+
+		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, null, callback);
+		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledTimes(1);
+		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledWith(purchaseDetails, null);
+	});
 	
 	test('AFPurchaseType enum values are correct', () => {
 		// Test the enum values directly since they're exported from index.js
@@ -610,37 +621,59 @@ describe('Test native event emitter', () => {
 
 		nativeEventEmitter.emit('onDeepLinking', nativeEventObject);
 	});
-/*
 	test('validateAndLogInAppPurchaseV2 event listener Happy Flow', () => {
 		const validationResult = { result: true, data: { transactionId: 'test_123' } };
 		let validationListener;
+		const callback = jest.fn((res) => {
+			expect(res).toEqual(validationResult);
+			if (validationListener) validationListener();
+		});
 
 		validationListener = appsFlyer.validateAndLogInAppPurchaseV2(
 			{ purchaseType: 'subscription', transactionId: 'test_123', productId: 'test_product' },
 			{ test: 'param' },
-			(res) => {
-				expect(res).toEqual(validationResult);
-				validationListener();
-			}
+			callback
 		);
 
 		nativeEventEmitter.emit('onValidationResult', JSON.stringify(validationResult));
+		expect(callback).toHaveBeenCalledWith(validationResult);
 	});
 
 	test('validateAndLogInAppPurchaseV2 event listener with error', () => {
 		const validationError = { error: 'Validation failed' };
 		let validationListener;
+		const callback = jest.fn((error) => {
+			expect(error).toEqual(validationError);
+			if (validationListener) validationListener();
+		});
 
 		validationListener = appsFlyer.validateAndLogInAppPurchaseV2(
 			{ purchaseType: 'one_time_purchase', transactionId: 'test_456', productId: 'test_product' },
 			{},
-			(error) => {
-				expect(error).toEqual(validationError);
-				validationListener();
-			}
+			callback
 		);
 
 		nativeEventEmitter.emit('onValidationResult', JSON.stringify(validationError));
+		expect(callback).toHaveBeenCalledWith(validationError);
 	});
-	*/
+
+	test('validateAndLogInAppPurchaseV2 event listener with invalid JSON', () => {
+		const invalidJson = 'not valid json';
+		let validationListener;
+		const callback = jest.fn((error) => {
+			// AFParseJSONException might not extend Error, check for name property instead
+			expect(error).toBeDefined();
+			expect(error.name).toBe('AFParseJSONException');
+			if (validationListener) validationListener();
+		});
+
+		validationListener = appsFlyer.validateAndLogInAppPurchaseV2(
+			{ purchaseType: 'one_time_purchase', transactionId: 'test_789', productId: 'test_product' },
+			{},
+			callback
+		);
+
+		nativeEventEmitter.emit('onValidationResult', invalidJson);
+		expect(callback).toHaveBeenCalled();
+	});
 });
