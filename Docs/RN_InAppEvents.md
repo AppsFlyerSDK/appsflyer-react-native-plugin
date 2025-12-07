@@ -54,6 +54,9 @@ appsFlyer.logEvent(
 
 ---
 ## In-app purchase validation
+
+> ⚠️ **Deprecated**: The `validateAndLogInAppPurchase` API is deprecated. Use `validateAndLogInAppPurchaseV2` instead. See the [API reference](/Docs/RN_API.md#validateandloginapppurchasev2) for details.
+
 Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.
 Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases).
 

@@ -741,9 +741,8 @@ appsFlyer.onDeepLink = (callback) => {
 
 
 /**
- * TODO: Remove comment when the API is stable
- * New validateAndLogInAppPurchase API with AFPurchaseDetails support.
- *
+ * validateAndLogInAppPurchase API with AFPurchaseDetails support.
+ */
 appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters , callback) => {
   const listener = appsFlyerEventEmitter.addListener("onValidationResult", (_data) => {
     if (callback && typeof callback === 'function') {
@@ -769,7 +768,6 @@ appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters
     listener.remove();
   };
 };
- */
 
 /**
  * Anonymize user Data.
@@ -885,10 +883,10 @@ export const AFPurchaseType = {
 };
 
 /**
- * [LEGACY WARNING] This is the legacy validateAndLogInAppPurchase API.
+ * @deprecated This API is deprecated. Use validateAndLogInAppPurchaseV2 instead.
  */
 appsFlyer.validateAndLogInAppPurchase = (purchaseInfo, successCallback, errorCallback) => {
-  console.log('[AppsFlyer] Using legacy validateAndLogInAppPurchase API');
+  console.warn('[AppsFlyer] validateAndLogInAppPurchase is deprecated. Use validateAndLogInAppPurchaseV2 instead.');
   return RNAppsFlyer.validateAndLogInAppPurchase(purchaseInfo, successCallback, errorCallback);
 };
 

@@ -596,6 +596,9 @@ appsFlyer.setSharingFilterForPartners(['googleadwords_int', 'all']);            
 
 ### validateAndLogInAppPurchase
 `validateAndLogInAppPurchase(purchaseInfo, successC, errorC): Response<string>`
+
+> ⚠️ **Deprecated**: This API is deprecated. Use `validateAndLogInAppPurchaseV2` instead.
+
 Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.
 Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases
 ❗Important❗ for iOS - set SandBox to ```true```
@@ -628,20 +631,22 @@ appsFlyer.validateAndLogInAppPurchase(info, res => console.log(res), err => cons
 ```
 
 ---
-<!--
-## New In-App Purchase Validation API
-The new `validateAndLogInAppPurchase` API uses `AFPurchaseDetails` and `AFPurchaseType` enum for structured purchase validation.
 
-### AFPurchaseType Enum
+### validateAndLogInAppPurchaseV2
+`validateAndLogInAppPurchaseV2(purchaseDetails, additionalParameters, callback): void`
+
+The `validateAndLogInAppPurchaseV2` API uses `AFPurchaseDetails` and `AFPurchaseType` enum for structured purchase validation.
+
+#### AFPurchaseType Enum
 
 ```javascript
 import { AFPurchaseType } from 'react-native-appsflyer';
 
 AFPurchaseType.SUBSCRIPTION        // "subscription"
-AFPurchaseType.ONE_TIME_PURCHASE   // "one-time-purchase"
+AFPurchaseType.ONE_TIME_PURCHASE   // "one_time_purchase"
 ```
 
-### AFPurchaseDetails Interface
+#### AFPurchaseDetails Interface
 
 ```typescript
 interface AFPurchaseDetails {
@@ -651,15 +656,15 @@ interface AFPurchaseDetails {
 }
 ```
 
-### Usage Example
+#### Usage Example
 
 ```javascript
 import appsFlyer, { AFPurchaseType } from 'react-native-appsflyer';
 
 const purchaseDetails = {
-  purchaseType: AFPurchaseType.SUBSCRIPTION,
-  transactionId: "google_play_purchase_token_123",
-  productId: "com.example.app.premium_monthly"
+  purchaseType: AFPurchaseType.ONE_TIME_PURCHASE,
+  transactionId: "2000000569065806",
+  productId: "deviceIdconsumableid"
 };
 
 const additionalParams = {
@@ -670,10 +675,19 @@ const additionalParams = {
 appsFlyer.validateAndLogInAppPurchaseV2(
   purchaseDetails,
   additionalParams,
-  (result) => console.log(result)
+  (result) => {
+    if (result.error) {
+      console.error('Validation failed:', result.error);
+    } else {
+      console.log('Validation success:', result);
+    }
+  }
 );
 ```
--->
+**Important Notes:**
+- The callback receives both `result` and `error` parameters
+- Always check for `error` first before processing `result`
+- Handle the case where `AFSDKPurchaseDetails` creation might fail
 ---
 
 ### updateServerUninstallToken

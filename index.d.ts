@@ -358,7 +358,7 @@ declare module "react-native-appsflyer" {
       successC?: SuccessCB
     ): void;
     /**
-     * [LEGACY WARNING] This is the legacy validateAndLogInAppPurchase API.
+     * @deprecated This API is deprecated. Use validateAndLogInAppPurchaseV2 instead.
      */
     validateAndLogInAppPurchase(
       purchaseInfo: InAppPurchase,
@@ -366,15 +366,14 @@ declare module "react-native-appsflyer" {
       errorC: ErrorCB
     ): Response<string>;
     /**
-     * [NEW API] This is the new validateAndLogInAppPurchase API with AFPurchaseDetails.
+     * validateAndLogInAppPurchase API with AFPurchaseDetails.
      * Uses event emitter pattern for callback handling.
-     
+     */
     validateAndLogInAppPurchaseV2(
       purchaseDetails: AFPurchaseDetails,
       additionalParameters?: { [key: string]: any },
       callback?: (data: any) => void
     ): void;
-    */
    
     updateServerUninstallToken(token: string, successC?: SuccessCB): void;
     sendPushNotificationData(pushPayload: object, errorC?: ErrorCB): void;
