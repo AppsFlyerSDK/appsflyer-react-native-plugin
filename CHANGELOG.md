@@ -1,3 +1,10 @@
+## 6.17.7
+ Release date: *2025-10-22*
+
+- React Native >> Update Android SDK to 6.17.7
+- React Native >> Update iOS SDK to 6.17.7
+- React Native >> Update Plugin to v6.17.7
+
 ## 6.17.5
  Release date: *2025-09-04*
 
