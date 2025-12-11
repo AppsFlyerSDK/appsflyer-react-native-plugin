@@ -480,8 +480,8 @@ When unsupported emailsCryptType is passed, the SDK will use the default (none).
 
 ```javascript
 const options = {
-  // In this case iOS platform will encrypt emails usind MD5 and android with SHA256. If you want both platform to encrypt with the same method, just write 0 or 3.
-  emailsCryptType: Platform.OS === 'ios' ? 2 : 3, 
+  // In this case iOS platform will encrypt emails using MD5 and android with SHA256. If you want both platform to encrypt with the same method, just write 0 or 3.
+  emailsCryptType: Platform.OS === 'ios' ? 0 : 3, 
   emails: ['user1@gmail.com', 'user2@gmail.com'],
 };
 
