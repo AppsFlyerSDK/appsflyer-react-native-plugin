@@ -1,5 +1,20 @@
+## 6.17.8
+Release date: *2025-12-17*
+
+- React Native >> Update Android SDK to 6.17.5
+- React Native >> Update iOS SDK to 6.17.8
+- React Native >> Update iOS Purchase Connector to 6.17.8
+- React Native >> Fixed callback double-invocation crash in React Native New Architecture on Android
+- React Native >> Fixed TypeScript return type for `validateAndLogInAppPurchaseV2`
+- React Native >> Fixed TypeScript type issues (`onFailure` → `OnFailure`, import paths)
+- React Native >> Fixed Expo Android build failure related to backup rules
+- React Native >> Added `preferAppsFlyerBackupRules` flag for Expo Android (default: false)
+- React Native >> Enhanced iOS Swift header import with CocoaPods fallback
+- React Native >> Added ESLint configuration and lint scripts
+- React Native >> Update Plugin to v6.17.8
+
 ## 6.17.7
- Release date: *2025-10-22*
+Release date: 2025-10-22
 
 - React Native >> Update Android SDK to 6.17.7
 - React Native >> Update iOS SDK to 6.17.7

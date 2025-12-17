@@ -3,7 +3,7 @@ interface TestPurchaseJson {}
 export class TestPurchase {
   constructor() {}
 
-  static fromJson(json: TestPurchaseJson): TestPurchase {
+  static fromJson(_json: TestPurchaseJson): TestPurchase {
     return new TestPurchase();
   }
 

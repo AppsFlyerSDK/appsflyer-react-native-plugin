@@ -596,6 +596,9 @@ appsFlyer.setSharingFilterForPartners(['googleadwords_int', 'all']);            
 
 ### validateAndLogInAppPurchase
 `validateAndLogInAppPurchase(purchaseInfo, successC, errorC): Response<string>`
+
+> ⚠️ **Deprecated**: This API is deprecated. Use `validateAndLogInAppPurchaseV2` instead.
+
 Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.
 Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases
 ❗Important❗ for iOS - set SandBox to ```true```
@@ -628,20 +631,22 @@ appsFlyer.validateAndLogInAppPurchase(info, res => console.log(res), err => cons
 ```
 
 ---
-<!--
-## New In-App Purchase Validation API
-The new `validateAndLogInAppPurchase` API uses `AFPurchaseDetails` and `AFPurchaseType` enum for structured purchase validation.
 
-### AFPurchaseType Enum
+### validateAndLogInAppPurchaseV2
+`validateAndLogInAppPurchaseV2(purchaseDetails, additionalParameters, callback): void`
+
+The `validateAndLogInAppPurchaseV2` API uses `AFPurchaseDetails` and `AFPurchaseType` enum for structured purchase validation.
+
+#### AFPurchaseType Enum
 
 ```javascript
 import { AFPurchaseType } from 'react-native-appsflyer';
 
 AFPurchaseType.SUBSCRIPTION        // "subscription"
-AFPurchaseType.ONE_TIME_PURCHASE   // "one-time-purchase"
+AFPurchaseType.ONE_TIME_PURCHASE   // "one_time_purchase"
 ```
 
-### AFPurchaseDetails Interface
+#### AFPurchaseDetails Interface
 
 ```typescript
 interface AFPurchaseDetails {
@@ -651,15 +656,15 @@ interface AFPurchaseDetails {
 }
 ```
 
-### Usage Example
+#### Usage Example
 
 ```javascript
 import appsFlyer, { AFPurchaseType } from 'react-native-appsflyer';
 
 const purchaseDetails = {
-  purchaseType: AFPurchaseType.SUBSCRIPTION,
-  transactionId: "google_play_purchase_token_123",
-  productId: "com.example.app.premium_monthly"
+  purchaseType: AFPurchaseType.ONE_TIME_PURCHASE,
+  transactionId: "2000000569065806",
+  productId: "deviceIdconsumableid"
 };
 
 const additionalParams = {
@@ -670,10 +675,19 @@ const additionalParams = {
 appsFlyer.validateAndLogInAppPurchaseV2(
   purchaseDetails,
   additionalParams,
-  (result) => console.log(result)
+  (result) => {
+    if (result.error) {
+      console.error('Validation failed:', result.error);
+    } else {
+      console.log('Validation success:', result);
+    }
+  }
 );
 ```
--->
+**Important Notes:**
+- The callback receives both `result` and `error` parameters
+- Always check for `error` first before processing `result`
+- Handle the case where `AFSDKPurchaseDetails` creation might fail
 ---
 
 ### updateServerUninstallToken
@@ -824,12 +838,39 @@ appsFlyer.enableTCFDataCollection(true);
 ### setConsentData
 `setConsentData(consentObject): void`
 
-When GDPR applies to the user and your app does not use a CMP compatible with TCF v2.2, use this API to provide the consent data directly to the SDK.<br>
-The AppsFlyerConsent object has 2 methods:
+When GDPR applies to the user and your app does not use a CMP compatible with TCF v2.2, use this API to provide the consent data directly to the SDK.
 
-1. `AppsFlyerConsent.forNonGDPRUser`: Indicates that GDPR doesn’t apply to the user and generates nonGDPR consent object. This method doesn’t accept any parameters.
+**Recommended approach (since v6.16.2):**
+Use the `AppsFlyerConsent` constructor:
+
+```javascript
+import appsFlyer, {AppsFlyerConsent} from 'react-native-appsflyer';
+
+// Full consent for GDPR user
+const consent1 = new AppsFlyerConsent(true, true, true, true);
+
+// No consent for GDPR user
+const consent2 = new AppsFlyerConsent(true, false, false, false);
+
+// Non-GDPR user
+const consent3 = new AppsFlyerConsent(false);
+
+appsFlyer.setConsentData(consent1);
+```
+
+**Constructor parameters:**
+| parameter       | type     | description                      |
+| ----------      |----------|------------------                |
+| isUserSubjectToGDPR  | boolean  | Whether GDPR applies to the user (required)       |
+| hasConsentForDataUsage  | boolean  | Consent for data usage (optional)       |
+| hasConsentForAdsPersonalization  | boolean  | Consent for ads personalization (optional)       |
+| hasConsentForAdStorage  | boolean  | Consent for ad storage (optional)       |
+
+**Deprecated approach (still supported):**
+The AppsFlyerConsent object has 2 deprecated methods:
+
+1. `AppsFlyerConsent.forNonGDPRUser`: Indicates that GDPR doesn't apply to the user and generates nonGDPR consent object. This method doesn't accept any parameters.
 2. `AppsFlyerConsent.forGDPRUser`: create an AppsFlyerConsent object with 2 parameters:
-
 
 | parameter       | type     | description                      |
 | ----------      |----------|------------------                |

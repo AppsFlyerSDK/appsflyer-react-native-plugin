@@ -52,7 +52,7 @@ export class CanceledStateContext {
 class DeveloperInitiatedCancellation {
   constructor() {}
 
-  static fromJson(json: any): DeveloperInitiatedCancellation {
+  static fromJson(_json: any): DeveloperInitiatedCancellation {
     // Here you would implement the conversion from JSON to DeveloperInitiatedCancellation instance
     return new DeveloperInitiatedCancellation();
   }
@@ -66,7 +66,7 @@ class DeveloperInitiatedCancellation {
 class ReplacementCancellation {
   constructor() {}
 
-  static fromJson(json: any): ReplacementCancellation {
+  static fromJson(_json: any): ReplacementCancellation {
     // Here you would implement the conversion from JSON to ReplacementCancellation instance
     return new ReplacementCancellation();
   }
@@ -79,7 +79,7 @@ class ReplacementCancellation {
 class SystemInitiatedCancellation {
   constructor() {}
 
-  static fromJson(json: any): SystemInitiatedCancellation {
+  static fromJson(_json: any): SystemInitiatedCancellation {
     // Here you would implement the conversion from JSON to SystemInitiatedCancellation instance
     return new SystemInitiatedCancellation();
   }

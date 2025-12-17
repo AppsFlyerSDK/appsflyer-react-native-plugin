@@ -7,7 +7,15 @@ static NSString *const TAG = @"[AppsFlyer_PurchaseConnector] ";
 
 #if __has_include(<PurchaseConnector/PurchaseConnector.h>)
 #import <PurchaseConnector/PurchaseConnector.h>
+// Try modular import path first (for newer CocoaPods configurations)
+#if __has_include(<react_native_appsflyer/react_native_appsflyer-Swift.h>)
+#import <react_native_appsflyer/react_native_appsflyer-Swift.h>
+#elif __has_include(<react_native_appsflyer-Swift.h>)
+// Fallback to legacy import path (for older CocoaPods configurations)
 #import <react_native_appsflyer-Swift.h>
+#else
+#warning "react_native_appsflyer Swift header not found"
+#endif
 
 @implementation PCAppsFlyer
 @synthesize bridge = _bridge;
