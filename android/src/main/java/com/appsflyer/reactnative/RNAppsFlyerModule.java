@@ -82,7 +82,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                 if (callback != null) {
                     try {
                         callback.invoke(args);
-                    } catch (RuntimeException | IllegalStateException e) {
+                    } catch (RuntimeException e) {
                         // Log error when bridge is destroyed or context is dead
                         // Don't rethrow - callback failure shouldn't break the SDK
                         Log.e(TAG, "Failed to invoke callback - bridge may be destroyed", e);
