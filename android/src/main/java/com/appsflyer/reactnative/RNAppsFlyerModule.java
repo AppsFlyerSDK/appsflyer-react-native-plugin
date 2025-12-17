@@ -1,3 +1,4 @@
+
 package com.appsflyer.reactnative;
 
 
@@ -57,7 +58,7 @@ import java.util.Locale;
 
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.afOnDeepLinking;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     private ReactApplicationContext reactContext;
@@ -323,14 +324,19 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity != null) {
                 AppsFlyerLib.getInstance().logEvent(getCurrentActivity(), eventName, data, new AppsFlyerRequestListener() {
+                    final AtomicBoolean isCompleted = new AtomicBoolean(false);
                     @Override
                     public void onSuccess() {
-                        successCallback.invoke(SUCCESS);
+                       if (isCompleted.compareAndSet(false, true)) {
+                            successCallback.invoke(SUCCESS);
+                        }
                     }
 
                     @Override
                     public void onError(int i, @NonNull String s) {
-                        errorCallback.invoke(s);
+                        if (isCompleted.compareAndSet(false, true)) {
+                            errorCallback.invoke(String.valueOf(i), s);
+                        }
                     }
                 });
             }
@@ -355,14 +361,19 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             Activity currentActivity = getCurrentActivity();
             if (currentActivity != null) {
                 AppsFlyerLib.getInstance().logEvent(getCurrentActivity(), eventName, data, new AppsFlyerRequestListener() {
+                    final AtomicBoolean isCompleted = new AtomicBoolean(false);
                     @Override
                     public void onSuccess() {
-                        promise.resolve(SUCCESS);
+                        if (isCompleted.compareAndSet(false, true)) {
+                            promise.resolve(SUCCESS);
+                        }
                     }
 
                     @Override
                     public void onError(int i, @NonNull String s) {
-                        promise.reject(s);
+                        if (isCompleted.compareAndSet(false, true)) {
+                            promise.reject(String.valueOf(i), s);
+                        }
                     }
                 });
             }
