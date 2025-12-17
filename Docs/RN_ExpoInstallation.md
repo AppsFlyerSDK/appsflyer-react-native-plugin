@@ -25,7 +25,8 @@ expo install react-native-appsflyer
         "react-native-appsflyer",
         {
           "shouldUseStrictMode": false,          // optional – kids-apps strict mode
-          "shouldUsePurchaseConnector": true     // NEW – enables Purchase Connector
+          "shouldUsePurchaseConnector": true,    // optional – enables Purchase Connector
+          "preferAppsFlyerBackupRules": false    // optional – use AppsFlyer SDK backup rules (default: false)
         }
       ]
     ],
@@ -42,8 +43,40 @@ expo install react-native-appsflyer
     ],
 ...
 ```
-### Fix for build failure with RN 0.76 and Expo 52
-To ensure seamless integration of the AppsFlyer plugin in your Expo-managed project, it’s essential to handle modifications to the AndroidManifest.xml correctly. Since direct edits to the AndroidManifest.xml aren’t feasible in the managed workflow, you’ll need to create a custom configuration to include the necessary changes.
+### Backup Rules Configuration (Android)
+
+The AppsFlyer SDK includes built-in backup rules in its Android manifest to ensure accurate install/reinstall detection. By default, the plugin respects your app's backup rules and does not modify them.
+
+**Default Behavior** (`preferAppsFlyerBackupRules: false` or omitted):
+- Your app's `android:dataExtractionRules` and `android:fullBackupContent` attributes are left untouched
+- You maintain full control over your app's backup policy
+- No manifest merge conflicts occur
+
+**Opt-in Behavior** (`preferAppsFlyerBackupRules: true`):
+- If your app defines backup rules, they will be removed to let AppsFlyer SDK's built-in rules take precedence
+- This ensures AppsFlyer SDK's backup rules are used, which may improve install/reinstall detection accuracy
+- Use this flag if you want AppsFlyer SDK to manage backup rules for you
+
+**When to use `preferAppsFlyerBackupRules: true`:**
+- You want AppsFlyer SDK to handle backup rules automatically
+- You're experiencing issues with install/reinstall detection that may be related to backup rules
+- You don't have specific backup requirements for your app
+
+**Example configuration:**
+```json
+{
+  "expo": {
+    "plugins": [
+      [
+        "react-native-appsflyer",
+        {
+          "preferAppsFlyerBackupRules": true
+        }
+      ]
+    ]
+  }
+}
+```
 
 ### Handling dataExtractionRules Conflict
 
@@ -123,3 +156,11 @@ Setting `"shouldUsePurchaseConnector": true` will:
 
 * **iOS** – add the `PurchaseConnector` CocoaPod automatically  
 * **Android** – add `appsflyer.enable_purchase_connector=true` to `gradle.properties`
+
+### Plugin Options Summary
+
+| Option | Type | Default | Description |
+|-------|------|---------|-------------|
+| `shouldUseStrictMode` | boolean | `false` | Enable strict mode for kids apps |
+| `shouldUsePurchaseConnector` | boolean | `false` | Enable Purchase Connector support |
+| `preferAppsFlyerBackupRules` | boolean | `false` | Remove app's backup rules to use AppsFlyer SDK's built-in rules (Android only) |

@@ -15,7 +15,7 @@ module.exports = {
   modulePathIgnorePatterns: ['<rootDir>/demos/'],
   testMatch: [
     '<rootDir>/__tests__/**/*.test.ts?(x)',
-    '<rootDir>/__tests__/index.test.js?(x)',
+    '<rootDir>/__tests__/**/*.test.js?(x)',
   ],
   setupFiles: ['<rootDir>/__tests__/setup.js'],
 };

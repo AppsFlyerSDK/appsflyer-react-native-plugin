@@ -477,6 +477,7 @@ adb shell am start -W -a android.intent.action.VIEW -d "https://your-onelink-dom
 <manifest xmlns:tools="http://schemas.android.com/tools">
   <application android:allowBackup="false" tools:replace="android:allowBackup">
 ```
+See [AppsFlyer Android SDK documentation](https://dev.appsflyer.com/hc/docs/install-android-sdk#backup-rules) for more details.
 
 **4. Package attribute deprecated:**
 - Remove `package="com.yourapp"` from AndroidManifest.xml

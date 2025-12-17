@@ -14,6 +14,7 @@ import android.util.Log;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.appsflyer.attribution.AppsFlyerRequestListener;
 import com.appsflyer.deeplink.DeepLinkListener;
@@ -47,6 +48,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,6 +65,35 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     private ReactApplicationContext reactContext;
     private Application application;
     private String personalDevKey;
+
+    private static class CallbackGuard {
+        private static final String TAG = "AppsFlyer_" + RNAppsFlyerConstants.PLUGIN_VERSION;
+        private final AtomicBoolean invoked = new AtomicBoolean(false);
+        private final WeakReference<Callback> callbackRef;
+
+        public CallbackGuard(Callback callback) {
+            this.callbackRef = new WeakReference<>(callback);
+        }
+
+        public void invoke(Object... args) {
+            if (invoked.compareAndSet(false, true)) {
+                // Store in local strong reference to prevent race condition with GC
+                final Callback callback = callbackRef.get();
+                if (callback != null) {
+                    try {
+                        callback.invoke(args);
+                    } catch (RuntimeException e) {
+                        // Log error when bridge is destroyed or context is dead
+                        // Don't rethrow - callback failure shouldn't break the SDK
+                        Log.e(TAG, "Failed to invoke callback - bridge may be destroyed", e);
+                    } catch (Exception e) {
+                        // Catch any other unexpected exceptions
+                        Log.e(TAG, "Unexpected error invoking callback", e);
+                    }
+                }
+            }
+        }
+    }
 
     public RNAppsFlyerModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -107,16 +138,18 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void initSdkWithCallBack(ReadableMap _options, Callback successCallback, Callback errorCallback) {
+        CallbackGuard guardedSuccessCallback = new CallbackGuard(successCallback);
+        CallbackGuard guardedErrorCallback = new CallbackGuard(errorCallback);
         try {
             final String errorReason = callSdkInternal(_options);
             if (errorReason == null) {
                 //TODO: callback should come from SDK
-                successCallback.invoke(SUCCESS);
+                guardedSuccessCallback.invoke(SUCCESS);
             } else {
-                errorCallback.invoke(new Exception(errorReason).getMessage());
+                guardedErrorCallback.invoke(new Exception(errorReason).getMessage());
             }
         } catch (Exception e) {
-            errorCallback.invoke(e.getMessage());
+            guardedErrorCallback.invoke(e.getMessage());
         }
     }
 
@@ -311,9 +344,11 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             final String eventName, ReadableMap eventData,
             final Callback successCallback,
             final Callback errorCallback) {
+        final CallbackGuard guardedSuccessCallback = new CallbackGuard(successCallback);
+        final CallbackGuard guardedErrorCallback = new CallbackGuard(errorCallback);
         try {
             if (eventName.trim().equals("")) {
-                errorCallback.invoke(NO_EVENT_NAME_FOUND);
+                guardedErrorCallback.invoke(NO_EVENT_NAME_FOUND);
                 return;
             }
             Map<String, Object> data = RNUtil.toMap(eventData);
@@ -325,17 +360,17 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                 AppsFlyerLib.getInstance().logEvent(getCurrentActivity(), eventName, data, new AppsFlyerRequestListener() {
                     @Override
                     public void onSuccess() {
-                        successCallback.invoke(SUCCESS);
+                        guardedSuccessCallback.invoke(SUCCESS);
                     }
 
                     @Override
                     public void onError(int i, @NonNull String s) {
-                        errorCallback.invoke(s);
+                        guardedErrorCallback.invoke(s);
                     }
                 });
             }
         } catch (Exception e) {
-            errorCallback.invoke(e.getMessage());
+            guardedErrorCallback.invoke(e.getMessage());
             return;
         }
     }
@@ -434,48 +469,49 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getAppsFlyerUID(Callback callback) {
+        CallbackGuard guardedCallback = new CallbackGuard(callback);
         String appId = AppsFlyerLib.getInstance().getAppsFlyerUID(getReactApplicationContext());
-        callback.invoke(null, appId);
+        guardedCallback.invoke(null, appId);
     }
 
     @ReactMethod
     public void updateServerUninstallToken(final String token, Callback callback) {
+        CallbackGuard guardedCallback = new CallbackGuard(callback);
         AppsFlyerLib.getInstance().updateServerUninstallToken(getReactApplicationContext(), token);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        guardedCallback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void setCustomerUserId(final String userId, Callback callback) {
+        CallbackGuard guardedCallback = new CallbackGuard(callback);
         AppsFlyerLib.getInstance().setCustomerUserId(userId);
-        callback.invoke(SUCCESS);
+        guardedCallback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void setCollectIMEI(boolean isCollect, Callback callback) {
+        CallbackGuard guardedCallback = new CallbackGuard(callback);
         AppsFlyerLib.getInstance().setCollectIMEI(isCollect);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        guardedCallback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void setCollectAndroidID(boolean isCollect, Callback callback) {
+        CallbackGuard guardedCallback = new CallbackGuard(callback);
         AppsFlyerLib.getInstance().setCollectAndroidID(isCollect);
-        if (callback != null) {
-            callback.invoke(SUCCESS);
-        }
+        guardedCallback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void stop(boolean isStopped, Callback callback) {
+        CallbackGuard guardedCallback = new CallbackGuard(callback);
         AppsFlyerLib.getInstance().stop(isStopped, getReactApplicationContext());
-        callback.invoke(SUCCESS);
+        guardedCallback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void setAdditionalData(ReadableMap additionalData, Callback callback) {
+        CallbackGuard guardedCallback = new CallbackGuard(callback);
         Map<String, Object> data = null;
         try {
             data = RNUtil.toMap(additionalData);
@@ -490,7 +526,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
         HashMap<String, Object> copyData = new HashMap<>(data);
         AppsFlyerLib.getInstance().setAdditionalData(copyData);
-        callback.invoke(SUCCESS);
+        guardedCallback.invoke(SUCCESS);
     }
 
 
@@ -498,6 +534,8 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     public void setUserEmails(ReadableMap _options,
                               Callback successCallback,
                               Callback errorCallback) {
+        CallbackGuard guardedSuccessCallback = new CallbackGuard(successCallback);
+        CallbackGuard guardedErrorCallback = new CallbackGuard(errorCallback);
 
         JSONObject options = RNUtil.readableMapToJson(_options);
 
@@ -505,7 +543,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         JSONArray emailsJSON = options.optJSONArray(afEmails);
 
         if (emailsJSON.length() == 0) {
-            errorCallback.invoke(new Exception(EMPTY_OR_CORRUPTED_LIST).getMessage());
+            guardedErrorCallback.invoke(new Exception(EMPTY_OR_CORRUPTED_LIST).getMessage());
             return;
         }
 
@@ -525,29 +563,33 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            errorCallback.invoke(new Exception(EMPTY_OR_CORRUPTED_LIST).getMessage());
+            guardedErrorCallback.invoke(new Exception(EMPTY_OR_CORRUPTED_LIST).getMessage());
             return;
         }
 
         AppsFlyerLib.getInstance().setUserEmails(type, emailsList);
-        successCallback.invoke(SUCCESS);
+        guardedSuccessCallback.invoke(SUCCESS);
     }
 
 
     @ReactMethod
     public void setAppInviteOneLinkID(final String oneLinkID, Callback callback) {
+        CallbackGuard guardedCallback = new CallbackGuard(callback);
         AppsFlyerLib.getInstance().setAppInviteOneLink(oneLinkID);
-        callback.invoke(SUCCESS);
+        guardedCallback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void setCurrencyCode(final String currencyCode, Callback callback) {
+        CallbackGuard guardedCallback = new CallbackGuard(callback);
         AppsFlyerLib.getInstance().setCurrencyCode(currencyCode);
-        callback.invoke(SUCCESS);
+        guardedCallback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void generateInviteLink(ReadableMap args, final Callback successCallback, final Callback errorCallback) {
+        final CallbackGuard guardedSuccessCallback = new CallbackGuard(successCallback);
+        final CallbackGuard guardedErrorCallback = new CallbackGuard(errorCallback);
 
         String channel = null;
         String campaign = null;
@@ -614,12 +656,12 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         CreateOneLinkHttpTask.ResponseListener listener = new CreateOneLinkHttpTask.ResponseListener() {
             @Override
             public void onResponse(final String oneLinkUrl) {
-                successCallback.invoke(oneLinkUrl);
+                guardedSuccessCallback.invoke(oneLinkUrl);
             }
 
             @Override
             public void onResponseError(final String error) {
-                errorCallback.invoke(error);
+                guardedErrorCallback.invoke(error);
             }
         };
 
@@ -652,14 +694,18 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void anonymizeUser(boolean b, Callback callback) {
+        CallbackGuard guardedCallback = new CallbackGuard(callback);
         AppsFlyerLib.getInstance().anonymizeUser(b);
-        callback.invoke(SUCCESS);
+        guardedCallback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void setOneLinkCustomDomains(ReadableArray domainsArray, Callback successCallback, Callback errorCallback) {
+        CallbackGuard guardedSuccessCallback = new CallbackGuard(successCallback);
+        CallbackGuard guardedErrorCallback = new CallbackGuard(errorCallback);
+
         if (domainsArray.size() <= 0) {
-            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            guardedErrorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
             return;
         }
 
@@ -668,17 +714,20 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         try {
             String[] domains = domainsList.toArray(new String[domainsList.size()]);
             AppsFlyerLib.getInstance().setOneLinkCustomDomain(domains);
-            successCallback.invoke(SUCCESS);
+            guardedSuccessCallback.invoke(SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();
-            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            guardedErrorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
         }
     }
 
     @ReactMethod
     public void setResolveDeepLinkURLs(ReadableArray urlsArray, Callback successCallback, Callback errorCallback) {
+        CallbackGuard guardedSuccessCallback = new CallbackGuard(successCallback);
+        CallbackGuard guardedErrorCallback = new CallbackGuard(errorCallback);
+
         if (urlsArray.size() <= 0) {
-            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            guardedErrorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
             return;
         }
 
@@ -687,23 +736,26 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         try {
             String[] urls = urlsList.toArray(new String[urlsList.size()]);
             AppsFlyerLib.getInstance().setResolveDeepLinkURLs(urls);
-            successCallback.invoke(SUCCESS);
+            guardedSuccessCallback.invoke(SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();
-            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            guardedErrorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
         }
     }
 
     @ReactMethod
     public void performOnAppAttribution(String urlString, Callback successCallback, Callback errorCallback) {
+        CallbackGuard guardedSuccessCallback = new CallbackGuard(successCallback);
+        CallbackGuard guardedErrorCallback = new CallbackGuard(errorCallback);
+
         try {
             URI uri = URI.create(urlString);
             Context c = application.getApplicationContext();
             AppsFlyerLib.getInstance().performOnAppAttribution(c, uri);
-            successCallback.invoke(SUCCESS);
+            guardedSuccessCallback.invoke(SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();
-            errorCallback.invoke(INVALID_URI);
+            guardedErrorCallback.invoke(INVALID_URI);
         }
     }
 
@@ -724,12 +776,16 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void logLocation(double longitude, double latitude, Callback successCallback) {
+        CallbackGuard guardedSuccessCallback = new CallbackGuard(successCallback);
         AppsFlyerLib.getInstance().logLocation(getReactApplicationContext(), latitude, longitude);
-        successCallback.invoke(SUCCESS);
+        guardedSuccessCallback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void validateAndLogInAppPurchase(ReadableMap purchaseInfo, Callback successCallback, Callback errorCallback) {
+        CallbackGuard guardedSuccessCallback = new CallbackGuard(successCallback);
+        CallbackGuard guardedErrorCallback = new CallbackGuard(errorCallback);
+
         String publicKey = "";
         String signature = "";
         String purchaseData = "";
@@ -753,34 +809,38 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
             }
 
             if (publicKey == "" || signature == "" || purchaseData == "" || price == "" || currency == "") {
-                errorCallback.invoke(NO_PARAMETERS_ERROR);
+                guardedErrorCallback.invoke(NO_PARAMETERS_ERROR);
                 return;
             }
         } catch (Exception e) {
             e.printStackTrace();
-            errorCallback.invoke(e);
+            guardedErrorCallback.invoke(e);
             return;
         }
-        initInAppPurchaseValidatorListener(successCallback, errorCallback);
+        initInAppPurchaseValidatorListenerInternal(guardedSuccessCallback, guardedErrorCallback);
         AppsFlyerLib.getInstance().validateAndLogInAppPurchase(reactContext, publicKey, signature, purchaseData, price, currency, additionalParameters);
 
     }
 
-    @ReactMethod
-    public void initInAppPurchaseValidatorListener(final Callback successCallback, final Callback errorCallback) {
+    private void initInAppPurchaseValidatorListenerInternal(final CallbackGuard guardedSuccess, final CallbackGuard guardedError) {
         AppsFlyerLib.getInstance().registerValidatorListener(reactContext, new AppsFlyerInAppPurchaseValidatorListener() {
             @Override
             public void onValidateInApp() {
-                successCallback.invoke(VALIDATE_SUCCESS);
-
+                guardedSuccess.invoke(VALIDATE_SUCCESS);
             }
 
             @Override
             public void onValidateInAppFailure(String error) {
-                errorCallback.invoke(VALIDATE_FAILED + error);
-
+                guardedError.invoke(VALIDATE_FAILED + error);
             }
         });
+    }
+
+    @ReactMethod
+    public void initInAppPurchaseValidatorListener(final Callback successCallback, final Callback errorCallback) {
+        CallbackGuard guardedSuccess = new CallbackGuard(successCallback);
+        CallbackGuard guardedError = new CallbackGuard(errorCallback);
+        initInAppPurchaseValidatorListenerInternal(guardedSuccess, guardedError);
     }
 
     @ReactMethod
@@ -859,11 +919,12 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void sendPushNotificationData(ReadableMap pushPayload, Callback errorCallback) {
+        CallbackGuard guardedErrorCallback = new CallbackGuard(errorCallback);
         JSONObject payload = RNUtil.readableMapToJson(pushPayload);
         String errorMsg;
         if (payload == null) {
             errorMsg = "PushNotification payload is null";
-            handleErrorMessage(errorMsg, errorCallback);
+            handleErrorMessage(errorMsg, guardedErrorCallback);
             return;
         }
         Bundle bundle = null;
@@ -872,7 +933,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         } catch (JSONException e) {
             e.printStackTrace();
             errorMsg = "Can't parse pushPayload to bundle";
-            handleErrorMessage(errorMsg, errorCallback);
+            handleErrorMessage(errorMsg, guardedErrorCallback);
             return;
         }
         Activity activity = getCurrentActivity();
@@ -884,15 +945,15 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
                 AppsFlyerLib.getInstance().sendPushNotificationData(activity);
             } else {
                 errorMsg = "The intent is null. Push payload has not been sent!";
-                handleErrorMessage(errorMsg, errorCallback);
+                handleErrorMessage(errorMsg, guardedErrorCallback);
             }
         } else {
             errorMsg = "The activity is null. Push payload has not been sent!";
-            handleErrorMessage(errorMsg, errorCallback);
+            handleErrorMessage(errorMsg, guardedErrorCallback);
         }
     }
 
-    private void handleErrorMessage(String errorMessage, Callback errorCB) {
+    private void handleErrorMessage(String errorMessage, CallbackGuard errorCB) {
         Log.d("AppsFlyer", errorMessage);
         if (errorCB != null) {
             errorCB.invoke(errorMessage);
@@ -901,14 +962,18 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setHost(String hostPrefix, String hostName, Callback successCallback) {
+        CallbackGuard guardedCallback = new CallbackGuard(successCallback);
         AppsFlyerLib.getInstance().setHost(hostPrefix, hostName);
-        successCallback.invoke(SUCCESS);
+        guardedCallback.invoke(SUCCESS);
     }
 
     @ReactMethod
     public void addPushNotificationDeepLinkPath(ReadableArray path, Callback successCallback, Callback errorCallback) {
+        CallbackGuard guardedSuccessCallback = new CallbackGuard(successCallback);
+        CallbackGuard guardedErrorCallback = new CallbackGuard(errorCallback);
+
         if (path.size() <= 0) {
-            errorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
+            guardedErrorCallback.invoke(EMPTY_OR_CORRUPTED_LIST);
             return;
         }
 //        ArrayList<Object> pathList = path.toArrayList();
@@ -916,10 +981,10 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
         try {
             String[] params = pathList.toArray(new String[pathList.size()]);
             AppsFlyerLib.getInstance().addPushNotificationDeepLinkPath(params);
-            successCallback.invoke(SUCCESS);
+            guardedSuccessCallback.invoke(SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();
-            errorCallback.invoke(e);
+            guardedErrorCallback.invoke(e);
         }
     }
 

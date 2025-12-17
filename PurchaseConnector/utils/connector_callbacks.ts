@@ -1,4 +1,5 @@
-import { IosError, JVMThrowable } from "../models";
+import { IosError } from "../models/ios_errors";
+import { JVMThrowable } from "../models/jvm_throwable";
 
 // Type definition for a general-purpose listener.
 export type PurchaseConnectorListener = (data: any) => void;
