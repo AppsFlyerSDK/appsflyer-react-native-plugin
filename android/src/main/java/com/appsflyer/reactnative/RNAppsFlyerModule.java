@@ -67,6 +67,7 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     private String personalDevKey;
 
     private static class CallbackGuard {
+        private static final String TAG = "AppsFlyer_" + RNAppsFlyerConstants.PLUGIN_VERSION;
         private final AtomicBoolean invoked = new AtomicBoolean(false);
         private final WeakReference<Callback> callbackRef;
 
@@ -76,9 +77,19 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
 
         public void invoke(Object... args) {
             if (invoked.compareAndSet(false, true)) {
-                Callback callback = callbackRef.get();
+                // Store in local strong reference to prevent race condition with GC
+                final Callback callback = callbackRef.get();
                 if (callback != null) {
-                    callback.invoke(args);
+                    try {
+                        callback.invoke(args);
+                    } catch (RuntimeException | IllegalStateException e) {
+                        // Log error when bridge is destroyed or context is dead
+                        // Don't rethrow - callback failure shouldn't break the SDK
+                        Log.e(TAG, "Failed to invoke callback - bridge may be destroyed", e);
+                    } catch (Exception e) {
+                        // Catch any other unexpected exceptions
+                        Log.e(TAG, "Unexpected error invoking callback", e);
+                    }
                 }
             }
         }
