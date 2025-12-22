@@ -46,3 +46,19 @@ jest.mock('../node_modules/react-native/Libraries/BatchedBridge/NativeModules', 
 	};
 });
 jest.mock('../node_modules/react-native/Libraries/EventEmitter/NativeEventEmitter');
+
+// Mock NativeAppsFlyerRPC TurboModule to prevent crashes in tests that import index.js
+jest.mock('../src/NativeAppsFlyerRPC', () => ({
+  __esModule: true,
+  default: {
+    executeJson: jest.fn(),
+    addListener: jest.fn(),
+    removeListeners: jest.fn(),
+  },
+}));
+
+// Mock Platform to prevent PlatformConstants TurboModule access
+jest.mock('react-native/Libraries/Utilities/Platform', () => ({
+  OS: 'ios',
+  select: jest.fn((obj) => obj.ios),
+}));

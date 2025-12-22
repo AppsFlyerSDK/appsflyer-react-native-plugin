@@ -10,6 +10,9 @@
 		7E7F839A2D75E11A009693C2 /* AppsFlyerAttribution.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F83912D75E11A009693C2 /* AppsFlyerAttribution.m */; };
 		7E7F839C2D75E1F5009693C2 /* AFTransactionFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F839B2D75E1F5009693C2 /* AFTransactionFetcher.swift */; };
 		7E7F83A02D75E943009693C2 /* PCAppsFlyer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E7F839F2D75E943009693C2 /* PCAppsFlyer.m */; };
+		7EFC85E02EF3FC6C001CA3D6 /* RNAppsFlyerRPC.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7EFC85DD2EF3FC6C001CA3D6 /* RNAppsFlyerRPC.mm */; };
+		7EFC85E12EF3FC6C001CA3D6 /* RNAppsFlyerRPC.h in Sources */ = {isa = PBXBuildFile; fileRef = 7EFC85DE2EF3FC6C001CA3D6 /* RNAppsFlyerRPC.h */; };
+		7EFC85E22EF3FC6C001CA3D6 /* RNAppsFlyerRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EFC85DF2EF3FC6C001CA3D6 /* RNAppsFlyerRPC.swift */; };
 		B3E7B58A1CC2AC0600A0062D /* RNAppsFlyer.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNAppsFlyer.m */; };
 /* End PBXBuildFile section */
 
@@ -39,6 +42,9 @@
 		7E7F839B2D75E1F5009693C2 /* AFTransactionFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AFTransactionFetcher.swift; sourceTree = "<group>"; };
 		7E7F839D2D75E257009693C2 /* RNAppsFlyer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNAppsFlyer-Bridging-Header.h"; sourceTree = "<group>"; };
 		7E7F839F2D75E943009693C2 /* PCAppsFlyer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PCAppsFlyer.m; sourceTree = "<group>"; };
+		7EFC85DD2EF3FC6C001CA3D6 /* RNAppsFlyerRPC.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RNAppsFlyerRPC.mm; sourceTree = "<group>"; };
+		7EFC85DE2EF3FC6C001CA3D6 /* RNAppsFlyerRPC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNAppsFlyerRPC.h; sourceTree = "<group>"; };
+		7EFC85DF2EF3FC6C001CA3D6 /* RNAppsFlyerRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNAppsFlyerRPC.swift; sourceTree = "<group>"; };
 		943704C6209F6734005B3A22 /* AppsFlyerShareInviteHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppsFlyerShareInviteHelper.h; sourceTree = "<group>"; };
 		943704C7209F6734005B3A22 /* AppsFlyerLinkGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppsFlyerLinkGenerator.h; sourceTree = "<group>"; };
 		943704C9209F6735005B3A22 /* AppsFlyerCrossPromotionHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppsFlyerCrossPromotionHelper.h; sourceTree = "<group>"; };
@@ -86,7 +92,18 @@
 				7E7F839D2D75E257009693C2 /* RNAppsFlyer-Bridging-Header.h */,
 				7E7F839B2D75E1F5009693C2 /* AFTransactionFetcher.swift */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				7EFC85DC2EF3FC1C001CA3D6 /* RNAppsFlyerRPC */,
 			);
+			sourceTree = "<group>";
+		};
+		7EFC85DC2EF3FC1C001CA3D6 /* RNAppsFlyerRPC */ = {
+			isa = PBXGroup;
+			children = (
+				7EFC85DE2EF3FC6C001CA3D6 /* RNAppsFlyerRPC.h */,
+				7EFC85DD2EF3FC6C001CA3D6 /* RNAppsFlyerRPC.mm */,
+				7EFC85DF2EF3FC6C001CA3D6 /* RNAppsFlyerRPC.swift */,
+			);
+			path = RNAppsFlyerRPC;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -147,6 +164,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7EFC85E02EF3FC6C001CA3D6 /* RNAppsFlyerRPC.mm in Sources */,
+				7EFC85E12EF3FC6C001CA3D6 /* RNAppsFlyerRPC.h in Sources */,
+				7EFC85E22EF3FC6C001CA3D6 /* RNAppsFlyerRPC.swift in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* RNAppsFlyer.m in Sources */,
 				7E7F839A2D75E11A009693C2 /* AppsFlyerAttribution.m in Sources */,
 				7E7F839C2D75E1F5009693C2 /* AFTransactionFetcher.swift in Sources */,

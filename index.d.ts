@@ -426,3 +426,6 @@ declare const appsFlyer: any; // Type is defined in declare module above
 
 export { StoreKitVersion, AppsFlyerPurchaseConnector, AppsFlyerPurchaseConnectorConfig };
 export { appsFlyer as default };
+
+// RPC-based implementation (POC)
+export { default as AppsFlyerRPC, AppsFlyerRPCError } from './src/AppsFlyerRPC';

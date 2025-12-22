@@ -53,4 +53,38 @@ To do so, please follow [this article](https://support.appsflyer.com/hc/en-us/ar
 - [React-Native Sample App](/demos/appsflyer-react-native-app)
 - [🆕 Expo Sample App](https://github.com/AppsFlyerSDK/appsflyer-expo-sample-app)
 
+## 🔬 RPC Module (iOS & Android)
+
+This plugin includes an **RPC-based implementation** using TurboModules for both iOS and Android:
+
+```javascript
+import { AppsFlyerRPC } from 'react-native-appsflyer/rpc';
+
+// Initialize
+await AppsFlyerRPC.instance.initialize({
+  devKey: 'YOUR_DEV_KEY',
+  appId: 'id123456789',
+});
+
+// Start SDK
+await AppsFlyerRPC.instance.start();
+```
+
+**Features:**
+- ✅ Singleton pattern (`AppsFlyerRPC.instance`)
+- ✅ Full TypeScript support
+- ✅ iOS RPC implementation
+- ✅ Android RPC implementation
+- ✅ Works with both New Architecture and Legacy Bridge
+
+**Setup:**
+- **iOS:** Add `$AppsFlyerRPC = true` to your `Podfile`, then run `pod install`
+- **Android:** Add `appsflyer.use_rpc_module=true` to your `gradle.properties`
+
+**Documentation:**
+- [RPC Integration Guide](/Docs/RN_RPC_POC.md)
+- [RPC Demo App](/demos/appsflyer-react-native-app/README_RPC.md)
+
+---
+
 ### [API reference](/Docs/RN_API.md)

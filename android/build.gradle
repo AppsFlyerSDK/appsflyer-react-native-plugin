@@ -37,12 +37,23 @@ android {
         }
 
         buildConfigField 'boolean', 'INCLUDE_CONNECTOR', includeConnector.toString()
+        // Feature flag to enable RPC module (default: false for backwards compatibility)
+        def useRPCModule = project.hasProperty('appsflyer.use_rpc_module') ? project.property('appsflyer.use_rpc_module').toBoolean() : false
+        buildConfigField 'boolean', 'USE_RPC_MODULE', useRPCModule.toString()
+        
+        // ProGuard rules for release builds
+        consumerProguardFiles 'proguard-rules.pro'
     }
 
     sourceSets {
         main {
             java.srcDirs = ['src/main/java', 'src/main/kotlin'] // Add Kotlin source directory
             java.srcDirs += includeConnector ? ['src/main/includeConnector'] : ['src/main/excludeConnector']
+            // Exclude old module when using RPC module
+            def useRPCModule = project.hasProperty('appsflyer.use_rpc_module') ? project.property('appsflyer.use_rpc_module').toBoolean() : false
+            if (useRPCModule) {
+                java.exclude '**/RNAppsFlyerModule.java'
+            }
         }
     }
 
@@ -65,12 +76,17 @@ android {
 repositories {
     mavenCentral()
     maven { url "https://maven.google.com" }
+    // AppsFlyer repositories are defined in the app's allprojects block
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10" // Add Kotlin standard library
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    api "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.17.5')}"
+    // AppsFlyer SDK 7.99.512 (required for plugin bridge 0.0.4)
+    implementation("com.appsflyer:af-android-sdk:7.99.512")
+    // AppsFlyer Plugin Bridge for RPC layer
+    implementation("com.appsflyer:af-android-plugin-bridge:0.0.4")
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.2')}"
     if (includeConnector){
         implementation 'com.appsflyer:purchase-connector:2.1.1'

@@ -9,5 +9,6 @@
 #ifndef RNAppsFlyer_Bridging_Header_h
 #define RNAppsFlyer_Bridging_Header_h
 
+#import "RCTAppDelegate.h"
 
 #endif /* RNAppsFlyer_Bridging_Header_h */

@@ -6,15 +6,28 @@ Pod::Spec.new do |s|
   s.version          = pkg["version"]
   s.summary          = pkg["description"]
   s.requires_arc     = true
-  s.license          = pkg["license"]
+  s.license          = pkg["license"]["type"] || pkg["license"]
   s.homepage         = pkg["homepage"]
   s.author           = pkg["author"]
-  s.source           = { :git => pkg["repository"]["url"] }
-  s.source_files     = 'ios/**/*.{h,m,swift}'
+  s.source           = { :git => pkg["repository"]["url"], :tag => s.version }
+  s.source_files     = 'ios/**/*.{h,m,mm,swift}'
   s.platform         = :ios, "12.0"
   s.static_framework = true
   s.swift_version    = '5.0'
+  s.module_name      = 'react_native_appsflyer'
   s.dependency 'React'
+  
+  # AppsFlyerRPC framework (optional - only if RPC module is enabled)
+  if defined?($AppsFlyerRPC) && ($AppsFlyerRPC == true)
+    Pod::UI.puts "#{s.name}: Including AppsFlyerRPC framework for RPC module support"
+    s.dependency 'AppsFlyerRPC'
+  end
+  
+  preprocessor_definitions = ['$(inherited)']
+  if ENV['RCT_NEW_ARCH_ENABLED'] == '1'
+    preprocessor_definitions << 'RCT_NEW_ARCH_ENABLED=1'
+  end
+  
   s.exclude_files = [
     "ios/AFAdRevenueData.h",
     "ios/AppsFlyerConsent.h",
@@ -37,7 +50,7 @@ Pod::Spec.new do |s|
   if defined?($RNAppsFlyerStrictMode) && ($RNAppsFlyerStrictMode == true)
     Pod::UI.puts "#{s.name}: Using AppsFlyerFramework/Strict mode"
     s.dependency 'AppsFlyerFramework/Strict', '6.17.8'
-    s.xcconfig = {'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) AFSDK_NO_IDFA=1' }
+    preprocessor_definitions << 'AFSDK_NO_IDFA=1'
   else
     if !defined?($RNAppsFlyerStrictMode)
       Pod::UI.puts "#{s.name}: Using default AppsFlyerFramework. You may require App Tracking Transparency. Not allowed for Kids apps."
@@ -45,4 +58,11 @@ Pod::Spec.new do |s|
     end
     s.dependency 'AppsFlyerFramework', '6.17.8'
   end
+  
+  s.pod_target_xcconfig = {
+    'DEFINES_MODULE' => 'YES',
+    'SWIFT_COMPILATION_MODE' => 'wholemodule',
+    'SWIFT_OBJC_INTERFACE_HEADER_NAME' => 'react_native_appsflyer-Swift.h',
+    'GCC_PREPROCESSOR_DEFINITIONS' => preprocessor_definitions.join(' ')
+  }
 end
