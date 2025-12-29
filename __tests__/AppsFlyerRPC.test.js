@@ -17,23 +17,56 @@ jest.mock('../src/NativeAppsFlyerRPC', () => ({
   },
 }));
 
-// Mock NativeEventEmitter
-jest.mock('react-native', () => ({
-  Platform: {
-    OS: 'ios',
-  },
-  NativeEventEmitter: jest.fn().mockImplementation(() => ({
-    addListener: jest.fn((eventName, callback) => ({
-      remove: jest.fn(),
+// Mock react-native with TurboModuleRegistry and NativeModules
+jest.mock('react-native', () => {
+  const mockModule = {
+    executeJson: jest.fn(),
+    addListener: jest.fn(),
+    removeListeners: jest.fn(),
+  };
+  
+  return {
+    Platform: {
+      OS: 'ios',
+    },
+    NativeEventEmitter: jest.fn().mockImplementation(() => ({
+      addListener: jest.fn((eventName, callback) => ({
+        remove: jest.fn(),
+      })),
     })),
-  })),
-}));
+    TurboModuleRegistry: {
+      get: jest.fn((name) => {
+        if (name === 'RNAppsFlyerRPC') {
+          return mockModule;
+        }
+        return null;
+      }),
+    },
+    NativeModules: {
+      RNAppsFlyerRPC: mockModule,
+    },
+  };
+});
 
 import NativeAppsFlyerRPC from '../src/NativeAppsFlyerRPC';
+import { NativeModules, TurboModuleRegistry } from 'react-native';
 
 describe('AppsFlyerRPC', () => {
+  // Get the mock native module for setting up expectations
+  const getMockNativeModule = () => {
+    return TurboModuleRegistry.get('RNAppsFlyerRPC') || NativeModules.RNAppsFlyerRPC;
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset the mock module's executeJson to return a default success response
+    const mockModule = getMockNativeModule();
+    if (mockModule) {
+      mockModule.executeJson.mockResolvedValue(JSON.stringify({
+        id: 'test-123',
+        result: { success: true },
+      }));
+    }
   });
 
   describe('Singleton Pattern', () => {
@@ -50,22 +83,24 @@ describe('AppsFlyerRPC', () => {
 
   describe('RPC Request/Response Handling', () => {
     it('should execute RPC request successfully', async () => {
+      const mockModule = getMockNativeModule();
       const mockResponse = JSON.stringify({
         id: 'test-123',
         result: { success: true, message: 'OK' },
       });
-      NativeAppsFlyerRPC.executeJson.mockResolvedValue(mockResponse);
+      mockModule.executeJson.mockResolvedValue(mockResponse);
 
       const result = await AppsFlyerRPC.instance.initialize({
         devKey: 'test-key',
         appId: 'id123',
       });
 
-      expect(NativeAppsFlyerRPC.executeJson).toHaveBeenCalled();
+      expect(mockModule.executeJson).toHaveBeenCalled();
       expect(result).toBeUndefined(); // initialize returns void
     });
 
     it('should handle RPC error response', async () => {
+      const mockModule = getMockNativeModule();
       const mockErrorResponse = JSON.stringify({
         id: 'test-123',
         error: {
@@ -74,7 +109,7 @@ describe('AppsFlyerRPC', () => {
           details: null,
         },
       });
-      NativeAppsFlyerRPC.executeJson.mockResolvedValue(mockErrorResponse);
+      mockModule.executeJson.mockResolvedValue(mockErrorResponse);
 
       await expect(
         AppsFlyerRPC.instance.initialize({
@@ -85,15 +120,17 @@ describe('AppsFlyerRPC', () => {
     });
 
     it('should throw error for null response', async () => {
-      NativeAppsFlyerRPC.executeJson.mockResolvedValue(null);
+      const mockModule = getMockNativeModule();
+      mockModule.executeJson.mockResolvedValue(null);
 
       await expect(
         AppsFlyerRPC.instance.setDebug(true)
-      ).rejects.toThrow('Null response from native');
+      ).rejects.toThrow('Empty response from native');
     });
 
     it('should throw error for invalid JSON response', async () => {
-      NativeAppsFlyerRPC.executeJson.mockResolvedValue('invalid json');
+      const mockModule = getMockNativeModule();
+      mockModule.executeJson.mockResolvedValue('invalid json');
 
       await expect(
         AppsFlyerRPC.instance.setDebug(true)
@@ -121,30 +158,32 @@ describe('AppsFlyerRPC', () => {
 
   describe('API Methods', () => {
     beforeEach(() => {
+      const mockModule = getMockNativeModule();
       const mockSuccessResponse = JSON.stringify({
         id: 'test-123',
         result: { success: true },
       });
-      NativeAppsFlyerRPC.executeJson.mockResolvedValue(mockSuccessResponse);
+      mockModule.executeJson.mockResolvedValue(mockSuccessResponse);
     });
 
     describe('initialize', () => {
       it('should call setPluginInfo and init', async () => {
+        const mockModule = getMockNativeModule();
         await AppsFlyerRPC.instance.initialize({
           devKey: 'test-key',
           appId: 'id123',
         });
 
-        expect(NativeAppsFlyerRPC.executeJson).toHaveBeenCalledTimes(2);
+        expect(mockModule.executeJson).toHaveBeenCalledTimes(2);
         
         // First call: setPluginInfo
-        const firstCall = NativeAppsFlyerRPC.executeJson.mock.calls[0][0];
+        const firstCall = mockModule.executeJson.mock.calls[0][0];
         const firstRequest = JSON.parse(firstCall);
         expect(firstRequest.method).toBe('setPluginInfo');
         expect(firstRequest.params.plugin).toBe('react_native');
 
         // Second call: init
-        const secondCall = NativeAppsFlyerRPC.executeJson.mock.calls[1][0];
+        const secondCall = mockModule.executeJson.mock.calls[1][0];
         const secondRequest = JSON.parse(secondCall);
         expect(secondRequest.method).toBe('init');
         expect(secondRequest.params.devKey).toBe('test-key');
@@ -154,9 +193,10 @@ describe('AppsFlyerRPC', () => {
 
     describe('setDebug', () => {
       it('should call isDebug RPC method', async () => {
+        const mockModule = getMockNativeModule();
         await AppsFlyerRPC.instance.setDebug(true);
 
-        const call = NativeAppsFlyerRPC.executeJson.mock.calls[0][0];
+        const call = mockModule.executeJson.mock.calls[0][0];
         const request = JSON.parse(call);
         expect(request.method).toBe('isDebug');
         expect(request.params.isDebug).toBe(true);
@@ -165,18 +205,20 @@ describe('AppsFlyerRPC', () => {
 
     describe('waitForATT', () => {
       it('should call waitForATT with default timeout', async () => {
+        const mockModule = getMockNativeModule();
         await AppsFlyerRPC.instance.waitForATT();
 
-        const call = NativeAppsFlyerRPC.executeJson.mock.calls[0][0];
+        const call = mockModule.executeJson.mock.calls[0][0];
         const request = JSON.parse(call);
         expect(request.method).toBe('waitForATT');
         expect(request.params.timeout).toBe(60);
       });
 
       it('should call waitForATT with custom timeout', async () => {
+        const mockModule = getMockNativeModule();
         await AppsFlyerRPC.instance.waitForATT({ timeout: 30 });
 
-        const call = NativeAppsFlyerRPC.executeJson.mock.calls[0][0];
+        const call = mockModule.executeJson.mock.calls[0][0];
         const request = JSON.parse(call);
         expect(request.params.timeout).toBe(30);
       });
@@ -184,33 +226,36 @@ describe('AppsFlyerRPC', () => {
 
     describe('start', () => {
       it('should call start without awaitResponse', async () => {
+        const mockModule = getMockNativeModule();
         await AppsFlyerRPC.instance.start();
 
-        const call = NativeAppsFlyerRPC.executeJson.mock.calls[0][0];
+        const call = mockModule.executeJson.mock.calls[0][0];
         const request = JSON.parse(call);
         expect(request.method).toBe('start');
         expect(request.params.awaitResponse).toBeUndefined();
       });
 
       it('should call start with awaitResponse', async () => {
+        const mockModule = getMockNativeModule();
         const mockResponse = JSON.stringify({
           id: 'test-123',
           result: { data: { attribution: 'data' } },
         });
-        NativeAppsFlyerRPC.executeJson.mockResolvedValue(mockResponse);
+        mockModule.executeJson.mockResolvedValue(mockResponse);
 
         const result = await AppsFlyerRPC.instance.start({ awaitResponse: true });
 
-        const call = NativeAppsFlyerRPC.executeJson.mock.calls[0][0];
+        const call = mockModule.executeJson.mock.calls[0][0];
         const request = JSON.parse(call);
         expect(request.params.awaitResponse).toBe(true);
         expect(result).toEqual({ attribution: 'data' });
       });
 
       it('startWithCallback should call start with awaitResponse', async () => {
+        const mockModule = getMockNativeModule();
         await AppsFlyerRPC.instance.startWithCallback();
 
-        const call = NativeAppsFlyerRPC.executeJson.mock.calls[0][0];
+        const call = mockModule.executeJson.mock.calls[0][0];
         const request = JSON.parse(call);
         expect(request.method).toBe('start');
         expect(request.params.awaitResponse).toBe(true);
@@ -219,9 +264,10 @@ describe('AppsFlyerRPC', () => {
 
     describe('logEvent', () => {
       it('should log event without values', async () => {
+        const mockModule = getMockNativeModule();
         await AppsFlyerRPC.instance.logEvent('test_event');
 
-        const call = NativeAppsFlyerRPC.executeJson.mock.calls[0][0];
+        const call = mockModule.executeJson.mock.calls[0][0];
         const request = JSON.parse(call);
         expect(request.method).toBe('logEvent');
         expect(request.params.eventName).toBe('test_event');
@@ -229,21 +275,23 @@ describe('AppsFlyerRPC', () => {
       });
 
       it('should log event with values', async () => {
+        const mockModule = getMockNativeModule();
         await AppsFlyerRPC.instance.logEvent('test_event', {
           eventValues: { key: 'value' },
         });
 
-        const call = NativeAppsFlyerRPC.executeJson.mock.calls[0][0];
+        const call = mockModule.executeJson.mock.calls[0][0];
         const request = JSON.parse(call);
         expect(request.params.eventValues).toEqual({ key: 'value' });
       });
 
       it('should log event with awaitResponse', async () => {
+        const mockModule = getMockNativeModule();
         const mockResponse = JSON.stringify({
           id: 'test-123',
           result: { data: { statusCode: 200 } },
         });
-        NativeAppsFlyerRPC.executeJson.mockResolvedValue(mockResponse);
+        mockModule.executeJson.mockResolvedValue(mockResponse);
 
         const result = await AppsFlyerRPC.instance.logEvent('test_event', {
           eventValues: { key: 'value' },
@@ -256,11 +304,12 @@ describe('AppsFlyerRPC', () => {
       });
 
       it('logEventWithCallback should call logEvent with awaitResponse', async () => {
+        const mockModule = getMockNativeModule();
         await AppsFlyerRPC.instance.logEventWithCallback('test_event', {
           eventValues: { key: 'value' },
         });
 
-        const call = NativeAppsFlyerRPC.executeJson.mock.calls[0][0];
+        const call = mockModule.executeJson.mock.calls[0][0];
         const request = JSON.parse(call);
         expect(request.params.awaitResponse).toBe(true);
       });
@@ -268,9 +317,10 @@ describe('AppsFlyerRPC', () => {
 
     describe('registerConversionListener', () => {
       it('should call registerConversionListener', async () => {
+        const mockModule = getMockNativeModule();
         await AppsFlyerRPC.instance.registerConversionListener();
 
-        const call = NativeAppsFlyerRPC.executeJson.mock.calls[0][0];
+        const call = mockModule.executeJson.mock.calls[0][0];
         const request = JSON.parse(call);
         expect(request.method).toBe('registerConversionListener');
         expect(request.params).toEqual({});
@@ -279,9 +329,10 @@ describe('AppsFlyerRPC', () => {
 
     describe('registerDeepLinkListener', () => {
       it('should call registerDeeplinkListener', async () => {
+        const mockModule = getMockNativeModule();
         await AppsFlyerRPC.instance.registerDeepLinkListener();
 
-        const call = NativeAppsFlyerRPC.executeJson.mock.calls[0][0];
+        const call = mockModule.executeJson.mock.calls[0][0];
         const request = JSON.parse(call);
         expect(request.method).toBe('registerDeeplinkListener');
         expect(request.params).toEqual({});
@@ -319,15 +370,34 @@ describe('AppsFlyerRPC', () => {
   });
 
   describe('Platform Support', () => {
-    it('should throw error on Android', async () => {
-      Platform.OS = 'android';
+    it('should work on both iOS and Android', async () => {
+      // Test iOS
+      Platform.OS = 'ios';
+      const mockModule = getMockNativeModule();
+      const mockResponse = JSON.stringify({
+        id: 'test-123',
+        result: { success: true },
+      });
+      mockModule.executeJson.mockResolvedValue(mockResponse);
 
-      await expect(
-        AppsFlyerRPC.instance.initialize({
-          devKey: 'test-key',
-          appId: 'com.test.app',
-        })
-      ).rejects.toThrow('RPC is currently only supported on iOS');
+      await AppsFlyerRPC.instance.initialize({
+        devKey: 'test-key',
+        appId: 'id123',
+      });
+
+      expect(mockModule.executeJson).toHaveBeenCalled();
+
+      // Test Android
+      Platform.OS = 'android';
+      jest.clearAllMocks();
+      mockModule.executeJson.mockResolvedValue(mockResponse);
+
+      await AppsFlyerRPC.instance.initialize({
+        devKey: 'test-key',
+        appId: 'com.test.app',
+      });
+
+      expect(mockModule.executeJson).toHaveBeenCalled();
 
       Platform.OS = 'ios'; // Reset
     });
