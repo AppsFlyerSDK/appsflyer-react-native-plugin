@@ -9,14 +9,14 @@ hidden: false
 ## Send consent for DMA compliance
 The SDK offers two alternative methods for gathering consent data:
 
-Through a Consent Management Platform (CMP): If the app uses a CMP that complies with the Transparency and Consent Framework (TCF) v2.2 protocol, the SDK can automatically retrieve the consent details.
+Through a Consent Management Platform (CMP): If the app uses a CMP that complies with the Transparency and Consent Framework (TCF) v2.2/2.3 protocol, the SDK can automatically retrieve the consent details.
 
 OR
 
 Through a dedicated SDK API: Developers can pass Google's required consent data directly to the SDK using a specific API designed for this purpose.
 
 ### Use CMP to collect consent data
-A CMP compatible with TCF v2.2 collects DMA consent data and stores it in NSUserDefaults (iOS) and SharedPreferences (Android). To enable the SDK to access this data and include it with every event, follow these steps:
+A CMP compatible with TCF v2.2/2.3 collects DMA consent data and stores it in NSUserDefaults (iOS) and SharedPreferences (Android). To enable the SDK to access this data and include it with every event, follow these steps:
 
 1. Call `appsFlyer.enableTCFDataCollection(true)`
 2. Initialize the SDK in [manual start mode](/Docs/RN_API.md#initsdk)
@@ -62,7 +62,7 @@ A CMP compatible with TCF v2.2 collects DMA consent data and stores it in NSUser
 
 ### Manually Collecting Consent Data
 
-If your app does not use a TCF v2.2-compatible CMP, you must manually provide the consent data using the SDK API.
+If your app does not use a TCF v2.2/2.3-compatible CMP, you must manually provide the consent data using the SDK API.
 
 How to Set Consent Data: </br>
 1.	Determine GDPR Applicability:

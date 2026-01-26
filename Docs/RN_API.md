@@ -894,7 +894,7 @@ appsFlyer.enableTCFDataCollection(true);
 ### setConsentData
 `setConsentData(consentObject): void`
 
-When GDPR applies to the user and your app does not use a CMP compatible with TCF v2.2, use this API to provide the consent data directly to the SDK.
+When GDPR applies to the user and your app does not use a CMP compatible with TCF v2.2/2.3, use this API to provide the consent data directly to the SDK.
 
 **Recommended approach (since v6.16.2):**
 Use the `AppsFlyerConsent` constructor:
