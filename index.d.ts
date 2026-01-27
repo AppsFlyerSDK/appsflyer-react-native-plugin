@@ -415,14 +415,3 @@ declare module "react-native-appsflyer" {
 
   export default appsFlyer;
 }
-
-// Explicit ambient declarations for ESLint compatibility
-// ESLint's import resolver doesn't recognize exports inside 'declare module' blocks.
-// These top-level declarations allow ESLint to detect the exports.
-declare const StoreKitVersion: { readonly SK1: "SK1"; readonly SK2: "SK2" };
-declare const AppsFlyerPurchaseConnector: any; // Type is defined in declare module above
-declare const AppsFlyerPurchaseConnectorConfig: any; // Type is defined in declare module above  
-declare const appsFlyer: any; // Type is defined in declare module above
-
-export { StoreKitVersion, AppsFlyerPurchaseConnector, AppsFlyerPurchaseConnectorConfig };
-export { appsFlyer as default };
