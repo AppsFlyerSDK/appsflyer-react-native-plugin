@@ -32,8 +32,15 @@ expo install react-native-appsflyer
     ],
 ...
 ```
-
-4. ___optional___ If you are developing a kids app and you wish to use our strict mode, you should add `"shouldUseStrictMode": true` as followed:
+4. ___optional___ If you want SKAdNetwork tracking, add AppsFlyer postbacks to the infoPlist configuration
+5. ```
+   ios: {
+     infoPlist: {
+       NSAdvertisingAttributionReportEndpoint:'https://appsflyer-skadnetwork.com/',
+     }
+   }
+   ```
+6. ___optional___ If you are developing a kids app and you wish to use our strict mode, you should add `"shouldUseStrictMode": true` as followed:
 ```
 ...
 "plugins": [
