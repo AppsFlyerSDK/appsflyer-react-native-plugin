@@ -182,7 +182,7 @@ android {
 }
 
 dependencies {
-    implementation "com.android.billingclient:billing:6.0.0"
+    implementation "com.android.billingclient:billing:8.0.0"
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion

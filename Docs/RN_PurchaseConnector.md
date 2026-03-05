@@ -20,7 +20,7 @@ For more information please check the following pages:
 
 The Purchase Connector feature of the AppsFlyer SDK depends on specific libraries provided by Google and Apple for managing in-app purchases:
 
--   For Android, it depends on the  [Google Play Billing Library](https://developer.android.com/google/play/billing/integrate) (Supported versions: 5.x.x - 7.x.x).
+-   For Android, it depends on the  [Google Play Billing Library](https://developer.android.com/google/play/billing/integrate).
 -   For iOS, it depends on  [StoreKit](https://developer.apple.com/documentation/storekit) (Supported versions: StoreKit1 and StoreKit2).
 
 However, these dependencies aren't actively included with the SDK. This means that the responsibility of managing these dependencies and including the necessary libraries in your project falls on you as the consumer of the SDK.
@@ -28,6 +28,19 @@ However, these dependencies aren't actively included with the SDK. This means th
 If you're implementing in-app purchases in your app, you'll need to ensure that the Google Play Billing Library (for Android) or StoreKit (for iOS) are included in your project. You can include these libraries manually in your native code, or you can use a third-party React Native plugin, such as the  [`react-native-iap`](https://www.npmjs.com/package/react-native-iap) plugin.
 
 Remember to appropriately manage these dependencies when implementing the Purchase Validation feature in your app. Failing to include the necessary libraries might result in failures when attempting to conduct in-app purchases or validate purchases.
+
+### <a id="android-purchase-connector-compatibility"></a>Android Purchase Connector Compatibility
+
+The plugin uses the [AppsFlyer Android Purchase Connector](https://github.com/AppsFlyerSDK/appsflyer-android-purchase-connector) under the hood. The Purchase Connector version must match the Google Play Billing Library version in your project.
+
+| Purchase Connector Version | Supported Billing Library Versions |
+|---|---|
+| v2.1.2 | v5.x.x - v7.x.x |
+| v2.2.0 | v8.x.x |
+
+**This version of the plugin ships with Purchase Connector v2.2.0**, which requires Google Play Billing Library 8.x.x. If you are using a third-party IAP library (such as `react-native-iap`), you must ensure it supports Billing Library 8. For `react-native-iap`, this means using **v14.0.0 or later** (the Nitro Modules version), which requires **React Native 0.79+**.
+
+> **Note:** Billing Library 8 introduces breaking API changes compared to previous versions. Users of Billing Library 5.x.x - 7.x.x should use a previous version of this plugin that ships with Purchase Connector v2.1.2 or lower.
 
 ## <a id="adding-the-connector-to-your-project"></a>Adding The Connector To Your Project
 
