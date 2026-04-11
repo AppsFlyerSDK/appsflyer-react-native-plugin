@@ -73,16 +73,20 @@ function withCustomAndroidManifest(config, { preferAppsFlyerBackupRules = false 
       // to tools:replace; leaving them after the attributes are deleted causes a manifest merge
       // failure: "Multiple entries with same key: <attr>=REPLACE".
       if (appAttrs['tools:replace']) {
-        const filtered = appAttrs['tools:replace']
+        const existingReplaceEntries = appAttrs['tools:replace']
           .split(',')
           .map((s) => s.trim())
-          .filter((s) => s && !removedKeys.includes(s));
-        if (filtered.length > 0) {
-          appAttrs['tools:replace'] = filtered.join(', ');
-        } else {
-          delete appAttrs['tools:replace'];
+          .filter(Boolean);
+        const filtered = existingReplaceEntries.filter((s) => !removedKeys.includes(s));
+
+        if (filtered.length !== existingReplaceEntries.length) {
+          if (filtered.length > 0) {
+            appAttrs['tools:replace'] = filtered.join(', ');
+          } else {
+            delete appAttrs['tools:replace'];
+          }
+          console.log('[AppsFlyerPlugin] Cleaned stale tools:replace entries for removed backup attributes');
         }
-        console.log('[AppsFlyerPlugin] Cleaned stale tools:replace entries for removed backup attributes');
       }
     }
 
