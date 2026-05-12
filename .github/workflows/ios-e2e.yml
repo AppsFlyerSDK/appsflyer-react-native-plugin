@@ -108,7 +108,7 @@ jobs:
 
       - name: Install example app dependencies
         working-directory: example
-        run: npm ci
+        run: npm install
 
       - name: Install CocoaPods
         working-directory: example/ios

@@ -462,7 +462,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Validate package (dry-run)
         run: npm pack --dry-run
