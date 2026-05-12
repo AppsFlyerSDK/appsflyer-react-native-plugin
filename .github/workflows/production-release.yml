@@ -1,0 +1,505 @@
+# =============================================================================
+# Production Release Workflow - Publish to npm
+# =============================================================================
+#
+# Purpose: Publishes the React Native plugin to npm after a release PR is
+# merged to master.
+#
+# Flow:
+# 1. Validates the merge is from a release branch
+# 2. Publishes to npm with the `latest` tag
+# 3. Verifies the package is live on npm (retry loop, max 120s)
+# 4. Creates a GitHub release with release notes
+# 5. Fetches Jira tickets for the fix version
+# 6. Notifies team via Slack
+#
+# Triggers:
+# - Pull request closed (merged) to master branch from releases/* branches
+# - Manual workflow dispatch (for republishing or testing)
+#
+# =============================================================================
+
+name: Production Release - Publish to npm
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (must match package.json)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Dry run (do not actually publish)'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  # ===========================================================================
+  # Job 1: Validate Release
+  # ===========================================================================
+  validate-release:
+    name: Validate Release
+    runs-on: ubuntu-latest
+
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.merged == true &&
+       startsWith(github.event.pull_request.head.ref, 'releases/'))
+
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      is_valid: ${{ steps.validate.outputs.is_valid }}
+      is_dry_run: ${{ steps.dry-run.outputs.value }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Resolve dry_run across trigger paths
+        id: dry-run
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_DRY: ${{ github.event.inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "workflow_dispatch" && "$DISPATCH_DRY" == "true" ]]; then
+            echo "value=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate release source
+        id: validate
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "Manual run - skipping branch validation"
+            echo "is_valid=true" >> "$GITHUB_OUTPUT"
+          else
+            SOURCE_BRANCH="$PR_HEAD_REF"
+            echo "Source branch: $SOURCE_BRANCH"
+
+            if [[ $SOURCE_BRANCH =~ ^releases/ ]]; then
+              echo "Valid release branch: $SOURCE_BRANCH"
+              echo "is_valid=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "::error::Not a release branch: $SOURCE_BRANCH"
+              echo "is_valid=false" >> "$GITHUB_OUTPUT"
+              exit 1
+            fi
+          fi
+
+      - name: Get version from package.json
+        id: get-version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            VERSION="$INPUT_VERSION"
+            echo "Using provided version: $VERSION"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+            echo "Extracted version from package.json: $VERSION"
+          fi
+
+          # Validate version format (X.Y.Z, no -rc suffix for production)
+          if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Valid production version format: $VERSION"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Invalid production version format: $VERSION (expected X.Y.Z)"
+            exit 1
+          fi
+
+      - name: Check if tag already exists
+        env:
+          VERSION: ${{ steps.get-version.outputs.version }}
+          DRY_RUN: ${{ steps.dry-run.outputs.value }}
+        run: |
+          git fetch --tags
+          if git rev-parse "v$VERSION" >/dev/null 2>&1 || git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "::warning::Tag for $VERSION already exists"
+            if [[ "$DRY_RUN" != "true" ]]; then
+              echo "::error::Cannot create duplicate release"
+              exit 1
+            fi
+          fi
+          echo "Tag $VERSION does not exist - safe to proceed"
+
+  # ===========================================================================
+  # Job 2: Publish to npm
+  # ===========================================================================
+  publish-to-npm:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs: [validate-release]
+    if: always() && needs.validate-release.outputs.is_valid == 'true'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Publish to npm
+        if: needs.validate-release.outputs.is_dry_run != 'true'
+        env:
+          CI_NPM_TOKEN: ${{ secrets.CI_NPM_TOKEN }}
+          VERSION: ${{ needs.validate-release.outputs.version }}
+        run: |
+          echo "Publishing version $VERSION to npm..."
+          echo "//registry.npmjs.org/:_authToken=$CI_NPM_TOKEN" > ~/.npmrc
+          npm publish
+          rm ~/.npmrc
+          echo "Published $VERSION to npm"
+
+      - name: Dry-run publish
+        if: needs.validate-release.outputs.is_dry_run == 'true'
+        run: |
+          echo "DRY RUN - would publish $(node -p "require('./package.json').version") to npm"
+          npm pack --dry-run
+
+      - name: Verify publication
+        if: needs.validate-release.outputs.is_dry_run != 'true'
+        env:
+          VERSION: ${{ needs.validate-release.outputs.version }}
+        run: |
+          MAX_WAIT=120
+          POLL=15
+          ELAPSED=0
+          while (( ELAPSED < MAX_WAIT )); do
+            if npm view "react-native-appsflyer@$VERSION" version 2>/dev/null | grep -Fxq "$VERSION"; then
+              echo "Verified: $VERSION is live on npm"
+              break
+            fi
+            echo "Waiting for npm propagation (${ELAPSED}s / ${MAX_WAIT}s)..."
+            sleep "$POLL"
+            ELAPSED=$(( ELAPSED + POLL ))
+          done
+          if (( ELAPSED >= MAX_WAIT )); then
+            echo "::warning::npm propagation exceeded ${MAX_WAIT}s --- verify manually on npmjs.com"
+          fi
+
+  # ===========================================================================
+  # Job 3: Create GitHub Release
+  # ===========================================================================
+  create-github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [validate-release, publish-to-npm]
+    if: always() && needs.validate-release.outputs.is_valid == 'true' && needs.validate-release.outputs.is_dry_run != 'true'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Extract release notes from CHANGELOG
+        id: changelog
+        env:
+          VERSION: ${{ needs.validate-release.outputs.version }}
+        run: |
+          echo "Extracting release notes for version $VERSION from CHANGELOG.md"
+
+          if [ -f "CHANGELOG.md" ]; then
+            RELEASE_NOTES=$(awk "/## $VERSION/,/^## [0-9]/" CHANGELOG.md | sed '1d;$d')
+
+            if [ -z "$RELEASE_NOTES" ]; then
+              echo "::warning::Could not find release notes for $VERSION in CHANGELOG.md"
+              RELEASE_NOTES="Release version $VERSION. See [CHANGELOG.md](CHANGELOG.md) for details."
+            fi
+          else
+            RELEASE_NOTES="Release version $VERSION."
+          fi
+
+          echo "$RELEASE_NOTES" > release_notes.md
+
+      - name: Build release notes
+        env:
+          VERSION: ${{ needs.validate-release.outputs.version }}
+          REPO: ${{ github.repository }}
+        run: |
+          cat > final_release_notes.md << EOF
+          # AppsFlyer React Native Plugin v$VERSION
+
+          ## Installation
+
+          \`\`\`bash
+          npm install react-native-appsflyer@$VERSION
+          \`\`\`
+
+          Then for iOS:
+          \`\`\`bash
+          cd ios && pod install
+          \`\`\`
+
+          ## Changes in This Release
+
+          $(cat release_notes.md)
+
+          ## Documentation
+
+          - [Installation Guide](https://github.com/$REPO/blob/master/Docs/Installation.md)
+          - [API Documentation](https://github.com/$REPO/blob/master/Docs/API.md)
+          - [Deep Linking Guide](https://github.com/$REPO/blob/master/Docs/DeepLink.md)
+          - [Expo Integration](https://github.com/$REPO/blob/master/Docs/ExpoIntegration.md)
+
+          ## Links
+
+          - [npm Package](https://www.npmjs.com/package/react-native-appsflyer/v/$VERSION)
+          - [GitHub Repository](https://github.com/$REPO)
+          - [AppsFlyer Developer Hub](https://dev.appsflyer.com/)
+
+          ## Support
+
+          For issues and questions, please contact <support@appsflyer.com>
+          EOF
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.validate-release.outputs.version }}
+        run: |
+          gh release create "v$VERSION" \
+            --title "v$VERSION" \
+            --notes-file final_release_notes.md \
+            --latest
+
+  # ===========================================================================
+  # Job 4: Notify Team
+  # ===========================================================================
+  notify-team:
+    name: Notify Team
+    runs-on: ubuntu-latest
+    needs: [validate-release, publish-to-npm, create-github-release]
+    if: >-
+      always() &&
+      needs.validate-release.outputs.is_dry_run != 'true' &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'pull_request' &&
+         github.event.pull_request.merged == true &&
+         startsWith(github.event.pull_request.head.ref, 'releases/'))
+      )
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Extract SDK versions and changelog
+        id: extract-info
+        env:
+          VERSION: ${{ needs.validate-release.outputs.version }}
+        run: |
+          # Extract Android SDK fallback version from build.gradle
+          ANDROID_SDK_VERSION=$(grep -oP "af-android-sdk:\K[^')]*" android/build.gradle | head -1)
+          echo "android_sdk=$ANDROID_SDK_VERSION" >> "$GITHUB_OUTPUT"
+
+          # Extract iOS SDK version from podspec
+          IOS_SDK_VERSION=$(grep "AppsFlyerFramework'" react-native-appsflyer.podspec | grep -oP "'~> \K[^']*" | head -1)
+          if [ -z "$IOS_SDK_VERSION" ]; then
+            IOS_SDK_VERSION=$(grep "AppsFlyerFramework'" react-native-appsflyer.podspec | grep -oP "'\K[0-9][^']*" | head -1)
+          fi
+          echo "ios_sdk=$IOS_SDK_VERSION" >> "$GITHUB_OUTPUT"
+
+          # Extract changelog for this version
+          if [ -f "CHANGELOG.md" ]; then
+            CHANGELOG=$(awk "/## $VERSION/,/^## [0-9]/" CHANGELOG.md | grep "^-" | sed 's/^- /- /' | head -5)
+            if [ -z "$CHANGELOG" ]; then
+              CHANGELOG="- Check CHANGELOG.md for details"
+            fi
+          else
+            CHANGELOG="- Check release notes for details"
+          fi
+
+          echo "changelog<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGELOG" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch Jira tickets
+        id: jira-tickets
+        continue-on-error: true
+        env:
+          VERSION: ${{ needs.validate-release.outputs.version }}
+          CI_JIRA_EMAIL: ${{ secrets.CI_JIRA_EMAIL }}
+          CI_JIRA_TOKEN: ${{ secrets.CI_JIRA_TOKEN }}
+          CI_JIRA_DOMAIN: ${{ secrets.CI_JIRA_DOMAIN }}
+        run: |
+          set +e
+          JIRA_FIX_VERSION="React Native SDK v$VERSION"
+
+          echo "Looking for Jira tickets with fix version: $JIRA_FIX_VERSION"
+
+          if [[ -z "$CI_JIRA_EMAIL" ]] || [[ -z "$CI_JIRA_TOKEN" ]]; then
+            echo "::warning::Jira credentials not configured"
+            echo "tickets=No assigned fix version found" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          JIRA_DOMAIN="${CI_JIRA_DOMAIN:-appsflyer.atlassian.net}"
+
+          JQL_QUERY="fixVersion=\"${JIRA_FIX_VERSION}\""
+          ENCODED_JQL=$(echo "$JQL_QUERY" | jq -sRr @uri)
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -u "$CI_JIRA_EMAIL:$CI_JIRA_TOKEN" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            "https://${JIRA_DOMAIN}/rest/api/3/search/jql?jql=${ENCODED_JQL}&fields=key,summary&maxResults=20")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          if [[ "$HTTP_CODE" != "200" ]]; then
+            echo "::warning::Jira API request failed with status $HTTP_CODE"
+            echo "tickets=No assigned fix version found" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          TICKETS=$(echo "$BODY" | jq -r '.issues[]? | "- https://'"${JIRA_DOMAIN}"'/browse/\(.key) - \(.fields.summary)"' 2>/dev/null | head -10)
+
+          if [ -z "$TICKETS" ]; then
+            echo "No linked tickets found for version: $JIRA_FIX_VERSION"
+            echo "tickets=No assigned fix version found" >> "$GITHUB_OUTPUT"
+          else
+            echo "Found Jira tickets:"
+            echo "$TICKETS"
+            echo "tickets<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$TICKETS" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine status and failed stage
+        id: status
+        env:
+          VALIDATE_RESULT: ${{ needs.validate-release.result }}
+          PUBLISH_RESULT: ${{ needs.publish-to-npm.result }}
+          RELEASE_RESULT: ${{ needs.create-github-release.result }}
+        run: |
+          set -euo pipefail
+          if [[ "$VALIDATE_RESULT" == "success" \
+             && "$PUBLISH_RESULT"  == "success" \
+             && "$RELEASE_RESULT"  == "success" ]]; then
+            echo "success=true" >> "$GITHUB_OUTPUT"
+            echo "failed_stage=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "success=false" >> "$GITHUB_OUTPUT"
+          if [[ "$VALIDATE_RESULT" != "success" ]]; then
+            echo "failed_stage=validate-release" >> "$GITHUB_OUTPUT"
+          elif [[ "$PUBLISH_RESULT" != "success" ]]; then
+            echo "failed_stage=publish-to-npm" >> "$GITHUB_OUTPUT"
+          else
+            echo "failed_stage=create-github-release" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Send Slack success notification
+        if: steps.status.outputs.success == 'true'
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "<!here>\n:react::react::react::react::react::react::react::react::react::react::react::react:\n\n*React Native:*\nnpm install react-native-appsflyer@${{ needs.validate-release.outputs.version }} is published to Production.\n\n:white_check_mark: rc-smoke/npm passed before promotion (verified by promote-release.yml).\n\n*Sources:*\n:github: https://github.com/${{ github.repository }}/tree/master\n:github: Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n:npm: https://www.npmjs.com/package/react-native-appsflyer/v/${{ needs.validate-release.outputs.version }}\n\n*Changes and fixes:*\n${{ steps.extract-info.outputs.changelog }}\n\n*Linked tickets and issues:*\n${{ steps.jira-tickets.outputs.tickets }}\n\n*Native SDKs:*\n:android: ${{ steps.extract-info.outputs.android_sdk }}\n:apple: ${{ steps.extract-info.outputs.ios_sdk }}\n\n:react::react::react::react::react::react::react::react::react::react::react::react:"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_WEBHOOK_URL }}
+
+      - name: Send Slack failure notification
+        if: steps.status.outputs.success == 'false'
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "<!here>\n:warning: *React Native production release failed at `${{ steps.status.outputs.failed_stage }}`*\n\nVersion: ${{ needs.validate-release.outputs.version }}\nRun: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n*Stage results:*\n- validate-release: ${{ needs.validate-release.result }}\n- publish-to-npm: ${{ needs.publish-to-npm.result }}\n- create-github-release: ${{ needs.create-github-release.result }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_WEBHOOK_URL }}
+
+  # ===========================================================================
+  # Job 5: Production Release Summary
+  # ===========================================================================
+  release-summary:
+    name: Release Summary
+    runs-on: ubuntu-latest
+    needs: [validate-release, publish-to-npm, create-github-release]
+    if: >-
+      always() && (
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'pull_request' &&
+         github.event.pull_request.merged == true &&
+         startsWith(github.event.pull_request.head.ref, 'releases/'))
+      )
+
+    steps:
+      - name: Display Release Summary
+        env:
+          VERSION: ${{ needs.validate-release.outputs.version }}
+          DRY_RUN: ${{ needs.validate-release.outputs.is_dry_run }}
+          VALIDATE_RESULT: ${{ needs.validate-release.result }}
+          PUBLISH_RESULT: ${{ needs.publish-to-npm.result }}
+          RELEASE_RESULT: ${{ needs.create-github-release.result }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "========================================="
+          echo "Production Release Summary"
+          echo "========================================="
+          echo "Version: $VERSION"
+          echo "Dry Run: $DRY_RUN"
+          echo "-----------------------------------------"
+          echo "Validation: $VALIDATE_RESULT"
+          echo "npm Publish: $PUBLISH_RESULT"
+          echo "GitHub Release: $RELEASE_RESULT"
+          echo "========================================="
+
+          if [[ "$DRY_RUN" == "true" ]]; then
+            echo "This was a DRY RUN - no actual publishing occurred"
+            exit 0
+          fi
+
+          if [[ "$VALIDATE_RESULT" == "success" ]] && \
+             [[ "$PUBLISH_RESULT" == "success" ]] && \
+             [[ "$RELEASE_RESULT" == "success" ]]; then
+            echo ""
+            echo "Production Release Completed Successfully!"
+            echo ""
+            echo "Version $VERSION is now live!"
+            echo ""
+            echo "npm: https://www.npmjs.com/package/react-native-appsflyer/v/$VERSION"
+            echo "GitHub: https://github.com/$REPO/releases/tag/v$VERSION"
+          else
+            echo ""
+            echo "Production Release Failed"
+            echo "Check the logs above for details and retry if necessary"
+            exit 1
+          fi
