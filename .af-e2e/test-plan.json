@@ -1,0 +1,314 @@
+{
+  "_meta": {
+    "plan_id": "reactnative-e2e",
+    "plugin": "reactnative",
+    "version": "1.0.0",
+    "description": "Pre-publish E2E test plan for the AppsFlyer React Native plugin. Runs against plugin source in example/. Covers six scenarios: cold launch, background deep link, foreground deep link, custom events, identity APIs, and consent/stop. Mapped to E2E-001..E2E-006 in appsflyer-mobile-plugin-tooling/contracts/e2e-test-contract.md.",
+    "platforms": ["android", "ios"],
+    "schema_version": "1.0.0",
+    "tooling_contract_ref": "E2E-001, E2E-002, E2E-003, E2E-004, E2E-005, E2E-006"
+  },
+
+  "config": {
+    "android": {
+      "package_name": "com.appsflyer.qa.reactnative",
+      "activity": ".MainActivity",
+      "apk_path": "example/android/app/build/outputs/apk/debug/app-debug.apk",
+      "build_cmd": "cd example/android && ./gradlew assembleDebug"
+    },
+    "ios": {
+      "bundle_id": "com.appsflyer.qa.reactnative",
+      "app_path": "example/ios/build/Build/Products/Debug-iphonesimulator/example.app",
+      "build_cmd": "cd example/ios && xcodebuild build -workspace example.xcworkspace -scheme example -configuration Debug -destination 'platform=iOS Simulator,id=$IOS_SIMULATOR_UDID' -derivedDataPath build"
+    }
+  },
+
+  "phases": [
+    {
+      "id": "phase_1",
+      "name": "Cold launch coverage",
+      "scenario_ref": "E2E-001",
+      "description": "Fresh install. Validate SDK startup, pre/post-start APIs, three auto-launched events, and install conversion data callback.",
+      "requires_fresh_install": true,
+      "wait_after_launch_sec": 30,
+      "checks": [
+        {
+          "id": "sdk_started",
+          "description": "startSDK returns a result",
+          "type": "log_contains",
+          "pattern": "[AF_QA][startSDK] result:",
+          "fail_action": "abort"
+        },
+        {
+          "id": "pre_start_complete",
+          "description": "Pre-start auto APIs ran",
+          "type": "log_contains",
+          "pattern": "[AF_QA][AUTO_APIS] --- Pre-start auto APIs complete ---",
+          "fail_action": "fail"
+        },
+        {
+          "id": "post_start_complete",
+          "description": "Post-start auto APIs ran",
+          "type": "log_contains",
+          "pattern": "[AF_QA][AUTO_APIS] --- Post-start auto APIs complete ---",
+          "fail_action": "fail"
+        },
+        {
+          "id": "conversion_data",
+          "description": "onInstallConversionData callback fires",
+          "type": "log_contains",
+          "pattern": "[AF_QA][CALLBACK][onInstallConversionData]",
+          "fail_action": "warn"
+        },
+        {
+          "id": "events_fired",
+          "description": "At least 3 logEvent calls recorded",
+          "type": "count_matches",
+          "pattern": "\\[AF_QA\\]\\[logEvent",
+          "minimum": 3,
+          "fail_action": "fail"
+        },
+        {
+          "id": "no_fatal",
+          "description": "No fatal exceptions or process crashes in logs",
+          "type": "absent",
+          "patterns": ["FATAL EXCEPTION", "Process crashed"],
+          "fail_action": "fail"
+        }
+      ]
+    },
+
+    {
+      "id": "phase_2",
+      "name": "Background deep link",
+      "scenario_ref": "E2E-002",
+      "description": "App backgrounded after Phase 1, then deep link triggers re-entry. onDeepLinking fires with the expected deep link value.",
+      "requires_fresh_install": false,
+      "wait_after_trigger_sec": 15,
+      "deep_link_url": "afqa-reactnative://deeplink?deep_link_value=qa_deeplink_bg&af_sub1=background_test&pid=testmedia&c=deeplink_test",
+      "pre_actions": {
+        "android": ["adb shell input keyevent KEYCODE_HOME", "sleep 2"],
+        "ios": ["xcrun simctl terminate {{UDID}} {{BUNDLE_ID}}", "sleep 2", "xcrun simctl launch {{UDID}} {{BUNDLE_ID}}", "sleep 3"]
+      },
+      "trigger": {
+        "android": "adb shell am start -W -a android.intent.action.VIEW -d \"{{DEEP_LINK_URL}}\"",
+        "ios": "xcrun simctl openurl {{UDID}} \"{{DEEP_LINK_URL}}\""
+      },
+      "checks": [
+        {
+          "id": "deep_link_received",
+          "description": "onDeepLinking callback fires",
+          "type": "log_contains",
+          "pattern": "[AF_QA][CALLBACK][onDeepLinking]",
+          "fail_action": "warn"
+        },
+        {
+          "id": "deep_link_value",
+          "description": "Deep link value matches qa_deeplink_bg",
+          "type": "log_contains",
+          "pattern": "qa_deeplink_bg",
+          "fail_action": "warn"
+        },
+        {
+          "id": "no_fatal",
+          "description": "No fatal exceptions after deep link",
+          "type": "absent",
+          "patterns": ["FATAL EXCEPTION", "Process crashed"],
+          "fail_action": "fail"
+        }
+      ]
+    },
+
+    {
+      "id": "phase_3",
+      "name": "Foreground deep link",
+      "scenario_ref": "E2E-003",
+      "description": "Fresh install, SDK starts, then deep link while app is in foreground. Verifies both SDK start and deep link callback fire correctly.",
+      "requires_fresh_install": true,
+      "wait_after_launch_sec": 30,
+      "wait_after_trigger_sec": 15,
+      "deep_link_url": "afqa-reactnative://deeplink?deep_link_value=qa_deeplink_fg&af_sub1=foreground_test&pid=testmedia&c=deeplink_test",
+      "pre_actions": {
+        "android": ["adb shell am start -a android.intent.action.MAIN -c android.intent.category.HOME", "sleep 1"],
+        "ios": ["sleep 3"]
+      },
+      "trigger": {
+        "android": "adb shell am start -W -a android.intent.action.VIEW -d \"{{DEEP_LINK_URL}}\"",
+        "ios": "xcrun simctl openurl {{UDID}} \"{{DEEP_LINK_URL}}\""
+      },
+      "checks": [
+        {
+          "id": "sdk_started",
+          "description": "startSDK returns a result on fresh install",
+          "type": "log_contains",
+          "pattern": "[AF_QA][startSDK] result:",
+          "fail_action": "abort"
+        },
+        {
+          "id": "deep_link_received",
+          "description": "onDeepLinking callback fires after foreground deep link",
+          "type": "log_contains",
+          "pattern": "[AF_QA][CALLBACK][onDeepLinking]",
+          "fail_action": "warn"
+        },
+        {
+          "id": "deep_link_value",
+          "description": "Deep link value matches qa_deeplink_fg",
+          "type": "log_contains",
+          "pattern": "qa_deeplink_fg",
+          "fail_action": "warn"
+        },
+        {
+          "id": "no_fatal",
+          "description": "No fatal exceptions",
+          "type": "absent",
+          "patterns": ["FATAL EXCEPTION", "Process crashed"],
+          "fail_action": "fail"
+        }
+      ]
+    },
+
+    {
+      "id": "phase_4",
+      "name": "Custom events",
+      "scenario_ref": "E2E-004",
+      "description": "Validates logEvent API with multiple event types and params. Verifies af_demo_launch, af_purchase, and af_content_view all return success.",
+      "requires_fresh_install": false,
+      "wait_after_launch_sec": 30,
+      "checks": [
+        {
+          "id": "sdk_started",
+          "description": "startSDK returns a result",
+          "type": "log_contains",
+          "pattern": "[AF_QA][startSDK] result:",
+          "fail_action": "abort"
+        },
+        {
+          "id": "event_demo_launch",
+          "description": "af_demo_launch event fires successfully",
+          "type": "log_contains",
+          "pattern": "[AF_QA][logEvent(af_demo_launch)] result:",
+          "fail_action": "fail"
+        },
+        {
+          "id": "event_purchase",
+          "description": "af_purchase event fires successfully",
+          "type": "log_contains",
+          "pattern": "[AF_QA][logEvent(af_purchase)] result:",
+          "fail_action": "fail"
+        },
+        {
+          "id": "event_content_view",
+          "description": "af_content_view event fires successfully",
+          "type": "log_contains",
+          "pattern": "[AF_QA][logEvent(af_content_view)] result:",
+          "fail_action": "fail"
+        },
+        {
+          "id": "events_count",
+          "description": "At least 3 logEvent calls recorded",
+          "type": "count_matches",
+          "pattern": "\\[AF_QA\\]\\[logEvent",
+          "minimum": 3,
+          "fail_action": "fail"
+        },
+        {
+          "id": "no_fatal",
+          "description": "No fatal exceptions or process crashes",
+          "type": "absent",
+          "patterns": ["FATAL EXCEPTION", "Process crashed"],
+          "fail_action": "fail"
+        }
+      ]
+    },
+
+    {
+      "id": "phase_5",
+      "name": "Identity APIs",
+      "scenario_ref": "E2E-005",
+      "description": "Validates setCustomerUserId, getAppsFlyerUID, and getSDKVersion readbacks after SDK start.",
+      "requires_fresh_install": false,
+      "wait_after_launch_sec": 30,
+      "checks": [
+        {
+          "id": "sdk_started",
+          "description": "startSDK returns a result",
+          "type": "log_contains",
+          "pattern": "[AF_QA][startSDK] result:",
+          "fail_action": "abort"
+        },
+        {
+          "id": "customer_user_id_set",
+          "description": "setCustomerUserId readback present",
+          "type": "log_contains",
+          "pattern": "[AF_QA][setCustomerUserId] result:",
+          "fail_action": "fail"
+        },
+        {
+          "id": "appsflyer_uid",
+          "description": "getAppsFlyerUID returns a value",
+          "type": "log_contains",
+          "pattern": "[AF_QA][getAppsFlyerUID] result:",
+          "fail_action": "fail"
+        },
+        {
+          "id": "sdk_version",
+          "description": "getSDKVersion returns a value",
+          "type": "log_contains",
+          "pattern": "[AF_QA][getSDKVersion] result:",
+          "fail_action": "fail"
+        },
+        {
+          "id": "no_fatal",
+          "description": "No fatal exceptions or process crashes",
+          "type": "absent",
+          "patterns": ["FATAL EXCEPTION", "Process crashed"],
+          "fail_action": "fail"
+        }
+      ]
+    },
+
+    {
+      "id": "phase_6",
+      "name": "Consent and sharing",
+      "scenario_ref": "E2E-006",
+      "description": "Validates setSharingFilterForPartners and setConsentData readbacks. stop(true)/stop(false) cycle requires HTTP traffic inspection (future).",
+      "requires_fresh_install": false,
+      "wait_after_launch_sec": 30,
+      "checks": [
+        {
+          "id": "sdk_started",
+          "description": "startSDK returns a result",
+          "type": "log_contains",
+          "pattern": "[AF_QA][startSDK] result:",
+          "fail_action": "abort"
+        },
+        {
+          "id": "sharing_filter",
+          "description": "setSharingFilterForPartners readback present",
+          "type": "log_contains",
+          "pattern": "[AF_QA][setSharingFilterForPartners] result: [partner_test]",
+          "fail_action": "fail"
+        },
+        {
+          "id": "consent_data",
+          "description": "setConsentData GDPR consent readback present",
+          "type": "log_contains",
+          "pattern": "[AF_QA][setConsentData] result: GDPR consent set",
+          "fail_action": "fail"
+        },
+        {
+          "id": "no_fatal",
+          "description": "No fatal exceptions or process crashes",
+          "type": "absent",
+          "patterns": ["FATAL EXCEPTION", "Process crashed"],
+          "fail_action": "fail"
+        }
+      ]
+    }
+  ],
+
+  "report": {
+    "output_dir": ".af-e2e/reports"
+  }
+}
