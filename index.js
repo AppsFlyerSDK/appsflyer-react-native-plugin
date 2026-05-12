@@ -415,6 +415,10 @@ appsFlyer.getAppsFlyerUID = (callback) => {
   return RNAppsFlyer.getAppsFlyerUID(callback);
 };
 
+appsFlyer.getSDKVersion = (callback) => {
+  return RNAppsFlyer.getSDKVersion(callback);
+};
+
 /**
  * Manually pass the Firebase / GCM Device Token for Uninstall measurement.
  *
