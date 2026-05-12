@@ -161,7 +161,7 @@ jobs:
           git config user.email "${CI_COMMIT_EMAIL:-github-actions[bot]@users.noreply.github.com}"
 
           if [[ -n $(git status -s) ]]; then
-            git add package.json package-lock.json ios/RNAppsFlyer.h android/
+            git add package.json ios/RNAppsFlyer.h android/
             git commit -m "chore: prepare production release $VERSION (from $CURRENT_VERSION)"
             git push
             echo "Pushed version update to release branch"

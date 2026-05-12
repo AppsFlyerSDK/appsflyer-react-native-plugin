@@ -305,7 +305,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
           if [[ -n $(git status -s) ]]; then
-            git add package.json package-lock.json android/ ios/ react-native-appsflyer.podspec README.md CHANGELOG.md || true
+            git add package.json android/ ios/ react-native-appsflyer.podspec README.md CHANGELOG.md
             git commit -m "chore: prepare RC ${VERSION} (iOS ${IOS_VER}, Android ${AND_VER})"
             git push --set-upstream origin "$REL_BRANCH"
           else
