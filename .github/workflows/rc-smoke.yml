@@ -206,7 +206,7 @@ jobs:
       - name: Write .env
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}
-        run: printf '%s\n' "$ENV_FILE" > example_rc_smoke/.env
+        run: echo "$ENV_FILE" | base64 -d > example_rc_smoke/.env
 
       - name: Select Xcode version
         run: |
@@ -333,7 +333,7 @@ jobs:
       - name: Write .env
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}
-        run: printf '%s\n' "$ENV_FILE" > example_rc_smoke/.env
+        run: echo "$ENV_FILE" | base64 -d > example_rc_smoke/.env
 
       - name: Install npm RC
         working-directory: example_rc_smoke
@@ -440,7 +440,7 @@ jobs:
               "text": "<!here>\n:warning: *React Native rc-smoke failed for `${{ needs.resolve.outputs.rc_version }}`*\n\nThe RC is published on npm but smoke checks did not pass on the artifact. Production promotion is blocked.\n\n*Smoke results:*\n- iOS: ${{ needs.smoke-ios.result }}\n- Android: ${{ needs.smoke-android.result }}\n\n*Branch:* ${{ needs.resolve.outputs.release_branch }}\n*Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n*Next step:* Bump to `rcN+1` and rerun the RC-release workflow with `dry_run=false`. Republishing the same RC version is not supported by npm."
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_HOOK }}
 
   # ===========================================================================
   # Post a skipped check-run when the parent run was dry, the version is not

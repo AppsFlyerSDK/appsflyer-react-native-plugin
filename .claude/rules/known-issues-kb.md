@@ -87,6 +87,13 @@ Issue-based KB derived from real GitHub issues. Reference when debugging user re
 **Root cause:** `logEvent` called before `initSdk` completes.
 **Fix:** Await `initSdk` resolution before calling `logEvent`.
 
+### logEvent callback never fires on Android (CallbackGuard WeakReference)
+**Issues:** discovered in E2E testing (2026-05-12)
+**Root cause:** `CallbackGuard` (added in 6.17.8) wraps `Callback` in `WeakReference<Callback>`. All other methods invoke callbacks synchronously before the `@ReactMethod` returns, so the strong reference on the call stack keeps them alive. `logEvent` is the only method where the callback fires asynchronously — `AppsFlyerRequestListener.onSuccess()` runs on a background thread ~2s later after the HTTP round-trip. By then, GC has collected the weakly-referenced `Callback`.
+**Symptoms:** Native SDK sends events successfully (200 OK in logcat), but JS success/error callbacks are silently swallowed. No error logged.
+**Fix:** Use the Promise-based API (`logEvent(name, values)` without callbacks → returns Promise) which uses `Promise` instead of `Callback`. `Promise` is held strongly by the bridge and is not affected.
+**Long-term fix:** `CallbackGuard` should use a strong reference for async callbacks, or `logEvent` should keep a strong reference alongside the `WeakReference`.
+
 ## Privacy / ATT / compliance (20 issues)
 
 ### ITMS-91064 App Store rejection

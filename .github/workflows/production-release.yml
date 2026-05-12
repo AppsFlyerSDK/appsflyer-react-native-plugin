@@ -155,7 +155,7 @@ jobs:
     name: Publish to npm
     runs-on: ubuntu-latest
     needs: [validate-release]
-    if: always() && needs.validate-release.outputs.is_valid == 'true'
+    if: needs.validate-release.result == 'success' && needs.validate-release.outputs.is_valid == 'true'
 
     steps:
       - name: Checkout repository
@@ -212,7 +212,7 @@ jobs:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     needs: [validate-release, publish-to-npm]
-    if: always() && needs.validate-release.outputs.is_valid == 'true' && needs.validate-release.outputs.is_dry_run != 'true'
+    if: needs.publish-to-npm.result == 'success' && needs.validate-release.outputs.is_dry_run != 'true'
 
     steps:
       - name: Checkout repository
@@ -323,7 +323,7 @@ jobs:
           VERSION: ${{ needs.validate-release.outputs.version }}
         run: |
           # Extract Android SDK fallback version from build.gradle
-          ANDROID_SDK_VERSION=$(grep -oP "af-android-sdk:\K[^')]*" android/build.gradle | head -1)
+          ANDROID_SDK_VERSION=$(grep "af-android-sdk" android/build.gradle | grep -oP "'[0-9][^']*'" | tr -d "'" | head -1)
           echo "android_sdk=$ANDROID_SDK_VERSION" >> "$GITHUB_OUTPUT"
 
           # Extract iOS SDK version from podspec
@@ -433,7 +433,7 @@ jobs:
               "text": "<!here>\n:react::react::react::react::react::react::react::react::react::react::react::react:\n\n*React Native:*\nnpm install react-native-appsflyer@${{ needs.validate-release.outputs.version }} is published to Production.\n\n:white_check_mark: rc-smoke/npm passed before promotion (verified by promote-release.yml).\n\n*Sources:*\n:github: https://github.com/${{ github.repository }}/tree/master\n:github: Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n:npm: https://www.npmjs.com/package/react-native-appsflyer/v/${{ needs.validate-release.outputs.version }}\n\n*Changes and fixes:*\n${{ steps.extract-info.outputs.changelog }}\n\n*Linked tickets and issues:*\n${{ steps.jira-tickets.outputs.tickets }}\n\n*Native SDKs:*\n:android: ${{ steps.extract-info.outputs.android_sdk }}\n:apple: ${{ steps.extract-info.outputs.ios_sdk }}\n\n:react::react::react::react::react::react::react::react::react::react::react::react:"
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_HOOK }}
 
       - name: Send Slack failure notification
         if: steps.status.outputs.success == 'false'
@@ -444,7 +444,7 @@ jobs:
               "text": "<!here>\n:warning: *React Native production release failed at `${{ steps.status.outputs.failed_stage }}`*\n\nVersion: ${{ needs.validate-release.outputs.version }}\nRun: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n*Stage results:*\n- validate-release: ${{ needs.validate-release.result }}\n- publish-to-npm: ${{ needs.publish-to-npm.result }}\n- create-github-release: ${{ needs.create-github-release.result }}"
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_HOOK }}
 
   # ===========================================================================
   # Job 5: Production Release Summary

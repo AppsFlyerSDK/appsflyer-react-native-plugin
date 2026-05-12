@@ -84,46 +84,29 @@ function runAutoFlow() {
 
   afLifecycleLog('--- Post-start auto APIs complete ---');
 
-  // 5. Fire standard events
-  appsFlyer.logEvent(
-    'af_demo_launch',
-    {platform: 'react-native'},
-    result => {
-      afLog('logEvent(af_demo_launch)', `result: ${result}`);
-    },
-    error => {
-      afLog('logEvent(af_demo_launch)', `error: ${error}`);
-    },
-  );
+  // 5. Fire standard events (Promise API — Android CallbackGuard WeakReference
+  //    GC's async Callback objects before AppsFlyerRequestListener fires)
+  appsFlyer
+    .logEvent('af_demo_launch', {platform: 'react-native'})
+    .then((result: any) => afLog('logEvent(af_demo_launch)', `result: ${result}`))
+    .catch((error: any) => afLog('logEvent(af_demo_launch)', `error: ${error}`));
 
-  appsFlyer.logEvent(
-    'af_purchase',
-    {
+  appsFlyer
+    .logEvent('af_purchase', {
       af_revenue: '12.99',
       af_currency: 'USD',
       af_content_id: 'qa-item-001',
-    },
-    result => {
-      afLog('logEvent(af_purchase)', `result: ${result}`);
-    },
-    error => {
-      afLog('logEvent(af_purchase)', `error: ${error}`);
-    },
-  );
+    })
+    .then((result: any) => afLog('logEvent(af_purchase)', `result: ${result}`))
+    .catch((error: any) => afLog('logEvent(af_purchase)', `error: ${error}`));
 
-  appsFlyer.logEvent(
-    'af_content_view',
-    {
+  appsFlyer
+    .logEvent('af_content_view', {
       af_content_id: 'qa-content-001',
       af_content_type: 'test',
-    },
-    result => {
-      afLog('logEvent(af_content_view)', `result: ${result}`);
-    },
-    error => {
-      afLog('logEvent(af_content_view)', `error: ${error}`);
-    },
-  );
+    })
+    .then((result: any) => afLog('logEvent(af_content_view)', `result: ${result}`))
+    .catch((error: any) => afLog('logEvent(af_content_view)', `error: ${error}`));
 
   // 6. Consent & sharing APIs
   appsFlyer.setSharingFilterForPartners(['partner_test']);

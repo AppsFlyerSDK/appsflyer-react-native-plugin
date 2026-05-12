@@ -11,8 +11,8 @@
 
   "config": {
     "android": {
-      "package_name": "com.appsflyer.qa.reactnative",
-      "activity": ".MainActivity",
+      "package_name": "com.appsflyer.engagement",
+      "activity": "com.appsflyer.qa.reactnative.MainActivity",
       "apk_path": "example/android/app/build/outputs/apk/debug/app-debug.apk",
       "build_cmd": "cd example/android && ./gradlew assembleDebug"
     },

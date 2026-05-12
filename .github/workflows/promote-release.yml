@@ -238,5 +238,5 @@ jobs:
               "text": "<!here>\n:warning: *React Native promote-release blocked*\n\nPR: ${{ github.event.pull_request.html_url }}\nBranch: ${{ github.event.pull_request.head.ref }}\n\nThe promote workflow could not prepare the release branch for production. Common causes:\n- `rc-smoke/npm` is missing or red on the PR head SHA --- bump to `rcN+1` and rerun rc-release.\n- The version-strip push was rejected (branch protection or stale ref).\n\nRun: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_HOOK }}
         continue-on-error: true

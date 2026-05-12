@@ -583,13 +583,13 @@ validate_check() {
              echo "$match" | grep -q "\"${payload_field}\":.*${payload_expected}" 2>/dev/null || \
              echo "$match" | grep -q "${payload_field}=${payload_expected}" 2>/dev/null || \
              echo "$match" | grep -q "${payload_field}: ${payload_expected}" 2>/dev/null; then
-            jq -n --arg evidence "$(echo "$match" | head -c 500)" \
+            jq -n --arg evidence "$(echo "$match" | tr -d '\000-\037' | head -c 500)" \
               '{status: "PASS", evidence: $evidence}'
           else
             echo "{\"status\":\"${fail_status}\",\"evidence\":\"Pattern found but payload check failed: ${payload_field} != ${payload_expected}\"}"
           fi
         else
-          echo "{\"status\":\"PASS\",\"evidence\":$(echo "$match" | head -c 500 | jq -Rs .)}"
+          echo "{\"status\":\"PASS\",\"evidence\":$(echo "$match" | tr -d '\000-\037' | head -c 500 | jq -Rs .)}"
         fi
       else
         echo "{\"status\":\"${fail_status}\",\"evidence\":\"Pattern not found in logs: ${pattern}\"}"
@@ -601,7 +601,9 @@ validate_check() {
       local minimum
       minimum=$(echo "$check_json" | jq -r '.minimum // 1')
       local count
-      count=$(grep -cE "$pattern" "$log_file" 2>/dev/null || echo "0")
+      count=$(grep -cE "$pattern" "$log_file" 2>/dev/null | tail -1 || echo "0")
+      count="${count//[^0-9]/}"
+      [[ -z "$count" ]] && count=0
       if [[ "$count" -ge "$minimum" ]]; then
         echo "{\"status\":\"PASS\",\"evidence\":\"Found ${count} matches (minimum: ${minimum})\"}"
       else

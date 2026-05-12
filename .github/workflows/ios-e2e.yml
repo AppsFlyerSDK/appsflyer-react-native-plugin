@@ -104,7 +104,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: example/ios/Pods
-          key: pods-${{ hashFiles('example/ios/Podfile.lock') }}
+          key: pods-${{ hashFiles('example/ios/Podfile', 'react-native-appsflyer.podspec') }}
           restore-keys: pods-
 
       - name: Install example app dependencies
@@ -118,7 +118,7 @@ jobs:
       - name: Write example app .env
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}
-        run: printf '%s\n' "$ENV_FILE" > example/.env
+        run: echo "$ENV_FILE" | base64 -d > example/.env
 
       - name: Cache iOS build output
         uses: actions/cache@v5

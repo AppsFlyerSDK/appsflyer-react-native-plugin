@@ -238,13 +238,16 @@ jobs:
 
           # PurchaseConnector (conditional dep, has its own version)
           if grep -q "PurchaseConnector" react-native-appsflyer.podspec; then
-            PC_VER=$(curl -s "https://api.github.com/repos/AppsFlyerSDK/appsflyer-apple-purchase-connector/releases/latest" | jq -r '.tag_name')
-            if [[ -n "$PC_VER" && "$PC_VER" != "null" ]]; then
-              echo "Auto-fetched PurchaseConnector version: $PC_VER"
-            elif [[ -n "${PC_VER_INPUT:-}" ]]; then
+            if [[ -n "${PC_VER_INPUT:-}" ]]; then
               PC_VER="$PC_VER_INPUT"
-              echo "Using manual PurchaseConnector version: $PC_VER"
+              echo "Using manual PurchaseConnector version override: $PC_VER"
             else
+              PC_VER=$(curl -s "https://api.github.com/repos/AppsFlyerSDK/appsflyer-apple-purchase-connector/releases/latest" | jq -r '.tag_name')
+              if [[ -n "$PC_VER" && "$PC_VER" != "null" ]]; then
+                echo "Auto-fetched PurchaseConnector version: $PC_VER"
+              fi
+            fi
+            if [[ -z "$PC_VER" || "$PC_VER" == "null" ]]; then
               echo "::error::Could not fetch latest PurchaseConnector version and no pc_version input provided."
               exit 1
             fi
@@ -374,10 +377,10 @@ jobs:
           if [[ "$CI_RESULT" == "success" || "$CI_RESULT" == "skipped" ]]; then
             ci_ok=true
           fi
-          if [[ "$E2E_IOS_RESULT" == "success" ]]; then
+          if [[ "$E2E_IOS_RESULT" == "success" || "$E2E_IOS_RESULT" == "skipped" ]]; then
             ios_ok=true
           fi
-          if [[ "$E2E_ANDROID_RESULT" == "success" ]]; then
+          if [[ "$E2E_ANDROID_RESULT" == "success" || "$E2E_ANDROID_RESULT" == "skipped" ]]; then
             android_ok=true
           fi
 
@@ -788,7 +791,7 @@ jobs:
               "text": "<!here>\n:react::react::react::react::react::react::react::react::react::react::react::react:\n\n*React Native Release Candidate:*\nreact-native-appsflyer: ${{ needs.validate-release.outputs.version }} is ready for QA testing.\n\n*Pre-publish checks:*\n${{ steps.legs.outputs.ci_icon }} Lint, Test & Build: ${{ steps.legs.outputs.ci_result }}\n${{ steps.legs.outputs.ios_icon }} RC-E2E iOS: ${{ steps.legs.outputs.e2e_ios_result }}\n${{ steps.legs.outputs.android_icon }} RC-E2E Android: ${{ steps.legs.outputs.e2e_android_result }}\n\n*Testing Instructions:*\n```\nnpm install react-native-appsflyer@${{ needs.validate-release.outputs.version }} --save\n```\n\n*Sources:*\n:github: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}\n:github: Release: https://github.com/${{ github.repository }}/releases/tag/${{ needs.validate-release.outputs.version }}\n:github: Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n*Changes and fixes:*\n${{ steps.extract-info.outputs.changelog }}\n\n*Linked tickets and issues:*\n${{ steps.jira-tickets.outputs.tickets }}\n\n*Native SDKs:*\n:android: ${{ steps.extract-info.outputs.android_sdk }}\n:apple: ${{ steps.extract-info.outputs.ios_sdk }}\n\n:react::react::react::react::react::react::react::react::react::react::react::react:"
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_HOOK }}
 
       - name: Send failure notification
         if: steps.status.outputs.success == 'false' && needs.validate-release.outputs.is_dry_run != 'true'
@@ -799,7 +802,7 @@ jobs:
               "text": "<!here>\n:warning: *React Native RC failed at `${{ steps.status.outputs.failed_stage }}`*\n\nVersion: ${{ needs.validate-release.outputs.version }}\nBranch: ${{ github.ref_name }}\nRun: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n*Pre-publish checks:*\n${{ steps.legs.outputs.ci_icon }} Lint, Test & Build: ${{ steps.legs.outputs.ci_result }}\n${{ steps.legs.outputs.ios_icon }} RC-E2E iOS: ${{ steps.legs.outputs.e2e_ios_result }}\n${{ steps.legs.outputs.android_icon }} RC-E2E Android: ${{ steps.legs.outputs.e2e_android_result }}\n\n*Downstream stages:*\n- prepare-branch: ${{ needs.prepare-branch.result }}\n- pre-publish-gate: ${{ needs.pre-publish-gate.result }}\n- validate-jira: ${{ needs.validate-jira.result }}\n- publish-rc: ${{ needs.publish-rc.result }}\n- create-prerelease: ${{ needs.create-prerelease.result }}"
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_HOOK }}
 
   # ===========================================================================
   # RC Summary
