@@ -56,7 +56,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
       - run: npm ci
       - run: npm run lint
       - run: npm test -- --coverage
@@ -71,7 +70,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
@@ -94,7 +92,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
       - name: Install example app dependencies
         working-directory: example
         run: npm ci
