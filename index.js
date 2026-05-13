@@ -465,15 +465,6 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
 };
 
 /**
- * Get the customer user ID that was previously set with setCustomerUserId.
- *
- * @callback callback function that returns (error, userId)
- */
-appsFlyer.getCustomerUserId = (callback) => {
-  return RNAppsFlyer.getCustomerUserId(callback);
-};
-
-/**
  * Once this API is invoked, our SDK no longer communicates with our servers and stops functioning.
  * In some extreme cases you might want to shut down all SDK activity due to legal and privacy compliance.
  * This can be achieved with the stop API.

@@ -489,13 +489,6 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getCustomerUserId(Callback callback) {
-        CallbackGuard guardedCallback = new CallbackGuard(callback);
-        String userId = AppsFlyerLib.getInstance().getCustomerUserId();
-        guardedCallback.invoke(null, userId != null ? userId : "");
-    }
-
-    @ReactMethod
     public void setCustomerUserId(final String userId, Callback callback) {
         CallbackGuard guardedCallback = new CallbackGuard(callback);
         AppsFlyerLib.getInstance().setCustomerUserId(userId);

@@ -89,10 +89,6 @@ function runAutoFlow() {
     afLog('getSDKVersion', `result: ${version || err}`);
   });
 
-  appsFlyer.getCustomerUserId((err, userId) => {
-    afLog('getCustomerUserId', `result: ${userId || err}`);
-  });
-
   afLifecycleLog('--- Post-start auto APIs complete ---');
 
   // 5. Fire standard events (Promise API — Android CallbackGuard WeakReference

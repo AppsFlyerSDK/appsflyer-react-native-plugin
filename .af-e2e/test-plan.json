@@ -278,7 +278,7 @@
       "id": "phase_5",
       "name": "Identity APIs round-trip",
       "scenario_ref": "E2E-005",
-      "description": "Fresh install. Verify setCustomerUserId, getCustomerUserId readback, setCurrencyCode, setAdditionalData propagate correctly. Identity-check event receives HTTP 200. is_first_launch=true still fires.",
+      "description": "Fresh install. Verify setCustomerUserId, setCurrencyCode, setAdditionalData propagate correctly. Identity-check event receives HTTP 200. is_first_launch=true still fires.",
       "requires_fresh_install": true,
       "wait_after_launch_sec": 420,
       "checks": [
@@ -287,13 +287,6 @@
           "description": "setCustomerUserId readback present",
           "type": "log_contains",
           "pattern": "[AF_QA][setCustomerUserId] result:",
-          "fail_action": "fail"
-        },
-        {
-          "id": "customer_user_id_readback",
-          "description": "getCustomerUserId returns the set value",
-          "type": "log_contains",
-          "pattern": "[AF_QA][getCustomerUserId] result:",
           "fail_action": "fail"
         },
         {

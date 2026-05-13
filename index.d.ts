@@ -312,7 +312,6 @@ declare module "react-native-appsflyer" {
     setAdditionalData(additionalData: object, successC?: SuccessCB): void;
     getAppsFlyerUID(callback: (error: Error, uid: string) => any): void;
     getSDKVersion(callback: (error: Error, version: string) => any): void;
-    getCustomerUserId(callback: (error: Error | null, userId: string | null) => void): void;
     setCustomerUserId(userId: string, successC?: SuccessCB): void;
     stop(isStopped: boolean, successC?: SuccessCB): void;
     setAppInviteOneLinkID(oneLinkID: string, successC?: SuccessCB): void;

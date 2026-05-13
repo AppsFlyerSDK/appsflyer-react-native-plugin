@@ -241,11 +241,6 @@ RCT_EXPORT_METHOD(getSDKVersion: (RCTResponseSenderBlock)callback) {
     callback(@[[NSNull null], version]);
 }
 
-RCT_EXPORT_METHOD(getCustomerUserId: (RCTResponseSenderBlock)callback) {
-    NSString *userId = [[AppsFlyerLib shared] customerUserID];
-    callback(@[[NSNull null], userId ?: @""]);
-}
-
 RCT_EXPORT_METHOD(setCustomerUserId: (NSString *)userId callback:(RCTResponseSenderBlock)callback) {
     [[AppsFlyerLib shared] setCustomerUserID:userId];
     callback(@[AF_SUCCESS]);
