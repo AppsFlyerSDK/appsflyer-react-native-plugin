@@ -156,6 +156,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate-release]
     if: needs.validate-release.result == 'success' && needs.validate-release.outputs.is_valid == 'true'
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -165,17 +168,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Publish to npm
         if: needs.validate-release.outputs.is_dry_run != 'true'
         env:
-          CI_NPM_TOKEN: ${{ secrets.CI_NPM_TOKEN }}
           VERSION: ${{ needs.validate-release.outputs.version }}
         run: |
           echo "Publishing version $VERSION to npm..."
-          echo "//registry.npmjs.org/:_authToken=$CI_NPM_TOKEN" > ~/.npmrc
           npm publish
-          rm ~/.npmrc
           echo "Published $VERSION to npm"
 
       - name: Dry-run publish

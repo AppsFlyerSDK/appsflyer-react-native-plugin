@@ -452,6 +452,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate-release, prepare-branch, pre-publish-gate, validate-jira]
     if: always() && needs.pre-publish-gate.result == 'success' && needs.pre-publish-gate.outputs.passed == 'true' && (needs.validate-jira.result == 'success' || needs.validate-jira.result == 'skipped')
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -463,6 +466,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: npm install
@@ -477,15 +481,7 @@ jobs:
 
       - name: Publish RC to npm
         if: ${{ needs.validate-release.outputs.is_dry_run != 'true' }}
-        env:
-          CI_NPM_TOKEN: ${{ secrets.CI_NPM_TOKEN }}
-        run: |
-          if [[ -z "${CI_NPM_TOKEN}" ]]; then
-            echo "CI_NPM_TOKEN is missing"; exit 1
-          fi
-          echo "//registry.npmjs.org/:_authToken=${CI_NPM_TOKEN}" > ~/.npmrc
-          npm publish --tag rc
-          rm -f ~/.npmrc
+        run: npm publish --tag rc
 
   # ===========================================================================
   # Create Pre-Release Tag
