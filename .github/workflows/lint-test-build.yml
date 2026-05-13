@@ -78,9 +78,6 @@ jobs:
       - name: Install example app dependencies
         working-directory: example
         run: npm install
-      - name: Generate Gradle wrapper script
-        working-directory: example/android
-        run: gradle wrapper
       - name: Build Android release APK
         working-directory: example/android
         run: ./gradlew assembleRelease
