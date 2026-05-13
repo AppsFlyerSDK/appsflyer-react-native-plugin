@@ -443,6 +443,7 @@ platform_peek_qa_log() {
     for path in app_flutter/af_qa_logs.txt files/af_qa_logs.txt; do
       adb shell "run-as $PACKAGE_NAME cat $path 2>/dev/null" 2>/dev/null && return 0
     done
+    adb logcat -d 2>/dev/null | grep -F "$LOG_TAG" 2>/dev/null || true
     return 0
   fi
   ios_ensure_udid
@@ -452,8 +453,12 @@ platform_peek_qa_log() {
   local qa_log
   qa_log=$(find "$sim_data_dir/Containers/Data/Application" \
     -name "af_qa_logs.txt" -maxdepth 4 2>/dev/null | head -1)
-  [[ -n "$qa_log" && -f "$qa_log" ]] || return 0
-  cat "$qa_log" 2>/dev/null || true
+  if [[ -n "$qa_log" && -f "$qa_log" ]]; then
+    cat "$qa_log" 2>/dev/null || true
+    return 0
+  fi
+  xcrun simctl spawn "$IOS_UDID" log show --last 2m --predicate "messageType == default || messageType == info || messageType == debug" 2>/dev/null \
+    | grep -F "$LOG_TAG" 2>/dev/null || true
 }
 
 # wait_for_qa_marker <marker_substring> <timeout_sec> [interval_sec]

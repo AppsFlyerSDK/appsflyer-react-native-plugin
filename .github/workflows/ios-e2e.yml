@@ -128,6 +128,8 @@ jobs:
 
       - name: Build iOS simulator app (debug)
         working-directory: example/ios
+        env:
+          FORCE_BUNDLING: "1"
         run: |
           xcodebuild build \
             -workspace example.xcworkspace \
