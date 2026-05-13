@@ -135,7 +135,7 @@ jobs:
             -configuration Debug \
             -destination "platform=iOS Simulator,id=$IOS_SIMULATOR_UDID" \
             -derivedDataPath build \
-            | xcpretty || true
+            | xcpretty
 
       - name: Run E2E (af-scenario-runner against .af-e2e/test-plan.json)
         run: ./scripts/af-scenario-runner.sh --platform ios --plan .af-e2e/test-plan.json

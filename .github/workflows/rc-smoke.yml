@@ -272,7 +272,7 @@ jobs:
             -configuration Debug \
             -destination "platform=iOS Simulator,id=$IOS_SIMULATOR_UDID" \
             -derivedDataPath build \
-            | xcpretty || true
+            | xcpretty
 
       - name: Run smoke (SMOKE-001/002/003)
         run: ./scripts/af-scenario-runner.sh --platform ios --plan .af-smoke/rc-test-plan.json

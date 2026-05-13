@@ -133,7 +133,7 @@ jobs:
 
           # 1. package.json (also updates react-native-appsflyer.podspec
           #    since podspec reads s.version from package.json)
-          npm version "$VERSION" --no-git-tag-version
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
           echo "package.json:" && node -p "require('./package.json').version"
 
           # 2. ios/RNAppsFlyer.h — kAppsFlyerPluginVersion
@@ -161,7 +161,8 @@ jobs:
           git config user.email "${CI_COMMIT_EMAIL:-github-actions[bot]@users.noreply.github.com}"
 
           if [[ -n $(git status -s) ]]; then
-            git add package.json ios/RNAppsFlyer.h android/
+            git add package.json react-native-appsflyer.podspec ios/RNAppsFlyer.h \
+              android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java
             git commit -m "chore: prepare production release $VERSION (from $CURRENT_VERSION)"
             git push
             echo "Pushed version update to release branch"
