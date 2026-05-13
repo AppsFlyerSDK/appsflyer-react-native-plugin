@@ -49,6 +49,13 @@ function runAutoFlow() {
     afLog('setCurrencyCode', `result: ${result}`);
   });
 
+  appsFlyer.setAdditionalData(
+    {tenant: 'qa_eu', experiment: 'rc_pipeline_v1'},
+    result => {
+      afLog('setAdditionalData', `result: ${result}`);
+    },
+  );
+
   afLifecycleLog('--- Pre-start auto APIs complete ---');
 
   // 3. Start SDK with manualStart — initSdk configures, startSdk fires the actual start
@@ -82,6 +89,10 @@ function runAutoFlow() {
     afLog('getSDKVersion', `result: ${version || err}`);
   });
 
+  appsFlyer.getCustomerUserId((err, userId) => {
+    afLog('getCustomerUserId', `result: ${userId || err}`);
+  });
+
   afLifecycleLog('--- Post-start auto APIs complete ---');
 
   // 5. Fire standard events (Promise API — Android CallbackGuard WeakReference
@@ -108,7 +119,39 @@ function runAutoFlow() {
     .then((result: any) => afLog('logEvent(af_content_view)', `result: ${result}`))
     .catch((error: any) => afLog('logEvent(af_content_view)', `error: ${error}`));
 
-  // 6. Consent & sharing APIs
+  // 6. Custom event with rich params (E2E-004)
+  const customPurchaseParams = {
+    af_revenue: 19.99,
+    af_currency: 'USD',
+    af_content_id: 'sku_42',
+    is_promo: true,
+    metadata: {campaign: 'rc_e2e', tier: 'gold'},
+  };
+  afLog(
+    'logEvent',
+    `name=af_qa_custom_purchase params=${JSON.stringify(customPurchaseParams)}`,
+  );
+  appsFlyer
+    .logEvent('af_qa_custom_purchase', customPurchaseParams)
+    .then((result: any) =>
+      afLog('logEvent(af_qa_custom_purchase)', `result: ${result}`),
+    )
+    .catch((error: any) =>
+      afLog('logEvent(af_qa_custom_purchase)', `error: ${error}`),
+    );
+
+  // 7. Identity-check event (E2E-005)
+  afLog('logEvent', `name=af_qa_identity_check params=${JSON.stringify({step: 'post_start'})}`);
+  appsFlyer
+    .logEvent('af_qa_identity_check', {step: 'post_start'})
+    .then((result: any) =>
+      afLog('logEvent(af_qa_identity_check)', `result: ${result}`),
+    )
+    .catch((error: any) =>
+      afLog('logEvent(af_qa_identity_check)', `error: ${error}`),
+    );
+
+  // 8. Consent & sharing APIs
   appsFlyer.setSharingFilterForPartners(['partner_test']);
   afLog('setSharingFilterForPartners', 'result: [partner_test]');
 
@@ -116,7 +159,36 @@ function runAutoFlow() {
   appsFlyer.setConsentData(consent);
   afLog('setConsentData', 'result: GDPR consent set');
 
-  afLifecycleLog('--- Auto run complete ---');
+  // 9. Stop/resume cycle (E2E-006)
+  appsFlyer.stop(true, () => {
+    afLog('stop', 'result: true');
+
+    appsFlyer
+      .logEvent('af_qa_suppressed', {phase: 'stopped'})
+      .then((result: any) =>
+        afLog('logEvent(af_qa_suppressed)', `result: ${result}`),
+      )
+      .catch((error: any) =>
+        afLog('logEvent(af_qa_suppressed)', `error: ${error}`),
+      );
+
+    setTimeout(() => {
+      appsFlyer.stop(false, () => {
+        afLog('stop', 'result: false');
+
+        appsFlyer
+          .logEvent('af_qa_resumed', {phase: 'restarted'})
+          .then((result: any) =>
+            afLog('logEvent(af_qa_resumed)', `result: ${result}`),
+          )
+          .catch((error: any) =>
+            afLog('logEvent(af_qa_resumed)', `error: ${error}`),
+          );
+
+        afLifecycleLog('--- Auto run complete ---');
+      });
+    }, 3000);
+  });
 }
 
 const styles = StyleSheet.create({
