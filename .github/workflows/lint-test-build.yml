@@ -43,7 +43,7 @@ on:
         default: false
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.run_id }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
