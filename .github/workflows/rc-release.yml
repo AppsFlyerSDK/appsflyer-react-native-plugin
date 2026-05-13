@@ -410,7 +410,7 @@ jobs:
     name: Validate Jira Fix Version
     runs-on: ubuntu-latest
     needs: [validate-release, pre-publish-gate]
-    if: needs.validate-release.outputs.is_valid == 'true' && needs.pre-publish-gate.outputs.passed == 'true'
+    if: always() && needs.pre-publish-gate.result == 'success' && needs.pre-publish-gate.outputs.passed == 'true'
     steps:
       - name: Verify Jira fix version exists
         env:
@@ -448,7 +448,7 @@ jobs:
     name: Publish RC to npm
     runs-on: ubuntu-latest
     needs: [validate-release, prepare-branch, pre-publish-gate, validate-jira]
-    if: needs.validate-release.outputs.is_valid == 'true' && needs.pre-publish-gate.outputs.passed == 'true'
+    if: always() && needs.pre-publish-gate.result == 'success' && needs.pre-publish-gate.outputs.passed == 'true' && (needs.validate-jira.result == 'success' || needs.validate-jira.result == 'skipped')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -642,12 +642,14 @@ jobs:
           PRERELEASE_RESULT: ${{ needs.create-prerelease.result }}
         run: |
           set -euo pipefail
+          ok() { [[ "$1" == "success" || "$1" == "skipped" ]]; }
+
           if [[ "$VALIDATE_RESULT" == "success" \
              && "$PREPARE_RESULT"   == "success" \
-             && "$GATE_RESULT"      == "success" \
-             && "$JIRA_RESULT"      == "success" \
-             && "$PUBLISH_RESULT"   == "success" \
-             && "$PRERELEASE_RESULT" == "success" ]]; then
+             && "$GATE_RESULT"      == "success" ]] \
+             && ok "$JIRA_RESULT" \
+             && ok "$PUBLISH_RESULT" \
+             && ok "$PRERELEASE_RESULT"; then
             echo "success=true" >> "$GITHUB_OUTPUT"
             echo "failed_stage=" >> "$GITHUB_OUTPUT"
             exit 0
@@ -659,9 +661,9 @@ jobs:
             echo "failed_stage=prepare-branch" >> "$GITHUB_OUTPUT"
           elif [[ "$GATE_RESULT" != "success" ]]; then
             echo "failed_stage=pre-publish-gate" >> "$GITHUB_OUTPUT"
-          elif [[ "$JIRA_RESULT" != "success" ]]; then
+          elif ! ok "$JIRA_RESULT"; then
             echo "failed_stage=validate-jira" >> "$GITHUB_OUTPUT"
-          elif [[ "$PUBLISH_RESULT" != "success" ]]; then
+          elif ! ok "$PUBLISH_RESULT"; then
             echo "failed_stage=publish-rc" >> "$GITHUB_OUTPUT"
           else
             echo "failed_stage=create-prerelease" >> "$GITHUB_OUTPUT"
@@ -781,23 +783,23 @@ jobs:
           fi
 
       - name: Send Slack notification (Success)
-        if: steps.status.outputs.success == 'true' && needs.validate-release.outputs.is_dry_run != 'true'
+        if: steps.status.outputs.success == 'true'
         uses: slackapi/slack-github-action@v1
         with:
           payload: |
             {
-              "text": "<!here>\n:react::react::react::react::react::react::react::react::react::react::react::react:\n\n*React Native Release Candidate:*\nreact-native-appsflyer: ${{ needs.validate-release.outputs.version }} is ready for QA testing.\n\n*Pre-publish checks:*\n${{ steps.legs.outputs.ci_icon }} Lint, Test & Build: ${{ steps.legs.outputs.ci_result }}\n${{ steps.legs.outputs.ios_icon }} RC-E2E iOS: ${{ steps.legs.outputs.e2e_ios_result }}\n${{ steps.legs.outputs.android_icon }} RC-E2E Android: ${{ steps.legs.outputs.e2e_android_result }}\n\n*Testing Instructions:*\n```\nnpm install react-native-appsflyer@${{ needs.validate-release.outputs.version }} --save\n```\n\n*Sources:*\n:github: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}\n:github: Release: https://github.com/${{ github.repository }}/releases/tag/${{ needs.validate-release.outputs.version }}\n:github: Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n*Changes and fixes:*\n${{ steps.extract-info.outputs.changelog }}\n\n*Linked tickets and issues:*\n${{ steps.jira-tickets.outputs.tickets }}\n\n*Native SDKs:*\n:android: ${{ steps.extract-info.outputs.android_sdk }}\n:apple: ${{ steps.extract-info.outputs.ios_sdk }}\n\n:react::react::react::react::react::react::react::react::react::react::react::react:"
+              "text": "<!here>\n:react::react::react::react::react::react::react::react::react::react::react::react:\n\n${{ needs.validate-release.outputs.is_dry_run == 'true' && ':test_tube: *[DRY RUN]* ' || '' }}*React Native Release Candidate:*\nreact-native-appsflyer: ${{ needs.validate-release.outputs.version }} ${{ needs.validate-release.outputs.is_dry_run == 'true' && 'pipeline completed (not published to npm)' || 'is ready for QA testing' }}.\n\n*Pre-publish checks:*\n${{ steps.legs.outputs.ci_icon }} Lint, Test & Build: ${{ steps.legs.outputs.ci_result }}\n${{ steps.legs.outputs.ios_icon }} RC-E2E iOS: ${{ steps.legs.outputs.e2e_ios_result }}\n${{ steps.legs.outputs.android_icon }} RC-E2E Android: ${{ steps.legs.outputs.e2e_android_result }}\n${{ needs.validate-release.outputs.is_dry_run != 'true' && format('\n*Testing Instructions:*\n```\nnpm install react-native-appsflyer@{0} --save\n```', needs.validate-release.outputs.version) || '' }}\n\n*Sources:*\n:github: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}\n:github: Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n${{ needs.validate-release.outputs.is_dry_run != 'true' && format(':github: Release: https://github.com/{0}/releases/tag/{1}', github.repository, needs.validate-release.outputs.version) || '' }}\n\n*Changes and fixes:*\n${{ steps.extract-info.outputs.changelog }}\n\n*Linked tickets and issues:*\n${{ steps.jira-tickets.outputs.tickets }}\n\n*Native SDKs:*\n:android: ${{ steps.extract-info.outputs.android_sdk }}\n:apple: ${{ steps.extract-info.outputs.ios_sdk }}\n\n:react::react::react::react::react::react::react::react::react::react::react::react:"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_HOOK }}
 
       - name: Send failure notification
-        if: steps.status.outputs.success == 'false' && needs.validate-release.outputs.is_dry_run != 'true'
+        if: steps.status.outputs.success == 'false'
         uses: slackapi/slack-github-action@v1
         with:
           payload: |
             {
-              "text": "<!here>\n:warning: *React Native RC failed at `${{ steps.status.outputs.failed_stage }}`*\n\nVersion: ${{ needs.validate-release.outputs.version }}\nBranch: ${{ github.ref_name }}\nRun: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n*Pre-publish checks:*\n${{ steps.legs.outputs.ci_icon }} Lint, Test & Build: ${{ steps.legs.outputs.ci_result }}\n${{ steps.legs.outputs.ios_icon }} RC-E2E iOS: ${{ steps.legs.outputs.e2e_ios_result }}\n${{ steps.legs.outputs.android_icon }} RC-E2E Android: ${{ steps.legs.outputs.e2e_android_result }}\n\n*Downstream stages:*\n- prepare-branch: ${{ needs.prepare-branch.result }}\n- pre-publish-gate: ${{ needs.pre-publish-gate.result }}\n- validate-jira: ${{ needs.validate-jira.result }}\n- publish-rc: ${{ needs.publish-rc.result }}\n- create-prerelease: ${{ needs.create-prerelease.result }}"
+              "text": "<!here>\n:warning: *${{ needs.validate-release.outputs.is_dry_run == 'true' && '[DRY RUN] ' || '' }}React Native RC failed at `${{ steps.status.outputs.failed_stage }}`*\n\nVersion: ${{ needs.validate-release.outputs.version }}\nBranch: ${{ github.ref_name }}\nRun: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n*Pre-publish checks:*\n${{ steps.legs.outputs.ci_icon }} Lint, Test & Build: ${{ steps.legs.outputs.ci_result }}\n${{ steps.legs.outputs.ios_icon }} RC-E2E iOS: ${{ steps.legs.outputs.e2e_ios_result }}\n${{ steps.legs.outputs.android_icon }} RC-E2E Android: ${{ steps.legs.outputs.e2e_android_result }}\n\n*Downstream stages:*\n- prepare-branch: ${{ needs.prepare-branch.result }}\n- pre-publish-gate: ${{ needs.pre-publish-gate.result }}\n- validate-jira: ${{ needs.validate-jira.result }}\n- publish-rc: ${{ needs.publish-rc.result }}\n- create-prerelease: ${{ needs.create-prerelease.result }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_HOOK }}
@@ -832,10 +834,20 @@ jobs:
           echo "Pre-release tag + PR: ${{ needs.create-prerelease.result }}"
           echo "========================================="
 
-          if [[ "${{ needs.validate-release.result }}" == "success" ]] && \
-             [[ "${{ needs.pre-publish-gate.result }}" == "success" ]] && \
-             [[ "${{ needs.publish-rc.result }}" == "success" ]] && \
-             [[ "${{ needs.create-prerelease.result }}" == "success" ]]; then
+          ok() { [[ "$1" == "success" || "$1" == "skipped" ]]; }
+
+          FAIL=0
+          # validate-release and pre-publish-gate must succeed (never legitimately skipped)
+          [[ "${{ needs.validate-release.result }}" == "success" ]] || FAIL=1
+          [[ "${{ needs.pre-publish-gate.result }}" == "success" ]] || FAIL=1
+          # downstream jobs may be skipped (dry-run, skip_e2e, etc.)
+          ok "${{ needs.run-ci.result }}" || FAIL=1
+          ok "${{ needs.prepare-branch.result }}" || FAIL=1
+          ok "${{ needs.validate-jira.result }}" || FAIL=1
+          ok "${{ needs.publish-rc.result }}" || FAIL=1
+          ok "${{ needs.create-prerelease.result }}" || FAIL=1
+
+          if [[ "$FAIL" == "0" ]]; then
             echo "RC Release Process Completed Successfully"
           else
             echo "RC Release Process Failed"
