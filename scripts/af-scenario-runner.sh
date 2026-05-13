@@ -693,6 +693,17 @@ run_phase() {
   # Fresh install if required
   if [[ "$requires_fresh" == "true" ]]; then
     platform_uninstall
+    # Reset device identity so the AppsFlyer server treats this as a brand-new
+    # device and returns is_first_launch=true.
+    if [[ "$PLATFORM" == "android" ]]; then
+      local new_id
+      new_id=$(cat /proc/sys/kernel/random/uuid 2>/dev/null | tr -d '-' | head -c 16 || date +%s%N | head -c 16)
+      adb shell settings put secure android_id "$new_id" 2>/dev/null || true
+      log_info "Reset android_id to $new_id for fresh-install attribution"
+    else
+      xcrun simctl privacy "$IOS_UDID" reset all 2>/dev/null || true
+      log_info "Reset simulator privacy settings for fresh-install attribution"
+    fi
     sleep 1
     if ! platform_install; then
       log_fail "Installation failed — aborting phase"
