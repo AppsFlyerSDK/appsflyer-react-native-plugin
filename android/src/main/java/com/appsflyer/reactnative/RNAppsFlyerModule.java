@@ -475,6 +475,13 @@ public class RNAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void getSDKVersion(Callback callback) {
+        CallbackGuard guardedCallback = new CallbackGuard(callback);
+        String version = AppsFlyerLib.getInstance().getSdkVersion();
+        guardedCallback.invoke(null, version);
+    }
+
+    @ReactMethod
     public void updateServerUninstallToken(final String token, Callback callback) {
         CallbackGuard guardedCallback = new CallbackGuard(callback);
         AppsFlyerLib.getInstance().updateServerUninstallToken(getReactApplicationContext(), token);

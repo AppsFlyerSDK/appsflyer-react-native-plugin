@@ -1,0 +1,52 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(*)",
+      "Bash(npm test*)",
+      "Bash(npm run lint*)",
+      "Bash(npx tsc*)",
+      "Bash(npx jest*)",
+      "Bash(npx react-native*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git status*)",
+      "Bash(git branch*)",
+      "Bash(git show*)",
+      "Bash(wc *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(gh issue*)",
+      "Bash(gh pr list*)",
+      "Bash(gh pr view*)"
+    ],
+    "ask": [
+      "Bash(rm *)",
+      "Bash(git push*)",
+      "Bash(git reset*)",
+      "Bash(git checkout -- *)",
+      "Bash(npm publish*)",
+      "Bash(pod install*)",
+      "Bash(pod deintegrate*)"
+    ]
+  },
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
+  },
+  "plansDirectory": "./docs/plans",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd ${CLAUDE_PROJECT_DIR} && FILE=$(echo \"$TOOL_INPUT\" | grep -o '\"file_path\":\"[^\"]*\"' 2>/dev/null | head -1 | cut -d'\"' -f4); if [ -n \"$FILE\" ] && echo \"$FILE\" | grep -qE '\\.(js|ts|jsx|tsx)$'; then npx eslint --no-error-on-unmatched-pattern --quiet \"$FILE\" 2>/dev/null || true; fi",
+            "timeout": 10000
+          }
+        ]
+      }
+    ]
+  }
+}
