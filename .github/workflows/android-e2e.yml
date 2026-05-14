@@ -83,7 +83,11 @@ jobs:
       - name: Write example app .env
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}
-        run: echo "$ENV_FILE" | base64 -d > example/.env
+        run: |
+          echo "$ENV_FILE" | base64 -d > example/.env
+          echo "::group::.env keys (values redacted)"
+          sed 's/=.*/=***/' example/.env
+          echo "::endgroup::"
 
       - name: Build and run E2E on Android emulator
         uses: reactivecircus/android-emulator-runner@v2

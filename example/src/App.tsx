@@ -156,6 +156,10 @@ function runAutoFlow() {
   afLog('setConsentData', 'result: GDPR consent set');
 
   // 9. Stop/resume cycle (E2E-006)
+  // Delay so the SDK has time to receive onInstallConversionData from the
+  // server before we stop it. Without this, stop(true) fires ~9ms after
+  // startSdk() and kills the in-flight conversion data request.
+  setTimeout(() => {
   appsFlyer.stop(true, () => {
     afLog('stop', 'result: true');
 
@@ -185,6 +189,7 @@ function runAutoFlow() {
       });
     }, 3000);
   });
+  }, 10000);
 }
 
 const styles = StyleSheet.create({
