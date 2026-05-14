@@ -484,7 +484,7 @@ jobs:
         if: ${{ needs.validate-release.outputs.is_dry_run != 'true' }}
         env:
           NODE_AUTH_TOKEN: ''
-        run: npm publish --tag rc
+        run: npm publish --tag rc --provenance
 
   # ===========================================================================
   # Create Pre-Release Tag

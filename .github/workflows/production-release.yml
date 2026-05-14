@@ -178,7 +178,7 @@ jobs:
           NODE_AUTH_TOKEN: ''
         run: |
           echo "Publishing version $VERSION to npm..."
-          npm publish
+          npm publish --provenance
           echo "Published $VERSION to npm"
 
       - name: Dry-run publish
