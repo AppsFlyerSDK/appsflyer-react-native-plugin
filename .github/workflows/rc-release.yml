@@ -482,6 +482,8 @@ jobs:
 
       - name: Publish RC to npm
         if: ${{ needs.validate-release.outputs.is_dry_run != 'true' }}
+        env:
+          NODE_AUTH_TOKEN: ''
         run: npm publish --tag rc
 
   # ===========================================================================

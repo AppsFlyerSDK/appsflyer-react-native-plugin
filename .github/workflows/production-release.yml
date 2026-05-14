@@ -175,6 +175,7 @@ jobs:
         if: needs.validate-release.outputs.is_dry_run != 'true'
         env:
           VERSION: ${{ needs.validate-release.outputs.version }}
+          NODE_AUTH_TOKEN: ''
         run: |
           echo "Publishing version $VERSION to npm..."
           npm publish
