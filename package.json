@@ -29,7 +29,7 @@
     "appsflyer"
   ],
   "bugs": {
-    "url": "https://github.com/AppsFlyerSDK/react-native-appsflyer/issues"
+    "url": "https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/issues"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.26.9",
