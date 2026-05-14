@@ -24,6 +24,7 @@ The list of available methods for this plugin is described below.
   - [logLocation](#loglocation)
   - [anonymizeUser](#anonymizeuser)
   - [getAppsFlyerUID](#getappsflyeruid)
+  - [getSDKVersion](#getsdkversion)
   - [setHost](#sethost)
   - [setUserEmails *Soon to be deprecated*](#setuseremails-soon-to-be-deprecated)
   - [generateInviteLink](#generateinvitelink)
@@ -77,6 +78,7 @@ The list of available methods for this plugin is described below.
   - [logLocation](#loglocation)
   - [anonymizeUser](#anonymizeuser)
   - [getAppsFlyerUID](#getappsflyeruid)
+  - [getSDKVersion](#getsdkversion)
   - [setHost](#sethost)
   - [setUserEmails *Soon to be deprecated*](#setuseremails-soon-to-be-deprecated)
   - [generateInviteLink](#generateinvitelink)
@@ -489,6 +491,29 @@ appsFlyer.getAppsFlyerUID((err, appsFlyerUID) => {
     console.error(err);
   } else {
     console.log('on getAppsFlyerUID: ' + appsFlyerUID);
+  }
+});
+```
+
+---
+
+### getSDKVersion
+`getSDKVersion(callback)`
+
+Returns the AppsFlyer native SDK version used by the plugin.
+
+| parameter | type     | description                          |
+| ----------|----------|--------------------------------------|
+| callback  | function | returns `(error, sdkVersion)` |
+
+*Example:*
+
+```javascript
+appsFlyer.getSDKVersion((err, sdkVersion) => {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log('AppsFlyer SDK version: ' + sdkVersion);
   }
 });
 ```
