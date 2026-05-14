@@ -1,0 +1,243 @@
+# =============================================================================
+# Promote Release - Prepare Release Branch for Production
+# =============================================================================
+#
+# Purpose: When QA approves an RC, this workflow prepares the release branch
+# for production by removing the -rc suffix from version numbers.
+#
+# IMPORTANT: This workflow does NOT merge the PR (org rules prevent bot merges).
+# Instead, it updates the release branch so when a human merges, the version
+# is clean (e.g., 6.18.0 instead of 6.18.0-rc1).
+#
+# Flow:
+# 1. QA tests the RC version
+# 2. QA adds label "pass QA ready for deploy" to the PR
+# 3. This workflow triggers and:
+#    - Verifies rc-smoke/npm check-run is green
+#    - Strips -rcN from all version files
+#    - Commits changes to the release branch
+# 4. Human reviews and manually merges the PR
+# 5. production-release.yml triggers on merge
+#
+# =============================================================================
+
+name: Promote Release - Prepare for Production
+
+on:
+  pull_request:
+    types: [labeled]
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # ===========================================================================
+  # Job 1: Prepare Release Branch for Production
+  # ===========================================================================
+  prepare-for-production:
+    name: Prepare Release for Production
+    if: |
+      github.event.label.name == 'pass QA ready for deploy' &&
+      startsWith(github.event.pull_request.head.ref, 'releases/')
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.compute-version.outputs.version }}
+      release_branch: ${{ steps.compute-version.outputs.release_branch }}
+
+    steps:
+      - name: Verify rc-smoke/npm check-run is green
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.payload.pull_request.head.sha;
+            const checkName = 'rc-smoke/npm';
+
+            const { data } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: sha,
+              check_name: checkName
+            });
+
+            const runs = (data.check_runs || []).filter(r => r.status === 'completed');
+            runs.sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
+            const latest = runs[0];
+
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/workflows/rc-smoke.yml`;
+            const prNumber = context.payload.pull_request.number;
+
+            if (!latest) {
+              const body = `**Promote blocked.** No \`${checkName}\` check-run exists on ${sha}.\n\n` +
+                `Run [rc-smoke.yml](${runUrl}) manually with the RC version, or wait for the auto-trigger from the RC-release workflow, then re-apply the label.`;
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: prNumber, body });
+              core.setFailed(`${checkName} is missing on ${sha}`);
+              return;
+            }
+            if (latest.conclusion !== 'success') {
+              const body = `**Promote blocked.** \`${checkName}\` on ${sha} concluded \`${latest.conclusion}\`.\n\n` +
+                `Details: ${latest.details_url}\n\n` +
+                `If the RC is genuinely broken on npm, bump to \`rcN+1\` and rerun the RC-release workflow. A skipped check-run is not sufficient for promotion --- publish the RC for real (\`dry_run=false\`), then re-apply the label.`;
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: prNumber, body });
+              core.setFailed(`${checkName} conclusion is ${latest.conclusion} on ${sha}`);
+              return;
+            }
+
+            core.info(`${checkName} is success on ${sha}; proceeding with promotion.`);
+
+      - name: Checkout release branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Compute production version
+        id: compute-version
+        env:
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          RELEASE_BRANCH="$PR_HEAD_REF"
+          echo "Release branch: $RELEASE_BRANCH"
+
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+
+          PROD_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-rc[0-9]*$//')
+          echo "Production version: $PROD_VERSION"
+
+          if [[ "$CURRENT_VERSION" == "$PROD_VERSION" ]]; then
+            echo "::warning::Version doesn't have -rc suffix. Already production ready?"
+            echo "Current: $CURRENT_VERSION"
+          fi
+
+          echo "version=$PROD_VERSION" >> "$GITHUB_OUTPUT"
+          echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_branch=$RELEASE_BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Strip -rcN from all version files
+        env:
+          VERSION: ${{ steps.compute-version.outputs.version }}
+        run: |
+          set -euo pipefail
+          echo "Updating all version files to production version: $VERSION"
+
+          # 1. package.json (also updates react-native-appsflyer.podspec
+          #    since podspec reads s.version from package.json)
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+          echo "package.json:" && node -p "require('./package.json').version"
+
+          # 2. ios/RNAppsFlyer.h — kAppsFlyerPluginVersion
+          IOS_FILE="ios/RNAppsFlyer.h"
+          if [ -f "$IOS_FILE" ]; then
+            sed -i "s/kAppsFlyerPluginVersion[[:space:]]*= @\"[^\"]*\"/kAppsFlyerPluginVersion      = @\"$VERSION\"/" "$IOS_FILE"
+            echo "iOS:" && grep "kAppsFlyerPluginVersion" "$IOS_FILE"
+          fi
+
+          # 3. android/.../RNAppsFlyerConstants.java — PLUGIN_VERSION
+          ANDROID_FILE="android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java"
+          if [ -f "$ANDROID_FILE" ]; then
+            sed -i "s/PLUGIN_VERSION = \"[^\"]*\"/PLUGIN_VERSION = \"$VERSION\"/" "$ANDROID_FILE"
+            echo "Android:" && grep "PLUGIN_VERSION" "$ANDROID_FILE"
+          fi
+
+      - name: Commit and push version changes
+        env:
+          VERSION: ${{ steps.compute-version.outputs.version }}
+          CURRENT_VERSION: ${{ steps.compute-version.outputs.current_version }}
+          CI_COMMIT_AUTHOR: ${{ secrets.CI_COMMIT_AUTHOR }}
+          CI_COMMIT_EMAIL: ${{ secrets.CI_COMMIT_EMAIL }}
+        run: |
+          git config user.name "${CI_COMMIT_AUTHOR:-github-actions[bot]}"
+          git config user.email "${CI_COMMIT_EMAIL:-github-actions[bot]@users.noreply.github.com}"
+
+          if [[ -n $(git status -s) ]]; then
+            git add package.json react-native-appsflyer.podspec ios/RNAppsFlyer.h \
+              android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java
+            git commit -m "chore: prepare production release $VERSION (from $CURRENT_VERSION)"
+            git push
+            echo "Pushed version update to release branch"
+          else
+            echo "No version changes needed"
+          fi
+
+      - name: Update PR description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.compute-version.outputs.version }}';
+            const currentVersion = '${{ steps.compute-version.outputs.current_version }}';
+            const pr = context.payload.pull_request;
+
+            const newBody = `### Production Release ${version}\n\n` +
+              `**Status:** Ready for manual merge\n\n` +
+              `**Version updated:** ${currentVersion} -> ${version}\n\n` +
+              `---\n\n` +
+              `${pr.body || ''}\n\n` +
+              `---\n\n` +
+              `**Next steps:**\n` +
+              `1. QA approved (label added)\n` +
+              `2. Version updated to production (${version})\n` +
+              `3. **Awaiting manual merge** by a maintainer\n` +
+              `4. Production release will trigger automatically after merge\n`;
+
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              body: newBody
+            });
+
+      - name: Add comment to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.compute-version.outputs.version }}';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `## Ready for Production Release\n\n` +
+                `The release branch has been updated:\n` +
+                `- **Version:** \`${version}\` (removed -rc suffix)\n` +
+                `- **All version files updated** (package.json, RNAppsFlyer.h, RNAppsFlyerConstants.java)\n\n` +
+                `### Next Steps\n` +
+                `1. **Review the changes** in this PR\n` +
+                `2. **Merge this PR** when ready\n` +
+                `3. The production release workflow will automatically:\n` +
+                `   - Publish \`${version}\` to npm\n` +
+                `   - Create GitHub release\n` +
+                `   - Send notifications\n\n` +
+                `> **Note:** This PR requires manual merge due to branch protection rules.`
+            });
+
+  # ===========================================================================
+  # Job 2: Notify Promote Failure
+  # ===========================================================================
+  notify-failure:
+    name: Notify Promote Failure
+    needs: prepare-for-production
+    runs-on: ubuntu-latest
+    if: always() && needs.prepare-for-production.result == 'failure'
+
+    steps:
+      - name: Send Slack failure notification
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "<!here>\n:warning: *React Native promote-release blocked*\n\nPR: ${{ github.event.pull_request.html_url }}\nBranch: ${{ github.event.pull_request.head.ref }}\n\nThe promote workflow could not prepare the release branch for production. Common causes:\n- `rc-smoke/npm` is missing or red on the PR head SHA --- bump to `rcN+1` and rerun rc-release.\n- The version-strip push was rejected (branch protection or stale ref).\n\nRun: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_HOOK }}
+        continue-on-error: true

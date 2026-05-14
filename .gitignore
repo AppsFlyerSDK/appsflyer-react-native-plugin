@@ -33,10 +33,8 @@ ios/Podfile.lock
 .idea
 .gradle
 local.properties
-android/gradlew.bat
 .vscode
 android/gradle
-android/gradlew
 android/.project
 android/.settings
 
@@ -71,3 +69,28 @@ demos/appsflyer-react-native-app/ios/.xcode.env
 demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcodeproj/project.pbxproj
 
 .cursor/*
+
+# Local MCP config
+.mcp.json
+
+# Claude-generated planning/skill docs
+Docs/plans/
+Docs/superpowers/
+
+# Test app secrets
+example/.env
+
+# Example app generated artifacts
+example/ios/Podfile.lock
+example/ios/.xcode.env.local
+example/ios/.af-e2e/
+example/android/app/.cxx/
+example/android/app/debug.keystore
+example/package-lock.json
+
+# Scenario runner reports
+.af-e2e/reports/
+.af-smoke/reports/
+
+# RC smoke synthesized app (created at CI time)
+example_rc_smoke/

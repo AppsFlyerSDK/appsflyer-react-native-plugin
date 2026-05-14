@@ -57,6 +57,7 @@ module.exports = {
 
   ignorePatterns: [
     'node_modules/**',
+    'example/**',
     'demos/**',
     'android/**',
     'ios/**',

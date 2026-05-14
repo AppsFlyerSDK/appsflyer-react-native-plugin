@@ -1,0 +1,499 @@
+# =============================================================================
+# RC Smoke — post-publish validation against the npm RC artifact
+# =============================================================================
+#
+# Stage: RC-SMOKE in the RC pipeline.
+#
+# Fires automatically after rc-release.yml ("RC - Release Candidate") completes
+# with conclusion: success. Synthesizes example_rc_smoke/ from the demo app
+# with react-native-appsflyer pinned to the RC version from npm, runs
+# SMOKE-001/002/003 via af-scenario-runner.sh on both platforms, and posts a
+# check_run named rc-smoke/npm on the release branch head SHA. That check_run
+# is what promote-release.yml verifies before stripping -rcN.
+#
+# Manual dispatch is supported for reruns (rc_version input).
+#
+# When the parent RC-release run was dry_run=true, this workflow still fires
+# but short-circuits and posts a skipped check-run so promotion can
+# distinguish "not applicable" from "failing".
+# =============================================================================
+
+name: RC Smoke - npm artifact
+
+on:
+  workflow_run:
+    workflows: ["RC - Release Candidate"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      rc_version:
+        description: 'RC version to smoke, e.g. 6.18.0-rc1 (must exist on npm)'
+        required: true
+        type: string
+      release_branch:
+        description: 'Release branch the smoke result should be associated with'
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_sha || github.event.inputs.release_branch }}
+  cancel-in-progress: false
+
+jobs:
+  # ===========================================================================
+  # Resolve RC version and branch context. Short-circuit on dry-run or failure
+  # of the parent RC-release run.
+  # ===========================================================================
+  resolve:
+    name: Resolve RC context
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.decide.outputs.should_run }}
+      skip_reason: ${{ steps.decide.outputs.skip_reason }}
+      rc_version: ${{ steps.decide.outputs.rc_version }}
+      release_branch: ${{ steps.decide.outputs.release_branch }}
+      head_sha: ${{ steps.decide.outputs.head_sha }}
+    steps:
+      - name: Log trigger context
+        run: |
+          echo "event_name=${{ github.event_name }}"
+          echo "workflow_run.conclusion=${{ github.event.workflow_run.conclusion }}"
+          echo "workflow_run.head_branch=${{ github.event.workflow_run.head_branch }}"
+          echo "workflow_run.head_sha=${{ github.event.workflow_run.head_sha }}"
+
+      - name: Checkout release branch (workflow_run path)
+        if: github.event_name == 'workflow_run'
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 1
+
+      - name: Checkout release branch (manual dispatch path)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.release_branch }}
+          fetch-depth: 1
+
+      - name: Decide whether to run
+        id: decide
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PARENT_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          INPUT_VERSION: ${{ github.event.inputs.rc_version }}
+          INPUT_BRANCH: ${{ github.event.inputs.release_branch }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            RC_VERSION="$INPUT_VERSION"
+            REL_BRANCH="$INPUT_BRANCH"
+            HEAD="$(git rev-parse HEAD)"
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "skip_reason=" >> "$GITHUB_OUTPUT"
+            echo "rc_version=$RC_VERSION" >> "$GITHUB_OUTPUT"
+            echo "release_branch=$REL_BRANCH" >> "$GITHUB_OUTPUT"
+            echo "head_sha=$HEAD" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # workflow_run path
+          if [[ "$PARENT_CONCLUSION" != "success" ]]; then
+            echo "Parent RC-release run was $PARENT_CONCLUSION; skipping smoke."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "skip_reason=parent_not_success" >> "$GITHUB_OUTPUT"
+            echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+            echo "release_branch=$HEAD_BRANCH" >> "$GITHUB_OUTPUT"
+            echo "rc_version=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # workflow_run listeners cannot read the parent's inputs directly,
+          # so we infer state from the release branch checkout: package.json
+          # carries the bumped RC version (committed by prepare-branch on both
+          # real and dry runs), and the npm API tells us if it was actually
+          # published. Dry runs naturally fail the visibility poll below and
+          # emit a skipped check-run.
+          VERSION=$(node -p "require('./package.json').version")
+          if [[ ! "$VERSION" =~ -rc[0-9]+$ ]]; then
+            echo "package.json version is not an RC ($VERSION); skipping."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "skip_reason=not_rc_version" >> "$GITHUB_OUTPUT"
+            echo "rc_version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "release_branch=$HEAD_BRANCH" >> "$GITHUB_OUTPUT"
+            echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # npm registry indexing can lag a few minutes after a successful
+          # publish. Poll until the RC version appears, with a hard timeout.
+          # Only emit a skipped check if it never shows up (genuine dry run /
+          # publish failure that the success-conclusion check missed).
+          MAX_WAIT_SECONDS=900
+          POLL_INTERVAL_SECONDS=30
+          ELAPSED=0
+          FOUND=false
+          while (( ELAPSED < MAX_WAIT_SECONDS )); do
+            if npm view "react-native-appsflyer@$VERSION" version 2>/dev/null | grep -Fxq "$VERSION"; then
+              echo "RC $VERSION visible on npm after ${ELAPSED}s."
+              FOUND=true
+              break
+            fi
+            echo "RC $VERSION not yet on npm (waited ${ELAPSED}s, retrying in ${POLL_INTERVAL_SECONDS}s)"
+            sleep "$POLL_INTERVAL_SECONDS"
+            ELAPSED=$(( ELAPSED + POLL_INTERVAL_SECONDS ))
+          done
+
+          if [[ "$FOUND" != "true" ]]; then
+            echo "RC $VERSION never appeared on npm within ${MAX_WAIT_SECONDS}s; emitting skipped check."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "skip_reason=not_on_npm" >> "$GITHUB_OUTPUT"
+            echo "rc_version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "release_branch=$HEAD_BRANCH" >> "$GITHUB_OUTPUT"
+            echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+          echo "skip_reason=" >> "$GITHUB_OUTPUT"
+          echo "rc_version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_branch=$HEAD_BRANCH" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+
+  # ===========================================================================
+  # iOS smoke against the published RC on npm.
+  # ===========================================================================
+  smoke-ios:
+    name: rc-smoke iOS
+    needs: resolve
+    if: needs.resolve.outputs.should_run == 'true'
+    runs-on: macos-15
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.resolve.outputs.head_sha }}
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Synthesize example_rc_smoke from demo app
+        env:
+          RC_VERSION: ${{ needs.resolve.outputs.rc_version }}
+        run: |
+          set -euo pipefail
+          rsync -a \
+            --exclude=node_modules \
+            --exclude=.env \
+            --exclude=build \
+            --exclude=ios/Pods \
+            --exclude=ios/build \
+            --exclude=android/.gradle \
+            --exclude=android/build \
+            --exclude='.metro-*' \
+            example/ example_rc_smoke/
+
+          cd example_rc_smoke
+          npm pkg set "dependencies.react-native-appsflyer=$RC_VERSION"
+          echo "Pinned react-native-appsflyer to $RC_VERSION"
+          grep "react-native-appsflyer" package.json
+
+      - name: Write .env
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: echo "$ENV_FILE" | base64 -d > example_rc_smoke/.env
+
+      - name: Select Xcode version
+        run: |
+          XCODE=$(ls /Applications | grep -E "^Xcode_[0-9]" | sort -V | tail -1)
+          sudo xcode-select -s "/Applications/$XCODE"
+          xcodebuild -version
+
+      - name: Boot iOS simulator
+        run: |
+          DEVICES_JSON=$(xcrun simctl list -j devices available)
+          UDID=$(echo "$DEVICES_JSON" | jq -r '
+            .devices
+            | to_entries
+            | map(select(.key | test("iOS-1[78]")))
+            | sort_by(.key) | reverse
+            | map(
+                . as $rt
+                | $rt.value
+                | map(select(.name | test("^iPhone 1[5-7]$")))
+                | first
+                | (if . then {udid} else empty end)
+              )
+            | first // empty
+            | .udid // empty
+          ')
+          if [[ -z "$UDID" ]]; then
+            echo "No plain iPhone 15/16/17 on iOS 17/18 found; falling back to first available iPhone."
+            UDID=$(echo "$DEVICES_JSON" | jq -r '.devices[][] | select(.name | test("^iPhone")) | .udid' | head -1)
+          fi
+          [[ -z "$UDID" ]] && { echo "::error::No iOS simulator available"; exit 1; }
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+          echo "IOS_SIMULATOR_UDID=$UDID" >> "$GITHUB_ENV"
+
+      - name: Install npm RC and CocoaPods
+        working-directory: example_rc_smoke
+        run: |
+          set -euo pipefail
+          # npm CDN propagation can lag; retry with backoff.
+          ATTEMPTS=5
+          SLEEP=30
+          for i in $(seq 1 "$ATTEMPTS"); do
+            echo "npm install attempt $i/$ATTEMPTS"
+            if npm install; then
+              echo "npm install succeeded on attempt $i"
+              break
+            fi
+            if [[ "$i" == "$ATTEMPTS" ]]; then
+              echo "npm install failed after $ATTEMPTS attempts" >&2
+              exit 1
+            fi
+            npm cache clean --force || true
+            sleep "$SLEEP"
+          done
+          cd ios && pod install
+
+      - name: Build iOS (debug)
+        working-directory: example_rc_smoke/ios
+        env:
+          FORCE_BUNDLING: "1"
+        run: |
+          xcodebuild build \
+            -workspace example.xcworkspace \
+            -scheme example \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=$IOS_SIMULATOR_UDID" \
+            -derivedDataPath build \
+            | xcpretty
+
+      - name: Run smoke (SMOKE-001/002/003)
+        run: ./scripts/af-scenario-runner.sh --platform ios --plan .af-smoke/rc-test-plan.json
+
+      - name: Upload smoke reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: rc-smoke-ios-${{ github.run_number }}
+          path: .af-smoke/reports/
+          retention-days: 30
+
+  # ===========================================================================
+  # Android smoke against the published RC on npm.
+  # ===========================================================================
+  smoke-android:
+    name: rc-smoke Android
+    needs: resolve
+    if: needs.resolve.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.resolve.outputs.head_sha }}
+          fetch-depth: 1
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Synthesize example_rc_smoke from demo app
+        env:
+          RC_VERSION: ${{ needs.resolve.outputs.rc_version }}
+        run: |
+          set -euo pipefail
+          rsync -a \
+            --exclude=node_modules \
+            --exclude=.env \
+            --exclude=build \
+            --exclude=ios/Pods \
+            --exclude=ios/build \
+            --exclude=android/.gradle \
+            --exclude=android/build \
+            --exclude='.metro-*' \
+            example/ example_rc_smoke/
+
+          cd example_rc_smoke
+          npm pkg set "dependencies.react-native-appsflyer=$RC_VERSION"
+          echo "Pinned react-native-appsflyer to $RC_VERSION"
+          grep "react-native-appsflyer" package.json
+
+      - name: Write .env
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: echo "$ENV_FILE" | base64 -d > example_rc_smoke/.env
+
+      - name: Install npm RC
+        working-directory: example_rc_smoke
+        run: |
+          set -euo pipefail
+          ATTEMPTS=5
+          SLEEP=30
+          for i in $(seq 1 "$ATTEMPTS"); do
+            echo "npm install attempt $i/$ATTEMPTS"
+            if npm install; then
+              echo "npm install succeeded on attempt $i"
+              break
+            fi
+            if [[ "$i" == "$ATTEMPTS" ]]; then
+              echo "npm install failed after $ATTEMPTS attempts" >&2
+              exit 1
+            fi
+            npm cache clean --force || true
+            sleep "$SLEEP"
+          done
+
+      - name: Build Android APK and run smoke on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 8.8.8.8,1.1.1.1
+          disable-animations: true
+          script: |
+            set -e
+            adb shell 'getprop net.dns1; getprop net.dns2' || true
+            adb shell 'nslookup oyoxfj.conversions.appsflyersdk.com 2>&1 | head -5' || { sleep 10; adb shell 'nslookup oyoxfj.conversions.appsflyersdk.com 2>&1 | head -5'; } || { echo "::error::Emulator DNS cannot resolve AppsFlyer hosts"; exit 1; }
+            cd example_rc_smoke/android && cp ../../example/android/gradlew . && cd ../..
+            cd example_rc_smoke && npx react-native build-android --mode=debug && cd ..
+            ./scripts/af-scenario-runner.sh --platform android --plan .af-smoke/rc-test-plan.json
+
+      - name: Upload smoke reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: rc-smoke-android-${{ github.run_number }}
+          path: .af-smoke/reports/
+          retention-days: 30
+
+  # ===========================================================================
+  # Post the rc-smoke/npm check-run on the release branch head SHA. This is
+  # the gate promote-release.yml verifies before stripping -rcN.
+  # ===========================================================================
+  post-check-run:
+    name: Post rc-smoke/npm check-run
+    needs: [resolve, smoke-ios, smoke-android]
+    if: always() && needs.resolve.outputs.should_run == 'true' && needs.resolve.outputs.head_sha != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post check-run
+        uses: actions/github-script@v7
+        env:
+          HEAD_SHA: ${{ needs.resolve.outputs.head_sha }}
+          RC_VERSION: ${{ needs.resolve.outputs.rc_version }}
+          IOS_RESULT: ${{ needs.smoke-ios.result }}
+          ANDROID_RESULT: ${{ needs.smoke-android.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const { HEAD_SHA, RC_VERSION, IOS_RESULT, ANDROID_RESULT, RUN_URL } = process.env;
+            const bothGreen = IOS_RESULT === 'success' && ANDROID_RESULT === 'success';
+            const conclusion = bothGreen ? 'success' : 'failure';
+            const summary = `rc-smoke on npm RC \`${RC_VERSION}\`\n\n` +
+              `- iOS:     **${IOS_RESULT}**\n` +
+              `- Android: **${ANDROID_RESULT}**\n\n` +
+              `Reports: ${RUN_URL}`;
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'rc-smoke/npm',
+              head_sha: HEAD_SHA,
+              status: 'completed',
+              conclusion,
+              details_url: RUN_URL,
+              output: {
+                title: bothGreen ? 'rc-smoke PASS' : 'rc-smoke FAIL',
+                summary
+              }
+            });
+
+  # ===========================================================================
+  # Notify Slack on a real smoke failure.
+  # ===========================================================================
+  notify-failure:
+    name: Notify Smoke Failure
+    needs: [resolve, smoke-ios, smoke-android]
+    if: >-
+      always() &&
+      needs.resolve.outputs.should_run == 'true' &&
+      (needs.smoke-ios.result == 'failure' || needs.smoke-android.result == 'failure' ||
+       needs.smoke-ios.result == 'cancelled' || needs.smoke-android.result == 'cancelled')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack failure notification
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "<!here>\n:warning: *React Native rc-smoke failed for `${{ needs.resolve.outputs.rc_version }}`*\n\nThe RC is published on npm but smoke checks did not pass on the artifact. Production promotion is blocked.\n\n*Smoke results:*\n- iOS: ${{ needs.smoke-ios.result }}\n- Android: ${{ needs.smoke-android.result }}\n\n*Branch:* ${{ needs.resolve.outputs.release_branch }}\n*Run:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n*Next step:* Bump to `rcN+1` and rerun the RC-release workflow with `dry_run=false`. Republishing the same RC version is not supported by npm."
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_HOOK }}
+
+  # ===========================================================================
+  # Post a skipped check-run when the parent run was dry, the version is not
+  # on npm, or the parent did not succeed.
+  # ===========================================================================
+  post-skipped-check:
+    name: Post rc-smoke/npm (skipped)
+    needs: [resolve]
+    if: needs.resolve.outputs.should_run == 'false' && needs.resolve.outputs.head_sha != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post skipped check-run
+        uses: actions/github-script@v7
+        env:
+          HEAD_SHA: ${{ needs.resolve.outputs.head_sha }}
+          SKIP_REASON: ${{ needs.resolve.outputs.skip_reason }}
+          RC_VERSION: ${{ needs.resolve.outputs.rc_version }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const { HEAD_SHA, SKIP_REASON, RC_VERSION, RUN_URL } = process.env;
+            const reasonLabels = {
+              parent_not_success: 'Parent RC-release run did not succeed',
+              not_rc_version: 'Head branch version is not an RC',
+              not_on_npm: 'RC not yet on npm (dry run or indexing delay)'
+            };
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'rc-smoke/npm',
+              head_sha: HEAD_SHA,
+              status: 'completed',
+              conclusion: 'skipped',
+              details_url: RUN_URL,
+              output: {
+                title: 'rc-smoke skipped',
+                summary: `Skipped: ${reasonLabels[SKIP_REASON] || SKIP_REASON}\n\n` +
+                  `Version: \`${RC_VERSION || '(unknown)'}\`\n\n` +
+                  `Run: ${RUN_URL}\n\n` +
+                  `promote-release.yml does not accept \`skipped\` as a green gate; if this was a dry run, start a new RC-release with \`dry_run=false\` to publish and re-smoke.`
+              }
+            });

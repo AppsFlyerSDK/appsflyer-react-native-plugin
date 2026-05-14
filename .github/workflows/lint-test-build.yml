@@ -1,0 +1,125 @@
+# =============================================================================
+# Lint, Test & Build - PR/push gate and reusable validation workflow
+# =============================================================================
+#
+# Purpose: Validates code quality, runs unit tests, and builds the demo app
+# in release mode for both Android and iOS on every PR and push to
+# development/master. Also reusable from rc-release.yml.
+#
+# What it does:
+# 1. Lints + runs Jest unit tests with coverage.
+# 2. Builds Android demo app (release APK).
+# 3. Builds iOS demo app (no-codesign release build).
+#
+# Triggers:
+# - Pull requests to development or master branches
+# - Direct pushes to development or master branches
+# - Manual workflow dispatch for testing
+# - workflow_call (rc-release.yml)
+#
+# =============================================================================
+
+name: Lint, Test & Build
+
+on:
+  pull_request:
+    branches: [development, master]
+    paths-ignore: ['**.md', 'Docs/**', 'demos/**']
+  push:
+    branches: [development, master]
+    paths-ignore: ['**.md', 'Docs/**', 'demos/**']
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      skip_unit:
+        description: 'Skip unit tests and linting'
+        required: false
+        type: boolean
+        default: false
+      skip_builds:
+        description: 'Skip Android + iOS release builds'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.run_id }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Jest + ESLint
+    runs-on: ubuntu-latest
+    if: ${{ inputs.skip_unit != true }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+      - run: npm run lint
+      - run: npm test -- --coverage
+
+  build-android:
+    name: Build Android (release)
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ (needs.test.result == 'success' || needs.test.result == 'skipped') && inputs.skip_builds != true }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+      - name: Install example app dependencies
+        working-directory: example
+        run: npm install
+      - name: Build Android release APK
+        working-directory: example/android
+        run: ./gradlew assembleRelease
+
+  build-ios:
+    name: Build iOS (release)
+    runs-on: macos-15
+    needs: test
+    if: ${{ (needs.test.result == 'success' || needs.test.result == 'skipped') && inputs.skip_builds != true }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install example app dependencies
+        working-directory: example
+        run: npm install
+      - name: Install CocoaPods
+        working-directory: example/ios
+        run: pod install
+      - name: Build iOS (no codesign)
+        working-directory: example/ios
+        run: |
+          xcodebuild build \
+            -workspace example.xcworkspace \
+            -scheme example \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_IDENTITY='' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+            | xcpretty
+
+  ci-summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [test, build-android, build-ios]
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          for result in "${{ needs.test.result }}" "${{ needs.build-android.result }}" "${{ needs.build-ios.result }}"; do
+            if [[ "$result" != "success" && "$result" != "skipped" ]]; then
+              echo "CI failed"; exit 1
+            fi
+          done
+          echo "CI passed"
