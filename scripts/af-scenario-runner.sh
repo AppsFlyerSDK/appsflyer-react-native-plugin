@@ -457,7 +457,11 @@ platform_peek_qa_log() {
     cat "$qa_log" 2>/dev/null || true
     return 0
   fi
-  xcrun simctl spawn "$IOS_UDID" log show --last 2m --predicate "messageType == default || messageType == info || messageType == debug" 2>/dev/null \
+  local peek_predicate="messageType == default || messageType == info || messageType == debug"
+  if [[ -n "$IOS_LAST_PID" ]]; then
+    peek_predicate="(processIdentifier == $IOS_LAST_PID) && ($peek_predicate)"
+  fi
+  xcrun simctl spawn "$IOS_UDID" log show --last 2m --predicate "$peek_predicate" 2>/dev/null \
     | grep -F "$LOG_TAG" 2>/dev/null || true
 }
 
@@ -767,6 +771,14 @@ run_phase() {
       fi
       if ! run_phase_command "Deep link trigger" "$trigger_cmd" false; then
         log_warn "Deep link trigger failed; continuing to collect logs and run checks"
+      fi
+      if [[ "$PLATFORM" == "ios" && "$trigger_cmd" == *"simctl launch"* && -n "$LAST_CMD_OUTPUT" ]]; then
+        local new_pid
+        new_pid=$(echo "$LAST_CMD_OUTPUT" | awk -F': ' '/^'"$PACKAGE_NAME"': [0-9]+$/ {print $2}' | tail -1)
+        if [[ -n "$new_pid" ]]; then
+          IOS_LAST_PID="$new_pid"
+          log_debug "Trigger updated PID: $IOS_LAST_PID"
+        fi
       fi
     else
       if ! platform_trigger_deeplink "$deep_link_url"; then
