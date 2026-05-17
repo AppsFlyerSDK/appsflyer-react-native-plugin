@@ -4,7 +4,7 @@
 #
 # Purpose: Validates code quality, runs unit tests, and builds the demo app
 # in release mode for both Android and iOS on every PR and push to
-# development/master. Also reusable from rc-release.yml.
+# development/master. Also reusable from release.yml.
 #
 # What it does:
 # 1. Lints + runs Jest unit tests with coverage.
@@ -15,7 +15,7 @@
 # - Pull requests to development or master branches
 # - Direct pushes to development or master branches
 # - Manual workflow dispatch for testing
-# - workflow_call (rc-release.yml)
+# - workflow_call (release.yml)
 #
 # =============================================================================
 

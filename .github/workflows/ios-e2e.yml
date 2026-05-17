@@ -9,7 +9,7 @@
 # the unified scripts/af-scenario-runner.sh on an iOS simulator.
 #
 # Triggers:
-#   - workflow_call from rc-release.yml (the gate before publish-rc)
+#   - workflow_call from release.yml (the gate before publish-to-npm)
 #   - workflow_dispatch for manual reruns and ad-hoc validation
 #   - Weekly cron (Sunday 02:00 UTC) to catch SDK / RN drift
 #

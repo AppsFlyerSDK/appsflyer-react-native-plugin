@@ -12,9 +12,9 @@ Step-by-step guide for cutting, validating, and shipping a React Native plugin r
 ## Workflow overview
 
 ```
-rc-release.yml ─── lint-test-build.yml ───┐
-                   ios-e2e.yml ───────────┤
-                   android-e2e.yml ───────┤
+release.yml (RC) ── lint-test-build.yml ───┐
+                    ios-e2e.yml ──────────┤
+                    android-e2e.yml ──────┤
                                           ▼
                                     publish RC to npm
                                     create pre-release + PR
@@ -28,20 +28,21 @@ rc-release.yml ─── lint-test-build.yml ───┐
                                           │
                               Human merges PR to master
                                           │
-                                    production-release.yml
+                                    release.yml (production)
                                     (publishes to npm @latest)
 ```
 
 ## 1. Cut a release candidate
 
-1. Go to **Actions** > **RC - Release Candidate** > **Run workflow**.
+1. Go to **Actions** > **Release** > **Run workflow**. Select `release_type: rc`.
 2. Fill in the required inputs:
 
 | Input | Required | Example | Description |
 |-------|----------|---------|-------------|
-| `rn_version` | Yes | `6.18.0-rc1` | Plugin version. Must match `X.Y.Z-rcN` format. |
-| `ios_sdk_version` | Yes | `6.18.0` | iOS native AppsFlyer SDK version to pin. |
-| `android_sdk_version` | Yes | `6.18.0` | Android native AppsFlyer SDK version to pin. |
+| `release_type` | Yes | `rc` | Release type (`rc` or `production`). |
+| `rn_version` | Yes | `6.18.0-rc1` | Plugin version. Must match `X.Y.Z-rcN` format for RC. |
+| `ios_sdk_version` | No | `6.18.0` | iOS native AppsFlyer SDK version to pin — RC only. |
+| `android_sdk_version` | No | `6.18.0` | Android native AppsFlyer SDK version to pin — RC only. |
 | `base_branch` | No | `development` | Branch to cut the release from (default: `development`). |
 | `pc_version` | No | `6.15.2` | PurchaseConnector iOS version override. Leave empty to auto-fetch latest from GitHub. |
 | `skip_unit` | No | `false` | Skip Jest + ESLint inside Lint, Test & Build. |
@@ -95,7 +96,7 @@ When the `pass QA ready for deploy` label is applied:
 
 When the PR merges to master:
 
-1. `production-release.yml` triggers automatically.
+1. `release.yml` triggers automatically (production path).
 2. It publishes to npm with the `latest` tag.
 3. Creates a GitHub release (not pre-release).
 4. Notifies Slack.
@@ -148,12 +149,12 @@ Check `.af-e2e/reports` artifacts in the workflow run. E2E failures block npm pu
 - Re-run the failed E2E job from the Actions UI, or
 - Cut a new RC if code changes are needed.
 
-### production-release.yml did not trigger after merge
+### release.yml (production) did not trigger after merge
 
 The workflow triggers on `pull_request: closed` to `master` from `releases/*` branches. If it didn't fire:
 - Verify the PR was merged (not just closed).
 - Verify the source branch matched `releases/*`.
-- Use the manual dispatch: Actions > Production Release > Run workflow, enter the version.
+- Use the manual dispatch: Actions > Release > Run workflow, select `production` type, enter the version.
 
 ## Version files reference
 

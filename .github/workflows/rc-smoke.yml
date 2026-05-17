@@ -4,7 +4,7 @@
 #
 # Stage: RC-SMOKE in the RC pipeline.
 #
-# Fires automatically after rc-release.yml ("RC - Release Candidate") completes
+# Fires automatically after release.yml ("Release" RC path) completes
 # with conclusion: success. Synthesizes example_rc_smoke/ from the demo app
 # with react-native-appsflyer pinned to the RC version from npm, runs
 # SMOKE-001/002/003 via af-scenario-runner.sh on both platforms, and posts a
@@ -22,7 +22,7 @@ name: RC Smoke - npm artifact
 
 on:
   workflow_run:
-    workflows: ["RC - Release Candidate"]
+    workflows: ["Release"]
     types: [completed]
   workflow_dispatch:
     inputs:

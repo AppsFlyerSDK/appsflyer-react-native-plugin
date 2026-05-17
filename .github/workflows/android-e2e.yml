@@ -10,7 +10,7 @@
 # reactivecircus/android-emulator-runner (KVM on ubuntu-latest).
 #
 # Triggers:
-#   - workflow_call from rc-release.yml (the gate before publish-rc)
+#   - workflow_call from release.yml (the gate before publish-to-npm)
 #   - workflow_dispatch for manual reruns
 #   - Weekly cron (Sunday 03:00 UTC) to catch SDK / RN drift
 #
