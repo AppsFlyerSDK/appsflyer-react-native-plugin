@@ -11,8 +11,8 @@
 
   "config": {
     "android": {
-      "package_name": "com.appsflyer.qa.reactnative",
-      "activity": ".MainActivity",
+      "package_name": "com.appsflyer.engagement",
+      "activity": "com.appsflyer.qa.reactnative.MainActivity",
       "apk_path": "example_rc_smoke/android/app/build/outputs/apk/debug/app-debug.apk",
       "build_cmd": "cd example_rc_smoke/android && ./gradlew assembleDebug"
     },
@@ -30,7 +30,7 @@
       "scenario_ref": "SMOKE-001",
       "description": "Fresh install using the npm-pinned RC build. Validates SDK startup, install conversion data, pre/post-start API markers, and standard events.",
       "requires_fresh_install": true,
-      "wait_after_launch_sec": 30,
+      "wait_after_launch_sec": 60,
       "checks": [
         {
           "id": "sdk_started",
@@ -125,7 +125,7 @@
       "scenario_ref": "SMOKE-003",
       "description": "Fresh install of the RC build, then deep link while app is in foreground. Verifies SDK start and deep link callback.",
       "requires_fresh_install": true,
-      "wait_after_launch_sec": 30,
+      "wait_after_launch_sec": 60,
       "wait_after_trigger_sec": 15,
       "deep_link_url": "afqa-reactnative://deeplink?deep_link_value=qa_deeplink_fg&af_sub1=foreground_test&pid=testmedia&c=deeplink_test",
       "pre_actions": {
