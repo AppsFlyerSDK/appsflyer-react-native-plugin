@@ -17,6 +17,7 @@ To do so, please follow [this article](https://support.appsflyer.com/hc/en-us/ar
 - Minimum tested with React-Native **v0.62.0** (older versions might be supported)
 
 ## <a id="release-updates"> Release Updates
+- Starting with version `6.18.0`, Android Purchase Connector: Updated to purchase-connector:2.2.0 with Billing Library 8 support, apps using Billing Library 7 APIs directly must migrate
 
 - Starting with version `6.17.1` the plugin supports the Purchase Connector for validating and measuring Subscription and In-app purchase events. Integration guide can be found [here](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/blob/master/Docs/RN_PurchaseConnector.md).
 
