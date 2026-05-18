@@ -4,7 +4,7 @@
 ### Changes
 - Android SDK 6.18.0
 - iOS SDK 6.18.0
-- TODO: Add specific changes before merging
+- Android Purchase connector to v2.2.0 supporting only Billing Library 8
 
 ## 6.17.9
  Release date: *2026-03-31*
