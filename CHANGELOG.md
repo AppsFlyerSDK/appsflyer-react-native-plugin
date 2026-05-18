@@ -1,3 +1,11 @@
+## 6.18.0-rc3
+ Release date: *2026-05-18*
+
+### Changes
+- Android SDK 6.18.0
+- iOS SDK 6.18.0
+- TODO: Add specific changes before merging
+
 ## 6.17.9
  Release date: *2026-03-31*
 
