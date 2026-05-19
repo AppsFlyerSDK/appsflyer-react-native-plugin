@@ -882,6 +882,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [determine-release-type, validate-production, publish-to-npm]
     if: >-
+      !cancelled() &&
       needs.determine-release-type.outputs.release_type == 'production' &&
       needs.publish-to-npm.result == 'success' &&
       needs.validate-production.outputs.is_dry_run != 'true'
