@@ -52,16 +52,41 @@ function withCustomAndroidManifest(config, { preferAppsFlyerBackupRules = false 
 
     // preferAppsFlyerBackupRules === true
     if (hasDataExtractionRules || hasFullBackupContent) {
-      // Remove conflicting attributes from app's manifest
+      // Remove conflicting attributes from app's manifest.
       // This allows AppsFlyer SDK's built-in backup rules to be used instead.
+      const removedKeys = [];
+
       if (hasDataExtractionRules) {
         delete appAttrs['android:dataExtractionRules'];
+        removedKeys.push('android:dataExtractionRules');
         console.log('[AppsFlyerPlugin] Removed android:dataExtractionRules to use AppsFlyer SDK rules');
       }
 
       if (hasFullBackupContent) {
         delete appAttrs['android:fullBackupContent'];
+        removedKeys.push('android:fullBackupContent');
         console.log('[AppsFlyerPlugin] Removed android:fullBackupContent to use AppsFlyer SDK rules');
+      }
+
+      // Clean removed attribute names from any existing tools:replace to avoid stale replace
+      // directives. Other plugins (e.g. expo-secure-store) may have already added these keys
+      // to tools:replace; leaving them after the attributes are deleted causes a manifest merge
+      // failure: "Multiple entries with same key: <attr>=REPLACE".
+      if (appAttrs['tools:replace']) {
+        const existingReplaceEntries = appAttrs['tools:replace']
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+        const filtered = existingReplaceEntries.filter((s) => !removedKeys.includes(s));
+
+        if (filtered.length !== existingReplaceEntries.length) {
+          if (filtered.length > 0) {
+            appAttrs['tools:replace'] = filtered.join(', ');
+          } else {
+            delete appAttrs['tools:replace'];
+          }
+          console.log('[AppsFlyerPlugin] Cleaned stale tools:replace entries for removed backup attributes');
+        }
       }
     }
 
