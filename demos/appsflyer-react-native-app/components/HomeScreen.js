@@ -1,13 +1,12 @@
 /* @flow weak */
 import { NativeEventEmitter, NativeModules } from "react-native";
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
   Image,
   StyleSheet,
-  ScrollView,
-  SafeAreaView,
+  FlatList,
   Alert,
 } from 'react-native';
 import {Card, ListItem, Button, FAB, Badge} from 'react-native-elements';
@@ -27,73 +26,106 @@ import {
 import Product from './Product.js';
 import WelcomeModal from './WelcomeModal.js';
 
+// Static product catalog — hoisted to module scope so it isn't rebuilt on every
+// render.
+const products = [
+  {
+    name: 'Water melon',
+    image: 'https://images.unsplash.com/photo-1652031552021-50bcc01121a7',
+    price: 15,
+    info: 'Summer vibes!',
+  },
+  {
+    name: 'Strawberry',
+    image: 'https://images.unsplash.com/photo-1594282241894-4da286138f44',
+    price: 11,
+    info: 'Strawberry Fields Forever!',
+  },
+  {
+    name: 'Peach',
+    image: 'https://images.unsplash.com/photo-1532704868953-d85f24176d73',
+    price: 12,
+    info: 'Be a peach!',
+  },
+    {
+    name: 'Banana',
+    image: 'https://images.unsplash.com/photo-1481349518771-20055b2a7b24',
+    price: 10,
+    info: 'Go bananas!',
+  },
+  {
+    name: 'Melon',
+    image: 'https://images.unsplash.com/photo-1638865553538-2434be4c62bd',
+    price: 13,
+    info: 'Summer vibes!',
+  },
+  {
+    name: 'Apple',
+    image: 'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb',
+    price: 14,
+    info: '1 apple a day keeps the doctor away! :)',
+  },
+
+];
+
+const getProductByName = productName => {
+  for (let i = 0; i < products.length; i++) {
+    if (products[i].name == productName) {
+      return products[i];
+    }
+  }
+};
+
+const productKeyExtractor = item => item.name;
+
 const HomeScreen = ({navigation}) => {
-  const products = [
-    {
-      name: 'Banana',
-      image:
-        'https://cdn.mos.cms.futurecdn.net/42E9as7NaTaAi4A6JcuFwG-1200-80.jpg',
-      price: 10,
-      info: 'Go bananas!',
-    },
-    {
-      name: 'Strawberry',
-      image: 'https://images.unsplash.com/photo-1467825487722-2a7c4cd62e75',
-      price: 11,
-      info: 'Strawberry Fields Forever!',
-    },
-    {
-      name: 'Peach',
-      image: 'https://images.unsplash.com/photo-1532704868953-d85f24176d73',
-      price: 12,
-      info: 'Be a peach!',
-    },
-    {
-      name: 'Melon',
-      image: 'https://images.unsplash.com/photo-1571575173700-afb9492e6a50',
-      price: 13,
-      info: 'Summer vibes!',
-    },
-    {
-      name: 'Apple',
-      image: 'https://images.unsplash.com/photo-1601236007883-e8c3079bebe0',
-      price: 14,
-      info: '1 apple a day keeps the doctor away! :)',
-    },
-    {
-      name: 'Water melon',
-      image: 'https://images.unsplash.com/photo-1582281298055-e25b84a30b0b',
-      price: 15,
-      info: 'Summer vibes!',
-    },
-  ];
   let AFGCDListener = null;
   let AFUDLListener = null;
   const [cartSize, setCartSize] = useState(0);
   const [itemsInCart, setItemsInCart] = useState([]);
   const [isFirstLaunch, setIsFirstLaunch] = useState(false);
 
-  const goToProductScreen = (product, addToCart) => {
-    AFLogEvent(AF_clickOnItem, product);
-    navigation.navigate('Item', {
-      product: product,
-      addToCart: addToCart,
-    });
-  };
+  const goToProductScreen = useCallback(
+    (product, addToCart) => {
+      AFLogEvent(AF_clickOnItem, product);
+      navigation.navigate('Item', {
+        product: product,
+        addToCart: addToCart,
+      });
+    },
+    [navigation],
+  );
 
-  const addProductToCart = product => {
+  const addProductToCart = useCallback(product => {
     AFLogEvent(AF_addedToCart, product);
-    setItemsInCart(prev => [...prev, product]);
-  };
+    // Tag each cart line with a unique id so list keys stay stable even when the
+    // same product is added more than once.
+    setItemsInCart(prev => [
+      ...prev,
+      {...product, cartId: `${product.name}-${prev.length}-${Date.now()}`},
+    ]);
+  }, []);
+
+  const renderProduct = useCallback(
+    ({item}) => (
+      <Product
+        product={item}
+        goToProductScreen={goToProductScreen}
+        addToCart={addProductToCart}
+      />
+    ),
+    [goToProductScreen, addProductToCart],
+  );
 
   const removeProductFromCart = product => {
-    let tempList = [...itemsInCart];
-    let index = tempList.indexOf(product);
-    if (index !== -1) {
-      AFLogEvent(AF_removedFromCart, product);
-      tempList.splice(index, 1);
-      setItemsInCart(tempList);
-    }
+    AFLogEvent(AF_removedFromCart, product);
+    // Remove every cart line matching this product (same name + price), so
+    // deleting a grouped row clears the whole quantity.
+    setItemsInCart(prev =>
+      prev.filter(
+        p => !(p.name === product.name && p.price === product.price),
+      ),
+    );
   };
 
   const goToCart = (productList, removeProductFromCart, checkout) => {
@@ -106,14 +138,6 @@ const HomeScreen = ({navigation}) => {
       removeProductFromCart: removeProductFromCart,
       checkout: checkout,
     });
-  };
-
-  const getProductByName = productName => {
-    for (let i = 0; i < products.length; i++) {
-      if (products[i].name == productName) {
-        return products[i];
-      }
-    }
   };
 
   const calculateTotalRevenue = () => {
@@ -238,18 +262,12 @@ const HomeScreen = ({navigation}) => {
         isFirstLaunch={isFirstLaunch}
         dismissOverlay={() => setIsFirstLaunch(false)}
       />
-      <ScrollView>
-        {products.map((product, index) => {
-          return (
-            <Product
-              key={index}
-              product={product}
-              goToProductScreen={goToProductScreen}
-              addToCart={addProductToCart}
-            />
-          );
-        })}
-      </ScrollView>
+      <FlatList
+        data={products}
+        keyExtractor={productKeyExtractor}
+        renderItem={renderProduct}
+        contentContainerStyle={styles.listContent}
+      />
       <View style={styles.fab}>
         <FAB
           title="Your Cart"
@@ -273,7 +291,13 @@ const HomeScreen = ({navigation}) => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    flex: 1,
+  },
+  // Clear the floating "Your Cart" FAB so the last card isn't hidden under it.
+  listContent: {
+    paddingBottom: 100,
+  },
   fab: {
     position: 'absolute',
     right: 0,
