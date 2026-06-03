@@ -1,0 +1,32 @@
+{
+  "$schema": "https://www.react.doctor/schema.json",
+  "rules": {
+    "react-doctor/no-this-in-sfc": "off",
+    "react-doctor/rn-no-metro-babel-preset": "warn"
+  },
+  "ignore": {
+    "overrides": [
+      {
+        "files": ["app.plugin.js", "expo/**"],
+        "rules": ["deslop/unused-file"]
+      },
+      {
+        "files": ["package.json"],
+        "rules": ["deslop/unused-dev-dependency"]
+      },
+      {
+        "files": ["demos/appsflyer-react-native-app/components/HomeScreen.js"],
+        "rules": ["react-doctor/jsx-pascal-case", "react-doctor/exhaustive-deps"]
+      },
+      {
+        "files": ["demos/appsflyer-react-native-app/components/Confetti.js"],
+        "rules": ["react-doctor/rn-prefer-reanimated"]
+      }
+    ]
+  },
+  "surfaces": {
+    "score": {
+      "excludeRules": ["react-doctor/rn-no-metro-babel-preset"]
+    }
+  }
+}

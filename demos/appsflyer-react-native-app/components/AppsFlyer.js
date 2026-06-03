@@ -4,6 +4,7 @@ import appsFlyer, {
   MEDIATION_NETWORK,
 } from 'react-native-appsflyer';
 import {Platform} from 'react-native';
+import {DEV_KEY, APP_ID} from '@env';
 
 // events
 export const AF_viewCart = 'af_view_cart';
@@ -14,11 +15,11 @@ export const AF_clickOnItem = 'af_click_on_item';
 
 const initOptions = {
   isDebug: true,
-  devKey: 'Us4GmXxXx46Qed',
+  devKey: DEV_KEY,
   onInstallConversionDataListener: true,
   timeToWaitForATTUserAuthorization: 10,
   onDeepLinkListener: true,
-  appId: '741993747',
+  appId: APP_ID,
 };
 
 // AppsFlyer initialization flow. ends with initSdk.
@@ -27,10 +28,12 @@ export function AFInit() {
     appsFlyer.setCurrentDeviceLanguage('EN');
   }
   //appsFlyer.setAppInviteOneLinkID('oW4R');
-  appsFlyer.initSdk(initOptions, 
+  appsFlyer.initSdk(initOptions,
     (success) => {
       console.log("init SDK success", success);
-    }, 
+      // Demonstrate logAdRevenue once after init — not on every in-app event.
+      AFLogAdRevenue();
+    },
     (error) =>{
       console.log("init SDK failed", error);
   });
@@ -38,7 +41,7 @@ export function AFInit() {
 
 // AppsFlyer Purchase Connector initialization flow
 export function PCInit() {
-  const purchaseConnectorConfig: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
+  const purchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
     logSubscriptions: true,
     logInApps: true,
     sandbox: true,
@@ -58,10 +61,9 @@ export function AFLogEvent(name, values) {
   (err) => {
     console.log(err);
   });
-  AFLogAdRevenue();
 }
 
-export function AFLogAdRevenue() {
+function AFLogAdRevenue() {
   const adRevenueData = {
     monetizationNetwork: 'AF-AdNetwork',
     mediationNetwork: MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK,
