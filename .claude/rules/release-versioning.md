@@ -77,12 +77,16 @@ Pre-6.x: tags use `v` prefix (`v1.2.0` through `v5.4.40`). The 6.x series has no
 
 ## 8. Native SDK dependency update
 
+The iOS native-SDK pin lives in the podspec constants block, not in scattered literals. `react-native-appsflyer.podspec` defines `APPSFLYER_IOS_SDK_VERSION` and `APPSFLYER_PURCHASE_CONNECTOR_VERSION` at the top. Both the CocoaPods `s.dependency` lines and the SPM `spm_dependency` calls consume these constants, so a single edit keeps both resolution paths aligned by construction. Update the constant — never the inline version strings. The pod pin and the SPM pin must stay identical for each dependency. Verify with `ruby scripts/spm/verify_podspec_spm_parity.rb` (manual check — not wired into CI while the SPM path is early-adopter/opt-in).
+
 When updating the native SDK version:
-1. Update `react-native-appsflyer.podspec` dependency version
+1. Update `APPSFLYER_IOS_SDK_VERSION` / `APPSFLYER_PURCHASE_CONNECTOR_VERSION` in `react-native-appsflyer.podspec` (single source of truth for both the pod and SPM paths)
 2. Update `android/build.gradle` dependency version
 3. Test that all existing bridge methods still compile against new headers
 4. Check CHANGELOG of native SDK for breaking changes that affect the bridge
 5. If native SDK added new APIs, decide whether to bridge them (minor bump if yes)
+
+A native-SDK pin change is independent of the plugin-version 4-file surface (§1) — bumping the SDK constant does not touch `package.json`, `s.version`, `kAppsFlyerPluginVersion`, or `PLUGIN_VERSION`.
 
 ## 9. Release checklist
 

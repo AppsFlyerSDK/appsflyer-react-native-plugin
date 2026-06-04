@@ -39,6 +39,10 @@ Bump the plugin version to `$ARGUMENTS` across all 4 files that must stay in syn
    Tests: passed/failed
    ```
 
+### Note — native SDK pins are separate
+
+This command bumps the **plugin** version across the 4 surface files only. A **native-SDK** pin change is a different operation: it updates the podspec constants block (`APPSFLYER_IOS_SDK_VERSION` / `APPSFLYER_PURCHASE_CONNECTOR_VERSION`), which feeds both the CocoaPods `s.dependency` lines and the SPM `spm_dependency` calls. It does not touch the atomic-4 plugin-version files. See `.claude/rules/release-versioning.md` §8.
+
 ### Fail-closed guardrail
 
 If any file cannot be read, or the version pattern is not found in any file, STOP and report which file failed. Do NOT partially update — all 4 files must be updated atomically or none.
