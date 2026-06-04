@@ -172,3 +172,8 @@ In v6.8.0 of the AppsFlyer SDK, we added the normal permission com.google.androi
 to allow the SDK to collect the Android Advertising ID on apps targeting API 33.
 If your app is targeting children, you need to revoke this permission to comply with Google's Data policy.
 You can read more about it [here](https://dev.appsflyer.com/hc/docs/install-android-sdk#the-ad_id-permission).
+
+## Experimental: resolve the native iOS SDK via Swift Package Manager (early adopter)
+CocoaPods is the supported default. For early adopters who want the native AppsFlyer iOS SDK resolved through **Swift Package Manager** instead, the plugin offers an **opt-in** path — it requires React Native 0.75+ and dynamic frameworks, and is not recommended for production yet.
+
+See **[Native AppsFlyer iOS SDK via SPM](/Docs/early-adopter/RN_NativeSDK_SPM.md)** for setup, requirements, and limitations.
