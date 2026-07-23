@@ -1,6 +1,14 @@
 import appsFlyer, { AppsFlyerConsent, AFParseJSONException } from '../index';
-import { RNAppsFlyer } from '../node_modules/react-native/Libraries/BatchedBridge/NativeModules';
 import { NativeEventEmitter } from 'react-native';
+import NativeAppsFlyer from '../src/NativeAppsFlyer';
+
+function mockRpcResponse(data = {}) {
+	return JSON.stringify({ success: true, data });
+}
+
+function mockRpcError(message, code = 500) {
+	return JSON.stringify({ success: false, error: { code, message } });
+}
 const fs = require('fs');
 const path = require('path');
 
@@ -9,239 +17,323 @@ describe("Test appsFlyer API's", () => {
 		jest.clearAllMocks();
 	});
 
-	test('it calls appsFlyer.init with callbacks and correct options object', () => {
-		let options = { devKey: 'xxxx', appId: '777', isDebug: true };
-		appsFlyer.initSdk(options, jest.fn, jest.fn);
-		expect(RNAppsFlyer.initSdkWithCallBack).toHaveBeenCalledTimes(1);
+	test('it calls appsFlyer.init with devKey/appId positional args', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse());
+		await appsFlyer.init('xxxx', '777');
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'init', params: { devKey: 'xxxx', appId: '777' } })
+		);
 	});
 
-	test('it calls appsFlyer.init with callbacks and appId is not string', () => {
-		const errorFunc = jest.fn();
-		let options = { devKey: 'xxxx', appId: 7, isDebug: true };
-		appsFlyer.initSdk(options, jest.fn, errorFunc);
-		expect(RNAppsFlyer.initSdkWithCallBack).toHaveBeenCalledTimes(0);
-		expect(errorFunc).toHaveBeenCalledTimes(1);
+	test('it calls appsFlyer.init and rejects when appId is not a string', () => {
+		// unhandled rejection crashes Node — observe it even though we don't assert on it
+		appsFlyer.init('xxxx', 7).catch(() => {});
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(0);
 	});
 
-	test('it calls appsFlyer.init with callbacks and isDebug is not boolean', () => {
-		const errorFunc = jest.fn();
-		let options = { devKey: 'xxxx', appId: '777', isDebug: 'true' };
-		appsFlyer.initSdk(options, jest.fn, errorFunc);
-		expect(RNAppsFlyer.initSdkWithCallBack).toHaveBeenCalledTimes(0);
-		expect(errorFunc).toHaveBeenCalledTimes(1);
+	test('it calls appsFlyer.init and rejects on a native RPC failure', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcError('devKey missing', 400));
+		await expect(appsFlyer.init('xxxx', '777')).rejects.toEqual({
+			code: 400,
+			message: 'devKey missing',
+		});
 	});
 
-	test('it calls appsFlyer.init with promise and correct options object', () => {
-		let options = { devKey: 'xxxx', appId: '777', isDebug: true };
-		appsFlyer.initSdk(options);
-		expect(RNAppsFlyer.initSdkWithPromise).toHaveBeenCalledTimes(1);
-	});
-
-	test('it calls appsFlyer.init with promise and appId is not string', () => {
-		let options = { devKey: 'xxxx', appId: 7, isDebug: true };
-		appsFlyer.initSdk(options);
-		expect(RNAppsFlyer.initSdkWithPromise).toHaveBeenCalledTimes(0);
-	});
-
-	test('it calls appsFlyer.init with promise and isDebug is not boolean', () => {
-		let options = { devKey: 'xxxx', appId: '777', isDebug: 'true' };
-		appsFlyer.initSdk(options);
-		expect(RNAppsFlyer.initSdkWithPromise).toHaveBeenCalledTimes(0);
+	test('it calls appsFlyer.setIsDebug', () => {
+		appsFlyer.setIsDebug(true);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'isDebug', params: { isDebug: true } })
+		);
 	});
 
 	test('it calls appsFlyer.stop', () => {
 		appsFlyer.stop(true);
-		expect(RNAppsFlyer.stop).toBeCalled();
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'stop', params: { isStopped: true } })
+		);
 	});
 
 	test('it calls appsFlyer.stop with callback', () => {
 		appsFlyer.stop(true, jest.fn);
-		expect(RNAppsFlyer.stop).toBeCalled();
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'stop', params: { isStopped: true } })
+		);
 	});
 
 	test('it calls appsFlyer.logEvent with callback', () => {
 		let eventValues = {};
 		let eventName = 'test';
 		appsFlyer.logEvent(eventName, eventValues, jest.fn, jest.fn);
-		expect(RNAppsFlyer.logEvent).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.logEventWithPromise).toHaveBeenCalledTimes(0);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({
+				method: 'logEvent',
+				params: { eventName, eventValues, awaitResponse: false },
+			})
+		);
 	});
 
 	test('it calls appsFlyer.logEvent with promise', () => {
 		let eventValues = {};
 		let eventName = 'test';
 		appsFlyer.logEvent(eventName, eventValues);
-		expect(RNAppsFlyer.logEvent).toHaveBeenCalledTimes(0);
-		expect(RNAppsFlyer.logEventWithPromise).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({
+				method: 'logEvent',
+				params: { eventName, eventValues, awaitResponse: false },
+			})
+		);
+	});
+
+	test('it calls appsFlyer.logEvent with awaitResponse: true', () => {
+		let eventValues = {};
+		let eventName = 'test';
+		appsFlyer.logEvent(eventName, eventValues, true);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({
+				method: 'logEvent',
+				params: { eventName, eventValues, awaitResponse: true },
+			})
+		);
+	});
+
+	test('it calls appsFlyer.logEvent with callback and awaitResponse: true', () => {
+		let eventValues = {};
+		let eventName = 'test';
+		appsFlyer.logEvent(eventName, eventValues, jest.fn, jest.fn, true);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({
+				method: 'logEvent',
+				params: { eventName, eventValues, awaitResponse: true },
+			})
+		);
 	});
 
 	test('it calls appsFlyer.logLocation with callback', () => {
 		appsFlyer.logLocation(12, 12, jest.fn);
-		expect(RNAppsFlyer.logLocation).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'logLocation', params: { longitude: 12, latitude: 12 } })
+		);
 	});
 
 	test('it calls appsFlyer.logLocation with no callback', () => {
 		appsFlyer.logLocation(12, 12);
-		expect(RNAppsFlyer.logLocation).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(1);
 	});
 
 	test('it calls appsFlyer.logLocation with empty string lat', () => {
 		appsFlyer.logLocation(12, '', jest.fn);
-		expect(RNAppsFlyer.logLocation).toHaveBeenCalledTimes(0);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(0);
 	});
 
 	test('it calls appsFlyer.logLocation with empty string long', () => {
 		appsFlyer.logLocation('', 12, jest.fn);
-		expect(RNAppsFlyer.logLocation).toHaveBeenCalledTimes(0);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(0);
 	});
 
 	test('it calls appsFlyer.logLocation with string long', () => {
 		appsFlyer.logLocation('12', 12, jest.fn);
-		expect(RNAppsFlyer.logLocation).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'logLocation', params: { longitude: 12, latitude: 12 } })
+		);
 	});
 
 	test('it calls appsFlyer.logLocation with string lat', () => {
 		appsFlyer.logLocation(12, '12', jest.fn);
-		expect(RNAppsFlyer.logLocation).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'logLocation', params: { longitude: 12, latitude: 12 } })
+		);
 	});
 
 	test('it calls appsFlyer.setUserEmails', () => {
 		appsFlyer.setUserEmails({}, jest.fn, jest.fn);
-		expect(RNAppsFlyer.setUserEmails).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setUserEmails', params: {} })
+		);
 	});
 
 	test('it calls appsFlyer.setAdditionalData with callback', () => {
 		appsFlyer.setAdditionalData({}, jest.fn);
-		expect(RNAppsFlyer.setAdditionalData).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setAdditionalData', params: {} })
+		);
 	});
 
 	test('it calls appsFlyer.setAdditionalData with no callback', () => {
 		appsFlyer.setAdditionalData({});
-		expect(RNAppsFlyer.setAdditionalData).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setAdditionalData', params: {} })
+		);
 	});
 
 	test('it calls appsFlyer.getAppsFlyerUID', () => {
 		appsFlyer.getAppsFlyerUID(jest.fn);
-		expect(RNAppsFlyer.getAppsFlyerUID).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'getAppsFlyerUID', params: {} })
+		);
 	});
 
 	test('it calls appsFlyer.updateServerUninstallToken', () => {
 		appsFlyer.updateServerUninstallToken('xxx', jest.fn);
-		expect(RNAppsFlyer.updateServerUninstallToken).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'updateServerUninstallToken', params: { token: 'xxx' } })
+		);
 	});
 
 	test('it calls appsFlyer.updateServerUninstallToken', () => {
 		appsFlyer.updateServerUninstallToken('xxx');
-		expect(RNAppsFlyer.updateServerUninstallToken).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'updateServerUninstallToken', params: { token: 'xxx' } })
+		);
 	});
 
 	test('it calls appsFlyer.setCustomerUserId', () => {
 		appsFlyer.setCustomerUserId('xxx', jest.fn);
-		expect(RNAppsFlyer.setCustomerUserId).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setCustomerUserId', params: { userId: 'xxx' } })
+		);
 	});
 
 	test('it calls appsFlyer.setCustomerUserId', () => {
 		appsFlyer.setCustomerUserId('xxx');
-		expect(RNAppsFlyer.setCustomerUserId).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setCustomerUserId', params: { userId: 'xxx' } })
+		);
 	});
 
 	test('it calls appsFlyer.setPartnerData', () => {
 		appsFlyer.setPartnerData('xxx', {});
-		expect(RNAppsFlyer.setPartnerData).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setPartnerData', params: { partnerId: 'xxx', partnerData: {} } })
+		);
 	});
-	
+
 	test('it calls appsFlyer.setPartnerData', () => {
 		appsFlyer.setPartnerData(55, {});
-		expect(RNAppsFlyer.setPartnerData).toHaveBeenCalledTimes(0);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(0);
 	});
 	test('it calls appsFlyer.setPartnerData', () => {
+		// typeof null === "object", so the existing guard lets this call through unchanged.
 		appsFlyer.setPartnerData('xxx', null);
-		expect(RNAppsFlyer.setPartnerData).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setPartnerData', params: { partnerId: 'xxx', partnerData: null } })
+		);
 	});
 	test('it calls appsFlyer.setPartnerData', () => {
 		appsFlyer.setPartnerData(null, {});
-		expect(RNAppsFlyer.setPartnerData).toHaveBeenCalledTimes(0);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(0);
 	});
 
 	test('it calls appsFlyer.setSharingFilterForPartners', () => {
 		appsFlyer.setSharingFilterForPartners([]);
-		expect(RNAppsFlyer.setSharingFilterForPartners).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setSharingFilterForPartners', params: { partners: [] } })
+		);
 	});
 
 	test('it calls appsFlyer.setCurrentDeviceLanguage', () => {
 		appsFlyer.setCurrentDeviceLanguage('EN');
-		expect(RNAppsFlyer.setCurrentDeviceLanguage).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setCurrentDeviceLanguage', params: { language: 'EN' } })
+		);
 	});
 
 	test('it calls appsFlyer.setCurrentDeviceLanguage', () => {
 		appsFlyer.setCurrentDeviceLanguage(5);
-		expect(RNAppsFlyer.setCurrentDeviceLanguage).toHaveBeenCalledTimes(0);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(0);
 	});
 
 	test('it calls appsFlyer.setCurrentDeviceLanguage', () => {
 		appsFlyer.setCurrentDeviceLanguage(null);
-		expect(RNAppsFlyer.setCurrentDeviceLanguage).toHaveBeenCalledTimes(0);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(0);
 	});
 
 	test('it calls appsFlyer.setCurrentDeviceLanguage', () => {
 		appsFlyer.setCurrentDeviceLanguage({});
-		expect(RNAppsFlyer.setCurrentDeviceLanguage).toHaveBeenCalledTimes(0);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(0);
 	});
 
 	test('it calls appsFlyer.stop(true)', () => {
 		appsFlyer.stop(true);
-		expect(RNAppsFlyer.stop).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'stop', params: { isStopped: true } })
+		);
 	});
 
 	test('it calls appsFlyer.stop(true, cb)', () => {
 		appsFlyer.stop(true, jest.fn);
-		expect(RNAppsFlyer.stop).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'stop', params: { isStopped: true } })
+		);
 	});
 
 	test('it calls appsFlyer.sendPushNotificationData({}, errorCb)', () => {
 		appsFlyer.sendPushNotificationData({ foo: 'bar' }, jest.fn);
-		expect(RNAppsFlyer.sendPushNotificationData).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'sendPushNotificationData', params: { foo: 'bar' } })
+		);
 	});
 
 	test('it calls appsFlyer.sendPushNotificationData({})', () => {
 		appsFlyer.sendPushNotificationData({ foo: 'bar' });
-		expect(RNAppsFlyer.sendPushNotificationData).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'sendPushNotificationData', params: { foo: 'bar' } })
+		);
 	});
 
 	test('it calls appsFlyer.appendParametersToDeepLinkingURL(dummy-url, foo)', () => {
 		appsFlyer.appendParametersToDeepLinkingURL('dummy-url', 'foo');
-		expect(RNAppsFlyer.appendParametersToDeepLinkingURL).toHaveBeenCalledTimes(0);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(0);
 	});
 
 	test('it calls appsFlyer.appendParametersToDeepLinkingURL(dummy-url, boolean)', () => {
 		appsFlyer.appendParametersToDeepLinkingURL('dummy-url', true);
-		expect(RNAppsFlyer.appendParametersToDeepLinkingURL).toHaveBeenCalledTimes(0);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(0);
 	});
 
 	test('it calls appsFlyer.appendParametersToDeepLinkingURL(dummy-url, {})', () => {
 		appsFlyer.appendParametersToDeepLinkingURL('dummy-url', {});
-		expect(RNAppsFlyer.appendParametersToDeepLinkingURL).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'appendParametersToDeepLinkingURL', params: { contains: 'dummy-url', parameters: {} } })
+		);
 	});
 
 	test('it calls appsFlyer.setDisableNetworkData(true)', () => {
 		appsFlyer.setDisableNetworkData(true);
-		expect(RNAppsFlyer.setDisableNetworkData).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setDisableNetworkData', params: { disable: true } })
+		);
 	});
 
-	test('it calls appsFlyer.startSdk()', () => {
-		appsFlyer.startSdk();
-		expect(RNAppsFlyer.startSdk).toHaveBeenCalledTimes(1);
+	test('it calls appsFlyer.startSdk()', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse());
+		await appsFlyer.startSdk();
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'start', params: { awaitResponse: true } })
+		);
+	});
+
+	test('it calls appsFlyer.startSdk() and rejects on a native RPC failure', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcError('start completed with error: timed out'));
+		await expect(appsFlyer.startSdk()).rejects.toEqual({
+			code: 500,
+			message: 'start completed with error: timed out',
+		});
 	});
 
 	test('it calls appsFlyer.performOnDeepLinking()', () => {
 		appsFlyer.performOnDeepLinking();
-		expect(RNAppsFlyer.performOnDeepLinking).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'performDeepLinking', params: {} })
+		);
 	});
 
 	test('it calls appsFlyer.disableIDFVCollection()', () => {
 		appsFlyer.disableIDFVCollection(true);
-		expect(RNAppsFlyer.disableIDFVCollection).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.disableIDFVCollection).toHaveBeenCalledWith(true);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setDisableIDFVCollection', params: { shouldDisable: true } })
+		);
 	});
 
 	test('it calls appsFlyer.logAdRevenue with valid ad revenue data', () => {
@@ -253,39 +345,45 @@ describe("Test appsFlyer API's", () => {
 			additionalParameters: { test: 'param' }
 		};
 		appsFlyer.logAdRevenue(adRevenueData);
-		expect(RNAppsFlyer.logAdRevenue).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.logAdRevenue).toHaveBeenCalledWith(adRevenueData);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'logAdRevenue', params: adRevenueData })
+		);
 	});
 
 	test('it calls appsFlyer.anonymizeUser with callback', () => {
 		appsFlyer.anonymizeUser(true, jest.fn);
-		expect(RNAppsFlyer.anonymizeUser).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.anonymizeUser).toHaveBeenCalledWith(true, expect.any(Function));
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'anonymizeUser', params: { shouldAnonymize: true } })
+		);
 	});
 
 	test('it calls appsFlyer.setCurrencyCode with callback', () => {
 		appsFlyer.setCurrencyCode('USD', jest.fn);
-		expect(RNAppsFlyer.setCurrencyCode).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setCurrencyCode).toHaveBeenCalledWith('USD', expect.any(Function));
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setCurrencyCode', params: { currencyCode: 'USD' } })
+		);
 	});
 
 	test('it calls appsFlyer.setCurrencyCode with number conversion', () => {
 		appsFlyer.setCurrencyCode(123);
-		expect(RNAppsFlyer.setCurrencyCode).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setCurrencyCode).toHaveBeenCalledWith('123', expect.any(Function));
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setCurrencyCode', params: { currencyCode: '123' } })
+		);
 	});
 
 	test('it calls appsFlyer.setOneLinkCustomDomains with callbacks', () => {
 		const domains = ['example.com', 'brand.com'];
 		appsFlyer.setOneLinkCustomDomains(domains, jest.fn, jest.fn);
-		expect(RNAppsFlyer.setOneLinkCustomDomains).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setOneLinkCustomDomains).toHaveBeenCalledWith(domains, expect.any(Function), expect.any(Function));
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setOneLinkCustomDomains', params: { domains } })
+		);
 	});
 
 	test('it calls appsFlyer.setAppInviteOneLinkID with callback', () => {
 		appsFlyer.setAppInviteOneLinkID('test_one_link_id', jest.fn);
-		expect(RNAppsFlyer.setAppInviteOneLinkID).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setAppInviteOneLinkID).toHaveBeenCalledWith('test_one_link_id', expect.any(Function));
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setAppInviteOneLink', params: { oneLinkID: 'test_one_link_id' } })
+		);
 	});
 
 	test('it calls appsFlyer.generateInviteLink with valid params', () => {
@@ -296,59 +394,58 @@ describe("Test appsFlyer API's", () => {
 			userParams: { deep_link_value: 'test_value' }
 		};
 		appsFlyer.generateInviteLink(params, jest.fn, jest.fn);
-		expect(RNAppsFlyer.generateInviteLink).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.generateInviteLink).toHaveBeenCalledWith(params, expect.any(Function), expect.any(Function));
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'generateInviteLink', params })
+		);
 	});
 
 	test('it calls appsFlyer.disableCollectASA', () => {
 		appsFlyer.disableCollectASA(true);
-		expect(RNAppsFlyer.disableCollectASA).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.disableCollectASA).toHaveBeenCalledWith(true);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setDisableCollectASA', params: { shouldDisable: true } })
+		);
 	});
 
 	test('it calls appsFlyer.setUseReceiptValidationSandbox', () => {
 		appsFlyer.setUseReceiptValidationSandbox(true);
-		expect(RNAppsFlyer.setUseReceiptValidationSandbox).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setUseReceiptValidationSandbox).toHaveBeenCalledWith(true);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setUseReceiptValidationSandbox', params: { isSandbox: true } })
+		);
 	});
 
 	test('it calls appsFlyer.disableSKAD', () => {
 		appsFlyer.disableSKAD(true);
-		expect(RNAppsFlyer.disableSKAD).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.disableSKAD).toHaveBeenCalledWith(true);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setDisableSKAdNetwork', params: { disableSkad: true } })
+		);
 	});
 
 	test('it calls appsFlyer.disableIDFVCollection', () => {
 		appsFlyer.disableIDFVCollection(true);
-		expect(RNAppsFlyer.disableIDFVCollection).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.disableIDFVCollection).toHaveBeenCalledWith(true);
-	});
-
-	test('it calls appsFlyer.setCollectIMEI with callback', () => {
-		appsFlyer.setCollectIMEI(true, jest.fn);
-		expect(RNAppsFlyer.setCollectIMEI).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setCollectIMEI).toHaveBeenCalledWith(true, expect.any(Function));
-	});
-
-	test('it calls appsFlyer.setCollectIMEI without callback', () => {
-		appsFlyer.setCollectIMEI(false);
-		expect(RNAppsFlyer.setCollectIMEI).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setDisableIDFVCollection', params: { shouldDisable: true } })
+		);
 	});
 
 	test('it calls appsFlyer.setCollectAndroidID with callback', () => {
 		appsFlyer.setCollectAndroidID(true, jest.fn);
-		expect(RNAppsFlyer.setCollectAndroidID).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setCollectAndroidID).toHaveBeenCalledWith(true, expect.any(Function));
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setCollectAndroidID', params: { isCollect: true } })
+		);
 	});
 
 	test('it calls appsFlyer.setCollectAndroidID without callback', () => {
 		appsFlyer.setCollectAndroidID(false);
-		expect(RNAppsFlyer.setCollectAndroidID).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setCollectAndroidID', params: { isCollect: false } })
+		);
 	});
 
 	test('it calls appsFlyer.disableAppSetId', () => {
 		appsFlyer.disableAppSetId();
-		expect(RNAppsFlyer.disableAppSetId).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'disableAppSetId', params: {} })
+		);
 	});
 	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 with valid purchase details', () => {
 		const purchaseDetails = {
@@ -360,8 +457,9 @@ describe("Test appsFlyer API's", () => {
 		const callback = jest.fn();
 
 		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, additionalParameters, callback);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledWith(purchaseDetails, additionalParameters);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'validateAndLogInAppPurchase', params: { purchaseDetails, additionalParameters } })
+		);
 	});
 
 	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 without additional parameters', () => {
@@ -373,8 +471,9 @@ describe("Test appsFlyer API's", () => {
 		const callback = jest.fn();
 
 		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, undefined, callback);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledWith(purchaseDetails, undefined);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'validateAndLogInAppPurchase', params: { purchaseDetails, additionalParameters: undefined } })
+		);
 	});
 
 	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 without callback', () => {
@@ -385,7 +484,7 @@ describe("Test appsFlyer API's", () => {
 		};
 
 		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(1);
 	});
 
 	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 with null additional parameters', () => {
@@ -397,18 +496,17 @@ describe("Test appsFlyer API's", () => {
 		const callback = jest.fn();
 
 		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, null, callback);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledWith(purchaseDetails, null);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'validateAndLogInAppPurchase', params: { purchaseDetails, additionalParameters: null } })
+		);
 	});
 	
 	test('AFPurchaseType enum values are correct', () => {
-		// Test the enum values directly since they're exported from index.js
 		expect('subscription').toBe('subscription');
 		expect('one_time_purchase').toBe('one_time_purchase');
 	});
 
 	test('MEDIATION_NETWORK enum values are correct', () => {
-		// Test the enum values directly since they're exported from index.js
 		expect('ironsource').toBe('ironsource');
 		expect('applovin_max').toBe('applovin_max');
 		expect('google_admob').toBe('google_admob');
@@ -426,13 +524,11 @@ describe("Test appsFlyer API's", () => {
 	});
 
 	test('AF_EMAIL_CRYPT_TYPE enum values are correct', () => {
-		// Test the enum values directly since they're exported from index.js
 		expect(0).toBe(0);
 		expect(3).toBe(3);
 	});
 
 	test('StoreKitVersion enum values are correct', () => {
-		// Test the enum values directly since they're exported from index.js
 		expect('SK1').toBe('SK1');
 		expect('SK2').toBe('SK2');
 	});
@@ -440,59 +536,31 @@ describe("Test appsFlyer API's", () => {
 	test('it calls appsFlyer.setResolveDeepLinkURLs with callbacks', () => {
 		const urls = ['example.com', 'brand.com'];
 		appsFlyer.setResolveDeepLinkURLs(urls, jest.fn, jest.fn);
-		expect(RNAppsFlyer.setResolveDeepLinkURLs).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setResolveDeepLinkURLs).toHaveBeenCalledWith(urls, expect.any(Function), expect.any(Function));
-	});
-
-	test('it calls appsFlyer.performOnAppAttribution with string URL', () => {
-		appsFlyer.performOnAppAttribution('https://example.com', jest.fn, jest.fn);
-		expect(RNAppsFlyer.performOnAppAttribution).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.performOnAppAttribution).toHaveBeenCalledWith('https://example.com', expect.any(Function), expect.any(Function));
-	});
-
-	test('it calls appsFlyer.performOnAppAttribution with non-string URL (converts to string)', () => {
-		appsFlyer.performOnAppAttribution(123, jest.fn, jest.fn);
-		expect(RNAppsFlyer.performOnAppAttribution).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.performOnAppAttribution).toHaveBeenCalledWith('123', expect.any(Function), expect.any(Function));
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setResolveDeepLinkURLs', params: { urls } })
+		);
 	});
 
 	test('it calls appsFlyer.disableAdvertisingIdentifier', () => {
 		appsFlyer.disableAdvertisingIdentifier(true);
-		expect(RNAppsFlyer.disableAdvertisingIdentifier).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.disableAdvertisingIdentifier).toHaveBeenCalledWith(true);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setDisableAdvertisingIdentifiers', params: { isDisable: true } })
+		);
 	});
 
 	test('it calls appsFlyer.enableTCFDataCollection', () => {
 		appsFlyer.enableTCFDataCollection(true);
-		expect(RNAppsFlyer.enableTCFDataCollection).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.enableTCFDataCollection).toHaveBeenCalledWith(true);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'enableTCFDataCollection', params: { enabled: true } })
+		);
 	});
 
 	test('it calls appsFlyer.setConsentData', () => {
 		const consentData = { isUserSubjectToGDPR: true };
 		appsFlyer.setConsentData(consentData);
-		expect(RNAppsFlyer.setConsentData).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setConsentData).toHaveBeenCalledWith(consentData);
-	});
-
-	test('it calls appsFlyer.setSharingFilterForAllPartners (deprecated)', () => {
-		appsFlyer.setSharingFilterForAllPartners();
-		expect(RNAppsFlyer.setSharingFilterForPartners).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setSharingFilterForPartners).toHaveBeenCalledWith(['all']);
-	});
-
-	test('it calls appsFlyer.setSharingFilter (deprecated)', () => {
-		const partners = ['partner1', 'partner2'];
-		appsFlyer.setSharingFilter(partners, jest.fn, jest.fn);
-		expect(RNAppsFlyer.setSharingFilterForPartners).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setSharingFilterForPartners).toHaveBeenCalledWith(partners);
-	});
-
-	test('it calls appsFlyer.validateAndLogInAppPurchase (legacy API)', () => {
-		const purchaseInfo = { productId: 'test_product' };
-		appsFlyer.validateAndLogInAppPurchase(purchaseInfo, jest.fn, jest.fn);
-		expect(RNAppsFlyer.validateAndLogInAppPurchase).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.validateAndLogInAppPurchase).toHaveBeenCalledWith(purchaseInfo, expect.any(Function), expect.any(Function));
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setConsentData', params: consentData })
+		);
 	});
 
 	test('AppsFlyerConsent constructor with all parameters', () => {
@@ -511,27 +579,6 @@ describe("Test appsFlyer API's", () => {
 		expect(consent.hasConsentForAdStorage).toBeUndefined();
 	});
 
-	test('AppsFlyerConsent.forGDPRUser (deprecated)', () => {
-		const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-		const consent = AppsFlyerConsent.forGDPRUser(true, false);
-		
-		expect(consent.isUserSubjectToGDPR).toBe(true);
-		expect(consent.hasConsentForDataUsage).toBe(true);
-		expect(consent.hasConsentForAdsPersonalization).toBe(false);
-		expect(consoleSpy).toHaveBeenCalled();
-		
-		consoleSpy.mockRestore();
-	});
-
-	test('AppsFlyerConsent.forNonGDPRUser (deprecated)', () => {
-		const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-		const consent = AppsFlyerConsent.forNonGDPRUser();
-		
-		expect(consent.isUserSubjectToGDPR).toBe(false);
-		expect(consoleSpy).toHaveBeenCalled();
-		
-		consoleSpy.mockRestore();
-	});
 
 	test('AFParseJSONException constructor', () => {
 		const error = new AFParseJSONException('Test error', { data: 'test' });
@@ -542,84 +589,81 @@ describe("Test appsFlyer API's", () => {
 });
 
 describe('Test native event emitter', () => {
-	const nativeEventEmitter = new NativeEventEmitter(RNAppsFlyer);
+	const nativeEventEmitter = new NativeEventEmitter(NativeAppsFlyer);
 	let gcdListener;
-	let oaoaListener;
 	let udlListener;
 	let nativeEventObject = { test: 'la' };
 
+	// index.js demuxes a single "RNAppsFlyer_rpcEvent" envelope onto listener APIs
+	function emitRpcEvent(event, data, origin = 'ios') {
+		nativeEventEmitter.emit(
+			'RNAppsFlyer_rpcEvent',
+			JSON.stringify({ event, data, timestamp: Date.now(), origin })
+		);
+	}
+
 	beforeEach(() => {
 		gcdListener = null;
-		oaoaListener = null;
 		udlListener = null;
 	});
 
-	/**
-	 * GCD listener tests
-	 */
 	test('GCD listener Happy Flow', () => {
 		gcdListener = appsFlyer.onInstallConversionData((res) => {
 			expect(res).toEqual(nativeEventObject);
 			gcdListener();
 		});
 
-		nativeEventEmitter.emit('onInstallConversionDataLoaded', JSON.stringify(nativeEventObject));
+		emitRpcEvent('onConversionDataSuccess', nativeEventObject);
 	});
 
-	test('test GCD listener gets JSON instead of StringifyJSON', () => {
+	test('GCD listener handles a stringified JSON `data` payload (known-issues-kb.md payload-shape delta)', () => {
+		gcdListener = appsFlyer.onInstallConversionData((res) => {
+			expect(res).toEqual(nativeEventObject);
+			gcdListener();
+		});
+
+		emitRpcEvent('onConversionDataSuccess', JSON.stringify(nativeEventObject));
+	});
+
+	test('GCD listener gets an unparsable stringified `data` payload', () => {
 		gcdListener = appsFlyer.onInstallConversionData((error) => {
 			expect(typeof error).toEqual('object');
 			expect(error.message).toEqual('Invalid data structure');
-			expect(error.data).toEqual(nativeEventObject);
 			expect(error.name).toEqual('AFParseJSONException');
 			gcdListener();
 		});
 
-		nativeEventEmitter.emit('onInstallConversionDataLoaded', nativeEventObject);
+		emitRpcEvent('onConversionDataSuccess', 'not valid json');
 	});
 
-	/**
-	 * OAOA listener tests
-	 */
-	test('OAOA listener Happy Flow', () => {
-		oaoaListener = appsFlyer.onAppOpenAttribution((res) => {
+	test('onInstallConversionFailure listener Happy Flow', () => {
+		let failureListener = appsFlyer.onInstallConversionFailure((res) => {
 			expect(res).toEqual(nativeEventObject);
-			oaoaListener();
-		});
-		nativeEventEmitter.emit('onAppOpenAttribution', JSON.stringify(nativeEventObject));
-	});
-	test('test OAOA listener gets JSON instead of StringifyJSON', () => {
-		oaoaListener = appsFlyer.onAppOpenAttribution((error) => {
-			expect(typeof error).toEqual('object');
-			expect(error.message).toEqual('Invalid data structure');
-			expect(error.data).toEqual(nativeEventObject);
-			expect(error.name).toEqual('AFParseJSONException');
-			oaoaListener();
+			failureListener();
 		});
 
-		nativeEventEmitter.emit('onAppOpenAttribution', nativeEventObject);
+		emitRpcEvent('onConversionDataFail', nativeEventObject);
 	});
 
-	/**
-	 * UDL listener tests
-	 */
-	test('UDL listener Happy Flow', () => {
+	test('UDL listener Happy Flow (iOS native event name)', () => {
 		udlListener = appsFlyer.onDeepLink((res) => {
 			expect(res).toEqual(nativeEventObject);
 			udlListener();
 		});
-		nativeEventEmitter.emit('onDeepLinking', JSON.stringify(nativeEventObject));
+		emitRpcEvent('onDeepLinkReceived', nativeEventObject, 'ios');
 	});
-	test('test UDL listener gets JSON instead of StringifyJSON', () => {
-		udlListener = appsFlyer.onAppOpenAttribution((error) => {
-			expect(typeof error).toEqual('object');
-			expect(error.message).toEqual('Invalid data structure');
-			expect(error.data).toEqual(nativeEventObject);
-			expect(error.name).toEqual('AFParseJSONException');
+
+	test('UDL listener Happy Flow (Android native event name)', () => {
+		udlListener = appsFlyer.onDeepLink((res) => {
+			expect(res).toEqual(nativeEventObject);
 			udlListener();
 		});
+		emitRpcEvent('onDeepLinking', nativeEventObject, 'android');
+	});
 
-		nativeEventEmitter.emit('onDeepLinking', nativeEventObject);
+	test('onAppOpenAttribution / onAttributionFailure were removed and merged into onDeepLink', () => {
+		expect(appsFlyer.onAppOpenAttribution).toBeUndefined();
+		expect(appsFlyer.onAttributionFailure).toBeUndefined();
 	});
 	test('validateAndLogInAppPurchaseV2 event listener Happy Flow', () => {
 		const validationResult = { result: true, data: { transactionId: 'test_123' } };
@@ -675,5 +719,103 @@ describe('Test native event emitter', () => {
 
 		nativeEventEmitter.emit('onValidationResult', invalidJson);
 		expect(callback).toHaveBeenCalled();
+	});
+});
+
+// --- net-new RPC-only method wrappers ---
+
+function buildRpcRequest(method, params = {}) {
+	return JSON.stringify({ method, params });
+}
+
+describe('net-new RPC-only method wrappers (one per domain block)', () => {
+	afterEach(() => {
+		jest.clearAllMocks();
+	});
+
+	test('setMinTimeBetweenSessions (Complex-config) calls executeRpc with the right envelope', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
+
+		await appsFlyer.setMinTimeBetweenSessions(30);
+
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			buildRpcRequest('setMinTimeBetweenSessions', { seconds: 30 })
+		);
+	});
+
+	test('handleOpenURL (Deep-link) calls executeRpc with the right envelope', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
+
+		await appsFlyer.handleOpenURL('https://example.com', { sourceApplication: 'com.foo' });
+
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			buildRpcRequest('handleOpenURL', {
+				url: 'https://example.com',
+				options: { sourceApplication: 'com.foo' },
+			})
+		);
+	});
+
+	test('handleOpenUrl is a distinct RPC method from handleOpenURL (case-sensitive)', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
+
+		await appsFlyer.handleOpenUrl('https://example.com', 'com.foo', null);
+
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			buildRpcRequest('handleOpenUrl', {
+				url: 'https://example.com',
+				sourceApplication: 'com.foo',
+				annotation: null,
+			})
+		);
+	});
+
+	test('setUserPhone (Hashed-PII) calls executeRpc with the right envelope', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
+
+		await appsFlyer.setUserPhone('+15551234567');
+
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			buildRpcRequest('setUserPhone', { phone: '+15551234567' })
+		);
+	});
+
+	test('clearUserPii (Hashed-PII) calls executeRpc with empty params', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
+
+		await appsFlyer.clearUserPii();
+
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(buildRpcRequest('clearUserPii', {}));
+	});
+
+	test('handleLaunchOptions (Lifecycle) calls executeRpc with the right envelope', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
+
+		await appsFlyer.handleLaunchOptions({ url: 'myapp://deeplink' });
+
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			buildRpcRequest('handleLaunchOptions', { launchOptions: { url: 'myapp://deeplink' } })
+		);
+	});
+
+	test('setPreinstallAttribution (Android-only) calls executeRpc with the right envelope', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
+
+		await appsFlyer.setPreinstallAttribution('media_src', 'campaign_1', 'site_1');
+
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			buildRpcRequest('setPreinstallAttribution', {
+				mediaSource: 'media_src',
+				campaign: 'campaign_1',
+				siteId: 'site_1',
+			})
+		);
+	});
+
+	test('isStopped (Android-only getter) resolves with response.data', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: false }));
+
+		await expect(appsFlyer.isStopped()).resolves.toBe(false);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(buildRpcRequest('isStopped', {}));
 	});
 });

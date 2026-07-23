@@ -5,7 +5,9 @@
  * Focus: Runtime compatibility and type safety.
  */
 
-import appsFlyer, { AppsFlyerConsent, StoreKitVersion } from '../index';
+import appsFlyer, { AppsFlyerConsent, StoreKitVersion, AFInAppEventType } from '../index';
+
+const NativeAppsFlyer = require('../src/NativeAppsFlyer').default;
 
 describe('Backward Compatibility Tests', () => {
   afterEach(() => {
@@ -23,15 +25,15 @@ describe('Backward Compatibility Tests', () => {
       
       // Should not throw - native code accepts ReadableMap/NSDictionary
       expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
-      expect(require('../node_modules/react-native/Libraries/BatchedBridge/NativeModules').RNAppsFlyer.setConsentData).toHaveBeenCalled();
+      expect(require('../src/NativeAppsFlyer').default.executeRpc).toHaveBeenCalled();
     });
 
     test('setConsentData accepts AppsFlyerConsent class instance', () => {
       // New code using AppsFlyerConsent class
       const consent = new AppsFlyerConsent(true, true, false, true);
-      
+
       expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
-      expect(require('../node_modules/react-native/Libraries/BatchedBridge/NativeModules').RNAppsFlyer.setConsentData).toHaveBeenCalled();
+      expect(require('../src/NativeAppsFlyer').default.executeRpc).toHaveBeenCalled();
     });
 
     test('setConsentData accepts minimal consent object (non-GDPR)', () => {
@@ -83,54 +85,85 @@ describe('Backward Compatibility Tests', () => {
     });
   });
 
-  describe('AppsFlyerConsent - Deprecated Static Methods', () => {
-    test('AppsFlyerConsent.forGDPRUser still works at runtime', () => {
-      const consent = AppsFlyerConsent.forGDPRUser(true, false);
-      
-      expect(consent).toBeInstanceOf(AppsFlyerConsent);
-      expect(consent.isUserSubjectToGDPR).toBe(true);
-      expect(consent.hasConsentForDataUsage).toBe(true);
-      expect(consent.hasConsentForAdsPersonalization).toBe(false);
-      
-      // Should work with setConsentData
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
-    });
-
-    test('AppsFlyerConsent.forNonGDPRUser still works at runtime', () => {
-      const consent = AppsFlyerConsent.forNonGDPRUser();
-      
-      expect(consent).toBeInstanceOf(AppsFlyerConsent);
-      expect(consent.isUserSubjectToGDPR).toBe(false);
-      
-      // Should work with setConsentData
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
-    });
-  });
-
   describe('Callback Behavior - Android CallbackGuard (Transparent)', () => {
-    test('Callbacks still work with initSdk', () => {
+    test('Callbacks still work with logEvent', () => {
       const successCallback = jest.fn();
       const errorCallback = jest.fn();
-      
-      const options = {
-        devKey: 'test',
-        appId: '123',
-        isDebug: true
-      };
-      
-      appsFlyer.initSdk(options, successCallback, errorCallback);
-      
-      // CallbackGuard should be transparent - callbacks should still be callable
-      expect(require('../node_modules/react-native/Libraries/BatchedBridge/NativeModules').RNAppsFlyer.initSdkWithCallBack).toHaveBeenCalled();
+
+      appsFlyer.logEvent('af_purchase', { af_revenue: 1 }, successCallback, errorCallback);
+
+      // Every executeRpc call resolves its own Promise per call (never a stored/shared
+      // Callback), which structurally can't double-invoke the way the pre-7.0.0 bridge did.
+      expect(require('../src/NativeAppsFlyer').default.executeRpc).toHaveBeenCalled();
     });
 
     test('Callbacks still work with logEvent', () => {
       const successCallback = jest.fn();
       const errorCallback = jest.fn();
-      
+
       appsFlyer.logEvent('test_event', {}, successCallback, errorCallback);
-      
-      expect(require('../node_modules/react-native/Libraries/BatchedBridge/NativeModules').RNAppsFlyer.logEvent).toHaveBeenCalled();
+
+      expect(require('../src/NativeAppsFlyer').default.executeRpc).toHaveBeenCalled();
+    });
+  });
+
+  describe('7.0.0 breaking changes (MIGRATION.md)', () => {
+    test('setHost sends {hostPrefixName, hostName} — param reorder/rename', () => {
+      appsFlyer.setHost('mycompany', 'onelink.me', jest.fn());
+      expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+        JSON.stringify({
+          method: 'setHost',
+          params: { hostPrefixName: 'mycompany', hostName: 'onelink.me' },
+        })
+      );
+    });
+
+    test('validateAndLogInAppPurchase (legacy, non-V2) is removed', () => {
+      expect(appsFlyer.validateAndLogInAppPurchase).toBeUndefined();
+    });
+
+    test('setCollectIMEI is removed', () => {
+      expect(appsFlyer.setCollectIMEI).toBeUndefined();
+    });
+
+    test('onAppOpenAttribution / onAttributionFailure / performOnAppAttribution are removed', () => {
+      expect(appsFlyer.onAppOpenAttribution).toBeUndefined();
+      expect(appsFlyer.onAttributionFailure).toBeUndefined();
+      expect(appsFlyer.performOnAppAttribution).toBeUndefined();
+    });
+
+    test('onDeepLink still delivers data previously routed through onAppOpenAttribution', () => {
+      const { NativeEventEmitter } = require('react-native');
+      const nativeEventEmitter = new NativeEventEmitter(NativeAppsFlyer);
+      const callback = jest.fn();
+      const remove = appsFlyer.onDeepLink(callback);
+
+      const attributionData = { media_source: 'test', campaign: 'test_campaign' };
+      nativeEventEmitter.emit(
+        'RNAppsFlyer_rpcEvent',
+        JSON.stringify({
+          event: 'onDeepLinkReceived',
+          data: attributionData,
+          timestamp: 0,
+          origin: 'ios',
+        })
+      );
+
+      expect(callback).toHaveBeenCalledWith(attributionData);
+      remove();
+    });
+  });
+
+  describe('AFInAppEventType (internal-mechanism change, MIGRATION.md)', () => {
+    test('is exported from the package and carries the pre-7.0.0 getConstants() values', () => {
+      expect(AFInAppEventType).toBeDefined();
+      expect(AFInAppEventType.PURCHASE).toBe('af_purchase');
+      expect(AFInAppEventType.ACHIEVEMENT_UNLOCKED).toBe('af_achievement_unlocked');
+      expect(AFInAppEventType.LEVEL_ACHIEVED).toBe('af_level_achieved');
+    });
+
+    test('is frozen — cannot be mutated at runtime', () => {
+      expect(Object.isFrozen(AFInAppEventType)).toBe(true);
     });
   });
 
