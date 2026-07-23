@@ -76,9 +76,11 @@ demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcodeproj/project.pbxproj
 # Claude-generated planning/skill docs
 Docs/plans/
 Docs/superpowers/
+specs/
 
 # Test app secrets
 example/.env
+demos/appsflyer-expo-app/.env
 
 # Example app generated artifacts
 example/ios/Podfile.lock

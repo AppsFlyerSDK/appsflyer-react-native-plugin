@@ -661,10 +661,11 @@ validate_check() {
 run_phase() {
   local phase_json="$1"
 
-  local phase_id phase_name requires_fresh scenario_ref wait_sec
+  local phase_id phase_name requires_fresh requires_identity_reset scenario_ref wait_sec
   phase_id=$(echo "$phase_json" | jq -r '.id')
   phase_name=$(echo "$phase_json" | jq -r '.name')
   requires_fresh=$(echo "$phase_json" | jq -r '.requires_fresh_install // false')
+  requires_identity_reset=$(echo "$phase_json" | jq -r '.requires_device_identity_reset // false')
   scenario_ref=$(echo "$phase_json" | jq -r '.scenario_ref // "N/A"')
   wait_sec=$(echo "$phase_json" | jq -r '.wait_after_launch_sec // 25')
   local wait_trigger_sec
@@ -704,6 +705,19 @@ run_phase() {
       new_id=$(cat /proc/sys/kernel/random/uuid 2>/dev/null | tr -d '-' | head -c 16 || date +%s%N | head -c 16)
       adb shell settings put secure android_id "$new_id" 2>/dev/null || true
       log_info "Reset android_id to $new_id for fresh-install attribution"
+    elif [[ "$requires_identity_reset" == "true" ]]; then
+      # `simctl privacy reset all` only clears permission grants — it does not touch the
+      # Keychain, and AppsFlyer's SDK persists its device UID there specifically so it
+      # survives uninstall/reinstall (anti-reinstall-fraud design). Without a full erase,
+      # is_first_launch keeps coming back false. Erase wipes the whole simulator (including
+      # Keychain) but keeps the same UDID, so IOS_UDID stays valid for the rest of the run.
+      # Only set requires_device_identity_reset on phases that actually assert
+      # is_first_launch — erase+reboot is expensive, skip it everywhere else.
+      xcrun simctl shutdown "$IOS_UDID" 2>/dev/null || true
+      xcrun simctl erase "$IOS_UDID"
+      xcrun simctl boot "$IOS_UDID"
+      xcrun simctl bootstatus "$IOS_UDID" -b
+      log_info "Erased simulator (Keychain included) for fresh-install attribution"
     else
       xcrun simctl privacy "$IOS_UDID" reset all 2>/dev/null || true
       log_info "Reset simulator privacy settings for fresh-install attribution"
