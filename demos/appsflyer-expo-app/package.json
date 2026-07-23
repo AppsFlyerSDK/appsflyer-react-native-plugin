@@ -9,18 +9,20 @@
     "eject": "expo eject"
   },
   "dependencies": {
-    "expo": "~45.0.0",
-    "expo-dev-client": "~0.9.5",
-    "expo-splash-screen": "~0.15.1",
-    "expo-status-bar": "~1.3.0",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "react-native": "0.68.2",
-    "react-native-appsflyer": "6.6.0",
-    "react-native-web": "0.17.7"
+    "expo": "~54.0.36",
+    "expo-dev-client": "~6.0.21",
+    "expo-splash-screen": "~31.0.13",
+    "expo-status-bar": "~3.0.9",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-appsflyer": "file:../../",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-web": "~0.21.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.9"
+    "@babel/core": "^7.25.2",
+    "babel-preset-expo": "~54.0.12"
   },
   "private": true
 }
