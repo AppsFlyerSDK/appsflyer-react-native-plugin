@@ -22,6 +22,9 @@ class MainActivity : ReactActivity() {
     // Forward to SDK before onResume stamps the URI with af_consumed=true.
     // Without this, warm-app VIEW intents are silently consumed and the
     // registered DeepLinkListener never fires.
-    AppsFlyerLib.getInstance().performOnDeepLinking(intent, applicationContext)
+    val url = intent.data?.toString()
+    if (url != null) {
+      AppsFlyerLib.getInstance().performDeepLinking(url, true)
+    }
   }
 }
