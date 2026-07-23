@@ -5,64 +5,58 @@ paths:
 
 # Native Android bridge rules
 
-Scope: `android/` directory — `RNAppsFlyerModule.java`, `RNAppsFlyerPackage.java`, `RNAppsFlyerConstants.java`, `RNUtil.java`.
+Scope: `android/` directory — `RNAppsFlyerModule.kt`, `RNAppsFlyerPackage.kt`, `RNAppsFlyerConstants.java`, `RpcInitGate.kt`, `RNUtil.java`.
 
 ## 1. Module structure
 
-- `RNAppsFlyerModule extends ReactContextBaseJavaModule` — registered via `RNAppsFlyerPackage implements ReactPackage`
-- Methods exposed with `@ReactMethod` annotation
-- Method names match JS calls exactly (e.g., JS `initSdkWithCallBack` → Java `initSdkWithCallBack(ReadableMap, Callback, Callback)`)
+- `RNAppsFlyerModule.kt` — TurboModule; extends `NativeAppsFlyerSpec` (Codegen-generated); implements `executeRpc(requestJson)` which delegates into `AppsFlyerRpcHandler`
+- `RNAppsFlyerPackage.kt` — package registration (replaces old `RNAppsFlyerPackage.java`)
+- `RpcInitGate.kt` — listener-registration buffer: holds `registerConversionListener` / `registerDeeplinkListener` / `registerSessionReadyListener` RPC dispatches until `init` resolves, then flushes; mirrors the Cordova prior-art fix
+- `android/libs/` — vendored Phase A binaries: `plugin_bridge.aar` + `af-android-sdk.aar`; declared via `flatDir` + `implementation(name: ...)` in `build.gradle`; replaced by Maven in Phase B
 
-## 2. CallbackGuard pattern (critical)
+The module no longer extends `ReactContextBaseJavaModule` or uses `@ReactMethod`.
 
-Added in 6.17.8 to fix double-invocation crashes (#601). Wraps every `Callback` with:
-- `AtomicBoolean` to ensure single invocation
-- `WeakReference<Callback>` to handle bridge destruction gracefully
+## 2. The single entry point
 
-```java
-private static class CallbackGuard {
-    private final AtomicBoolean called = new AtomicBoolean(false);
-    private final WeakReference<Callback> ref;
-    // invoke() checks-and-sets atomically
-}
-```
+There is one exported method: `executeRpc(requestJson: String): Promise<String>`. All SDK capabilities are invoked by name inside the JSON payload. Do **not** add new `@ReactMethod` / Codegen spec methods for individual SDK capabilities.
 
-**Every new method that accepts a Callback must use CallbackGuard.** The React Native bridge crashes if a callback is invoked more than once — this is not optional.
+To add a new SDK capability: expose it in `AppsFlyerRpcHandler` and document the method name. No Android bridge code change is needed.
 
-## 3. Constants export
+## 3. Threading
 
-`getConstants()` exports `AFInAppEventType.*` constants to JS. These are available in JS as `RNAppsFlyer.ACHIEVEMENT_UNLOCKED`, etc.
+Any RPC call that can block natively (Android's `awaitResponse` model — up to 5–10 s on `start`, `logEvent`, purchase validation) **must** be dispatched off the calling thread inside `RNAppsFlyerModule.kt`. Do not call blocking RPC methods directly on the JS thread.
 
-## 4. Event emission
+## 4. CallbackGuard — do NOT use in TurboModule
 
-Uses `reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, data)`. Data is serialized to a JSON string before emission (matching iOS behavior).
+`CallbackGuard` (`AtomicBoolean` + `WeakReference<Callback>`) was added in 6.17.8 to fix a double-invocation / GC crash specific to the old-architecture `Callback` type. Under TurboModules, Promises are held strongly by the bridge and the `WeakReference` bug doesn't exist. **Do not add `CallbackGuard` to `RNAppsFlyerModule.kt`.** It still exists in `PCAppsFlyer` (purchase connector, legacy bridge — leave it there).
 
-## 5. NativeEventEmitter stubs
+## 5. Constants
 
-Lines ~1078-1085 in `RNAppsFlyerModule.java` have empty `addListener` and `removeListeners` method stubs annotated with `@ReactMethod`. These are required by RN's built-in `NativeEventEmitter` since RN 0.65. Do not remove them — their absence causes yellow-box warnings (#335).
+`PLUGIN_VERSION` in `RNAppsFlyerConstants.java` — must stay in sync with the other 3 version locations on every release (see `release-versioning.md`).
 
-## 6. Purchase Connector conditional compilation
+`AFInAppEventType` constants are now a plain JS frozen object in `index.js` — they are **no longer exported** from `getConstants()`. Do not re-add them to `getConstants()`.
 
-Gradle `sourceSets` conditionally includes `includeConnector` or `excludeConnector` directory based on the `appsflyer.enable_purchase_connector` gradle property. This toggles whether `PCAppsFlyer` Java classes are compiled.
+## 6. NativeEventEmitter stubs
 
-## 7. Version constant
+`RNAppsFlyerModule.kt` must still implement empty `addListener(eventName: String)` and `removeListeners(count: Double)` methods (annotated for the Codegen spec). These are required by `NativeEventEmitter` — their absence causes warnings.
 
-`PLUGIN_VERSION` in `RNAppsFlyerConstants.java` — must be updated on every release, synchronized with the other 3 version locations.
+## 7. Event emission
 
-## 8. Namespace requirement (AGP 8+)
+Events are emitted via `reactApplicationContext.emitDeviceEvent("onRPCEvent", payload)` (or equivalent TurboModule event emission API). Payload is a serialized JSON string. One shared event name for all event types — `index.js` demuxes on `envelope.event`.
 
-`build.gradle` must include `namespace` for Android Gradle Plugin 8.0+. This was added in plugin 6.15.1. Older versions cause `Namespace not specified` build failures (#583, #561).
+## 8. RNUtil
 
-## 9. Common Android build failures from issues
+`RNUtil.java` handles `ReadableMap` ↔ JSON conversion. Where `ReadableMap` is still used (e.g. in `PCAppsFlyer`), continue using `RNUtil` for conversion.
+
+## 9. Build setup
+
+`android/build.gradle` uses a `flatDir` repository for the vendored `.aar` files (Phase A). `namespace` is declared for AGP 8.0+ compatibility. `minSdkVersion` defaults to 21 — verify `plugin_bridge`'s own `minSdkVersion` is ≤21 before release (T069).
+
+## 10. Common Android build failures
 
 | Symptom | Root cause | Fix |
 |---------|-----------|-----|
-| `Namespace not specified` (#583, #561) | AGP 8+ requires namespace in build.gradle | Upgrade plugin to 6.15.1+ |
-| `Multiple entries: android:allowBackup=REPLACE` (#627) | AndroidManifest merge conflict | Add `tools:replace` in app's main manifest |
+| `Namespace not specified` (#583, #561) | AGP 8+ | Confirm `namespace` is in `build.gradle` |
+| `Multiple entries: android:allowBackup=REPLACE` (#627) | Manifest merge conflict | Add `tools:replace` in app's main manifest |
+| `.aar not found` | Vendored binary missing from `android/libs/` | Verify both `plugin_bridge.aar` and `af-android-sdk.aar` are present |
 | `ConcurrentModificationException` (#447) | Thread safety in native SDK | Upgrade native SDK |
-| `IllegalAccessException on logEvent` (#464) | Reflection issue in native SDK | Upgrade native SDK |
-| `null is not an object (RNAppsFlyer.logEvent)` (#333) | Autolinking not triggered | Run Gradle sync, clear Metro cache |
-
-## 10. ReadableMap conversion
-
-`RNUtil.java` handles `ReadableMap` ↔ JSON conversion. When adding new methods that accept complex objects from JS, use `RNUtil` for conversion — do not write custom conversion logic.

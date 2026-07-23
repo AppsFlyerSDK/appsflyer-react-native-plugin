@@ -92,3 +92,6 @@ When updating the native SDK version:
 4. `npx tsc --noEmit` passes
 5. Manual test on iOS simulator and Android emulator
 6. Demo app builds and runs on both platforms
+
+**7.0.x additional gate (RELEASE BLOCKER — must not ship with vendored binaries)**:
+7. Dependency Consumption Phase A→B swap complete: vendored `ios/Frameworks/AppsFlyerRPC.xcframework` and `android/libs/*.aar` binaries replaced with real published coordinates (`s.dependency 'AppsFlyerRPC', '<version>'` in podspec; `implementation 'com.appsflyer:<artifact>:<version>'` in build.gradle). Confirm CocoaPods trunk publish and Maven coordinate are live before tagging the release. See `plan.md` §Dependency Consumption Model for the exact swap diff.

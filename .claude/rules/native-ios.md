@@ -5,61 +5,51 @@ paths:
 
 # Native iOS bridge rules
 
-Scope: `ios/` directory — `RNAppsFlyer.h`, `RNAppsFlyer.m`, `PCAppsFlyer.h`, `PCAppsFlyer.m`, `AppsFlyerAttribution.h/.m`.
+Scope: `ios/` directory — `RNAppsFlyer.mm`, `RNAppsFlyer.h`, `RNAppsFlyerImpl.swift`, `RNAppsFlyer-Bridging-Header.h`, `PCAppsFlyer.h/.m` (purchase connector — legacy, out of scope).
 
 ## 1. Module structure
 
-- `RNAppsFlyer` extends `RCTEventEmitter` (not `RCTBridgeModule` directly) — this enables `sendEventWithName:body:`
-- Conforms to `AppsFlyerLibDelegate` and `AppsFlyerDeepLinkDelegate`
-- Registered via `RCT_EXPORT_MODULE()` with no custom name
+- `RNAppsFlyer.mm` — thin ObjC++ TurboModule shim; conforms to `NativeAppsFlyerSpec` (Codegen-generated); delegates everything to `RNAppsFlyerImpl.swift`
+- `RNAppsFlyerImpl.swift` — all real logic: RPC dispatch into `AppsFlyerRPCBridge`, event-channel wiring, listener-registration buffering
+- `ios/Frameworks/AppsFlyerRPC.xcframework` — vendored Phase A dependency; declared via `s.vendored_frameworks` in podspec; replaced by `s.dependency 'AppsFlyerRPC', '<version>'` in Phase B
 
-## 2. Method export naming
+The module no longer subclasses `RCTEventEmitter`. Event emission goes through the TurboModule's `NativeEventEmitter` channel — one shared event name, demuxed in JS.
 
-| JS call | ObjC selector |
-|---------|--------------|
-| `initSdkWithCallBack(options, success, error)` | `initSdkWithCallBack:successCallback:errorCallback:` |
-| `initSdkWithPromise(options)` | `initSdkWithPromise:initSdkWithPromiseWithResolver:rejecter:` |
-| `logEvent(name, values, success, error)` | `logEvent:eventValues:successCallback:errorCallback:` |
-| `getAppsFlyerUID(callback)` | `getAppsFlyerUID:` |
+## 2. The single entry point
 
-Follow the existing naming convention when adding new methods. Promise variants use `RCT_EXPORT_METHOD` with `resolver:(RCTPromiseResolveBlock)` and `rejecter:(RCTPromiseRejectBlock)`.
+There is one exported method: `executeRpc(requestJson: String) -> Promise<String>`. All SDK capabilities are invoked by name inside the JSON payload. Do **not** add `RCT_EXPORT_METHOD` / new Codegen spec methods for individual SDK capabilities.
+
+To add a new SDK capability: expose it in the native `AppsFlyerRPCBridge` handler and document the method name. No iOS bridge code change is needed.
 
 ## 3. Threading
 
-- Delegate callbacks use `performSelectorOnMainThread:withObject:waitUntilDone:NO` to dispatch to main thread before emitting JS events
-- `logCrossPromotionAndOpenStore` uses `dispatch_async(dispatch_get_main_queue(), ...)` for UI operations
-- All event emissions to JS must happen on the main thread
+- Any RPC call that can block natively (e.g. `start`, `logEvent`, purchase validation) **must** dispatch off the calling thread inside `RNAppsFlyerImpl.swift` — do not rely on TurboModule codegen defaults
+- Event emissions back to JS must be dispatched to the JS thread via the TurboModule event emitter — not `performSelectorOnMainThread`
+- `AppsFlyerRPCBridge` calls complete asynchronously; results are delivered via completion handler on whatever thread the SDK chooses
 
-## 4. IDFA strict mode
+## 4. Listener-registration buffering
 
-`#ifndef AFSDK_NO_IDFA` guards ATT-related code. The podspec supports `$RNAppsFlyerStrictMode` which uses `AppsFlyerFramework/AppsFlyerFrameworkStrict` — this excludes IDFA access entirely.
+`RNAppsFlyerImpl.swift` holds `registerConversionListener` / `registerDeeplinkListener` / `registerSessionReadyListener` RPC dispatches if called before `init` resolves, then flushes them immediately after. This matches the Cordova prior-art fix (commit `9ee0552`). Do not remove this buffer — removing it silently drops events on the first launch.
 
-When adding ATT or IDFA-dependent code, always wrap in `#ifndef AFSDK_NO_IDFA`.
+## 5. IDFA / strict mode
 
-## 5. Version constant
+`#ifndef AFSDK_NO_IDFA` guards ATT-related code. The podspec supports `$RNAppsFlyerStrictMode` (`AppsFlyerFrameworkStrict`) — this excludes IDFA access entirely. When adding ATT-dependent code, always wrap in `#ifndef AFSDK_NO_IDFA`.
 
-`kAppsFlyerPluginVersion` in `RNAppsFlyer.h` — must be updated on every release. This is separate from the podspec version and package.json version (see release-versioning.md).
+## 6. Version constant
 
-## 6. Podspec dependency
+`kAppsFlyerPluginVersion` in `RNAppsFlyer.h` — must be updated on every release, in sync with the other 3 version locations (see `release-versioning.md`).
 
-`react-native-appsflyer.podspec` pins the native SDK version via `s.dependency 'AppsFlyerFramework'`. Header-not-found errors (#633, #602, #646) are almost always caused by:
-- Stale pod cache (fix: `pod deintegrate && pod install --repo-update`)
-- Podfile.lock pinning a different native SDK version than the podspec expects
-- Strict mode missing headers (`AppsFlyerFrameworkStrict` has different headers)
+## 7. Podspec
 
-## 7. Event names
+`react-native-appsflyer.podspec` currently declares `s.vendored_frameworks = 'ios/Frameworks/AppsFlyerRPC.xcframework'` (Phase A). The existing `static_framework = true` setting requires verification with Swift framework embedding — see `plan.md §Dependency Consumption Model`. Phase B swaps `vendored_frameworks` for `s.dependency 'AppsFlyerRPC', '<version>'`.
 
-`supportedEvents` returns a fixed array. Adding a new event type requires:
-1. Add to the `supportedEvents` array in `RNAppsFlyer.m`
-2. Add matching event name constant on Android
-3. Add listener registration method in `index.js`
-4. Add type in `index.d.ts`
+The podspec's existing conditional `PurchaseConnector` pod dependency is unchanged by this rewrite.
 
-## 8. Common iOS build failures from issues
+## 8. Common iOS build issues
 
 | Symptom | Root cause | Fix |
 |---------|-----------|-----|
-| `react_native_appsflyer-Swift.h not found` (#646) | Mixed Swift/ObjC without bridging header | Check Xcode build settings for Swift bridging |
-| `AppsFlyerConsent.h not found` (#633) | Native SDK version mismatch | Match plugin version to compatible native SDK |
+| `react_native_appsflyer-Swift.h not found` (#646) | Mixed Swift/ObjC without bridging header | Verify `RNAppsFlyer-Bridging-Header.h` is set in Xcode build settings |
+| `AppsFlyerConsent.h not found` (#633) | Native SDK version mismatch | `pod deintegrate && pod install --repo-update` |
 | `Redefinition of SUCCESS` (#497, #541) | Enum collision with other libs | Update to plugin version where enum was namespaced |
-| `unsupported Swift architecture` (#656) | Release build architecture mismatch | Check `EXCLUDED_ARCHS` build settings |
+| Framework not found at link time | Vendored xcframework path wrong | Verify `ios/Frameworks/AppsFlyerRPC.xcframework` exists and podspec `vendored_frameworks` path matches |

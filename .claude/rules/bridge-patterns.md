@@ -2,59 +2,118 @@
 paths:
   - "index.js"
   - "index.d.ts"
+  - "src/NativeAppsFlyer.ts"
 ---
 
 # Bridge patterns — JS ↔ native contract
 
-Scope: `index.js`, `index.d.ts`, and any file that calls `NativeModules.RNAppsFlyer` or `NativeModules.PCAppsFlyer`.
+Scope: `index.js`, `index.d.ts`, `src/NativeAppsFlyer.ts`. All native calls go through the single TurboModule entry point `NativeAppsFlyer.executeRpc(requestJson)` — there are no bespoke per-feature native methods.
 
-## 1. Three API patterns coexist
+## 1. Three call patterns (all route through executeRpc)
 
-| Pattern | When used | Detection |
-|---------|-----------|-----------|
-| Dual callback/promise | `initSdk`, `logEvent` | `if (success && error)` routes to `*WithCallBack`; otherwise `*WithPromise` |
-| Callback-only | Most config methods (`setCustomerUserId`, `stop`, `setCurrencyCode`) | Optional callback; defaults to `console.log` fallback |
-| Event emitter | Deep linking, conversion data, purchase validation | `appsFlyerEventEmitter.addListener(eventName, handler)` |
+| Pattern | Helper | When to use |
+|---------|--------|-------------|
+| Promise-returning | `callRpc(method, params)` | Any method that returns data or needs error handling |
+| Void config setter | `callRpcVoid(method, params)` | Fire-and-forget setters; logs a warning on failure instead of throwing |
+| Callback compat | `callRpcWithCallback(method, params, successCb)` | Legacy callback-style API surface; bridges to `callRpc` internally |
 
-When adding a new method, match the pattern of similar methods. Do not mix patterns within a single method.
+When adding a new method, pick the pattern that matches the method's JS contract. Do not add a fourth pattern.
 
-## 2. Callback-to-native routing
+## 2. RPC request/response shape
 
-```js
-// Dual pattern — index.js
-if (success && error) {
-  RNAppsFlyer.initSdkWithCallBack(options, success, error);
-} else {
-  return RNAppsFlyer.initSdkWithPromise(options);
-}
+Every call serializes to:
+```json
+{ "method": "methodName", "params": { ... } }
 ```
 
-The native side has **separate methods** for callback vs promise variants. Adding a new dual method requires implementing both on iOS (`RCT_EXPORT_METHOD`) and Android (`@ReactMethod`).
+Every response resolves (never rejects for native-side outcomes) as:
+```json
+{ "success": true, "data": <any> }
+// or
+{ "success": false, "error": { "code": <number>, "message": "<string>" } }
+```
 
-## 3. Event emitter contract
+`callRpc` unwraps this: resolves with `data` on success, rejects with `error` on failure.
 
-- Events arrive as **JSON strings** from native — always parsed with `JSON.parse` on the JS side
-- Parse failures produce `AFParseJSONException` objects (not proper Error subclasses)
-- Native must serialize data to JSON string **before** calling `sendEventWithName:body:` (iOS) or `sendEvent` (Android)
-- Supported event names are declared in iOS `supportedEvents` and must match exactly on both platforms:
-  `onAttributionFailure`, `onAppOpenAttribution`, `onInstallConversionFailure`, `onInstallConversionDataLoaded`, `onDeepLinking`, `onValidationResult`
+**Android cross-platform note**: Android maps unknown-method to error code 422 with message `"Unknown or missing method: ..."`. `callRpc` normalizes this to `{ code: 404 }` to match iOS's dedicated 404 — see `contracts/rpc-error-normalization-contract.md`.
+
+The TurboModule Promise rejects (transport failure) only if the call never reaches native at all.
+
+## 3. Event channel contract
+
+Async native events (conversion data, deep link, session ready) arrive via `NativeEventEmitter` on a **single shared event name** (`onRPCEvent` on both platforms).
+
+`index.js` demuxes on `envelope.event` — one of:
+- `onConversionDataSuccess` / `onConversionDataFail`
+- `onDeepLinkReceived` (iOS) / `onDeepLinking` (Android) — same concept, different native name; `index.js` normalizes both
+- `onSessionReady` — both platforms emit this once `registerSessionReadyListener` has been registered and the native SDK signals readiness (confirmed against `AppsFlyerRPC`'s own source, `AFRPCCoreHandler.swift`'s `sessionReadyEmitter`). `isSessionReady` is a separate one-off Promise query for the current state, not a replacement for the event.
+
+The raw `origin` and `timestamp` envelope fields are stripped before handing `data` to app callbacks. There is no `supportedEvents` array to maintain under TurboModules.
 
 ## 4. Listener registration order
 
-`onDeepLink` (and `onInstallConversionData`, `onAppOpenAttribution`) must be registered **before** `initSdk`. The native SDK fires these callbacks immediately after initialization — if the JS listener isn't attached yet, events are lost silently.
+JS must call `onDeepLink` / `onInstallConversionData` / `onInstallConversionFailure` /
+`registerSessionReadyListener` registration **synchronously, before `init`'s promise settles**
+— these trigger `registerDeeplinkListener` / `registerConversionListener` /
+`registerSessionReadyListener` RPC calls, and the native layer (`RpcInitGate` on Android,
+equivalent buffer in `RNAppsFlyerImpl.swift`) only holds these dispatches until `init`
+*completes*, not until the JS call site for `init()` executes.
 
-This is the #1 source of GitHub issues (#650, #647, #630, #305, #292). Always validate listener timing in code review.
+What actually matters: the registration calls must not be deferred into `init(...).then(...)`
+— that's genuinely too late, since native's buffer gate may have already flushed by then. The
+literal source-line order of the registration calls relative to the `init()` *call statement*
+does not matter, because `init()` dispatches asynchronously (both platforms hop threads before
+doing real work) — synchronous JS statements after `init()` but outside its `.then()` still
+reach native well before `init` actually resolves. `example/src/App.tsx` calls `init()` first
+and registers listeners as separate synchronous statements right after it, matching the
+reference `RPCTestApp`'s own call order (`initialize` → `isDebug` → listeners → ... → `start`)
+— this is correct, not a violation of this rule. **Do not `await appsFlyer.init(...)` before
+registering listeners** — that's the same `.then()` mistake with different syntax; it was
+tried and reverted in `example/src/App.tsx` for exactly this reason.
+
+### Recommended pattern for deterministic ordering after start()
+
+`registerSessionReadyListener`'s callback is the only place `startSdk()` should be called
+(`AppsFlyerLib.h`: *"Call start inside the block. The SDK does not call start automatically"*)
+— this doesn't change. But because that callback fires asynchronously (real native event, or
+this repo's Android session-ready fallback — see
+`specs/001-turbomodule-rpc-bridge/android-session-ready-race.md`), any JS code written after
+the `registerSessionReadyListener(...)` call in source order actually runs *before* the
+callback does, not after — `registerSessionReadyListener` returns immediately, JS doesn't wait
+for it. If a consuming app wants some of its own logic (e.g. logging events) to run strictly
+after `start()`, wrap the registration + `startSdk()` call in a `Promise` and `await` it:
+
+```js
+function startWhenSessionReady() {
+  return new Promise((resolve, reject) => {
+    appsFlyer.registerSessionReadyListener(() => {
+      appsFlyer.startSdk().then(resolve, reject);
+    });
+  });
+}
+
+// ... init() + listener registration (NOT awaited, see above) ...
+
+await startWhenSessionReady();
+// everything here is guaranteed to run after start() has dispatched
+```
+
+`example/src/App.tsx` uses this exact pattern (`startWhenSessionReady`). It only reorders code
+the *app* controls — it cannot make native's `onSessionReady` fire any faster; on Android in
+particular, `startSdk()` may still be bounded by the fallback's timeout in the worst case.
+
+`onAppOpenAttribution`, `onAttributionFailure`, and `performOnAppAttribution` are **removed** in 7.0.0 — route attribution data through `onDeepLink` instead (see MIGRATION.md).
 
 ## 5. No transpilation
 
-`index.js` ships as-is via npm — no Babel, no bundler. Write only syntax that Metro and Node can consume directly. The file uses ES module `export` syntax with CommonJS-compatible patterns.
+`index.js` ships as-is via npm — no Babel, no bundler. Write only syntax that Metro and Node can consume directly.
 
 ## 6. Named exports
 
-Current named exports from `index.js`: `AppsFlyerConsent`, `AFParseJSONException`, `AFPurchaseType`, `MEDIATION_NETWORK`, `StoreKitVersion`, `AppsFlyerPurchaseConnector`, `AppsFlyerPurchaseConnectorConfig`.
+Current named exports from `index.js`: `AppsFlyerConsent`, `AFInAppEventType`, `AFPurchaseType`, `MEDIATION_NETWORK`, `StoreKitVersion`, `AppsFlyerPurchaseConnector`, `AppsFlyerPurchaseConnectorConfig`.
 
-Adding a new named export changes the public API surface — requires a minor version bump and matching `index.d.ts` update.
+`AFInAppEventType` is now a plain JS frozen object (23 constants) — it was previously served by `NativeModules.RNAppsFlyer.getConstants()`. Adding a new named export requires a version bump and matching `index.d.ts` update.
 
-## 7. Default callback fallback
+## 7. PurchaseConnector
 
-Many methods use `(result) => console.log(result)` as the default callback when none is provided. This leaks to production logs. Prefer silent no-ops for new methods, or document the logging behavior explicitly.
+`PCAppsFlyer` (PurchaseConnector) still uses the legacy `NativeModules` bridge — it is **out of scope** for the TurboModule rewrite. Do not touch `PurchaseConnector/` when working on RPC or TurboModule changes.

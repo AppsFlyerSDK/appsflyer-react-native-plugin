@@ -24,13 +24,14 @@ This is a recurring source of issues (#670, #575, #475, #218, #194):
 ## 3. Type conventions
 
 ```typescript
-// Callback overload + Promise overload pattern
+// Promise-returning (all native calls route through executeRpc now)
 export function initSdk(options: InitSdkOptions, successC?: SuccessCB, errorC?: ErrorCB): Promise<string>;
 
 // Event listener registration — returns cleanup function
 export function onDeepLink(callback: (data: UnifiedDeepLinkData) => void): () => void;
 
-// Enum-like frozen objects
+// Enum-like frozen objects (AFInAppEventType is now a plain JS object, not from getConstants())
+export const AFInAppEventType: { PURCHASE: string; ACHIEVEMENT_UNLOCKED: string; /* ... */ };
 export const AFPurchaseType: { SUBSCRIPTION: string; ONE_TIME_PURCHASE: string };
 ```
 
@@ -42,9 +43,9 @@ export const AFPurchaseType: { SUBSCRIPTION: string; ONE_TIME_PURCHASE: string }
 4. **Deprecation**: mark deprecated methods with `@deprecated` JSDoc tag. Keep the type signature for backward compatibility until removal.
 5. **New exports**: every named export from `index.js` needs a matching type in `index.d.ts`. Missing types = broken TypeScript consumers.
 
-## 5. Stale header
+## 5. Source of truth for method signatures
 
-The file header says "Sync with v5.1.1" — this is misleading (last real sync was long ago). Do not rely on this header for version tracking.
+Use `specs/001-turbomodule-rpc-bridge/data-model.md` §Method Catalog as the authoritative source for method names, param shapes, and platform coverage. The old "Sync with v5.1.1" header in the file is stale — ignore it. Verify types against the Method Catalog and both platforms' RPC reference docs before updating.
 
 ## 6. Validation approach
 

@@ -7,6 +7,8 @@ paths:
 
 Scope: `expo/` directory — `withAppsFlyer.js`, `withAppsFlyerIos.js`, `withAppsFlyerAndroid.js`.
 
+**7.0.x context**: The core `RNAppsFlyer` module is now a TurboModule. The Expo config plugin's job (modifying AppDelegate / AndroidManifest at prebuild time) is unchanged, but the **New Architecture must be enabled** in the host app — the plugin itself doesn't enforce this at prebuild time. Validation of the config plugin against a New-Architecture-only baseline is an open task (T064).
+
 ## 1. Config plugin structure
 
 ```

@@ -1,19 +1,37 @@
 # appsflyer-react-native-plugin
 
-React Native bridge plugin wrapping the AppsFlyer iOS and Android native SDKs via `NativeModules`.
+React Native bridge plugin wrapping the AppsFlyer iOS and Android native SDKs via a **New-Architecture TurboModule** (RN ≥ 0.76 required). Every native capability is routed through a single `executeRpc(requestJson)` call — no bespoke native method per feature.
+
+## Before writing any non-trivial code
+
+Use the **context7 MCP** to pull current best-practice documentation for any library or API you are about to touch. Focus on: performance (avoid redundant bridge crossings, prefer batched calls), efficiency (minimal allocations on the hot path, no blocking on the JS thread), clean code (idiomatic React Native / Swift / Kotlin patterns), and testability (seams that allow mocking at the TurboModule boundary without hitting native).
+
+```
+# Example: before changing TurboModule codegen or NativeEventEmitter wiring
+mcp__context7__resolve-library-id  →  /facebook/react-native
+mcp__context7__query-docs           →  "TurboModule NativeEventEmitter performance"
+```
+
+Pull docs for: `react-native` (TurboModule / Codegen), `jest` (mock patterns), `swift` / `kotlin` as needed. Prefer context7 over training-data recall for any versioned API — React Native's New Architecture APIs changed significantly in 0.74–0.76.
 
 ## Architecture
 
 ```
-index.js          ← JS API surface (plain JS, no build step)
-index.d.ts        ← Hand-maintained TypeScript declarations
-ios/RNAppsFlyer.m ← iOS bridge (RCTEventEmitter subclass)
-android/…/RNAppsFlyerModule.java ← Android bridge (ReactContextBaseJavaModule)
-expo/             ← Expo config plugin (withAppsFlyer*)
-PurchaseConnector/ ← Optional purchase validation module (TS)
+src/NativeAppsFlyer.ts          ← TurboModule Codegen spec (single executeRpc entry point)
+index.js                        ← JS API surface — typed wrappers over callRpc / NativeEventEmitter
+index.d.ts                      ← Hand-maintained TypeScript declarations
+ios/RNAppsFlyer.mm              ← iOS TurboModule (NativeAppsFlyerSpec, delegates to Swift impl)
+ios/RNAppsFlyerImpl.swift       ← iOS RPC dispatch + event-channel wiring
+android/…/RNAppsFlyerModule.kt  ← Android TurboModule (NativeAppsFlyerSpec)
+android/…/RNAppsFlyerPackage.kt ← Android package registration
+android/…/RpcInitGate.kt        ← Listener-registration buffer (holds dispatch until init resolves)
+ios/Frameworks/                 ← Vendored AppsFlyerRPC.xcframework (Phase A; replaced by CocoaPods in Phase B)
+android/libs/                   ← Vendored plugin_bridge + af-android-sdk .aar (Phase A; replaced by Maven in Phase B)
+expo/                           ← Expo config plugin (withAppsFlyer*)
+PurchaseConnector/              ← Optional purchase validation module (TS) — legacy bridge, out of scope for this rewrite
 ```
 
-Two native modules per platform: `RNAppsFlyer` (core) and `PCAppsFlyer` (purchase connector).
+Two native modules per platform: `RNAppsFlyer` (core, TurboModule) and `PCAppsFlyer` (purchase connector, still legacy bridge — untouched).
 
 ## Commands
 
@@ -47,12 +65,13 @@ cd demos/demo/android && ./gradlew clean
 
 ## Critical constraints
 
-- `onDeepLink` listener must register **before** `initSdk` — not after, not in a late-mounting component
-- `appId` is required on iOS (numeric Apple ID), optional on Android — use `Platform.select()`
+- `onDeepLink` / conversion-data / `registerSessionReadyListener` registration must be called **synchronously, before `init`'s promise settles** — the native RPC layer buffers listener-registration RPCs internally (`RpcInitGate.kt` / `RNAppsFlyerImpl.swift`) until `init` resolves, gated on actual native completion, not JS source-line order. Never defer registration into `init(...).then(...)` — that's too late. See `.claude/rules/bridge-patterns.md` §4.
+- `appId` is required on iOS (numeric Apple ID), unused on Android — pass it unconditionally to `init(devKey, appId)`; no `Platform.select()` needed. Confirmed against Android's own RPC source (`plugin_bridge`'s `InitRequest` data class has no `appId` field at all — the parser reads only `devKey` and silently ignores any extra JSON fields).
 - `index.js` is the published entry point with no transpilation — write ES module syntax compatible with Metro
-- `index.d.ts` is hand-maintained and drifts from runtime behavior — verify against native output on both platforms
-- Callbacks must fire exactly once across the bridge — Android uses `CallbackGuard` (AtomicBoolean + WeakReference)
-- Native SDK delegate callbacks must dispatch to main thread before emitting to JS
+- `index.d.ts` is hand-maintained — verify against the `data-model.md` Method Catalog and test on both platforms when changing
+- Every native call goes through `callRpc` / `callRpcVoid` / `callRpcWithCallback` → `NativeAppsFlyer.executeRpc` — do **not** reach for `NativeModules` directly
+- Any blocking native RPC call (e.g. `start`, `logEvent`, purchase validation) must dispatch off the JS thread — TurboModule codegen defaults do not guarantee this; verify with the native implementation
+- Do **not** add a `CallbackGuard` (`WeakReference`) to the TurboModule — that pattern fixed an Old-Architecture bridge destruction bug that doesn't exist under TurboModules; Promises are held strongly by the bridge
 
 ## Do not duplicate
 
