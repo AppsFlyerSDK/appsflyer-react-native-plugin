@@ -6,6 +6,7 @@
  */
 
 const path = require('path');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 
 const pluginRoot = path.resolve(__dirname, '../../'); // `react-native-appsflyer`
 const localPackagePaths = [pluginRoot];
@@ -14,15 +15,10 @@ const localPackagePaths = [pluginRoot];
 const blockDir = dir =>
   new RegExp(dir.replace(/[/\\]/g, '[/\\\\]') + '[/\\\\].*');
 
-module.exports = {
-  transformer: {
-    getTransformOptions: async () => ({
-      transform: {
-        experimentalImportSupport: false,
-        inlineRequires: true,
-      },
-    }),
-  },
+/**
+ * @type {import('@react-native/metro-config').MetroConfig}
+ */
+const config = {
   resolver: {
     nodeModulesPaths: [path.resolve(__dirname, 'node_modules'), ...localPackagePaths],
     extraNodeModules: {
@@ -43,3 +39,5 @@ module.exports = {
   },
   watchFolders: [...localPackagePaths],
 };
+
+module.exports = mergeConfig(getDefaultConfig(__dirname), config);
