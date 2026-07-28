@@ -89,6 +89,18 @@ In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in
 }
 ```
 
+The same forwarding is also available from JavaScript (iOS only):
+
+```javascript
+// URI-scheme deep link. Native reads only {url, options} —
+// `sourceApplication` and `annotation` are not supported.
+appsFlyer.handleOpenUrl(url, options);
+
+// Universal Link. `activityType` is optional and defaults
+// natively to NSUserActivityTypeBrowsingWeb.
+appsFlyer.continueUserActivity(webpageURL, activityType);
+```
+
 ### Universal Links
 Universal Links link between an iOS mobile app and an associate website/domain, such as AppsFlyer’s OneLink domain (xxx.onelink.me). To do so, it is required to:
 

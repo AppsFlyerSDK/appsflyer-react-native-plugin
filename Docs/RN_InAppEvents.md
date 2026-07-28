@@ -55,7 +55,9 @@ appsFlyer.logEvent(
 ---
 ## In-app purchase validation
 
-> ⚠️ **Deprecated**: The `validateAndLogInAppPurchase` API is deprecated. Use `validateAndLogInAppPurchaseV2` instead. See the [API reference](/Docs/RN_API.md#validateandloginapppurchasev2) for details.
+> ⚠️ **`callback` is currently inert**: no native event delivers a validation result yet — this
+> call only dispatches the RPC. See the [API reference](/Docs/RN_API.md#validateandloginapppurchase)
+> for the full signature and `AFPurchaseDetails`/`AFPurchaseType` shapes.
 
 Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.
 Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases).
@@ -63,24 +65,22 @@ Learn more [here](https://support.appsflyer.com/hc/en-us/articles/207032106-Rece
 ❗Important❗ for iOS - set SandBox to ```true```
 ```appsFlyer.setUseReceiptValidationSandbox(true);```
 
-| parameter       | type     | description                      |
-| ----------      |----------|------------------                |
-| purchaseInfo    | json     | In-App Purchase parameters      |
-| successC        | function | success callback (generated link) |
-| errorC          | function | error callback                   |
+| parameter            | type                 | description                                   |
+| -------------------- | -------------------- | ---------------------------------------------- |
+| purchaseDetails      | `AFPurchaseDetails`  | `{ purchaseType, transactionId, productId }`   |
+| additionalParameters | object               | extra data to attach to the validation request |
+| callback             | function             | currently inert — see note above               |
 
 *Example:*
+
 ```javascript
-let info = {
-        publicKey: 'key',
-        currency: 'biz',
-        signature: 'sig',
-        purchaseData: 'data',
-        price: '123',
-        productIdentifier: 'identifier',
-        currency: 'USD',
-        transactionId: '1000000614252747',
-        additionalParameters: {'foo': 'bar'},
-    };
-appsFlyer.validateAndLogInAppPurchase(info, res => console.log(res), err => console.log(err));
+import appsFlyer, { AFPurchaseType } from 'react-native-appsflyer';
+
+const purchaseDetails = {
+  purchaseType: AFPurchaseType.ONE_TIME_PURCHASE,
+  transactionId: '1000000614252747',
+  productId: 'identifier',
+};
+
+appsFlyer.validateAndLogInAppPurchase(purchaseDetails, { foo: 'bar' });
 ```

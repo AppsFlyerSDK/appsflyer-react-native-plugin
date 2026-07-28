@@ -41,9 +41,23 @@ appsFlyer.initSdk({
 appsFlyer.setIsDebug(true);              // was: isDebug
 appsFlyer.onInstallConversionData(cb);   // was: onInstallConversionDataListener — already registers natively
 appsFlyer.onDeepLink(cb);                // was: onDeepLinkListener — already registers natively
+// startSdk() is always explicit now (manualStart had no effect either way), but it is NOT a
+// bare call after init() — the native SDK never auto-starts, so startSdk() must be called
+// from inside registerSessionReadyListener's callback (AppsFlyerLib.h: "Call start inside the
+// block. The SDK does not call start automatically."). registerSessionReadyListener must also
+// be registered synchronously, before init()'s promise settles, same as the listeners above.
+appsFlyer.registerSessionReadyListener(() => {
+  appsFlyer.startSdk().then(onSuccess, onError);
+});
 appsFlyer.init('xxxx', '777').then(onSuccess, onError);
-appsFlyer.startSdk();                    // always explicit now — manualStart had no effect either way
 ```
+
+Calling `startSdk()` right after `init()` outside of `registerSessionReadyListener`'s callback
+is a common migration mistake — it may appear to work but doesn't follow the documented native
+contract and can start the SDK before the session is actually ready. See
+`.claude/rules/bridge-patterns.md` §4 for the full listener-ordering contract and the
+`startWhenSessionReady()` Promise-wrapping pattern if your app needs deterministic code
+ordering after start.
 
 `timeToWaitForATTUserAuthorization` has no replacement yet — the current native RPC layer
 has no App Tracking Transparency timing method exposed. This is a known gap, not a silent
@@ -98,21 +112,102 @@ native param names (e.g. in a patch or a custom native extension).
 appsFlyer.setHost('mycompany', 'onelink.me', successCallback);
 ```
 
-### `validateAndLogInAppPurchase` (legacy, non-V2) — removed
+### `setUserEmails(options)` — replaced by `setUserEmail(email)`
 
-The pre-V2 purchase validation API is removed entirely, with no adapter. It already
-carried a deprecation warning since 6.4.0. Use `validateAndLogInAppPurchaseV2` or
-`AppsFlyerPurchaseConnector` instead.
+SDK7's RPC layer exposes only a single-address `setUserEmail`, which reads one `email` param.
+Neither the `emails` array nor `emailsCryptType` has a native counterpart on either platform,
+so `AF_EMAIL_CRYPT_TYPE` is now meaningless for this call. `setUserEmails` stays as a
+deprecated shim: it logs a warning and forwards only the **first** address.
 
 ```js
-// 6.x (removed in 7.0.0)
+// 6.x
+appsFlyer.setUserEmails({
+  emailsCryptType: 3,
+  emails: ['user1@gmail.com', 'user2@gmail.com'],
+}, onSuccess, onError);
+
+// 7.0.0
+appsFlyer.setUserEmail('user1@gmail.com', onSuccess, onError);
+```
+
+There is no replacement for sending more than one address per user.
+
+### `performOnDeepLinking()` — now takes a URL
+
+Native reads `{url, shouldTriggerSession}`. The old no-arg form resolved the empty string, so
+it was a silent no-op. Android-only; `shouldTriggerSession` defaults to `false`.
+
+```js
+// 6.x — resolved the empty string, did nothing
+appsFlyer.performOnDeepLinking();
+
+// 7.0.0
+appsFlyer.performOnDeepLinking(deepLinkUrl);
+appsFlyer.performOnDeepLinking(deepLinkUrl, true); // also start a session
+```
+
+### `sendPushNotificationData` — Android needs explicit campaign fields
+
+The platforms diverged in SDK7. iOS still takes the raw notification payload and locates the
+`af` block itself. Android dropped raw-payload support and builds an `AFPushData` from explicit
+fields, so a third argument carries them: `{campaign?, pid?, isRetargeting?, additionalParameters?}`.
+
+```js
+// 6.x — one raw payload for both platforms
+appsFlyer.sendPushNotificationData(pushPayload, onError);
+
+// 7.0.0 — iOS reads pushPayload as before; Android reads the third argument
+appsFlyer.sendPushNotificationData(pushPayload, onError, {
+  campaign: 'holiday_sale',
+  pid: 'push_provider_int',
+  isRetargeting: true,
+});
+```
+
+Omitting the third argument logs a warning and reports an empty re-engagement **on Android
+only** — iOS is unaffected. The change is additive, so iOS-only apps need no code change.
+
+### `generateInviteLink` — `deeplinkPath` deprecated and ignored
+
+`deeplinkPath` has no native counterpart on either platform. It is now ignored and logs a
+warning. `customerID` and `baseDeeplink` still work — the plugin translates them to the native
+key names internally (iOS `referrerCustomerId`, Android `customerId`, both `baseDeepLink`), so
+call sites using them are unchanged.
+
+```js
+// 6.x
+appsFlyer.generateInviteLink({
+  channel: 'gmail',
+  customerID: '1234',
+  deeplinkPath: 'af_sub1',
+}, onSuccess, onError);
+
+// 7.0.0
+appsFlyer.generateInviteLink({
+  channel: 'gmail',
+  customerID: '1234',
+}, onSuccess, onError);
+```
+
+### `validateAndLogInAppPurchase(purchaseInfo, successC, errorC)` — signature replaced
+
+The pre-7.0.0 3-positional-argument signature is removed entirely, with no adapter. It already
+carried a deprecation warning since 6.4.0. The `validateAndLogInAppPurchase` name is reused in
+7.0.0 for the `AFPurchaseDetails`-based API (an in-development "V2" API in earlier 7.0.0
+pre-releases, renamed back to the original name once the legacy signature was gone). Use it, or
+`AppsFlyerPurchaseConnector`, instead.
+
+```js
+// 6.x (signature removed in 7.0.0)
 appsFlyer.validateAndLogInAppPurchase(purchaseInfo, onSuccess, onError);
 
-// 7.0.0 — use the V2 API (event-emitter based result)
-const remove = appsFlyer.validateAndLogInAppPurchaseV2(
+// 7.0.0 — same name, new AFPurchaseDetails-based signature.
+// Note: the `callback` argument is currently inert — no native event delivers a validation
+// result yet, so this only dispatches the RPC. Don't rely on it firing.
+appsFlyer.validateAndLogInAppPurchase(
   purchaseDetails,
   additionalParameters,
-  (result) => { /* ... */ }
+  (result) => { /* not currently invoked */ }
 );
 ```
 
@@ -189,6 +284,17 @@ package ever accepted it. Use `AFPurchaseDetails` (the type `validateAndLogInApp
 actually takes).
 
 ## Internal-mechanism changes (not breaking, documented for transparency)
+
+### `stop(false)` now actually resumes the SDK on Android
+
+Android's RPC parser defaults a missing `shouldStop` key to `true`, and the flag wasn't being
+sent, so an app that called `stop(false)` could never resume the SDK. The flag is now sent
+explicitly. The call signature is unchanged; if you worked around this, the workaround can go.
+
+```js
+// 6.x and 7.0.0 — call site is identical, but only 7.0.0 actually resumes on Android
+appsFlyer.stop(false);
+```
 
 ### `Response<T>` (TypeScript type, dead type) — removed
 

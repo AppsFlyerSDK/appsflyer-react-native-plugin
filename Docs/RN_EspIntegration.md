@@ -129,6 +129,10 @@ public class AppDelegate: ExpoAppDelegate {
 }
 ```
 
+The same forwarding can be done from JavaScript with `appsFlyer.handleOpenUrl(url, options)` and
+`appsFlyer.continueUserActivity(webpageURL, activityType)` (iOS only) — see
+[Deep linking integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup).
+
 ---
 
 ## 🤖 Android Platform Preparation
