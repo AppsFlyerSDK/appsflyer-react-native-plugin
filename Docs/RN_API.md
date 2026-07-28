@@ -26,13 +26,15 @@ The list of available methods for this plugin is described below.
   - [getAppsFlyerUID](#getappsflyeruid)
   - [getSDKVersion](#getsdkversion)
   - [setHost](#sethost)
-  - [setUserEmails *Soon to be deprecated*](#setuseremails-soon-to-be-deprecated)
+  - [setUserEmail](#setuseremail)
+  - [setUserEmails *Deprecated*](#setuseremails-deprecated)
+  - [setUserPhone](#setuserphone)
+  - [setUserFbLoginId](#setuserfbloginid)
   - [generateInviteLink](#generateinvitelink)
   - [setSharingFilterForAllPartners](#setsharingfilterforallpartners)
   - [setSharingFilter](#setsharingfilter)
   - [setSharingFilterForPartners](#setsharingfilterforpartners)
   - [validateAndLogInAppPurchase](#validateandloginapppurchase)
-  - [validateAndLogInAppPurchaseV2](#validateandloginapppurchasev2)
     - [AFPurchaseType Enum](#afpurchasetype-enum)
     - [AFPurchaseDetails Interface](#afpurchasedetails-interface)
     - [Usage Example](#usage-example)
@@ -56,13 +58,14 @@ The list of available methods for this plugin is described below.
   - [setUseReceiptValidationSandbox](#setusereceiptvalidationsandbox)
   - [disableSKAD](#disableskad)
   - [setCurrentDeviceLanguage](#setcurrentdevicelanguage)
+  - [handleOpenUrl](#handleopenurl)
+  - [continueUserActivity](#continueuseractivity)
 - [AppsFlyerConversionData](#appsflyerconversiondata)
   - [onInstallConversionData](#oninstallconversiondata)
   - [onInstallConversionFailure](#oninstallconversionfailure)
   - [onAppOpenAttribution](#onappopenattribution)
   - [onAttributionFailure](#onattributionfailure)
   - [onDeepLink](#ondeeplink)
-<!--  - [validateAndLogInAppPurchase(NEW)](#validateandloginapppurchasev2) -->
 - [APIs](#apis)
 - [Android and iOS APIs](#android-and-ios-apis)
   - [initSdk](#initsdk)
@@ -80,13 +83,15 @@ The list of available methods for this plugin is described below.
   - [getAppsFlyerUID](#getappsflyeruid)
   - [getSDKVersion](#getsdkversion)
   - [setHost](#sethost)
-  - [setUserEmails *Soon to be deprecated*](#setuseremails-soon-to-be-deprecated)
+  - [setUserEmail](#setuseremail)
+  - [setUserEmails *Deprecated*](#setuseremails-deprecated)
+  - [setUserPhone](#setuserphone)
+  - [setUserFbLoginId](#setuserfbloginid)
   - [generateInviteLink](#generateinvitelink)
   - [setSharingFilterForAllPartners](#setsharingfilterforallpartners)
   - [setSharingFilter](#setsharingfilter)
   - [setSharingFilterForPartners](#setsharingfilterforpartners)
   - [validateAndLogInAppPurchase](#validateandloginapppurchase)
-  - [validateAndLogInAppPurchaseV2](#validateandloginapppurchasev2)
     - [AFPurchaseType Enum](#afpurchasetype-enum)
     - [AFPurchaseDetails Interface](#afpurchasedetails-interface)
     - [Usage Example](#usage-example)
@@ -110,6 +115,8 @@ The list of available methods for this plugin is described below.
   - [setUseReceiptValidationSandbox](#setusereceiptvalidationsandbox)
   - [disableSKAD](#disableskad)
   - [setCurrentDeviceLanguage](#setcurrentdevicelanguage)
+  - [handleOpenUrl](#handleopenurl)
+  - [continueUserActivity](#continueuseractivity)
 - [AppsFlyerConversionData](#appsflyerconversiondata)
   - [onInstallConversionData](#oninstallconversiondata)
   - [onInstallConversionFailure](#oninstallconversionfailure)
@@ -539,12 +546,41 @@ appsFlyer.setHost('foo', 'bar.appsflyer.com', res => console.log(res));
 ```
 ---
 
-### setUserEmails *Soon to be deprecated*
-`setUserEmails(options, success, error)`
+### setUserEmail
+`setUserEmail(email, success, error)`
 
-Set the user emails and encrypt them.
-**Note:** Android and iOS platforms supports only 0 (none) and 3 (SHA256) emailsCryptType.
-When unsupported emailsCryptType is passed, the SDK will use the default (none).
+Set the user email. The email is hashed by the native SDK before transmission.
+
+| parameter       | type     | description               |
+| ----------      |----------|------------------         |
+| email           | string   | the user's email address  |
+| success         | function | success callback          |
+| error           | function | error callback            |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setUserEmail(
+  'user1@gmail.com',
+  (res) => {
+    //...
+  },
+  (err) => {
+    console.error(err);
+  }
+);
+```
+
+---
+
+### setUserEmails *Deprecated*
+`setUserEmails(options, success, error)`
+> **Deprecated!** Use [setUserEmail](#setuseremail).
+
+The native SDK exposes a single-address `setUserEmail` only. Neither the `emails` array nor
+`emailsCryptType` has a native counterpart on either platform, so `AF_EMAIL_CRYPT_TYPE` is
+meaningless for this call. This method logs a warning and forwards **only the first** address.
 
 | parameter       | type     | description               |
 | ----------      |----------|------------------         |
@@ -555,28 +591,46 @@ When unsupported emailsCryptType is passed, the SDK will use the default (none).
 
 | option          | type  | description  |
 | --------------  | ----  |------------- |
-| emailsCryptType | int   | none - 0 (default), SHA256 - 3 |
-| emails          | array | comma separated list of emails |
+| emailsCryptType | int   | ignored |
+| emails          | array | only the first address is sent |
+
+---
+
+### setUserPhone
+`setUserPhone(countryCode, phoneNumber)`
+
+Set the user phone number. The number is hashed by the native SDK before transmission.<br>
+The native SDK reads a split country code and subscriber number — a single combined string is not supported.
+
+| parameter       | type     | description               |
+| ----------      |----------|------------------         |
+| countryCode     | string   | country code, e.g. `'1'` or `'+1'` |
+| phoneNumber     | string   | subscriber number, without the country code |
 
 
 *Example:*
 
 ```javascript
-const options = {
-  // In this case iOS platform will encrypt emails using MD5 and android with SHA256. If you want both platform to encrypt with the same method, just write 0 or 3.
-  emailsCryptType: Platform.OS === 'ios' ? 0 : 3, 
-  emails: ['user1@gmail.com', 'user2@gmail.com'],
-};
+appsFlyer.setUserPhone('1', '5551234567');
+```
 
-appsFlyer.setUserEmails(
-  options,
-  (res) => {
-    //...
-  },
-  (err) => {
-    console.error(err);
-  }
-);
+---
+
+### setUserFbLoginId
+`setUserFbLoginId(fbLoginId)`
+
+Set the user's Facebook login ID. The ID is sent as a JSON number — iOS parses it with `requireInt64` and rejects a JSON string, so a numeric string is coerced for you.
+
+| parameter       | type              | description                |
+| ----------      |-------------------|------------------          |
+| fbLoginId       | string \| number  | numeric Facebook login ID  |
+
+
+*Example:*
+
+```javascript
+appsFlyer.setUserFbLoginId(1234567890);
+appsFlyer.setUserFbLoginId('1234567890'); // coerced to a number
 ```
 
 ---
@@ -616,6 +670,10 @@ appsFlyer.generateInviteLink(
 ```
 
 A complete list of supported parameters is available [here](https://support.appsflyer.com/hc/en-us/articles/115004480866-User-Invite-Tracking). Custom parameters can be passed using a userParams{} nested object, as in the example above.
+
+Note:<br>
+1. `deeplinkPath` is **deprecated and ignored** — it has no native counterpart on either platform. Passing it logs a warning.
+2. `customerID` and `baseDeeplink` are supported. The plugin translates them to the native key names for you (iOS `referrerCustomerId`, Android `customerId`, both `baseDeepLink`).
 
 ---
 
@@ -676,47 +734,20 @@ appsFlyer.setSharingFilterForPartners(['googleadwords_int', 'all']);            
 ---
 
 ### validateAndLogInAppPurchase
-`validateAndLogInAppPurchase(purchaseInfo, successC, errorC): Response<string>`
+`validateAndLogInAppPurchase(purchaseDetails, additionalParameters, callback): void`
 
-> ⚠️ **Deprecated**: This API is deprecated. Use `validateAndLogInAppPurchaseV2` instead.
+> ⚠️ **`callback` is currently inert**: no native event delivers a validation result yet — this
+> call only dispatches the RPC (fire-and-forget). A 401/500 response logged via `console.warn`
+> is an expected server-side rejection when the app isn't registered for purchase validation,
+> not a bridge failure. The pre-7.0.0 `(purchaseInfo, successC, errorC)` signature was removed
+> with no adapter — see [MIGRATION.md](/MIGRATION.md).
 
 Receipt validation is a secure mechanism whereby the payment platform (e.g. Apple or Google) validates that an in-app purchase indeed occurred as reported.
 Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-validation-for-in-app-purchases
 ❗Important❗ for iOS - set SandBox to ```true```
 ```appsFlyer.setUseReceiptValidationSandbox(true);```
 
-
-| parameter       | type     | description                      |
-| ----------      |----------|------------------                |
-| purchaseInfo      | json     | In-App Purchase parameters      |
-| successC         | function | success callback (generated link)|
-| errorC           | function | error callback                   |
-
-
-*Example:*
-
-```javascript
-let info = {
-        publicKey: 'key',
-        currency: 'biz',
-        signature: 'sig',
-        purchaseData: 'data',
-        price: '123',
-        productIdentifier: 'identifier',
-        currency: 'USD',
-        transactionId: '1000000614252747',
-        additionalParameters: {'foo': 'bar'},
-    };
-
-appsFlyer.validateAndLogInAppPurchase(info, res => console.log(res), err => console.log(err));
-```
-
----
-
-### validateAndLogInAppPurchaseV2
-`validateAndLogInAppPurchaseV2(purchaseDetails, additionalParameters, callback): void`
-
-The `validateAndLogInAppPurchaseV2` API uses `AFPurchaseDetails` and `AFPurchaseType` enum for structured purchase validation.
+The `validateAndLogInAppPurchase` API uses `AFPurchaseDetails` and `AFPurchaseType` enum for structured purchase validation.
 
 #### AFPurchaseType Enum
 
@@ -753,22 +784,16 @@ const additionalParams = {
   currency: "USD"
 };
 
-appsFlyer.validateAndLogInAppPurchaseV2(
-  purchaseDetails,
-  additionalParams,
-  (result) => {
-    if (result.error) {
-      console.error('Validation failed:', result.error);
-    } else {
-      console.log('Validation success:', result);
-    }
-  }
-);
+appsFlyer.validateAndLogInAppPurchase(purchaseDetails, additionalParams);
 ```
+
 **Important Notes:**
-- The callback receives both `result` and `error` parameters
-- Always check for `error` first before processing `result`
-- Handle the case where `AFSDKPurchaseDetails` creation might fail
+
+- The third `callback` argument is accepted for signature compatibility but is currently never
+  invoked — no native event delivers a validation result yet. Don't rely on it.
+- A 401/500 logged via `console.warn` after calling this means the app isn't registered for
+  purchase validation on the server side — expected, not a bridge failure.
+
 ---
 
 ### updateServerUninstallToken
@@ -793,16 +818,27 @@ appsFlyer.updateServerUninstallToken('token', (res) => {
 ---
 
 ### sendPushNotificationData
-`sendPushNotificationData(pushPayload, ErrorCB): void`
+`sendPushNotificationData(pushPayload, ErrorCB, androidCampaignData): void`
 Push-notification campaigns are used to create fast re-engagements with existing users.<br>
 [Learn more](https://support.appsflyer.com/hc/en-us/articles/207364076-Measuring-Push-Notification-Re-Engagement-Campaigns)<br>
 For Android platform, AppsFlyer SDK uses the activity in order to process the push payload. Make sure you call this api when the app's activity is available (NOT dead state).<br>
 From version ***6.6.0*** we added an error callback that returns an error message.<br>
+The platforms read different parts of the call: iOS takes the raw notification payload and locates the `af` block itself, while Android builds an `AFPushData` from the explicit fields in `androidCampaignData`.<br>
+If `androidCampaignData` is omitted, a warning is logged and Android reports an empty re-engagement. iOS is unaffected.<br>
 
 | parameter       | type     | description                      |
 | ----------      |----------|------------------                |
-| pushPayload      | json     | push notification payload      |
+| pushPayload      | json     | push notification payload (read by iOS)      |
 | ErrorCB      | function     | returns an error msg when the payload has not been sent      |
+| androidCampaignData | json | Android campaign fields — see below      |
+
+
+| androidCampaignData  | type    | description  |
+| -------------------  | ----    |------------- |
+| campaign             | string  | campaign name |
+| pid                  | string  | media source identifier |
+| isRetargeting        | boolean | true for a re-engagement |
+| additionalParameters | json    | additional campaign parameters |
 
 
 *Example:*
@@ -820,7 +856,15 @@ const pushPayload = {
                 sound:"default"
             }
         };
-        appsFlyer.sendPushNotificationData(pushPayload, err => console.log(err));
+        appsFlyer.sendPushNotificationData(
+          pushPayload,
+          err => console.log(err),
+          {
+            campaign: 'test_campaign',
+            pid: 'push_provider_int',
+            isRetargeting: true,
+          }
+        );
 ```
 
 ---
@@ -1074,10 +1118,15 @@ appsFlyer.setDisableNetworkData(true);
 ```
 
 ### performOnDeepLinking 
-`performOnDeepLinking()`
+`performOnDeepLinking(url, shouldTriggerSession)`
 
-Enables manual triggering of deep link resolution. This method allows apps that are delaying the call to `appsFlyer.startSdk()` to resolve deep links before the SDK starts.<br>
+Enables manual triggering of deep link resolution for a given URL. This method allows apps that are delaying the call to `appsFlyer.startSdk()` to resolve deep links before the SDK starts.<br>
 Note:<br>This API will trigger the `appsFlyer.onDeepLink` callback. In the following example, we check if `res.deepLinkStatus` is equal to “FOUND” inside `appsFlyer.onDeepLink` callback to extract the deeplink parameters.
+
+| parameter            | type     | description               |
+| ----------           |----------|------------------         |
+| url                  | string   | the deep link URL to resolve |
+| shouldTriggerSession  | boolean  | whether resolution should also start a session. Defaults to false. |
 
 *Example:*
 ```javascript
@@ -1112,7 +1161,7 @@ appsFlyer.initSdk(
 );
 
 if (Platform.OS == 'android') {
-  appsFlyer.performOnDeepLinking();
+  appsFlyer.performOnDeepLinking(deepLinkUrl);
 }
 
 // more app flow...
@@ -1232,6 +1281,49 @@ If you want to clear this property, set an empty string. ("")
 ```javascript
 if (Platform.OS == 'ios') {
     appsFlyer.setCurrentDeviceLanguage("EN");
+}
+```
+
+---
+
+### handleOpenUrl 
+`handleOpenUrl(url, options)`
+
+Forwards a URI-scheme deep link (the `application:openURL:sourceApplication:annotation:` path) to the SDK.<br>
+The native SDK reads only the URL and the options dictionary — `sourceApplication` and `annotation` are not supported.
+
+| parameter | type     | description      |
+| ----------|----------|------------------|
+| url       | string   | the opened URL |
+| options   | json     | the openURL options dictionary. Optional. |
+
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'ios') {
+    appsFlyer.handleOpenUrl(url, options);
+}
+```
+
+---
+
+### continueUserActivity 
+`continueUserActivity(url, activityType)`
+
+Forwards a Universal Link (from `application:continueUserActivity:restorationHandler:`) to the SDK.
+
+| parameter    | type     | description      |
+| ----------   |----------|------------------|
+| url          | string   | the activity's `webpageURL` |
+| activityType | string   | the activity type. Optional — defaults natively to `NSUserActivityTypeBrowsingWeb`. |
+
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'ios') {
+    appsFlyer.continueUserActivity(userActivity.webpageURL);
 }
 ```
 
