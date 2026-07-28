@@ -118,8 +118,10 @@ describe('Backward Compatibility Tests', () => {
       );
     });
 
-    test('validateAndLogInAppPurchase (legacy, non-V2) is removed', () => {
-      expect(appsFlyer.validateAndLogInAppPurchase).toBeUndefined();
+    test('validateAndLogInAppPurchase legacy (purchaseInfo, successC, errorC) signature is gone — new AFPurchaseDetails signature dispatches the RPC instead', () => {
+      appsFlyer.validateAndLogInAppPurchase({ productId: 'sku', transactionId: 'txn', purchaseType: 'subscription' });
+      const [requestJson] = NativeAppsFlyer.executeRpc.mock.calls[0];
+      expect(JSON.parse(requestJson).method).toBe('validateAndLogInAppPurchase');
     });
 
     test('setCollectIMEI is removed', () => {
