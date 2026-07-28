@@ -1,1 +1,3 @@
-{"feature_directory":"specs/002-demo-apps-rpc-verification"}
+{
+  "feature_directory": "specs/003-release-workflow-rpc-bump"
+}
