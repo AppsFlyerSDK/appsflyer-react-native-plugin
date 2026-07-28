@@ -1,5 +1,5 @@
-import appsFlyer, { AppsFlyerConsent, AFParseJSONException } from '../index';
-import { NativeEventEmitter } from 'react-native';
+import appsFlyer, { AppsFlyerConsent, AFParseJSONException, AFPurchaseType, MEDIATION_NETWORK } from '../index';
+import { NativeEventEmitter, Platform } from 'react-native';
 import NativeAppsFlyer from '../src/NativeAppsFlyer';
 
 function mockRpcResponse(data = {}) {
@@ -50,14 +50,14 @@ describe("Test appsFlyer API's", () => {
 	test('it calls appsFlyer.stop', () => {
 		appsFlyer.stop(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'stop', params: { isStopped: true } })
+			JSON.stringify({ method: 'stop', params: { shouldStop: true } })
 		);
 	});
 
 	test('it calls appsFlyer.stop with callback', () => {
 		appsFlyer.stop(true, jest.fn);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'stop', params: { isStopped: true } })
+			JSON.stringify({ method: 'stop', params: { shouldStop: true } })
 		);
 	});
 
@@ -145,24 +145,32 @@ describe("Test appsFlyer API's", () => {
 		);
 	});
 
-	test('it calls appsFlyer.setUserEmails', () => {
-		appsFlyer.setUserEmails({}, jest.fn, jest.fn);
+	test('it calls appsFlyer.setUserEmail', () => {
+		appsFlyer.setUserEmail('a@b.com', jest.fn, jest.fn);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setUserEmails', params: {} })
+			JSON.stringify({ method: 'setUserEmail', params: { email: 'a@b.com' } })
+		);
+	});
+
+	// Deprecated shim: the multi-address + crypt-type form has no native counterpart; forwards the first address.
+	test('it calls appsFlyer.setUserEmails (deprecated) forwarding the first address', () => {
+		appsFlyer.setUserEmails({ emails: ['a@b.com', 'c@d.com'] }, jest.fn, jest.fn);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'setUserEmail', params: { email: 'a@b.com' } })
 		);
 	});
 
 	test('it calls appsFlyer.setAdditionalData with callback', () => {
 		appsFlyer.setAdditionalData({}, jest.fn);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setAdditionalData', params: {} })
+			JSON.stringify({ method: 'setAdditionalData', params: { customData: {} } })
 		);
 	});
 
 	test('it calls appsFlyer.setAdditionalData with no callback', () => {
 		appsFlyer.setAdditionalData({});
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setAdditionalData', params: {} })
+			JSON.stringify({ method: 'setAdditionalData', params: { customData: {} } })
 		);
 	});
 
@@ -173,38 +181,85 @@ describe("Test appsFlyer API's", () => {
 		);
 	});
 
+	// Regression: mock only modeled Android's bare-value shape, so iOS's keyed-dict shape ({uid}, {version}) went uncovered.
+	describe('getter resolved values are platform-neutral', () => {
+		const fromCallback = (invoke) =>
+			new Promise((resolve, reject) =>
+				invoke((error, value) => (error ? reject(error) : resolve(value)))
+			);
+
+		test.each([
+			['iOS keyed dict', { uid: 'af-uid-1' }],
+			['Android bare value', 'af-uid-1'],
+		])('getAppsFlyerUID resolves a string given an %s', async (_shape, data) => {
+			NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse(data));
+			await expect(fromCallback(appsFlyer.getAppsFlyerUID)).resolves.toBe('af-uid-1');
+		});
+
+		test.each([
+			['iOS keyed dict', { version: '7.0.1' }],
+			['Android bare value', '7.0.1'],
+		])('getSDKVersion resolves a string given an %s', async (_shape, data) => {
+			NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse(data));
+			await expect(fromCallback(appsFlyer.getSDKVersion)).resolves.toBe('7.0.1');
+		});
+
+		// Guards against a truthiness rewrite: `data.x || data` would wrongly resolve true here.
+		test('isSessionReady unwraps a falsy keyed value', async () => {
+			await appsFlyer.isSessionReady(); // burn the one-time listener registration RPC
+			NativeAppsFlyer.executeRpc.mockResolvedValueOnce(
+				mockRpcResponse({ isSessionReady: false })
+			);
+			await expect(appsFlyer.isSessionReady()).resolves.toBe(false);
+		});
+
+		// iOS used to leak its {success, message} status envelope here instead of resolving null.
+		test('a void RPC resolves null, not a status envelope', async () => {
+			NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse(null));
+			await expect(
+				new Promise((resolve) => appsFlyer.stop(true, resolve))
+			).resolves.toBeNull();
+		});
+	});
+
 	test('it calls appsFlyer.updateServerUninstallToken', () => {
 		appsFlyer.updateServerUninstallToken('xxx', jest.fn);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'updateServerUninstallToken', params: { token: 'xxx' } })
+			JSON.stringify({
+				method: 'updateServerUninstallToken',
+				params: { token: 'xxx', deviceToken: 'xxx' },
+			})
 		);
 	});
 
 	test('it calls appsFlyer.updateServerUninstallToken', () => {
 		appsFlyer.updateServerUninstallToken('xxx');
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'updateServerUninstallToken', params: { token: 'xxx' } })
+			JSON.stringify({
+				method: 'updateServerUninstallToken',
+				params: { token: 'xxx', deviceToken: 'xxx' },
+			})
 		);
 	});
 
 	test('it calls appsFlyer.setCustomerUserId', () => {
 		appsFlyer.setCustomerUserId('xxx', jest.fn);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setCustomerUserId', params: { userId: 'xxx' } })
+			JSON.stringify({ method: 'setCustomerUserId', params: { customerId: 'xxx' } })
 		);
 	});
 
 	test('it calls appsFlyer.setCustomerUserId', () => {
 		appsFlyer.setCustomerUserId('xxx');
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setCustomerUserId', params: { userId: 'xxx' } })
+			JSON.stringify({ method: 'setCustomerUserId', params: { customerId: 'xxx' } })
 		);
 	});
 
 	test('it calls appsFlyer.setPartnerData', () => {
 		appsFlyer.setPartnerData('xxx', {});
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setPartnerData', params: { partnerId: 'xxx', partnerData: {} } })
+			JSON.stringify({ method: 'setPartnerData', params: { partnerId: 'xxx', data: {} } })
 		);
 	});
 
@@ -216,7 +271,7 @@ describe("Test appsFlyer API's", () => {
 		// typeof null === "object", so the existing guard lets this call through unchanged.
 		appsFlyer.setPartnerData('xxx', null);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setPartnerData', params: { partnerId: 'xxx', partnerData: null } })
+			JSON.stringify({ method: 'setPartnerData', params: { partnerId: 'xxx', data: null } })
 		);
 	});
 	test('it calls appsFlyer.setPartnerData', () => {
@@ -256,28 +311,57 @@ describe("Test appsFlyer API's", () => {
 	test('it calls appsFlyer.stop(true)', () => {
 		appsFlyer.stop(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'stop', params: { isStopped: true } })
+			JSON.stringify({ method: 'stop', params: { shouldStop: true } })
 		);
 	});
 
 	test('it calls appsFlyer.stop(true, cb)', () => {
 		appsFlyer.stop(true, jest.fn);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'stop', params: { isStopped: true } })
+			JSON.stringify({ method: 'stop', params: { shouldStop: true } })
+		);
+	});
+
+	// Regression: Android's parser reads optBoolean('shouldStop', true) — a missing key leaves the SDK stopped forever.
+	test('it calls appsFlyer.stop(false) with shouldStop:false', () => {
+		appsFlyer.stop(false);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({ method: 'stop', params: { shouldStop: false } })
 		);
 	});
 
 	test('it calls appsFlyer.sendPushNotificationData({}, errorCb)', () => {
-		appsFlyer.sendPushNotificationData({ foo: 'bar' }, jest.fn);
+		appsFlyer.sendPushNotificationData({ foo: 'bar' }, jest.fn, {
+			campaign: 'c1',
+			pid: 'firebase',
+			isRetargeting: true,
+		});
+		// iOS reads the raw pushPayload; Android reads the flat campaign fields.
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'sendPushNotificationData', params: { foo: 'bar' } })
+			JSON.stringify({
+				method: 'sendPushNotificationData',
+				params: {
+					pushPayload: { foo: 'bar' },
+					campaign: 'c1',
+					pid: 'firebase',
+					isRetargeting: true,
+				},
+			})
 		);
 	});
 
 	test('it calls appsFlyer.sendPushNotificationData({})', () => {
 		appsFlyer.sendPushNotificationData({ foo: 'bar' });
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'sendPushNotificationData', params: { foo: 'bar' } })
+			JSON.stringify({
+				method: 'sendPushNotificationData',
+				params: {
+					pushPayload: { foo: 'bar' },
+					campaign: '',
+					pid: '',
+					isRetargeting: false,
+				},
+			})
 		);
 	});
 
@@ -301,7 +385,7 @@ describe("Test appsFlyer API's", () => {
 	test('it calls appsFlyer.setDisableNetworkData(true)', () => {
 		appsFlyer.setDisableNetworkData(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setDisableNetworkData', params: { disable: true } })
+			JSON.stringify({ method: 'setDisableNetworkData', params: { isDisable: true } })
 		);
 	});
 
@@ -325,14 +409,17 @@ describe("Test appsFlyer API's", () => {
 	test('it calls appsFlyer.performOnDeepLinking()', () => {
 		appsFlyer.performOnDeepLinking();
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'performDeepLinking', params: {} })
+			JSON.stringify({
+				method: 'performDeepLinking',
+				params: { url: '', shouldTriggerSession: false },
+			})
 		);
 	});
 
 	test('it calls appsFlyer.disableIDFVCollection()', () => {
 		appsFlyer.disableIDFVCollection(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setDisableIDFVCollection', params: { shouldDisable: true } })
+			JSON.stringify({ method: 'setDisableIDFVCollection', params: { disable: true } })
 		);
 	});
 
@@ -348,6 +435,59 @@ describe("Test appsFlyer API's", () => {
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
 			JSON.stringify({ method: 'logAdRevenue', params: adRevenueData })
 		);
+	});
+
+	// Android's RPC layer requires an exact mediationNetwork string match (no normalization);
+	// iOS lowercases and strips underscores before matching. A few MEDIATION_NETWORK constants
+	// don't survive Android's exact match as-is — logAdRevenue must resolve them per-platform.
+	describe('logAdRevenue mediationNetwork per-platform resolution', () => {
+		const originalOS = Platform.OS;
+
+		afterEach(() => {
+			Platform.OS = originalOS;
+		});
+
+		function paramsSentFor(mediationNetwork) {
+			appsFlyer.logAdRevenue({
+				monetizationNetwork: 'test_network',
+				mediationNetwork,
+				currencyIso4217Code: 'USD',
+				revenue: 1,
+			});
+			const calls = NativeAppsFlyer.executeRpc.mock.calls;
+			const [requestJson] = calls[calls.length - 1];
+			return JSON.parse(requestJson).params;
+		}
+
+		test('Android: APPLOVIN_MAX/GOOGLE_ADMOB/TOPON_PTE are rewritten to Android\'s exact spelling', () => {
+			Platform.OS = 'android';
+			expect(paramsSentFor(MEDIATION_NETWORK.APPLOVIN_MAX).mediationNetwork).toBe('applovinmax');
+			expect(paramsSentFor(MEDIATION_NETWORK.GOOGLE_ADMOB).mediationNetwork).toBe('googleadmob');
+			expect(paramsSentFor(MEDIATION_NETWORK.TOPON_PTE).mediationNetwork).toBe('toponpte');
+		});
+
+		test('Android: CUSTOM_MEDIATION/DIRECT_MONETIZATION_NETWORK resolve to Android\'s camelCase spelling', () => {
+			Platform.OS = 'android';
+			expect(paramsSentFor(MEDIATION_NETWORK.CUSTOM_MEDIATION).mediationNetwork).toBe('customMediation');
+			expect(paramsSentFor(MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK).mediationNetwork).toBe(
+				'directMonetizationNetwork'
+			);
+		});
+
+		test('iOS: APPLOVIN_MAX/GOOGLE_ADMOB/TOPON_PTE pass through unchanged (iOS normalizes case/underscores itself)', () => {
+			Platform.OS = 'ios';
+			expect(paramsSentFor(MEDIATION_NETWORK.APPLOVIN_MAX).mediationNetwork).toBe('applovin_max');
+			expect(paramsSentFor(MEDIATION_NETWORK.GOOGLE_ADMOB).mediationNetwork).toBe('google_admob');
+			expect(paramsSentFor(MEDIATION_NETWORK.TOPON_PTE).mediationNetwork).toBe('topon_pte');
+		});
+
+		test('iOS: CUSTOM_MEDIATION/DIRECT_MONETIZATION_NETWORK resolve to iOS\'s normalizer-safe spelling', () => {
+			Platform.OS = 'ios';
+			expect(paramsSentFor(MEDIATION_NETWORK.CUSTOM_MEDIATION).mediationNetwork).toBe('custom');
+			expect(paramsSentFor(MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK).mediationNetwork).toBe(
+				'directmonetization'
+			);
+		});
 	});
 
 	test('it calls appsFlyer.anonymizeUser with callback', () => {
@@ -375,14 +515,14 @@ describe("Test appsFlyer API's", () => {
 		const domains = ['example.com', 'brand.com'];
 		appsFlyer.setOneLinkCustomDomains(domains, jest.fn, jest.fn);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setOneLinkCustomDomains', params: { domains } })
+			JSON.stringify({ method: 'setOneLinkCustomDomain', params: { domains } })
 		);
 	});
 
 	test('it calls appsFlyer.setAppInviteOneLinkID with callback', () => {
 		appsFlyer.setAppInviteOneLinkID('test_one_link_id', jest.fn);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setAppInviteOneLink', params: { oneLinkID: 'test_one_link_id' } })
+			JSON.stringify({ method: 'setAppInviteOneLink', params: { oneLinkId: 'test_one_link_id' } })
 		);
 	});
 
@@ -394,36 +534,47 @@ describe("Test appsFlyer API's", () => {
 			userParams: { deep_link_value: 'test_value' }
 		};
 		appsFlyer.generateInviteLink(params, jest.fn, jest.fn);
+		// customerID has no native counterpart under that name: iOS reads referrerCustomerId,
+		// Android reads customerId, so it is sent under both.
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'generateInviteLink', params })
+			JSON.stringify({
+				method: 'generateInviteLink',
+				params: {
+					channel: 'test_channel',
+					campaign: 'test_campaign',
+					userParams: { deep_link_value: 'test_value' },
+					referrerCustomerId: 'test_customer',
+					customerId: 'test_customer',
+				},
+			})
 		);
 	});
 
 	test('it calls appsFlyer.disableCollectASA', () => {
 		appsFlyer.disableCollectASA(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setDisableCollectASA', params: { shouldDisable: true } })
+			JSON.stringify({ method: 'setDisableCollectASA', params: { disable: true } })
 		);
 	});
 
 	test('it calls appsFlyer.setUseReceiptValidationSandbox', () => {
 		appsFlyer.setUseReceiptValidationSandbox(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setUseReceiptValidationSandbox', params: { isSandbox: true } })
+			JSON.stringify({ method: 'setUseReceiptValidationSandbox', params: { sandbox: true } })
 		);
 	});
 
 	test('it calls appsFlyer.disableSKAD', () => {
 		appsFlyer.disableSKAD(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setDisableSKAdNetwork', params: { disableSkad: true } })
+			JSON.stringify({ method: 'setDisableSKAdNetwork', params: { disable: true } })
 		);
 	});
 
 	test('it calls appsFlyer.disableIDFVCollection', () => {
 		appsFlyer.disableIDFVCollection(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setDisableIDFVCollection', params: { shouldDisable: true } })
+			JSON.stringify({ method: 'setDisableIDFVCollection', params: { disable: true } })
 		);
 	});
 
@@ -447,7 +598,7 @@ describe("Test appsFlyer API's", () => {
 			JSON.stringify({ method: 'disableAppSetId', params: {} })
 		);
 	});
-	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 with valid purchase details', () => {
+	test('it calls appsFlyer.validateAndLogInAppPurchase with valid purchase details', () => {
 		const purchaseDetails = {
 			purchaseType: 'subscription',
 			transactionId: 'test_transaction_123',
@@ -456,13 +607,25 @@ describe("Test appsFlyer API's", () => {
 		const additionalParameters = { test: 'param' };
 		const callback = jest.fn();
 
-		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, additionalParameters, callback);
+		appsFlyer.validateAndLogInAppPurchase(purchaseDetails, additionalParameters, callback);
+		// iOS reads nested product/transaction; Android reads the flat trio (its purchaseToken
+		// is the same value callers pass as transactionId). Both shapes ship together.
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'validateAndLogInAppPurchase', params: { purchaseDetails, additionalParameters } })
+			JSON.stringify({
+				method: 'validateAndLogInAppPurchase',
+				params: {
+					product: { productId: 'test_product_123' },
+					transaction: { transactionId: 'test_transaction_123', purchaseType: 'subscription' },
+					productId: 'test_product_123',
+					purchaseToken: 'test_transaction_123',
+					purchaseType: 'subscription',
+					additionalParameters: additionalParameters,
+				},
+			})
 		);
 	});
 
-	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 without additional parameters', () => {
+	test('it calls appsFlyer.validateAndLogInAppPurchase without additional parameters', () => {
 		const purchaseDetails = {
 			purchaseType: 'one_time_purchase',
 			transactionId: 'test_transaction_456',
@@ -470,24 +633,66 @@ describe("Test appsFlyer API's", () => {
 		};
 		const callback = jest.fn();
 
-		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, undefined, callback);
+		appsFlyer.validateAndLogInAppPurchase(purchaseDetails, undefined, callback);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'validateAndLogInAppPurchase', params: { purchaseDetails, additionalParameters: undefined } })
+			JSON.stringify({
+				method: 'validateAndLogInAppPurchase',
+				params: {
+					product: { productId: 'test_product_456' },
+					transaction: {
+						transactionId: 'test_transaction_456',
+						purchaseType: 'oneTimePurchase',
+					},
+					productId: 'test_product_456',
+					purchaseToken: 'test_transaction_456',
+					purchaseType: 'one_time_purchase',
+					additionalParameters: undefined,
+				},
+			})
 		);
 	});
 
-	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 without callback', () => {
+	// Wire value, not key: Android's "one_time_purchase" vs iOS's "oneTimePurchase" — nested (iOS) and flat (Android) halves carry different spellings.
+	test('validateAndLogInAppPurchase maps purchaseType per platform', () => {
+		appsFlyer.validateAndLogInAppPurchase(
+			{
+				purchaseType: AFPurchaseType.ONE_TIME_PURCHASE,
+				transactionId: 'txn',
+				productId: 'sku',
+			},
+			undefined,
+			jest.fn()
+		);
+		const [requestJson] = NativeAppsFlyer.executeRpc.mock.calls[0];
+		const { params } = JSON.parse(requestJson);
+		expect(params.transaction.purchaseType).toBe('oneTimePurchase');
+		expect(params.purchaseType).toBe('one_time_purchase');
+	});
+
+	test('validateAndLogInAppPurchase leaves subscription spelling untouched', () => {
+		appsFlyer.validateAndLogInAppPurchase(
+			{ purchaseType: AFPurchaseType.SUBSCRIPTION, transactionId: 't', productId: 'p' },
+			undefined,
+			jest.fn()
+		);
+		const [requestJson] = NativeAppsFlyer.executeRpc.mock.calls[0];
+		const { params } = JSON.parse(requestJson);
+		expect(params.transaction.purchaseType).toBe('subscription');
+		expect(params.purchaseType).toBe('subscription');
+	});
+
+	test('it calls appsFlyer.validateAndLogInAppPurchase without callback', () => {
 		const purchaseDetails = {
 			purchaseType: 'subscription',
 			transactionId: 'test_transaction_789',
 			productId: 'test_product_789'
 		};
 
-		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails);
+		appsFlyer.validateAndLogInAppPurchase(purchaseDetails);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(1);
 	});
 
-	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 with null additional parameters', () => {
+	test('it calls appsFlyer.validateAndLogInAppPurchase with null additional parameters', () => {
 		const purchaseDetails = {
 			purchaseType: 'one_time_purchase',
 			transactionId: 'test_transaction_null',
@@ -495,9 +700,22 @@ describe("Test appsFlyer API's", () => {
 		};
 		const callback = jest.fn();
 
-		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, null, callback);
+		appsFlyer.validateAndLogInAppPurchase(purchaseDetails, null, callback);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'validateAndLogInAppPurchase', params: { purchaseDetails, additionalParameters: null } })
+			JSON.stringify({
+				method: 'validateAndLogInAppPurchase',
+				params: {
+					product: { productId: 'test_product_null' },
+					transaction: {
+						transactionId: 'test_transaction_null',
+						purchaseType: 'oneTimePurchase',
+					},
+					productId: 'test_product_null',
+					purchaseToken: 'test_transaction_null',
+					purchaseType: 'one_time_purchase',
+					additionalParameters: null,
+				},
+			})
 		);
 	});
 	
@@ -544,14 +762,17 @@ describe("Test appsFlyer API's", () => {
 	test('it calls appsFlyer.disableAdvertisingIdentifier', () => {
 		appsFlyer.disableAdvertisingIdentifier(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'setDisableAdvertisingIdentifiers', params: { isDisable: true } })
+			JSON.stringify({
+				method: 'setDisableAdvertisingIdentifiers',
+				params: { isDisable: true, disable: true },
+			})
 		);
 	});
 
 	test('it calls appsFlyer.enableTCFDataCollection', () => {
 		appsFlyer.enableTCFDataCollection(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			JSON.stringify({ method: 'enableTCFDataCollection', params: { enabled: true } })
+			JSON.stringify({ method: 'enableTCFDataCollection', params: { shouldCollect: true } })
 		);
 	});
 
@@ -665,60 +886,23 @@ describe('Test native event emitter', () => {
 		expect(appsFlyer.onAppOpenAttribution).toBeUndefined();
 		expect(appsFlyer.onAttributionFailure).toBeUndefined();
 	});
-	test('validateAndLogInAppPurchaseV2 event listener Happy Flow', () => {
-		const validationResult = { result: true, data: { transactionId: 'test_123' } };
-		let validationListener;
-		const callback = jest.fn((res) => {
-			expect(res).toEqual(validationResult);
-			if (validationListener) validationListener();
-		});
+	// Previously this subscribed to a raw "onValidationResult" event that no native code ever
+	// emits — RCTEventEmitter rejects addListener for event names outside the module's declared
+	// supportedEvents, so every real call crashed the host app on New Architecture (only the
+	// Jest NativeEventEmitter mock allowed it, which is why these tests passed while the app
+	// crashed). The callback is now documented as inert until a real native event exists.
+	test('validateAndLogInAppPurchase callback is inert and does not subscribe to any event', () => {
+		const callback = jest.fn();
 
-		validationListener = appsFlyer.validateAndLogInAppPurchaseV2(
+		const remove = appsFlyer.validateAndLogInAppPurchase(
 			{ purchaseType: 'subscription', transactionId: 'test_123', productId: 'test_product' },
 			{ test: 'param' },
 			callback
 		);
 
-		nativeEventEmitter.emit('onValidationResult', JSON.stringify(validationResult));
-		expect(callback).toHaveBeenCalledWith(validationResult);
-	});
-
-	test('validateAndLogInAppPurchaseV2 event listener with error', () => {
-		const validationError = { error: 'Validation failed' };
-		let validationListener;
-		const callback = jest.fn((error) => {
-			expect(error).toEqual(validationError);
-			if (validationListener) validationListener();
-		});
-
-		validationListener = appsFlyer.validateAndLogInAppPurchaseV2(
-			{ purchaseType: 'one_time_purchase', transactionId: 'test_456', productId: 'test_product' },
-			{},
-			callback
-		);
-
-		nativeEventEmitter.emit('onValidationResult', JSON.stringify(validationError));
-		expect(callback).toHaveBeenCalledWith(validationError);
-	});
-
-	test('validateAndLogInAppPurchaseV2 event listener with invalid JSON', () => {
-		const invalidJson = 'not valid json';
-		let validationListener;
-		const callback = jest.fn((error) => {
-			// AFParseJSONException might not extend Error, check for name property instead
-			expect(error).toBeDefined();
-			expect(error.name).toBe('AFParseJSONException');
-			if (validationListener) validationListener();
-		});
-
-		validationListener = appsFlyer.validateAndLogInAppPurchaseV2(
-			{ purchaseType: 'one_time_purchase', transactionId: 'test_789', productId: 'test_product' },
-			{},
-			callback
-		);
-
-		nativeEventEmitter.emit('onValidationResult', invalidJson);
-		expect(callback).toHaveBeenCalled();
+		nativeEventEmitter.emit('onValidationResult', JSON.stringify({ result: true }));
+		expect(callback).not.toHaveBeenCalled();
+		expect(() => remove()).not.toThrow();
 	});
 });
 
@@ -759,13 +943,14 @@ describe('net-new RPC-only method wrappers (one per domain block)', () => {
 	test('handleOpenUrl is a distinct RPC method from handleOpenURL (case-sensitive)', async () => {
 		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
 
-		await appsFlyer.handleOpenUrl('https://example.com', 'com.foo', null);
+		// sourceApplication/annotation were never read by any RPC layer and are gone; native
+		// reads {url, options}.
+		await appsFlyer.handleOpenUrl('https://example.com', { key: 'value' });
 
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
 			buildRpcRequest('handleOpenUrl', {
 				url: 'https://example.com',
-				sourceApplication: 'com.foo',
-				annotation: null,
+				options: { key: 'value' },
 			})
 		);
 	});
@@ -773,10 +958,11 @@ describe('net-new RPC-only method wrappers (one per domain block)', () => {
 	test('setUserPhone (Hashed-PII) calls executeRpc with the right envelope', async () => {
 		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
 
-		await appsFlyer.setUserPhone('+15551234567');
+		// Native reads a split country code + number, never a combined `phone` string.
+		await appsFlyer.setUserPhone('1', '5551234567');
 
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
-			buildRpcRequest('setUserPhone', { phone: '+15551234567' })
+			buildRpcRequest('setUserPhone', { countryCode: '1', phoneNumber: '5551234567' })
 		);
 	});
 
