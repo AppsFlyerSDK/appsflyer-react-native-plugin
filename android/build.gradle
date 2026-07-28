@@ -70,32 +70,20 @@ android {
 repositories {
     mavenCentral()
     maven { url "https://maven.google.com" }
-    // Phase A (research.md R8): plugin_bridge + a matching af-android-sdk build are not yet
-    // published to Maven — vendored .aar files are resolved from android/libs/ via flatDir.
-    // Phase B (once published): drop this flatDir block and the two `name:`-based
-    // implementations below in favor of real `com.appsflyer:<artifact>:<version>` coordinates.
-    flatDir { dirs 'libs' }
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10" // Add Kotlin standard library
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    // af-android-sdk now comes from the vendored aars below (Phase A, research.md R8) —
-    // NOT also from Maven, to avoid a duplicate-class conflict (plugin_bridge's af-android-sdk
-    // build vs a separately-resolved Maven version). PCAppsFlyer compiles against this same
-    // vendored SDK build.
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.2')}"
     if (includeConnector){
         implementation 'com.appsflyer:purchase-connector:2.2.0'
     }
 
-    // Phase A vendored RPC binaries (research.md R8) — af-android-sdk-base/dev.aar together
-    // constitute af-android-sdk itself; af-android-plugin-bridge.aar is the RPC handler.
-    // Phase B (once published): replace all three with real com.appsflyer:<artifact>:<version>
-    // Maven coordinates and delete the vendored .aar files from android/libs/.
-    api(name: 'af-android-sdk-base', ext: 'aar')
-    api(name: 'af-android-sdk-dev', ext: 'aar')
-    implementation(name: 'af-android-plugin-bridge', ext: 'aar')
+    // Phase B (research.md R8): published Maven coordinates replace the vendored
+    // android/libs/*.aar files from Phase A.
+    api 'com.appsflyer:af-android-sdk:7.0.1'
+    implementation 'com.appsflyer:af-android-plugin-bridge:7.0.1'
 
     testImplementation 'junit:junit:4.13.2'
 }
