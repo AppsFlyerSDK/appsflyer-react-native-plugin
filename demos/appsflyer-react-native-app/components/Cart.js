@@ -1,5 +1,5 @@
 /* @flow weak */
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {View, Text, StyleSheet, FlatList, Pressable, Platform} from 'react-native';
 import {ListItem, Avatar, Button} from 'react-native-elements';
 import Confetti from './Confetti';
@@ -8,8 +8,6 @@ import Confetti from './Confetti';
 // the per-row source object and press handler aren't rebuilt on every list pass.
 const CartRow = React.memo(({group, onRemove}) => {
   const {product, quantity} = group;
-  const imageSource = useMemo(() => ({uri: product.image}), [product.image]);
-  const handlePress = useCallback(() => onRemove(product), [onRemove, product]);
   return (
     <ListItem.Swipeable
       bottomDivider
@@ -18,11 +16,11 @@ const CartRow = React.memo(({group, onRemove}) => {
         <Button
           title="Delete"
           buttonStyle={styles.deleteButton}
-          onPress={handlePress}
+          onPress={() => onRemove(product)}
         />
       }>
       <Avatar
-        source={imageSource}
+        source={{uri: product.image}}
         size={56}
         avatarStyle={styles.avatarImage}
         containerStyle={styles.avatar}
@@ -70,12 +68,9 @@ const Cart = ({route, navigation}) => {
   const {productList, removeProductFromCart, checkout} = route.params;
   const [summary, setSummary] = useState(null);
 
-  const total = useMemo(
-    () => productList.reduce((sum, p) => sum + p.price, 0),
-    [productList],
-  );
+  const total = productList.reduce((sum, p) => sum + p.price, 0);
 
-  const groups = useMemo(() => groupCart(productList), [productList]);
+  const groups = groupCart(productList);
 
   const handleRemove = useCallback(
     product => {
