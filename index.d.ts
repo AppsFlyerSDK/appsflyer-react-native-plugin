@@ -13,7 +13,7 @@ declare module "react-native-appsflyer" {
     status: "success" | "failure";
     type: "onInstallConversionDataLoaded" | "onInstallConversionFailure";
     data: {
-      is_first_launch: "true" | "false";
+      is_first_launch: boolean;
       media_source: string;
       campaign: string;
       af_status: "Organic" | "Non-organic";
@@ -84,6 +84,7 @@ declare module "react-native-appsflyer" {
     };
     referrerName?: string;
     referrerImageUrl?: string;
+    /** @deprecated No native counterpart on either platform — ignored (logs a warning). */
     deeplinkPath?: string;
     baseDeeplink?: string;
     brandDomain?: string;
@@ -262,10 +263,13 @@ declare module "react-native-appsflyer" {
       errorC: ErrorCB,
       awaitResponse?: boolean
     ): void;
+    /** Set the user's email address. Hashed by the native SDK before transmission. */
+    setUserEmail(email: string, successC?: SuccessCB, errorC?: ErrorCB): void;
+    /** @deprecated since 7.0.0 — use {@link setUserEmail}; only the first address is sent, `emailsCryptType` is ignored. */
     setUserEmails(
       options: SetEmailsOptions,
-      successC: SuccessCB,
-      errorC: ErrorCB
+      successC?: SuccessCB,
+      errorC?: ErrorCB
     ): void;
     setAdditionalData(additionalData: object, successC?: SuccessCB): void;
     getAppsFlyerUID(callback: (error: Error, uid: string) => any): void;
@@ -308,16 +312,31 @@ declare module "react-native-appsflyer" {
     ): void;
     /**
      * validateAndLogInAppPurchase API with AFPurchaseDetails.
-     * Uses event emitter pattern for callback handling.
+     * @remarks `callback` is currently inert — no native event delivers a validation result yet
+     *   (see index.js's remarks on this method). A 401/500 response after calling this is an
+     *   expected server-side rejection when the app isn't registered for purchase validation.
      */
-    validateAndLogInAppPurchaseV2(
+    validateAndLogInAppPurchase(
       purchaseDetails: AFPurchaseDetails,
       additionalParameters?: { [key: string]: any },
       callback?: (data: any) => void
     ): void;
    
     updateServerUninstallToken(token: string, successC?: SuccessCB): void;
-    sendPushNotificationData(pushPayload: object, errorC?: ErrorCB): void;
+    /**
+     * @param pushPayload the raw remote-notification payload — iOS locates the `af` block itself.
+     * @param androidCampaignData required on Android (SDK7 dropped raw-payload support there); omitting it reports an empty re-engagement.
+     */
+    sendPushNotificationData(
+      pushPayload: object,
+      errorC?: ErrorCB,
+      androidCampaignData?: {
+        campaign?: string;
+        pid?: string;
+        isRetargeting?: boolean;
+        additionalParameters?: Record<string, unknown>;
+      }
+    ): void;
     setHost(hostPrefix: string, hostName: string, success: SuccessCB): void;
     addPushNotificationDeepLinkPath(
       path: string[],
@@ -349,7 +368,7 @@ declare module "react-native-appsflyer" {
      * */
     setCollectAndroidID(isCollect: boolean, successC?: SuccessCB): void;
     setDisableNetworkData(disable: boolean): void;
-    performOnDeepLinking(): void;
+    performOnDeepLinking(url: string, shouldTriggerSession?: boolean): void;
     disableAppSetId(): void;
 
     // --- Complex config (net-new) ---
@@ -377,16 +396,14 @@ declare module "react-native-appsflyer" {
      * Case-sensitive and distinct from {@link handleOpenURL} — do not collapse the two.
      * @platform ios
      */
-    handleOpenUrl(
-      url: string,
-      sourceApplication?: string,
-      annotation?: unknown
-    ): Promise<void>;
+    handleOpenUrl(url: string, options?: Record<string, unknown>): Promise<void>;
     /**
-     * Forward a Universal Link `NSUserActivity` for deep link resolution.
+     * Forward a Universal Link for deep link resolution.
+     * @param url the activity's `webpageURL`.
+     * @param activityType defaults natively to `NSUserActivityTypeBrowsingWeb`.
      * @platform ios
      */
-    continueUserActivity(userActivity: Record<string, unknown>): Promise<void>;
+    continueUserActivity(url: string, activityType?: string): Promise<void>;
     /** Enable or disable resolution of Facebook deferred app links. */
     enableFacebookDeferredApplinks(isEnabled: boolean): Promise<void>;
     /**
@@ -399,14 +416,20 @@ declare module "react-native-appsflyer" {
 
     // --- Hashed PII (net-new) ---
 
-    /** Set the user's phone number. Hashed by the native SDK before transmission. */
-    setUserPhone(phone: string): Promise<void>;
+    /**
+     * Set the user's phone number. Hashed by the native SDK before transmission.
+     * Native reads a split country code + number, never a single combined string.
+     */
+    setUserPhone(countryCode: string, phoneNumber: string): Promise<void>;
     /** Set the user's first name. Hashed by the native SDK before transmission. */
     setUserFirstName(firstName: string): Promise<void>;
     /** Set the user's last name. Hashed by the native SDK before transmission. */
     setUserLastName(lastName: string): Promise<void>;
-    /** Set the user's Facebook login ID. Hashed by the native SDK before transmission. */
-    setUserFbLoginId(fbLoginId: string): Promise<void>;
+    /**
+     * Set the user's Facebook login ID. Hashed by the native SDK before transmission.
+     * Must be numeric — iOS parses it with `requireInt64` and rejects a JSON string.
+     */
+    setUserFbLoginId(fbLoginId: string | number): Promise<void>;
     /** Clear all previously set hashed PII (phone, first/last name, Facebook login ID, emails). */
     clearUserPii(): Promise<void>;
 
