@@ -67,7 +67,7 @@ In your app’s manifest add the following intent-filter to your relevant activi
 For more on URI Scheme check out the guide [here](https://dev.appsflyer.com/hc/docs/dl_android_init_setup#procedures-for-uri-scheme).
 
 ##  iOS Deeplink Setup
-In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
+In order to record retargeting and use the `onDeepLink`/UDL callback in iOS (`onAppOpenAttribution` was removed in 7.0.0 and merged into `onDeepLink` — see MIGRATION.md), the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
 
 ```objectivec
 #import <RNAppsFlyer.h>

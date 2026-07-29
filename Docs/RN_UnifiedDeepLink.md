@@ -25,7 +25,7 @@ hidden: false
 * Requires AppsFlyer Android SDK V6.1.3 or later.
 * Does not support SRN campaigns.
 * Does not provide af_dp in the API response.
-* onAppOpenAttribution will not be called. All code should migrate to `onDeepLink`.
+* `onAppOpenAttribution` and `onAttributionFailure` are **removed in 7.0.0** with no adapter — all code must migrate to `onDeepLink`.
 
 ### Implementation:
 
@@ -47,20 +47,12 @@ const onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
       }
 })
 
-appsFlyer.initSdk(
-  {
-    devKey: 'K2***********99',
-    isDebug: false,
-    appId: '41*****44',
-    onInstallConversionDataListener: true,
-    onDeepLinkListener: true // -->  you must set the onDeepLinkListener to true to get onDeepLink callbacks
-  },
-  (result) => {
-    console.log(result);
-  },
-  (error) => {
-    console.error(error);
-  }
+appsFlyer.init('K2***********99', '41*****44').then(
+  (result) => console.log(result),
+  (error) => console.error(error)
 );
+appsFlyer.setIsDebug(false);
 ```
+
+**Note:** `initSdk(options, success, error)` (with `isDebug`, `onInstallConversionDataListener`, `onDeepLinkListener` options) is **removed in 7.0.0** with no adapter. Use `init(devKey, appId)` + `setIsDebug(isDebug)` instead, and register `onDeepLink` synchronously — before `init()`'s promise settles, as shown above — rather than inside `init().then()`. See [RN_API.md](RN_API.md#initialization-flow) for the full recommended call order.
 
