@@ -133,7 +133,9 @@ describe('Listener registration triggers the matching register*Listener RPC once
 });
 
 describe('isSessionReady (net-new)', () => {
-	test('resolves a boolean and triggers registerSessionReadyListener once, on first use', async () => {
+	// Regression guard for finding #5: isSessionReady is a pure read-only status query — it must
+	// not register the session-ready listener as a side effect (that's registerSessionReadyListener's job).
+	test('resolves a boolean without triggering registerSessionReadyListener', async () => {
 		const { appsFlyer, nativeAppsFlyer } = freshModule();
 		nativeAppsFlyer.executeRpc.mockImplementation((requestJson) => {
 			const { method } = JSON.parse(requestJson);
@@ -146,7 +148,7 @@ describe('isSessionReady (net-new)', () => {
 		expect(await appsFlyer.isSessionReady()).toBe(true);
 		await appsFlyer.isSessionReady();
 
-		expect(rpcMethodCalls(nativeAppsFlyer, 'registerSessionReadyListener')).toHaveLength(1);
+		expect(rpcMethodCalls(nativeAppsFlyer, 'registerSessionReadyListener')).toHaveLength(0);
 	});
 
 	test('rejects with the normalized {code,message} error when the RPC call fails', async () => {

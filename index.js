@@ -282,26 +282,29 @@ function dispatchRpc(method, params) {
   );
 }
 
-// Unwraps normalized { success, data|error } into resolve(data)/reject(error).
-function callRpc(method, params = {}) {
-  return dispatchRpc(method, params).then((response) => {
-    if (!response.success) {
-      const error = response.error;
-      // ponytail: Android maps unknown-method to 422 with this message substring; normalize to 404
-      // to match iOS's dedicated 404 per rpc-error-normalization-contract.md §FR-007 Decision —
-      // remove when Android throws METHOD_NOT_FOUND (404) for real.
-      if (
-        error &&
-        error.code === 422 &&
-        typeof error.message === "string" &&
-        error.message.indexOf("Unknown or missing method") !== -1
-      ) {
-        return Promise.reject({ code: 404, message: error.message });
-      }
-      return Promise.reject(error);
+// Unwraps normalized { success, data|error } into resolve(data)/reject(error). Shared by callRpc
+// and setUserFbLoginId, which bypasses callRpc's JSON.stringify to avoid Number()'s precision loss.
+function unwrapRpcResponse(response) {
+  if (!response.success) {
+    const error = response.error;
+    // ponytail: Android maps unknown-method to 422 with this message substring; normalize to 404
+    // to match iOS's dedicated 404 per rpc-error-normalization-contract.md §FR-007 Decision —
+    // remove when Android throws METHOD_NOT_FOUND (404) for real.
+    if (
+      error &&
+      error.code === 422 &&
+      typeof error.message === "string" &&
+      error.message.indexOf("Unknown or missing method") !== -1
+    ) {
+      return Promise.reject({ code: 404, message: error.message });
     }
-    return response.data;
-  });
+    return Promise.reject(error);
+  }
+  return response.data;
+}
+
+function callRpc(method, params = {}) {
+  return dispatchRpc(method, params).then(unwrapRpcResponse);
 }
 
 // For void-returning config setters: fire the call, log instead of throwing on failure.
@@ -778,12 +781,10 @@ appsFlyer.registerSessionReadyListener = createBucketListener(
  * Net-new in 7.0.0 — no 6.x equivalent.
  * @returns {Promise<boolean>}
  */
-appsFlyer.isSessionReady = () => {
-  ensureSessionReadyListenerRegistered();
-  return callRpc("isSessionReady", {}).then((data) =>
+appsFlyer.isSessionReady = () =>
+  callRpc("isSessionReady", {}).then((data) =>
     Boolean(unwrapKeyed(data, "isSessionReady"))
   );
-};
 
 /**
  * Remove a previously registered session-ready listener.
@@ -1067,14 +1068,7 @@ appsFlyer.setDisableNetworkData = (disable) => {
 
 // Now returns a Promise (it didn't pre-7.0.0) — callers that ignored the return value are
 // unaffected; callers may now await/.then() it if they choose.
-appsFlyer.startSdk = () => {
-  return dispatchRpc("start", { awaitResponse: true }).then((response) => {
-    if (!response.success) {
-      return Promise.reject(response.error);
-    }
-    return response.data;
-  });
-};
+appsFlyer.startSdk = () => callRpc("start", { awaitResponse: true });
 
 /**
  * Re-run deep link resolution for a URL.
@@ -1250,12 +1244,21 @@ appsFlyer.setUserLastName = (lastName) =>
   callRpc("setUserLastName", { lastName });
 
 /**
- * @param {string|number} fbLoginId numeric Facebook login ID. iOS parses this with
- *   `requireInt64` and rejects a JSON string, so coerce before dispatching; Android accepts
- *   either. Sent as a JSON number.
+ * @param {string|number} fbLoginId numeric Facebook login ID (commonly 15-18 digits). iOS
+ *   requires a JSON number (`requireInt64`), but a JS `Number` only safely holds integers up to
+ *   2^53 — `Number(fbLoginId)` silently rounds longer IDs (e.g. "100003456789012345" ->
+ *   100003456789012350) before it ever reaches JSON.stringify. The validated digits are spliced
+ *   into the request body directly instead, so the exact value reaches native on both platforms.
  */
-appsFlyer.setUserFbLoginId = (fbLoginId) =>
-  callRpc("setUserFbLoginId", { fbLoginId: Number(fbLoginId) });
+appsFlyer.setUserFbLoginId = (fbLoginId) => {
+  const digits = String(fbLoginId).trim();
+  if (!/^-?\d+$/.test(digits)) {
+    return Promise.reject(new TypeError("setUserFbLoginId: fbLoginId must be an integer"));
+  }
+  return NativeAppsFlyer.executeRpc(
+    `{"method":"setUserFbLoginId","params":{"fbLoginId":${digits}}}`
+  ).then((responseJson) => unwrapRpcResponse(JSON.parse(responseJson)));
+};
 
 /** Clear all previously set hashed PII (phone, first/last name, Facebook login ID, emails). */
 appsFlyer.clearUserPii = () => callRpc("clearUserPii");
