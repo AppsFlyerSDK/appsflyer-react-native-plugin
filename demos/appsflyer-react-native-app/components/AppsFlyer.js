@@ -22,23 +22,6 @@ export function AFInit() {
   }
   //appsFlyer.setAppInviteOneLinkID('oW4R');
 
-  // startSdk() must fire from inside registerSessionReadyListener's callback — the native
-  // SDK does not auto-start (AppsFlyerLib.h contract, bridge-patterns.md §4). Registering
-  // this listener here is also required to happen synchronously, before init()'s promise
-  // settles, same as onInstallConversionData/onDeepLink in HomeScreen.js.
-  appsFlyer.registerSessionReadyListener(() => {
-    appsFlyer.startSdk().then(
-      (success) => {
-        console.log('start SDK success', success);
-        // Demonstrate logAdRevenue once after start — not on every in-app event.
-        AFLogAdRevenue();
-      },
-      (error) => {
-        console.log('start SDK failed', error);
-      },
-    );
-  });
-
   appsFlyer.setIsDebug(true);
 
   appsFlyer.init(DEV_KEY, APP_ID).then(
@@ -59,6 +42,23 @@ export function AFInit() {
     },
     (error) => console.log('init SDK failed', error),
   );
+
+  // startSdk() must fire from inside registerSessionReadyListener's callback — the native
+  // SDK does not auto-start (AppsFlyerLib.h contract, bridge-patterns.md §4). Registering
+  // this listener here is also required to happen synchronously, before init()'s promise
+  // settles, same as onInstallConversionData/onDeepLink in HomeScreen.js.
+  appsFlyer.registerSessionReadyListener(() => {
+    appsFlyer.startSdk().then(
+      (success) => {
+        console.log('start SDK success', success);
+        // Demonstrate logAdRevenue once after start — not on every in-app event.
+        AFLogAdRevenue();
+      },
+      (error) => {
+        console.log('start SDK failed', error);
+      },
+    );
+  });
 }
 
 // AppsFlyer Purchase Connector initialization flow
