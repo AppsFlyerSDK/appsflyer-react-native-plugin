@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
+  },
   "permissions": {
     "allow": [
       "Read(*)",
@@ -31,10 +34,6 @@
       "Bash(pod deintegrate*)"
     ]
   },
-  "env": {
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
-  },
-  "plansDirectory": "./docs/plans",
   "hooks": {
     "PostToolUse": [
       {
@@ -48,5 +47,6 @@
         ]
       }
     ]
-  }
+  },
+  "plansDirectory": "./docs/plans"
 }

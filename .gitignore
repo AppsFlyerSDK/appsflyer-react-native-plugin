@@ -99,3 +99,5 @@ demos/appsflyer-react-native-app/android/app/.cxx/
 
 # RC smoke synthesized app (created at CI time)
 example_rc_smoke/
+
+.reviews/
