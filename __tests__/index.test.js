@@ -206,11 +206,20 @@ describe("Test appsFlyer API's", () => {
 
 		// Guards against a truthiness rewrite: `data.x || data` would wrongly resolve true here.
 		test('isSessionReady unwraps a falsy keyed value', async () => {
-			await appsFlyer.isSessionReady(); // burn the one-time listener registration RPC
 			NativeAppsFlyer.executeRpc.mockResolvedValueOnce(
 				mockRpcResponse({ isSessionReady: false })
 			);
 			await expect(appsFlyer.isSessionReady()).resolves.toBe(false);
+		});
+
+		// Regression guard: isSessionReady is a pure read-only status query — it must not fire
+		// registerSessionReadyListener as a side effect (that RPC is only for actual listener attach).
+		test('isSessionReady does not register the session-ready listener as a side effect', async () => {
+			await appsFlyer.isSessionReady();
+			const dispatchedMethods = NativeAppsFlyer.executeRpc.mock.calls.map(
+				([requestJson]) => JSON.parse(requestJson).method
+			);
+			expect(dispatchedMethods).not.toContain('registerSessionReadyListener');
 		});
 
 		// iOS used to leak its {success, message} status envelope here instead of resolving null.
@@ -403,6 +412,18 @@ describe("Test appsFlyer API's", () => {
 		await expect(appsFlyer.startSdk()).rejects.toEqual({
 			code: 500,
 			message: 'start completed with error: timed out',
+		});
+	});
+
+	// Regression guard for finding #4: startSdk() must route through callRpc's shared
+	// Android 422 -> 404 "unknown method" normalization, same as every other RPC method.
+	test('it calls appsFlyer.startSdk() and normalizes an Android 422 unknown-method error to 404', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValueOnce(
+			mockRpcError('Unknown or missing method: start', 422)
+		);
+		await expect(appsFlyer.startSdk()).rejects.toEqual({
+			code: 404,
+			message: 'Unknown or missing method: start',
 		});
 	});
 
@@ -810,7 +831,23 @@ describe("Test appsFlyer API's", () => {
 });
 
 describe('Test native event emitter', () => {
-	const nativeEventEmitter = new NativeEventEmitter(NativeAppsFlyer);
+	// freshModule() resets module state (same pattern as rpc-contract.test.js's freshModule()) —
+	// rpcListenerBuckets is a module-level singleton in index.js, so a listener that leaks past
+	// its own removal (e.g. an assertion throws before the test calls its unregister function)
+	// would otherwise carry over into the next test in this describe block.
+	function freshModule() {
+		jest.resetModules();
+		const { NativeEventEmitter: FreshNativeEventEmitter } = require('react-native');
+		const freshAppsFlyer = require('../index').default;
+		const freshNativeAppsFlyer = require('../src/NativeAppsFlyer').default;
+		return {
+			appsFlyer: freshAppsFlyer,
+			nativeEventEmitter: new FreshNativeEventEmitter(freshNativeAppsFlyer),
+		};
+	}
+
+	let appsFlyer;
+	let nativeEventEmitter;
 	let gcdListener;
 	let udlListener;
 	let nativeEventObject = { test: 'la' };
@@ -824,6 +861,7 @@ describe('Test native event emitter', () => {
 	}
 
 	beforeEach(() => {
+		({ appsFlyer, nativeEventEmitter } = freshModule());
 		gcdListener = null;
 		udlListener = null;
 	});
@@ -880,6 +918,26 @@ describe('Test native event emitter', () => {
 			udlListener();
 		});
 		emitRpcEvent('onDeepLinking', nativeEventObject, 'android');
+	});
+
+	// Regression test for #12: a listener callback that throws before reaching its own
+	// unregister call must not leak into the next test in this bucket. Reproduces the failure
+	// mode by never removing the listener, then proving the following test only sees its own.
+	test('a listener that throws before self-removing does not leak into the next test', () => {
+		appsFlyer.onDeepLink(() => {
+			throw new Error('simulated assertion failure before self-removal');
+		});
+
+		expect(() => emitRpcEvent('onDeepLinkReceived', nativeEventObject, 'ios')).toThrow();
+	});
+
+	test('the next test in the same bucket only sees its own listener, not a leaked one', () => {
+		const callback = jest.fn();
+		appsFlyer.onDeepLink(callback);
+
+		emitRpcEvent('onDeepLinkReceived', nativeEventObject, 'ios');
+
+		expect(callback).toHaveBeenCalledTimes(1);
 	});
 
 	test('onAppOpenAttribution / onAttributionFailure were removed and merged into onDeepLink', () => {

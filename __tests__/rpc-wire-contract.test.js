@@ -296,6 +296,9 @@ function dispatchedMethodsInSource() {
 	const patterns = [
 		/(?:callRpc|callRpcVoid|callRpcWithCallback|dispatchRpc)\(\s*"([^"]+)"/g,
 		/onceRegistrar\(\s*"([^"]+)"/g,
+		// setUserFbLoginId bypasses callRpc/dispatchRpc and builds its request JSON inline (see
+		// index.js's precision-loss comment) — matches the literal `"method":"..."` it sends.
+		/"method"\s*:\s*"([^"]+)"/g,
 	];
 	for (const pattern of patterns) {
 		for (const match of source.matchAll(pattern)) {
@@ -385,6 +388,20 @@ describe('RPC wire contract', () => {
 			.filter((method) => !exercisedMethods.has(method))
 			.sort();
 		expect(uncovered).toEqual([]);
+	});
+
+	// Regression guard for finding #6: an 18-digit Facebook ID must reach native at full precision.
+	// Number(fbLoginId) would round "100003456789012345" to ...012350 before serialization, and
+	// JSON.parse-ing the wire text back into a JS Number for inspection would silently reintroduce
+	// the same rounding — so this asserts on the raw wire *text*, not a re-parsed object.
+	test('setUserFbLoginId does not lose precision on an 18-digit ID', () => {
+		const eighteenDigitId = '100003456789012345';
+		NativeAppsFlyer.executeRpc.mockClear();
+		appsFlyer.setUserFbLoginId(eighteenDigitId);
+		const [requestJson] = NativeAppsFlyer.executeRpc.mock.calls[0];
+		expect(requestJson).toBe(
+			`{"method":"setUserFbLoginId","params":{"fbLoginId":${eighteenDigitId}}}`
+		);
 	});
 
 	test('the iOS alias table matches RNAppsFlyerImpl.swift', () => {

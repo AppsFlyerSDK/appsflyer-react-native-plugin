@@ -350,7 +350,7 @@ declare module "react-native-appsflyer" {
       contains: string,
       parameters: object
     ): void;
-    startSdk(): void;
+    startSdk(): Promise<string>;
     enableTCFDataCollection(enabled: boolean): void;
     setConsentData(consentData: AppsFlyerConsent): void;
     logAdRevenue(adRevenueData: AFAdRevenueData): void;
