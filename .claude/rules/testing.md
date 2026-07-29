@@ -44,7 +44,7 @@ Do **not** assert on `NativeModules.RNAppsFlyer` — that object is not used in 
 
 Use `freshModule()` (defined in `rpc-contract.test.js`) when a test needs a clean module instance — it calls `jest.resetModules()` and re-requires `index.js` + `NativeAppsFlyer` + `NativeEventEmitter` fresh, because listener-registration state is module-level.
 
-Test the event channel by constructing a `NativeEventEmitter` from the fresh mock and calling `.emit('onRPCEvent', envelopePayload)` directly.
+Test the event channel by constructing a `NativeEventEmitter` from the fresh mock and calling `.emit('RNAppsFlyer_rpcEvent', envelopePayload)` directly.
 
 ## 5. Compatibility tests
 

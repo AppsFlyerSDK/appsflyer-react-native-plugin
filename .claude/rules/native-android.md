@@ -42,7 +42,7 @@ Any RPC call that can block natively (Android's `awaitResponse` model — up to 
 
 ## 7. Event emission
 
-Events are emitted via `reactApplicationContext.emitDeviceEvent("onRPCEvent", payload)` (or equivalent TurboModule event emission API). Payload is a serialized JSON string. One shared event name for all event types — `index.js` demuxes on `envelope.event`.
+Events are emitted via `reactApplicationContext.emitDeviceEvent("RNAppsFlyer_rpcEvent", payload)` (or equivalent TurboModule event emission API). Payload is a serialized JSON string. One shared event name for all event types — `index.js` demuxes on `envelope.event`.
 
 ## 8. RNUtil
 
