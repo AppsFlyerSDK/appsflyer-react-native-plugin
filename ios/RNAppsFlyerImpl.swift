@@ -54,6 +54,8 @@ public final class RNAppsFlyerImpl: NSObject {
                 resolve(normalizedResponseJson)
                 if Self.isSuccess(normalizedResponseJson: normalizedResponseJson) {
                     self?.flushPendingRegistrations()
+                } else {
+                    self?.rejectPendingRegistrations(withNormalizedResponseJson: normalizedResponseJson)
                 }
             }
             return
@@ -81,6 +83,21 @@ public final class RNAppsFlyerImpl: NSObject {
         }
         for (requestJson, resolve) in pending {
             dispatchToNative(requestJson: requestJson) { resolve($0) }
+        }
+    }
+
+    // On a failed init, buffered register*Listener calls would otherwise hang forever (nothing
+    // ever calls their resolve block). initCompleted is deliberately left false so a later,
+    // successful init retry can still buffer and flush new registrations normally — only the
+    // registrations already stuck waiting on *this* failed attempt are unstuck here, resolved
+    // with the same normalized error envelope the init call itself surfaced.
+    private func rejectPendingRegistrations(withNormalizedResponseJson normalizedResponseJson: String) {
+        let pending: [(String, RCTPromiseResolveBlock)] = initGateQueue.sync {
+            defer { pendingRegistrations = [] }
+            return pendingRegistrations
+        }
+        for (_, resolve) in pending {
+            resolve(normalizedResponseJson)
         }
     }
 
