@@ -25,7 +25,8 @@ export default function App() {
 // call returns.
 function startWhenSessionReady() {
   return new Promise<void>((resolve, reject) => {
-    appsFlyer.registerSessionReadyListener(() => {
+    const remove = appsFlyer.registerSessionReadyListener(() => {
+      remove();
       afCallbackLog('onSessionReady', 'session ready — starting SDK');
       appsFlyer.startSdk().then(() => {
         afLog('startSDK', 'result: called');
