@@ -10,6 +10,7 @@ import org.json.JSONObject
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 private const val RPC_EVENT_NAME = "RNAppsFlyer_rpcEvent"
 private const val SESSION_READY_EVENT = "onSessionReady"
@@ -31,15 +32,27 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
     @Volatile
     private var sessionReadyFallback: ScheduledFuture<*>? = null
 
+    // Guards exactly-once onSessionReady delivery: the fallback timer and the real native
+    // callback can both fire for the same registration cycle (ScheduledFuture#cancel(false) is
+    // a documented no-op once the task has started running), so delivery is gated on this flag
+    // rather than on cancellation succeeding. true = no delivery owed for the current cycle.
+    private val sessionReadyDelivered = AtomicBoolean(true)
+
     private val rpcHandler = AppsFlyerRpcHandler(
         context = reactApplicationContext,
         pluginNotifier = { eventJson ->
-            if (JSONObject(eventJson).optString("event") == SESSION_READY_EVENT) {
+            val isSessionReadyEvent = JSONObject(eventJson).optString("event") == SESSION_READY_EVENT
+            val shouldEmit = if (isSessionReadyEvent) {
                 sessionReadyFallback?.cancel(false)
+                sessionReadyDelivered.compareAndSet(false, true)
+            } else {
+                true
             }
-            reactApplicationContext
-                .getJSModule(RCTDeviceEventEmitter::class.java)
-                .emit(RPC_EVENT_NAME, eventJson)
+            if (shouldEmit) {
+                reactApplicationContext
+                    .getJSModule(RCTDeviceEventEmitter::class.java)
+                    .emit(RPC_EVENT_NAME, eventJson)
+            }
         },
     )
 
@@ -80,7 +93,10 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
         if (response is RpcResponse.VoidSuccess) {
             when (canonicalMethod) {
                 "registerSessionReadyListener" -> scheduleSessionReadyFallback()
-                "unregisterSessionReadyListener" -> sessionReadyFallback?.cancel(false)
+                "unregisterSessionReadyListener" -> {
+                    sessionReadyFallback?.cancel(false)
+                    sessionReadyDelivered.set(true)
+                }
             }
         }
 
@@ -88,15 +104,19 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
     }
 
     // Synthesizes the same onSessionReady envelope AppsFlyerRpcHandler emits natively, in case
-    // the real native callback never fires. Cancelled by pluginNotifier if the real event
-    // arrives first.
+    // the real native callback never fires. cancel() here is a best-effort early stop (avoids
+    // waking the scheduler needlessly); sessionReadyDelivered is what actually prevents a
+    // double-emit if the real event and this timer race.
     private fun scheduleSessionReadyFallback() {
         sessionReadyFallback?.cancel(false)
+        sessionReadyDelivered.set(false)
         sessionReadyFallback = sessionReadyScheduler.schedule({
-            val eventJson = RpcEventFormatter.formatEvent(SESSION_READY_EVENT, null)
-            reactApplicationContext
-                .getJSModule(RCTDeviceEventEmitter::class.java)
-                .emit(RPC_EVENT_NAME, eventJson)
+            if (sessionReadyDelivered.compareAndSet(false, true)) {
+                val eventJson = RpcEventFormatter.formatEvent(SESSION_READY_EVENT, null)
+                reactApplicationContext
+                    .getJSModule(RCTDeviceEventEmitter::class.java)
+                    .emit(RPC_EVENT_NAME, eventJson)
+            }
         }, SESSION_READY_FALLBACK_TIMEOUT_MS, TimeUnit.MILLISECONDS)
     }
 
@@ -122,6 +142,15 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
 
     override fun removeListeners(count: Double) {
         // no-op, see addListener
+    }
+
+    // Shuts down this instance's dedicated thread pools so they don't leak past TurboModule
+    // teardown (bridge/context invalidation, multi-instance RN hosts).
+    override fun invalidate() {
+        super.invalidate()
+        sessionReadyFallback?.cancel(false)
+        rpcExecutor.shutdown()
+        sessionReadyScheduler.shutdown()
     }
 
     private fun remapMethodName(requestJson: String): String {
