@@ -16,13 +16,19 @@ Pod::Spec.new do |s|
     :name => 'Generate primary module header for Swift import',
     :script => <<~'SCRIPT',
       set -e
+      patched=0
       for f in \
         "${PODS_ROOT}/Target Support Files/react-native-appsflyer/react-native-appsflyer-umbrella.h" \
         "${TARGET_BUILD_DIR}/${PRODUCT_NAME}/react-native-appsflyer-umbrella.h"; do
         if [ -f "$f" ]; then
           sed -i '' '/AppsFlyerRPC/d' "$f"
+          patched=1
         fi
       done
+      if [ "$patched" -eq 0 ]; then
+        echo "error: react-native-appsflyer: no umbrella header found at either candidate path — Swift import workaround did not run" >&2
+        exit 1
+      fi
 
       mkdir -p "${PODS_ROOT}/Headers/Public/react_native_appsflyer"
       echo '#import "react-native-appsflyer-umbrella.h"' > "${PODS_ROOT}/Headers/Public/react_native_appsflyer/react_native_appsflyer.h"
