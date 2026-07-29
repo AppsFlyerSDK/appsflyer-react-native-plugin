@@ -49,11 +49,11 @@ appsFlyer.generateInviteLink(
    channel: 'gmail',
    campaign: 'myCampaign',
    customerID: '1234',
+   brandDomain: 'myexample.com',
    userParams: {
      deep_link_value : 'value', // deep link param
      deep_link_sub1 : 'sub1', // deep link param
      custom_param : 'custom',
-     brandDomain:'myexample.com'
    },
  },
  (link) => {
@@ -64,3 +64,5 @@ appsFlyer.generateInviteLink(
  }
 );
 ```
+
+Note: `brandDomain` must be a top-level key in `parameters`, not nested inside `userParams` — the native SDK reads it as its own RPC field (`AFRPCGenerateInviteLinkRequest.brandDomain` on iOS, `GenerateInviteLinkRequest.brandDomain` on Android), separate from the custom link parameters carried in `userParams`. Nesting it inside `userParams` would just send it through as an arbitrary link query parameter instead of setting the actual brand domain.

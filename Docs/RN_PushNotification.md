@@ -104,14 +104,13 @@ After setting up all listeners and configurations, initialize and start the SDK:
 
 ```jsx
 // Initialize AppsFlyer (AFTER setting up listeners)
-appsFlyer.initSdk({
-  devKey: 'YOUR_DEV_KEY',
-  isDebug: true,
-  appId: 'YOUR_APP_ID', // iOS only
-});
+// `initSdk` was removed in 7.0.0 — use `init(devKey, appId)` instead (see MIGRATION.md).
+appsFlyer.init('YOUR_DEV_KEY', 'YOUR_APP_ID'); // appId is iOS only, harmlessly ignored on Android
 
-// Start AppsFlyer (AFTER init)
-appsFlyer.startSdk();
+// Start AppsFlyer from inside registerSessionReadyListener's callback (see bridge-patterns.md §4)
+appsFlyer.registerSessionReadyListener(() => {
+  appsFlyer.startSdk();
+});
 ```
 
 **Parameters:**
@@ -247,13 +246,11 @@ appsFlyer.onDeepLink((data) => {
 });
 
 // 2. Initialize and start SDK
-appsFlyer.initSdk({
-  devKey: 'YOUR_DEV_KEY',
-  isDebug: true,
-  appId: 'YOUR_APP_ID',
+// `initSdk` was removed in 7.0.0 — use `init(devKey, appId)` instead (see MIGRATION.md).
+appsFlyer.init('YOUR_DEV_KEY', 'YOUR_APP_ID');
+appsFlyer.registerSessionReadyListener(() => {
+  appsFlyer.startSdk();
 });
-
-appsFlyer.startSdk();
 
 // 3. Handle push data the same way
 // The SDK will automatically detect the 'af' object in the payload
@@ -285,14 +282,13 @@ const AppsflyerPushIntegration = () => {
     );
 
     // 3. Initialize AppsFlyer SDK (AFTER listeners and config)
-    appsFlyer.initSdk({
-      devKey: 'YOUR_DEV_KEY',
-      isDebug: true,
-      appId: 'YOUR_APP_ID',
-    });
+    // `initSdk` was removed in 7.0.0 — use `init(devKey, appId)` instead (see MIGRATION.md).
+    appsFlyer.init('YOUR_DEV_KEY', 'YOUR_APP_ID');
 
-    // 4. Start AppsFlyer (AFTER init)
-    appsFlyer.startSdk();
+    // 4. Start AppsFlyer once the session is ready (see bridge-patterns.md §4)
+    appsFlyer.registerSessionReadyListener(() => {
+      appsFlyer.startSdk();
+    });
 
     // 5. Set up push notification handlers
     const handlePushData = (payload) => {
@@ -383,7 +379,7 @@ Push Notification received af payload = {"c":"campaign_name", "is_retargeting":"
 
 - **Deep links not working**: Verify the key path in `addPushNotificationDeepLinkPath` matches your payload structure
 - **OneLink not detected**: Ensure the OneLink contains required parameters (pid, is_retargeting=true, c)
-- **Payload not processed**: Check that `addPushNotificationDeepLinkPath` is called before `initSdk`
+- **Payload not processed**: Check that `addPushNotificationDeepLinkPath` is called before `init`
 
 **JSON Method:**
 
@@ -395,7 +391,7 @@ Push Notification received af payload = {"c":"campaign_name", "is_retargeting":"
 
 - **Android crashes**: Verify app activity is available when calling `sendPushNotificationData`
 - **Android re-engagement empty (iOS fine)**: Pass `androidCampaignData` to `sendPushNotificationData` — Android builds the re-engagement from those fields, not from the raw payload
-- **Listeners not firing**: Ensure all listeners are set up before calling `initSdk` and `startSdk`
+- **Listeners not firing**: Ensure all listeners are set up before calling `init` and `startSdk`
 - **Duplicate processing**: SDK prevents duplicate processing of the same payload in the same cold launch
 
 ## Resources
