@@ -87,16 +87,32 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
     private fun dispatchToNative(requestJson: String): String {
         val canonicalMethod = canonicalMethodName(requestJson)
         val remappedRequestJson = remapMethodName(requestJson)
+
+        // Arm BEFORE the native call, not after: AppsFlyerLib.registerSessionReadyListener
+        // (plugin_bridge's AppsFlyerRpcHandler.handleRegisterSessionReadyListener) invokes the
+        // listener synchronously, inline, if the session is already ready — e.g. re-registration
+        // after a prior successful register. If the guard were armed after rpcHandler.execute()
+        // returned, that synchronous callback would race pluginNotifier while sessionReadyDelivered
+        // was still `true` from the previous cycle, fail its compareAndSet(false, true), and get
+        // dropped until the fallback timer resent it up to a second late.
+        if (canonicalMethod == "registerSessionReadyListener") {
+            armSessionReadyFallback()
+        }
+
         val response = rpcHandler.execute(remappedRequestJson)
         val normalized = normalize(response)
 
-        if (response is RpcResponse.VoidSuccess) {
-            when (canonicalMethod) {
-                "registerSessionReadyListener" -> scheduleSessionReadyFallback()
-                "unregisterSessionReadyListener" -> {
-                    sessionReadyFallback?.cancel(false)
-                    sessionReadyDelivered.set(true)
-                }
+        when {
+            canonicalMethod == "registerSessionReadyListener" && response !is RpcResponse.VoidSuccess -> {
+                // Registration itself failed — nothing will ever deliver onSessionReady for this
+                // attempt, so disarm the fallback we speculatively armed above instead of leaving
+                // it ticking for a registration that never happened.
+                sessionReadyFallback?.cancel(false)
+                sessionReadyDelivered.set(true)
+            }
+            canonicalMethod == "unregisterSessionReadyListener" && response is RpcResponse.VoidSuccess -> {
+                sessionReadyFallback?.cancel(false)
+                sessionReadyDelivered.set(true)
             }
         }
 
@@ -106,8 +122,9 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
     // Synthesizes the same onSessionReady envelope AppsFlyerRpcHandler emits natively, in case
     // the real native callback never fires. cancel() here is a best-effort early stop (avoids
     // waking the scheduler needlessly); sessionReadyDelivered is what actually prevents a
-    // double-emit if the real event and this timer race.
-    private fun scheduleSessionReadyFallback() {
+    // double-emit if the real event and this timer race. Must be called before the native
+    // register call that may synchronously deliver the real event (see call site).
+    private fun armSessionReadyFallback() {
         sessionReadyFallback?.cancel(false)
         sessionReadyDelivered.set(false)
         sessionReadyFallback = sessionReadyScheduler.schedule({
