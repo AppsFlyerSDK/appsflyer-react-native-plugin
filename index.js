@@ -1172,6 +1172,9 @@ appsFlyer.setDeepLinkTimeout = (timeout) =>
  * @param {string} url the opened URL string.
  * @param {object} [options] iOS `UIApplication.OpenURLOptionsKey` dictionary, passed
  *   through as-is.
+ * @remarks Safe to call before {@link appsFlyer.init} resolves (e.g. a cold start via
+ *   Universal Link/URI scheme) — native buffers this call and flushes it once init succeeds,
+ *   instead of failing with "Not ready".
  * @platform ios
  */
 appsFlyer.handleOpenURL = (url, options = {}) =>
@@ -1183,6 +1186,7 @@ appsFlyer.handleOpenURL = (url, options = {}) =>
  * collapse the two.
  * @param {string} url the opened URL string.
  * @param {object} [options] the openURL options dictionary.
+ * @remarks Safe to call before {@link appsFlyer.init} resolves — see {@link appsFlyer.handleOpenURL}.
  * @platform ios
  */
 appsFlyer.handleOpenUrl = (url, options = {}) =>
@@ -1195,6 +1199,7 @@ appsFlyer.handleOpenUrl = (url, options = {}) =>
  * `application:continueUserActivity:restorationHandler:`) to the SDK.
  * @param {string} url the activity's `webpageURL`.
  * @param {string} [activityType] defaults natively to `NSUserActivityTypeBrowsingWeb`.
+ * @remarks Safe to call before {@link appsFlyer.init} resolves — see {@link appsFlyer.handleOpenURL}.
  * @platform ios
  */
 appsFlyer.continueUserActivity = (url, activityType) =>

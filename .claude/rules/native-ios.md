@@ -29,7 +29,9 @@ To add a new SDK capability: expose it in the native `AppsFlyerRPCBridge` handle
 
 ## 4. Listener-registration buffering
 
-`RNAppsFlyerImpl.swift` holds `registerConversionListener` / `registerDeeplinkListener` / `registerSessionReadyListener` RPC dispatches if called before `init` resolves, then flushes them immediately after. This matches the Cordova prior-art fix (commit `9ee0552`). Do not remove this buffer — removing it silently drops events on the first launch.
+`RNAppsFlyerImpl.swift`'s `bufferedUntilInitMethods` holds `registerConversionListener` / `registerDeeplinkListener` / `registerSessionReadyListener` RPC dispatches if called before `init` resolves, then flushes them immediately after. This matches the Cordova prior-art fix (commit `9ee0552`). Do not remove this buffer — removing it silently drops events on the first launch.
+
+The same set also buffers the AppDelegate deep-link forwarders — `handleOpenURL` / `handleOpenUrl` / `continueUserActivity` — for the same reason: the vendored `AppsFlyerRPC` layer's pre-ready `deepLinkRoute` hard-fails with a "Not ready" error rather than queuing, and a cold start via Universal Link/URI scheme can call these before JS calls `init()`. This is the TurboModule-era replacement for the pre-7.0.0 `AppsFlyerAttribution` singleton, which buffered one pending url/userActivity natively for the same race.
 
 ## 5. IDFA / strict mode
 

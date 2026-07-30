@@ -388,12 +388,14 @@ declare module "react-native-appsflyer" {
 
     /**
      * Forward an opened URL (iOS `application:openURL:options:`) for deep link resolution.
+     * @remarks Safe to call before `init` resolves — buffered natively and flushed after.
      * @platform ios
      */
     handleOpenURL(url: string, options?: Record<string, unknown>): Promise<void>;
     /**
      * Legacy (pre-iOS 9) `application:openURL:sourceApplication:annotation:` path.
      * Case-sensitive and distinct from {@link handleOpenURL} — do not collapse the two.
+     * @remarks Safe to call before `init` resolves — buffered natively and flushed after.
      * @platform ios
      */
     handleOpenUrl(url: string, options?: Record<string, unknown>): Promise<void>;
@@ -401,6 +403,7 @@ declare module "react-native-appsflyer" {
      * Forward a Universal Link for deep link resolution.
      * @param url the activity's `webpageURL`.
      * @param activityType defaults natively to `NSUserActivityTypeBrowsingWeb`.
+     * @remarks Safe to call before `init` resolves — buffered natively and flushed after.
      * @platform ios
      */
     continueUserActivity(url: string, activityType?: string): Promise<void>;
