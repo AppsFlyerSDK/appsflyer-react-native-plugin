@@ -11,6 +11,7 @@
 - React Native >> Fix `logAdRevenue`'s `mediationNetwork` silently failing on Android for several `MEDIATION_NETWORK` constants (`APPLOVIN_MAX`, `GOOGLE_ADMOB`, `TOPON_PTE`, `CUSTOM_MEDIATION`, `DIRECT_MONETIZATION_NETWORK`) — Android's RPC layer requires an exact string match with no normalization, while iOS lowercases and strips underscores before matching; `CUSTOM_MEDIATION`/`DIRECT_MONETIZATION_NETWORK` had no single spelling that satisfied both platforms' validators at all. `logAdRevenue` now resolves the public constant to each platform's actual required wire value before dispatch (same pattern as the existing iOS/Android `purchaseType` mapping) — no change to the public `MEDIATION_NETWORK` values themselves
 - React Native >> Bump `AppsFlyerRPC` to 7.0.12; strict mode (`$RNAppsFlyerStrictMode=true`) now pulls `AppsFlyerRPC/Strict` (no-IDFA build) instead of the plain `AppsFlyerRPC` pod. Also drops the podspec's unused `AppsFlyerFramework/Strict` dependency — no source file imports it
 - React Native >> Replace sed-based native dependency version bumps in the release workflow with `scripts/bump-native-deps.sh`, which verifies each substitution actually landed before continuing; add a required `android_plugin_bridge_version` workflow_dispatch input
+- React Native >> Rewrite `MIGRATION.md`: checklist, symbol-by-symbol table, and an LLM-assistant migration prompt — docs only, no API changes
 
 ### Breaking changes
 
