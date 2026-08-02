@@ -1,4 +1,4 @@
-interface TestPurchaseJson {}
+type TestPurchaseJson = object;
 
 export class TestPurchase {
   constructor() {}
