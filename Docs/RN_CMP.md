@@ -19,10 +19,10 @@ Through a dedicated SDK API: Developers can pass Google's required consent data 
 A CMP compatible with TCF v2.2/2.3 collects DMA consent data and stores it in NSUserDefaults (iOS) and SharedPreferences (Android). To enable the SDK to access this data and include it with every event, follow these steps:
 
 1. Call `appsFlyer.enableTCFDataCollection(true)`
-2. `init(devKey, appId)` and register listeners as usual (see [Initialization Flow](RN_API.md#initialization-flow)) — 7.0.0 always requires an explicit `startSdk()` call, so there is no separate "manual start" mode to opt into.
+2. `init(devKey, appId)` and register listeners as usual (see [Initialization Flow](RN_API.md#initialization-flow)) — 7.0.0 always requires an explicit `start()` call, so there is no separate "manual start" mode to opt into.
 3. Use the CMP to decide if you need the consent dialog in the current session to acquire the consent data. If you need the consent dialog move to step 4; otherwise move to step 5
 4. Get confirmation from the CMP that the user has made their consent decision and the data is available in NSUserDefaults/SharedPreferences
-5. Call `appsFlyer.startSdk()` from inside `registerSessionReadyListener`'s callback, after the CMP decision is resolved
+5. Call `appsFlyer.start()` from inside `registerSessionReadyListener`'s callback, after the CMP decision is resolved
 ```javascript
 useEffect(() => {
   // TCF data collection
@@ -37,10 +37,10 @@ useEffect(() => {
   appsFlyer.registerSessionReadyListener(() => {
     // CMP Pseudocode
     if (cmpManager.hasConsent()) {
-      appsFlyer.startSdk();
+      appsFlyer.start();
     } else {
       cmpManager.presentConsentDialog(res => {
-        appsFlyer.startSdk();
+        appsFlyer.start();
       });
     }
   });
@@ -56,7 +56,7 @@ How to Set Consent Data: </br>
     *	If GDPR applies, check whether consent data is already stored.
     *	If not stored, show a consent dialog to obtain user consent.
 2.	Create an AppsFlyerConsent object with the relevant parameters.
-3.	Pass the consent data to the SDK using appsFlyer.setConsentData(consentData) inside `registerSessionReadyListener`'s callback, before calling `startSdk()`.
+3.	Pass the consent data to the SDK using appsFlyer.setConsentData(consentData) inside `registerSessionReadyListener`'s callback, before calling `start()`.
 4.	Initialize the SDK with `appsFlyer.init(devKey, appId)` (see [Initialization Flow](RN_API.md#initialization-flow)).
 
 #### Setting Consent Data for Users
@@ -81,7 +81,7 @@ useEffect(() => {
         // Send consent data to the SDK
         appsFlyer.setConsentData(consentData);
 
-        appsFlyer.startSdk();
+        appsFlyer.start();
     });
 }, []);
 ```
@@ -106,7 +106,7 @@ useEffect(() => {
         // Send consent data to the SDK
         appsFlyer.setConsentData(consentData);
 
-        appsFlyer.startSdk();
+        appsFlyer.start();
     });
 }, []);
 ```

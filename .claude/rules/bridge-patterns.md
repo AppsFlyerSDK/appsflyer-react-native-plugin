@@ -85,7 +85,7 @@ statements right after it, matching the reference `RPCTestApp`'s own call order 
 
 ### Recommended pattern for deterministic ordering after start()
 
-`registerSessionReadyListener`'s callback is the only place `startSdk()` should be called
+`registerSessionReadyListener`'s callback is the only place `start()` should be called
 (`AppsFlyerLib.h`: *"Call start inside the block. The SDK does not call start automatically"*)
 — this doesn't change. But because that callback fires asynchronously (a real native event —
 there is no plugin-side fallback/synthesized event; if it never fires, that's a native SDK bug
@@ -93,13 +93,13 @@ to file, not something this plugin should paper over), any JS code written after
 the `registerSessionReadyListener(...)` call in source order actually runs *before* the
 callback does, not after — `registerSessionReadyListener` returns immediately, JS doesn't wait
 for it. If a consuming app wants some of its own logic (e.g. logging events) to run strictly
-after `start()`, wrap the registration + `startSdk()` call in a `Promise` and `await` it:
+after `start()`, wrap the registration + `start()` call in a `Promise` and `await` it:
 
 ```js
 function startWhenSessionReady() {
   return new Promise((resolve, reject) => {
     appsFlyer.registerSessionReadyListener(() => {
-      appsFlyer.startSdk().then(resolve, reject);
+      appsFlyer.start().then(resolve, reject);
     });
   });
 }
@@ -112,7 +112,7 @@ await startWhenSessionReady();
 
 `example/src/App.tsx` uses this exact pattern (`startWhenSessionReady`). It only reorders code
 the *app* controls — it cannot make native's `onSessionReady` fire any faster, and if it never
-fires, `startSdk()` never dispatches (there is no timeout/fallback — see the known-issues KB's
+fires, `start()` never dispatches (there is no timeout/fallback — see the known-issues KB's
 session-ready-stall entry for the one confirmed native cause).
 
 `onAppOpenAttribution`, `onAttributionFailure`, and `performOnAppAttribution` are **removed** in 7.0.0 — route attribution data through `onDeepLink` instead (see MIGRATION.md).

@@ -13,7 +13,7 @@ The list of available methods for this plugin is described below.
 - [Android and iOS APIs](#android-and-ios-apis)
   - [Initialization Flow](#initialization-flow)
   - [initSdk](#initsdk)
-  - [startSdk](#startsdk)
+  - [start](#start)
   - [setIsDebug](#setisdebug)
   - [logEvent](#logevent)
     - [AFInAppEventType](#afinappeventtype)
@@ -85,11 +85,8 @@ The list of available methods for this plugin is described below.
   - [setUseReceiptValidationSandbox](#setusereceiptvalidationsandbox)
   - [disableSKAD](#disableskad)
   - [setCurrentDeviceLanguage](#setcurrentdevicelanguage)
-  - [handleOpenURL](#handleopenurl-capital)
-  - [handleOpenUrl](#handleopenurl)
-  - [continueUserActivity](#continueuseractivity)
+  - [iOS AppDelegate lifecycle forwarding (native-only)](#ios-appdelegate-lifecycle-forwarding-native-only)
   - [setFacebookDeferredAppLink](#setfacebookdeferredapplink)
-  - [handleLaunchOptions](#handlelaunchoptions)
 - [AppsFlyerConversionData](#appsflyerconversiondata)
   - [onInstallConversionData](#oninstallconversiondata)
   - [onInstallConversionFailure](#oninstallconversionfailure)
@@ -112,7 +109,7 @@ Recommended call order for a 7.0.0 (RPC) integration:
 3. Register `onInstallConversionData` / `onDeepLink` — **synchronously**, in the same call stack as `init`, not inside `init()`'s `.then()`
 4. `setCustomerUserId(...)` — if you need the CUID associated with the install event
 5. `registerSessionReadyListener(...)` — **synchronously**, same rule as step 3
-6. Inside the `registerSessionReadyListener` callback: collect consent data (`setConsentData`) / ATT authorization status if your app requires it, then call `startSdk()`
+6. Inside the `registerSessionReadyListener` callback: collect consent data (`setConsentData`) / ATT authorization status if your app requires it, then call `start()`
 
 *Example:*
 
@@ -137,7 +134,7 @@ appsFlyer.onDeepLink((res) => {
 appsFlyer.registerSessionReadyListener(() => {
   // Collect consent / ATT status here if your app requires it, e.g.:
   // appsFlyer.setConsentData(consent);
-  appsFlyer.startSdk().then(
+  appsFlyer.start().then(
     () => console.log('SDK started'),
     (err) => console.error('start failed', err)
   );
@@ -147,7 +144,7 @@ appsFlyer.registerSessionReadyListener(() => {
 **Why the order matters:**
 - `init` must be issued first. `setIsDebug` and the buffered listener registrations below all go over the same native RPC channel in call order — issuing them right after `init` guarantees the native side processes `init` first, even though `init()`'s own JS Promise resolves later, asynchronously.
 - `onInstallConversionData`, `onDeepLink`, and `registerSessionReadyListener` must be registered before `init()`'s promise settles. The native layer buffers these registrations and flushes them once `init` completes — but only catches registrations that arrived before that point. Registering them inside `init().then()` risks the native side having already resolved, silently dropping the registration.
-- `startSdk()` must be called from inside the `registerSessionReadyListener` callback, never chained off `init().then()` — see [startSdk](#startsdk).
+- `start()` must be called from inside the `registerSessionReadyListener` callback, never chained off `init().then()` — see [start](#start).
 
 ---
 
@@ -156,7 +153,7 @@ appsFlyer.registerSessionReadyListener(() => {
 `initSdk(options, success, error)` is **removed**. Use `init(devKey, appId)` instead — a Promise-only call. `isDebug`, `onInstallConversionDataListener`, `onDeepLinkListener`, and `manualStart` are no longer options on the init call; see
 [MIGRATION.md](../MIGRATION.md#initsdkoptions--replaced-by-initdevkey-appid) for the full
 replacement pattern (`setIsDebug`, `onInstallConversionData`, `onDeepLink`,
-`registerSessionReadyListener` + `startSdk`), and [Initialization Flow](#initialization-flow) above for the recommended call order. 
+`registerSessionReadyListener` + `start`), and [Initialization Flow](#initialization-flow) above for the recommended call order. 
 
 *Example:*
 
@@ -169,17 +166,17 @@ appsFlyer.init('K2***********99', '41*****44').then(
 );
 
 appsFlyer.registerSessionReadyListener(() => {
-  appsFlyer.startSdk();
+  appsFlyer.start();
 });
 ```
 ---
 
-### startSdk
-`startSdk()`
+### start
+`start()`
 
-7.0.0 always requires an explicit `startSdk()` call — the native SDK never auto-starts (there is
+7.0.0 always requires an explicit `start()` call — the native SDK never auto-starts (there is
 no `manualStart` option any more, since `initSdk` itself is removed; see
-[MIGRATION.md](../MIGRATION.md#initsdkoptions--replaced-by-initdevkey-appid)). `startSdk()` isn't
+[MIGRATION.md](../MIGRATION.md#initsdkoptions--replaced-by-initdevkey-appid)). `start()` isn't
 gated by the bridge — it can technically be called at any point, even before `init()` — but doing
 so isn't meaningful: there's no session for the native SDK to start yet. Keep it in the order
 shown in [Initialization Flow](#initialization-flow), calling it from inside
@@ -190,7 +187,7 @@ shown in [Initialization Flow](#initialization-flow), calling it from inside
 appsFlyer.init('UsxXxXxed', '75xXxXxXxXx11');
 
 appsFlyer.registerSessionReadyListener(() => {
-  appsFlyer.startSdk().then(
+  appsFlyer.start().then(
     () => console.warn('AppsFlyer SDK started!'),
     (err) => { /* handle error */ }
   );
@@ -1256,7 +1253,7 @@ appsFlyer.setDisableNetworkData(true);
 ### performOnDeepLinking 
 `performOnDeepLinking(url, shouldTriggerSession)`
 
-Enables manual triggering of deep link resolution for a given URL. This method allows apps that are delaying the call to `appsFlyer.startSdk()` to resolve deep links before the SDK starts.<br>
+Enables manual triggering of deep link resolution for a given URL. This method allows apps that are delaying the call to `appsFlyer.start()` to resolve deep links before the SDK starts.<br>
 Note:<br>This API will trigger the `appsFlyer.onDeepLink` callback. In the following example, we check if `res.deepLinkStatus` is equal to “FOUND” inside `appsFlyer.onDeepLink` callback to extract the deeplink parameters.
 
 | parameter            | type     | description               |
@@ -1276,7 +1273,7 @@ const onDeepLink = appsFlyer.onDeepLink(res => {
 });
 
 appsFlyer.registerSessionReadyListener(() => {
-  appsFlyer.startSdk(); // <--- Here we send launch, only once the session is ready
+  appsFlyer.start(); // <--- Here we send launch, only once the session is ready
 });
 
 appsFlyer.init('UsxXxXxed', '75xXxXxXxXx11');
@@ -1618,66 +1615,14 @@ if (Platform.OS == 'ios') {
 
 ---
 
-### handleOpenURL (capital)
-`handleOpenURL(url, options) : Promise<void>`
+### iOS AppDelegate lifecycle forwarding (native-only)
 
-Forward an opened URL (iOS AppDelegate `application:openURL:options:`) to the SDK for deep link resolution.
-
-| parameter | type   | description                                              |
-| --------- |--------|-------------------------------------------------------------|
-| url       | string | the opened URL string                                        |
-| options   | object | `UIApplication.OpenURLOptionsKey` dictionary. Optional, passed through as-is. |
-
-*Example:*
-
-```javascript
-if (Platform.OS == 'ios') {
-    appsFlyer.handleOpenURL(url, options);
-}
-```
-
----
-
-### handleOpenUrl
-`handleOpenUrl(url, options) : Promise<void>`
-
-Legacy (pre-iOS 9) `application:openURL:sourceApplication:annotation:` deep link path. Case-sensitive and a distinct RPC method from [`handleOpenURL`](#handleopenurl-capital) — do not collapse the two.<br>
-The native SDK reads only the URL and the options dictionary — `sourceApplication` and `annotation` are not supported.
-
-| parameter | type     | description      |
-| ----------|----------|------------------|
-| url       | string   | the opened URL |
-| options   | json     | the openURL options dictionary. Optional. |
-
-
-*Example:*
-
-```javascript
-if (Platform.OS == 'ios') {
-    appsFlyer.handleOpenUrl(url, options);
-}
-```
-
----
-
-### continueUserActivity 
-`continueUserActivity(url, activityType)`
-
-Forwards a Universal Link (from `application:continueUserActivity:restorationHandler:`) to the SDK.
-
-| parameter    | type     | description      |
-| ----------   |----------|------------------|
-| url          | string   | the activity's `webpageURL` |
-| activityType | string   | the activity type. Optional — defaults natively to `NSUserActivityTypeBrowsingWeb`. |
-
-
-*Example:*
-
-```javascript
-if (Platform.OS == 'ios') {
-    appsFlyer.continueUserActivity(userActivity.webpageURL);
-}
-```
+`handleOpenURL`/`handleOpenUrl`/`continueUserActivity`/`handleLaunchOptions` are **not**
+JS APIs — call `AppsFlyerLib.shared()` directly from your app's native `AppDelegate`
+instead. See [Deep Linking integration](/Docs/RN_DeepLinkIntegrate.md#ios-deeplink-setup)
+for the exact code. Expo apps get the `openURL`/`continueUserActivity` forwarding
+auto-injected by the config plugin at `expo prebuild` time — see
+[Expo Deep Link Integration](/Docs/RN_ExpoDeepLinkIntegration.md).
 
 ---
 
@@ -1695,25 +1640,6 @@ Explicitly resolve a Facebook deferred app link from the app's `open(url:options
 ```javascript
 if (Platform.OS == 'ios') {
   appsFlyer.setFacebookDeferredAppLink(options);
-}
-```
-
----
-
-### handleLaunchOptions
-`handleLaunchOptions(launchOptions) : Promise<void>`
-
-Forward the app's cold-start launch options (e.g. from a push notification or deep link) to the SDK during startup.
-
-| parameter     | type   | description                     |
-| ------------- |--------|-----------------------------------|
-| launchOptions | object | the raw launch options dictionary |
-
-*Example:*
-
-```javascript
-if (Platform.OS == 'ios') {
-  appsFlyer.handleLaunchOptions(launchOptions);
 }
 ```
 
@@ -1850,7 +1776,7 @@ settles — see [Initialization Flow](#initialization-flow).
 
 ```javascript
 appsFlyer.registerSessionReadyListener(() => {
-  appsFlyer.startSdk();
+  appsFlyer.start();
 });
 ```
 

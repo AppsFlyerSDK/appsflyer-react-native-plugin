@@ -67,26 +67,34 @@ In your app’s manifest add the following intent-filter to your relevant activi
 For more on URI Scheme check out the guide [here](https://dev.appsflyer.com/hc/docs/dl_android_init_setup#procedures-for-uri-scheme).
 
 ##  iOS Deeplink Setup
-In order to record retargeting and use the `onDeepLink`/UDL callback in iOS (`onAppOpenAttribution` was removed in 7.0.0 and merged into `onDeepLink` — see MIGRATION.md), the app needs to forward opened URLs / Universal Links to the SDK. The 7.0.0 TurboModule rewrite removed the native `AppsFlyerAttribution` proxy class — there is no longer any AppsFlyer-specific code to add to **AppDelegate**. Instead, forward from JavaScript, using React Native's own `Linking` module to receive the AppDelegate events (standard RN setup, via `RCTLinkingManager` — see the [React Native Linking docs](https://reactnative.dev/docs/linking)):
+In order to record retargeting and use the `onDeepLink`/UDL callback in iOS (`onAppOpenAttribution` was removed in 7.0.0 and merged into `onDeepLink` — see MIGRATION.md), the app needs to forward opened URLs / Universal Links / cold-start launch options to the native SDK. This is done entirely in your app's native **AppDelegate** — there is no JavaScript API for this (`handleOpenURL`/`handleOpenUrl`/`continueUserActivity`/`handleLaunchOptions` are not exposed by this plugin's JS surface):
 
-```javascript
-import { Linking } from 'react-native';
-import appsFlyer from 'react-native-appsflyer';
+```swift
+import AppsFlyerLib
 
-// Universal Links / URI scheme opened while the app is already running.
-Linking.addEventListener('url', ({ url }) => {
-  appsFlyer.handleOpenURL(url);
-});
+func application(_ app: UIApplication, open url: URL,
+                  options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+  AppsFlyerLib.shared().handleOpen(url, options: options)
+  return true
+}
 
-// App launched cold via a Universal Link / URI scheme.
-Linking.getInitialURL().then(url => {
-  if (url) {
-    appsFlyer.handleOpenURL(url);
-  }
-});
+func application(_ application: UIApplication, continue userActivity: NSUserActivity,
+                  restorationHandler: @escaping ([Any]?) -> Void) -> Bool {
+  AppsFlyerLib.shared().continue(userActivity, restorationHandler: restorationHandler)
+  return true
+}
+
+func application(_ application: UIApplication,
+                  didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+  AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
+  // ... rest of your launch setup ...
+  return true
+}
 ```
 
-`appsFlyer.handleOpenURL(url, options?)` and `appsFlyer.continueUserActivity(url, activityType?)` are safe to call before `appsFlyer.init(...)` resolves — a cold start can fire before JS has finished initializing, and the native RPC layer buffers these calls until `init` succeeds rather than dropping them. `appsFlyer.handleOpenUrl(url, options?)` (lowercase `Url`) is the legacy pre-iOS 9 path — a distinct, case-sensitive RPC method from `handleOpenURL`, not an alias.
+`AppsFlyerLib` is already available as a transitive dependency of this plugin (via the vendored `AppsFlyerRPC` pod) — no extra `pod` entry is needed to `import AppsFlyerLib` in your own AppDelegate.
+
+**Expo apps**: the `openURL`/`continueUserActivity` forwarding above is auto-injected into your generated AppDelegate by this plugin's config plugin at `expo prebuild` time (see [Expo Deep Link Integration](/Docs/RN_ExpoDeepLinkIntegration.md)) — you don't need to add it by hand. `handleLaunchOptions` isn't auto-injected yet; add it manually if you need cold-start launch options forwarded.
 
 ### Universal Links
 Universal Links link between an iOS mobile app and an associate website/domain, such as AppsFlyer’s OneLink domain (xxx.onelink.me). To do so, it is required to:
