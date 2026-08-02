@@ -109,7 +109,7 @@ appsFlyer.init('YOUR_DEV_KEY', 'YOUR_APP_ID'); // appId is iOS only, harmlessly 
 
 // Start AppsFlyer from inside registerSessionReadyListener's callback (see bridge-patterns.md §4)
 appsFlyer.registerSessionReadyListener(() => {
-  appsFlyer.startSdk();
+  appsFlyer.start();
 });
 ```
 
@@ -249,7 +249,7 @@ appsFlyer.onDeepLink((data) => {
 // `initSdk` was removed in 7.0.0 — use `init(devKey, appId)` instead (see MIGRATION.md).
 appsFlyer.init('YOUR_DEV_KEY', 'YOUR_APP_ID');
 appsFlyer.registerSessionReadyListener(() => {
-  appsFlyer.startSdk();
+  appsFlyer.start();
 });
 
 // 3. Handle push data the same way
@@ -287,7 +287,7 @@ const AppsflyerPushIntegration = () => {
 
     // 4. Start AppsFlyer once the session is ready (see bridge-patterns.md §4)
     appsFlyer.registerSessionReadyListener(() => {
-      appsFlyer.startSdk();
+      appsFlyer.start();
     });
 
     // 5. Set up push notification handlers
@@ -391,7 +391,7 @@ Push Notification received af payload = {"c":"campaign_name", "is_retargeting":"
 
 - **Android crashes**: Verify app activity is available when calling `sendPushNotificationData`
 - **Android re-engagement empty (iOS fine)**: Pass `androidCampaignData` to `sendPushNotificationData` — Android builds the re-engagement from those fields, not from the raw payload
-- **Listeners not firing**: Ensure all listeners are set up before calling `init` and `startSdk`
+- **Listeners not firing**: Ensure all listeners are set up before calling `init` and `start`
 - **Duplicate processing**: SDK prevents duplicate processing of the same payload in the same cold launch
 
 ## Resources

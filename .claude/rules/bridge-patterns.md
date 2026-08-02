@@ -73,7 +73,7 @@ tried and reverted in `example/src/App.tsx` for exactly this reason.
 
 ### Recommended pattern for deterministic ordering after start()
 
-`registerSessionReadyListener`'s callback is the only place `startSdk()` should be called
+`registerSessionReadyListener`'s callback is the only place `start()` should be called
 (`AppsFlyerLib.h`: *"Call start inside the block. The SDK does not call start automatically"*)
 — this doesn't change. But because that callback fires asynchronously (real native event, or
 this repo's Android session-ready fallback — see
@@ -81,13 +81,13 @@ this repo's Android session-ready fallback — see
 the `registerSessionReadyListener(...)` call in source order actually runs *before* the
 callback does, not after — `registerSessionReadyListener` returns immediately, JS doesn't wait
 for it. If a consuming app wants some of its own logic (e.g. logging events) to run strictly
-after `start()`, wrap the registration + `startSdk()` call in a `Promise` and `await` it:
+after `start()`, wrap the registration + `start()` call in a `Promise` and `await` it:
 
 ```js
 function startWhenSessionReady() {
   return new Promise((resolve, reject) => {
     appsFlyer.registerSessionReadyListener(() => {
-      appsFlyer.startSdk().then(resolve, reject);
+      appsFlyer.start().then(resolve, reject);
     });
   });
 }
@@ -100,7 +100,7 @@ await startWhenSessionReady();
 
 `example/src/App.tsx` uses this exact pattern (`startWhenSessionReady`). It only reorders code
 the *app* controls — it cannot make native's `onSessionReady` fire any faster; on Android in
-particular, `startSdk()` may still be bounded by the fallback's timeout in the worst case.
+particular, `start()` may still be bounded by the fallback's timeout in the worst case.
 
 `onAppOpenAttribution`, `onAttributionFailure`, and `performOnAppAttribution` are **removed** in 7.0.0 — route attribution data through `onDeepLink` instead (see MIGRATION.md).
 

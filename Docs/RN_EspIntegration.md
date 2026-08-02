@@ -58,9 +58,10 @@ Add associated domains to your `app.json`:
 
 ### Step 2: Configure AppDelegate for Deep Linking
 
-There is no AppsFlyer-specific native code to add to `AppDelegate` under the TurboModule bridge (the pre-7.0.0 `AppsFlyerAttribution` proxy class and the `RNAppsFlyer.h` bridging-header import it required are gone). Your `AppDelegate` only needs the standard React Native `RCTLinkingManager` relay so opened URLs / Universal Links reach the JS `Linking` module:
+Forward opened URLs / Universal Links to the AppsFlyer SDK directly from `AppDelegate` (there is no JavaScript API for this — `AppsFlyerLib` is already available as a transitive dependency of this plugin, no extra `pod` entry needed). If your app also uses React Native's own `Linking` module for its own deep-link routing, call both `AppsFlyerLib.shared()` and `RCTLinkingManager` from the same delegate methods:
 
 ```swift
+import AppsFlyerLib
 import Expo
 import React
 import ReactAppDependencyProvider
@@ -76,6 +77,7 @@ public class AppDelegate: ExpoAppDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
+    AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
     //...
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -87,6 +89,7 @@ public class AppDelegate: ExpoAppDelegate {
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
+    AppsFlyerLib.shared().handleOpen(url, options: options)
     return super.application(app, open: url, options: options) || RCTLinkingManager.application(app, open: url, options: options)
   }
 
@@ -96,15 +99,14 @@ public class AppDelegate: ExpoAppDelegate {
     continue userActivity: NSUserActivity,
     restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
   ) -> Bool {
+    AppsFlyerLib.shared().continue(userActivity, restorationHandler: restorationHandler)
     let result = RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
     return super.application(application, continue: userActivity, restorationHandler: restorationHandler) || result
   }
 }
 ```
 
-Forward the resulting `Linking` events to the SDK from JavaScript with `appsFlyer.handleOpenURL(url, options)` and
-`appsFlyer.continueUserActivity(webpageURL, activityType)` (iOS only) — see
-[Deep linking integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup) for the full JS-side pattern.
+See [Deep linking integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup) for the full native pattern (this plugin's Expo config plugin auto-injects the `openURL`/`continueUserActivity` calls above at `expo prebuild` time — `handleLaunchOptions` is not auto-injected yet).
 
 ---
 
