@@ -34,9 +34,9 @@
       "checks": [
         {
           "id": "sdk_started",
-          "description": "startSDK was called",
+          "description": "start was called",
           "type": "log_contains",
-          "pattern": "[AF_QA][startSDK] result:",
+          "pattern": "[AF_QA][start] result:",
           "fail_action": "abort"
         },
         {
@@ -115,7 +115,7 @@
           "id": "no_fatal_errors",
           "description": "No fatal exceptions or SDK errors in logs",
           "type": "absent",
-          "patterns": ["Fatal Exception", "FATAL", "[AF_QA][startSDK] error:", "response code:4", "response code:5"],
+          "patterns": ["Fatal Exception", "FATAL", "[AF_QA][start] error:", "response code:4", "response code:5"],
           "fail_action": "fail"
         }
       ]

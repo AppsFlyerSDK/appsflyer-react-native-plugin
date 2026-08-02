@@ -34,9 +34,9 @@
       "checks": [
         {
           "id": "sdk_started",
-          "description": "startSDK returns a result",
+          "description": "start returns a result",
           "type": "log_contains",
-          "pattern": "[AF_QA][startSDK] result:",
+          "pattern": "[AF_QA][start] result:",
           "fail_action": "abort"
         },
         {
@@ -139,9 +139,9 @@
       "checks": [
         {
           "id": "sdk_started",
-          "description": "startSDK returns a result on fresh install",
+          "description": "start returns a result on fresh install",
           "type": "log_contains",
-          "pattern": "[AF_QA][startSDK] result:",
+          "pattern": "[AF_QA][start] result:",
           "fail_action": "abort"
         },
         {
