@@ -17,19 +17,19 @@ public final class RNAppsFlyerImpl: NSObject {
         "updateServerUninstallToken": "registerUninstall",
     ]
 
-    /// register*Listener RPCs, plus the AppDelegate deep-link forwarders, are dropped by the native
-    /// RPC layer if they arrive before init resolves (`AFRPCRequestHandler`'s pre-ready `deepLinkRoute`
-    /// hard-fails with "Not ready" — it does not queue). A cold start via Universal Link/URI scheme can
-    /// reach these before JS calls `init()`, so buffer and flush after, same as the listeners. This
-    /// replaces the pre-TurboModule `AppsFlyerAttribution` singleton, which buffered one pending
-    /// url/userActivity client-side for the same reason.
+    /// register*Listener RPCs are dropped by the native RPC layer if they arrive before init
+    /// resolves (`AFRPCRequestHandler`'s pre-ready `deepLinkRoute` hard-fails with "Not ready" —
+    /// it does not queue). A cold start via Universal Link/URI scheme can reach these before JS
+    /// calls `init()`, so buffer and flush after.
+    ///
+    /// `handleOpenURL`/`handleOpenUrl`/`continueUserActivity` used to be buffered here too, back
+    /// when they were JS-callable RPCs — they no longer are (moved to native-only; the app calls
+    /// `AppsFlyerLib.shared()` directly from its own AppDelegate, same as `expo/withAppsFlyerIos.js`
+    /// already does). Removed from this set rather than left as dead entries.
     private static let bufferedUntilInitMethods: Set<String> = [
         "registerConversionListener",
         "registerDeeplinkListener",
         "registerSessionReadyListener",
-        "handleOpenURL",
-        "handleOpenUrl",
-        "continueUserActivity",
     ]
 
     private let initGateQueue = DispatchQueue(label: "com.appsflyer.reactnative.initGate")
