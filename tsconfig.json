@@ -10,6 +10,6 @@
         "noEmit": true, // Prevents the compiler from emitting output files
         "types": ["jest"] // TS7 defaults types to [] instead of ["*"]; jest globals need this explicit
     },
-    "include": ["src/**/*", "__tests__/**/*"], // Includes application source code and tests
+    "include": ["index.ts", "src/**/*", "__tests__/**/*"], // Includes application source code and tests
     "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js"] // Excludes unnecessary files
 }
