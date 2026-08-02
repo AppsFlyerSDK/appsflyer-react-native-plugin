@@ -32,7 +32,6 @@ export const RPC_CATALOG = [
 	// Init
 	{ name: 'init', group: 'Init', platform: 'both', run: () => appsFlyer.init(DEV_KEY, APP_ID) },
 	{ name: 'setIsDebug', group: 'Debug', platform: 'both', run: () => { appsFlyer.setIsDebug(true); return fired(); } },
-	{ name: 'handleLaunchOptions', group: 'Init', platform: 'ios', run: () => appsFlyer.handleLaunchOptions({}) },
 
 	// Listeners
 	{ name: 'onInstallConversionData', group: 'Listener', platform: 'both', run: () => { appsFlyer.onInstallConversionData(() => {})(); return Promise.resolve('listener registered'); } },
@@ -40,8 +39,8 @@ export const RPC_CATALOG = [
 	{ name: 'onDeepLink', group: 'Listener', platform: 'both', run: () => { appsFlyer.onDeepLink(() => {})(); return Promise.resolve('listener registered'); } },
 	{ name: 'registerSessionReadyListener', group: 'Listener', platform: 'both', run: () => { appsFlyer.registerSessionReadyListener(() => {})(); return Promise.resolve('listener registered'); } },
 	{ name: 'isSessionReady', group: 'Listener', platform: 'both', run: () => appsFlyer.isSessionReady() },
-	// unregisterSessionReadyListener moved below startSdk — see comment there: unregistering
-	// here would reset the registration guard and force startSdk to re-register (re-triggering
+	// unregisterSessionReadyListener moved below start — see comment there: unregistering
+	// here would reset the registration guard and force start to re-register (re-triggering
 	// the buggy native call) instead of finding the session already marked as registered.
 
 	// Config — simple setters
@@ -79,26 +78,28 @@ export const RPC_CATALOG = [
 	{ name: 'setUserFbLoginId', group: 'HashedPII', platform: 'both', run: () => appsFlyer.setUserFbLoginId(123456789) },
 
 	// Lifecycle
-	{ name: 'stop', group: 'Lifecycle', platform: 'both', run: () => withCallback((cb) => appsFlyer.stop(false, cb)) },
+	// stop() is void/fire-and-forget (callRpcVoid under the hood) — any callback passed is
+	// silently ignored, not invoked, so withCallback's Promise would never resolve.
+	{ name: 'stop', group: 'Lifecycle', platform: 'both', run: () => { appsFlyer.stop(false); return fired(); } },
 
-	// bridge-patterns.md §4: startSdk() must fire inside a live registerSessionReadyListener
+	// bridge-patterns.md §4: start() must fire inside a live registerSessionReadyListener
 	// callback. Re-registering re-triggers AppsFlyerLib's registerSessionReadyListener:, which
 	// has a UIApplication.applicationState thread-safety stall (only unstuck by backgrounding the
 	// app) — so check isSessionReady() first (registration from the entry above is still live,
-	// making this a no-op) and call startSdk() directly; only register/wait if not ready yet.
+	// making this a no-op) and call start() directly; only register/wait if not ready yet.
 	{
-		name: 'startSdk',
+		name: 'start',
 		group: 'Start',
 		platform: 'both',
 		run: () =>
 			appsFlyer.isSessionReady().then((ready) => {
 				if (ready) {
-					return appsFlyer.startSdk();
+					return appsFlyer.start();
 				}
 				return new Promise((resolve, reject) => {
 					const remove = appsFlyer.registerSessionReadyListener(() => {
 						remove();
-						appsFlyer.startSdk().then(resolve, reject);
+						appsFlyer.start().then(resolve, reject);
 					});
 				});
 			}),
@@ -117,9 +118,6 @@ export const RPC_CATALOG = [
 	{ name: 'addPushNotificationDeepLinkPath', group: 'DeepLink', platform: 'both', run: () => appsFlyer.addPushNotificationDeepLinkPath(['data', 'deeplink']) },
 	{ name: 'enableFacebookDeferredApplinks', group: 'DeepLink', platform: 'both', run: () => appsFlyer.enableFacebookDeferredApplinks(false) },
 	{ name: 'setFacebookDeferredAppLink', group: 'DeepLink', platform: 'ios', run: () => appsFlyer.setFacebookDeferredAppLink({ url: 'https://example.com/deferred' }) },
-	{ name: 'handleOpenURL', group: 'DeepLink', platform: 'ios', run: () => appsFlyer.handleOpenURL('https://example.com/open') },
-	{ name: 'handleOpenUrl', group: 'DeepLink', platform: 'ios', run: () => appsFlyer.handleOpenUrl('https://example.com/open2') },
-	{ name: 'continueUserActivity', group: 'DeepLink', platform: 'ios', run: () => appsFlyer.continueUserActivity('https://example.com/activity') },
 	{ name: 'performOnDeepLinking', group: 'DeepLink', platform: 'android', run: () => { appsFlyer.performOnDeepLinking('https://example.com/open', false); return fired(); } },
 
 	// Push
