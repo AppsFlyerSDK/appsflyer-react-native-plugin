@@ -42,7 +42,7 @@ const CALL_SITES = [
 		invoke: () => appsFlyer.init('devkey', '123456789'),
 	},
 	{ api: 'setIsDebug', platforms: BOTH, invoke: () => appsFlyer.setIsDebug(true) },
-	{ api: 'startSdk', platforms: BOTH, invoke: () => appsFlyer.startSdk() },
+	{ api: 'start', platforms: BOTH, invoke: () => appsFlyer.start() },
 	{ api: 'logEvent', platforms: BOTH, invoke: () => appsFlyer.logEvent('af_purchase', { af_revenue: 1 }) },
 	{
 		api: 'logAdRevenue',
@@ -57,14 +57,9 @@ const CALL_SITES = [
 	},
 	{ api: 'logLocation', platforms: BOTH, invoke: () => appsFlyer.logLocation(1.5, 2.5) },
 	{ api: 'setUserEmail', platforms: BOTH, invoke: () => appsFlyer.setUserEmail('a@b.com') },
-	{
-		api: 'setUserEmails (deprecated shim)',
-		platforms: BOTH,
-		invoke: () => appsFlyer.setUserEmails({ emails: ['a@b.com'], emailsCryptType: 0 }),
-	},
 	{ api: 'setAdditionalData', platforms: BOTH, invoke: () => appsFlyer.setAdditionalData({ tenant: 'qa' }) },
-	{ api: 'getAppsFlyerUID', platforms: BOTH, invoke: () => appsFlyer.getAppsFlyerUID(jest.fn()) },
-	{ api: 'getSDKVersion', platforms: BOTH, invoke: () => appsFlyer.getSDKVersion(jest.fn()) },
+	{ api: 'getAppsFlyerUID', platforms: BOTH, invoke: () => appsFlyer.getAppsFlyerUID() },
+	{ api: 'getSDKVersion', platforms: BOTH, invoke: () => appsFlyer.getSDKVersion() },
 	{
 		api: 'updateServerUninstallToken',
 		platforms: BOTH,
@@ -216,22 +211,10 @@ const CALL_SITES = [
 	},
 	{ api: 'disableSKAD', platforms: [IOS], invoke: () => appsFlyer.disableSKAD(true) },
 	{ api: 'setCurrentDeviceLanguage', platforms: [IOS], invoke: () => appsFlyer.setCurrentDeviceLanguage('en') },
-	{ api: 'handleOpenURL', platforms: [IOS], invoke: () => appsFlyer.handleOpenURL('https://a.com', {}) },
-	{ api: 'handleOpenUrl', platforms: [IOS], invoke: () => appsFlyer.handleOpenUrl('https://a.com', {}) },
-	{
-		api: 'continueUserActivity',
-		platforms: [IOS],
-		invoke: () => appsFlyer.continueUserActivity('https://a.com', 'browsing'),
-	},
 	{
 		api: 'setFacebookDeferredAppLink',
 		platforms: [IOS],
 		invoke: () => appsFlyer.setFacebookDeferredAppLink({ url: 'https://a.com' }),
-	},
-	{
-		api: 'handleLaunchOptions',
-		platforms: [IOS],
-		invoke: () => appsFlyer.handleLaunchOptions({ url: 'https://a.com' }),
 	},
 
 	// Android-only surface
@@ -291,7 +274,7 @@ function requestsFrom(invoke) {
 
 // Static scan of index.js for every RPC method it can dispatch (direct calls + onceRegistrar listeners).
 function dispatchedMethodsInSource() {
-	const source = fs.readFileSync(path.join(__dirname, '..', 'index.js'), 'utf8');
+	const source = fs.readFileSync(path.join(__dirname, '..', 'index.ts'), 'utf8');
 	const found = new Set();
 	const patterns = [
 		/(?:callRpc|callRpcVoid|callRpcWithCallback|dispatchRpc)\(\s*"([^"]+)"/g,
