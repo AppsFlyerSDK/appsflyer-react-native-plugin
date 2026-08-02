@@ -13,8 +13,11 @@ import {
 const Item = ({route, navigation}) => {
   const {product, addToCart, deepLinkValues = null} = route.params;
 
+  // deepLinkValues is the raw onDeepLink payload ({deepLink: {...}}) when it came from a
+  // direct/warm-start link, or the raw onInstallConversionData payload (flat, custom params
+  // at the top level) when it came from a deferred link resolved after first install.
   const discount = deepLinkValues
-    ? parseFloat(deepLinkValues.data.af_discount)
+    ? parseFloat(deepLinkValues.deepLink?.af_discount ?? deepLinkValues.af_discount)
     : 0;
 
   const calculateNewPrice = () => {
@@ -22,8 +25,6 @@ const Item = ({route, navigation}) => {
     return oldPrice - oldPrice * (discount / 100);
   };
 
-  // Discounted product is derived from the deep link during render — the price
-  // never changes after mount, so no state or effect is needed.
   const updatedProduct = deepLinkValues
     ? {...product, price: calculateNewPrice()}
     : null;

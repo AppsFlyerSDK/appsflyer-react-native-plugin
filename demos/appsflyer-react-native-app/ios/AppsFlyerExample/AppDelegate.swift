@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       in: window,
       launchOptions: launchOptions
     )
-
+    AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
     return true
   }
 
