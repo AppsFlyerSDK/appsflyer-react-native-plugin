@@ -1,4 +1,4 @@
-package com.appsflyerexample
+package com.appsflyer.rnpluginexample
 
 import android.content.Intent
 import com.appsflyer.AppsFlyerLib

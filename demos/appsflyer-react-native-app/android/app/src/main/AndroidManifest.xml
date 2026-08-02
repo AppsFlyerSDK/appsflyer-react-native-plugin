@@ -27,14 +27,22 @@
 
           <intent-filter android:autoVerify="true">
               <action android:name="android.intent.action.VIEW" />
-
               <category android:name="android.intent.category.DEFAULT" />
               <category android:name="android.intent.category.BROWSABLE" />
 
               <data
-                  android:host="af-rn-git.onelink.me"
-                  android:pathPrefix="/oW4R"
+                  android:host="rndemo.onelink.me"
+                  android:pathPrefix="/neai"
                   android:scheme="https" />
+          </intent-filter>
+
+          <intent-filter>
+              <action android:name="android.intent.action.VIEW" />
+
+              <category android:name="android.intent.category.DEFAULT" />
+              <category android:name="android.intent.category.BROWSABLE" />
+
+              <data android:scheme="afrntests" />
           </intent-filter>
       </activity>
     </application>

@@ -1,7 +1,4 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
  * @format
  * @flow strict-local
  */
@@ -18,13 +15,11 @@ import Item from './components/Item.js';
 const Stack = createStackNavigator();
 
 try {
-  // Disable RTL alignments for this app
   I18nManager.allowRTL(false);
 } catch (e) {
   console.log('Failed to disable RTL', e);
 }
 
-// Ignore certain warnings regarding navigation state
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
 ]);
