@@ -19,7 +19,7 @@ config.resolver.extraNodeModules = {
   // Force a single copy of react-native / react. With the plugin linked via
   // `file:../../`, the plugin root ships its own (older) react-native, so the
   // plugin's NativeEventEmitter would otherwise bind to a second event bus and
-  // onDeepLink / onInstallConversionData callbacks would silently never fire
+  // registerDeepLinkListener / registerConversionListener callbacks would silently never fire
   // (SO#79083213). Local dev only — npm consumers have a single copy.
   'react-native': path.resolve(__dirname, 'node_modules/react-native'),
   react: path.resolve(__dirname, 'node_modules/react'),
