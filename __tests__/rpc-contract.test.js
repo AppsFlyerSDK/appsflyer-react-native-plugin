@@ -84,7 +84,7 @@ describe('RPC event channel pass-through fidelity', () => {
 	test('firing the same native event twice in immediate succession invokes the JS listener exactly twice', () => {
 		const { appsFlyer, nativeEventEmitter } = freshModule();
 		const callback = jest.fn();
-		const remove = appsFlyer.onDeepLink(callback);
+		const remove = appsFlyer.registerDeepLinkListener(callback);
 
 		const payload = { campaign: 'test_campaign', deep_link_value: 'abc', media_source: 'test', link: 'https://x' };
 		const emit = () =>
@@ -104,27 +104,27 @@ describe('RPC event channel pass-through fidelity', () => {
 });
 
 describe('Listener registration triggers the matching register*Listener RPC once', () => {
-	test('registerConversionListener RPC fires exactly once, shared across onInstallConversionData and onInstallConversionFailure', () => {
+	test('registerConversionListener RPC fires exactly once, shared across two registerConversionListener attaches', () => {
 		const { appsFlyer, nativeAppsFlyer } = freshModule();
 
-		const removeA = appsFlyer.onInstallConversionData(jest.fn());
+		const removeA = appsFlyer.registerConversionListener(jest.fn());
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerConversionListener')).toHaveLength(1);
 
 		// same native registration backs both — must not re-dispatch
-		const removeB = appsFlyer.onInstallConversionFailure(jest.fn());
+		const removeB = appsFlyer.registerConversionListener(jest.fn());
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerConversionListener')).toHaveLength(1);
 
 		removeA();
 		removeB();
 	});
 
-	test('first onDeepLink attach calls executeRpc with the canonical registerDeeplinkListener method name, only once', () => {
+	test('first registerDeepLinkListener attach calls executeRpc with the canonical registerDeeplinkListener method name, only once', () => {
 		const { appsFlyer, nativeAppsFlyer } = freshModule();
 
-		const removeA = appsFlyer.onDeepLink(jest.fn());
+		const removeA = appsFlyer.registerDeepLinkListener(jest.fn());
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerDeeplinkListener')).toHaveLength(1);
 
-		const removeB = appsFlyer.onDeepLink(jest.fn());
+		const removeB = appsFlyer.registerDeepLinkListener(jest.fn());
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerDeeplinkListener')).toHaveLength(1);
 
 		removeA();

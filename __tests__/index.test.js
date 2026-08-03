@@ -48,8 +48,8 @@ describe("Test appsFlyer API's", () => {
 		});
 	});
 
-	test('it calls appsFlyer.setIsDebug', () => {
-		appsFlyer.setIsDebug(true);
+	test('it calls appsFlyer.enableDebug', () => {
+		appsFlyer.enableDebug(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
 			JSON.stringify({ method: 'isDebug', params: { isDebug: true } })
 		);
@@ -151,9 +151,9 @@ describe("Test appsFlyer API's", () => {
 		test.each([
 			['iOS keyed dict', { version: '7.0.1' }],
 			['Android bare value', '7.0.1'],
-		])('getSDKVersion resolves a string given an %s', async (_shape, data) => {
+		])('getSdkVersion resolves a string given an %s', async (_shape, data) => {
 			NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse(data));
-			await expect(appsFlyer.getSDKVersion()).resolves.toBe('7.0.1');
+			await expect(appsFlyer.getSdkVersion()).resolves.toBe('7.0.1');
 		});
 
 		// Guards against a truthiness rewrite: `data.x || data` would wrongly resolve true here.
@@ -353,8 +353,8 @@ describe("Test appsFlyer API's", () => {
 		});
 	});
 
-	test('it calls appsFlyer.performOnDeepLinking()', () => {
-		appsFlyer.performOnDeepLinking();
+	test('it calls appsFlyer.performDeepLinking()', () => {
+		appsFlyer.performDeepLinking();
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
 			JSON.stringify({
 				method: 'performDeepLinking',
@@ -363,8 +363,8 @@ describe("Test appsFlyer API's", () => {
 		);
 	});
 
-	test('it calls appsFlyer.disableIDFVCollection()', () => {
-		appsFlyer.disableIDFVCollection(true);
+	test('it calls appsFlyer.setDisableIDFVCollection()', () => {
+		appsFlyer.setDisableIDFVCollection(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
 			JSON.stringify({ method: 'setDisableIDFVCollection', params: { disable: true } })
 		);
@@ -458,16 +458,16 @@ describe("Test appsFlyer API's", () => {
 		);
 	});
 
-	test('it calls appsFlyer.setOneLinkCustomDomains', () => {
+	test('it calls appsFlyer.setOneLinkCustomDomain', () => {
 		const domains = ['example.com', 'brand.com'];
-		appsFlyer.setOneLinkCustomDomains(domains);
+		appsFlyer.setOneLinkCustomDomain(domains);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
 			JSON.stringify({ method: 'setOneLinkCustomDomain', params: { domains } })
 		);
 	});
 
-	test('it calls appsFlyer.setAppInviteOneLinkID', () => {
-		appsFlyer.setAppInviteOneLinkID('test_one_link_id');
+	test('it calls appsFlyer.setAppInviteOneLink', () => {
+		appsFlyer.setAppInviteOneLink('test_one_link_id');
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
 			JSON.stringify({ method: 'setAppInviteOneLink', params: { oneLinkId: 'test_one_link_id' } })
 		);
@@ -497,8 +497,8 @@ describe("Test appsFlyer API's", () => {
 		);
 	});
 
-	test('it calls appsFlyer.disableCollectASA', () => {
-		appsFlyer.disableCollectASA(true);
+	test('it calls appsFlyer.setDisableCollectASA', () => {
+		appsFlyer.setDisableCollectASA(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
 			JSON.stringify({ method: 'setDisableCollectASA', params: { disable: true } })
 		);
@@ -511,15 +511,15 @@ describe("Test appsFlyer API's", () => {
 		);
 	});
 
-	test('it calls appsFlyer.disableSKAD', () => {
-		appsFlyer.disableSKAD(true);
+	test('it calls appsFlyer.setDisableSKAdNetwork', () => {
+		appsFlyer.setDisableSKAdNetwork(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
 			JSON.stringify({ method: 'setDisableSKAdNetwork', params: { disable: true } })
 		);
 	});
 
-	test('it calls appsFlyer.disableIDFVCollection', () => {
-		appsFlyer.disableIDFVCollection(true);
+	test('it calls appsFlyer.setDisableIDFVCollection', () => {
+		appsFlyer.setDisableIDFVCollection(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
 			JSON.stringify({ method: 'setDisableIDFVCollection', params: { disable: true } })
 		);
@@ -706,8 +706,8 @@ describe("Test appsFlyer API's", () => {
 		);
 	});
 
-	test('it calls appsFlyer.disableAdvertisingIdentifier', () => {
-		appsFlyer.disableAdvertisingIdentifier(true);
+	test('it calls appsFlyer.setDisableAdvertisingIdentifiers', () => {
+		appsFlyer.setDisableAdvertisingIdentifiers(true);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
 			JSON.stringify({
 				method: 'setDisableAdvertisingIdentifiers',
@@ -793,7 +793,7 @@ describe('Test native event emitter', () => {
 	});
 
 	test('GCD listener Happy Flow', () => {
-		gcdListener = appsFlyer.onInstallConversionData((res) => {
+		gcdListener = appsFlyer.registerConversionListener((res) => {
 			expect(res).toEqual(nativeEventObject);
 			gcdListener();
 		});
@@ -802,7 +802,7 @@ describe('Test native event emitter', () => {
 	});
 
 	test('GCD listener handles a stringified JSON `data` payload (known-issues-kb.md payload-shape delta)', () => {
-		gcdListener = appsFlyer.onInstallConversionData((res) => {
+		gcdListener = appsFlyer.registerConversionListener((res) => {
 			expect(res).toEqual(nativeEventObject);
 			gcdListener();
 		});
@@ -811,7 +811,7 @@ describe('Test native event emitter', () => {
 	});
 
 	test('GCD listener gets an unparsable stringified `data` payload', () => {
-		gcdListener = appsFlyer.onInstallConversionData((error) => {
+		gcdListener = appsFlyer.registerConversionListener((error) => {
 			expect(typeof error).toEqual('object');
 			expect(error.message).toEqual('Invalid data structure');
 			expect(error.name).toEqual('AFParseJSONException');
@@ -821,8 +821,8 @@ describe('Test native event emitter', () => {
 		emitRpcEvent('onConversionDataSuccess', 'not valid json');
 	});
 
-	test('onInstallConversionFailure listener Happy Flow', () => {
-		let failureListener = appsFlyer.onInstallConversionFailure((res) => {
+	test('registerConversionListener onConversionDataFail Happy Flow', () => {
+		let failureListener = appsFlyer.registerConversionListener(() => {}, (res) => {
 			expect(res).toEqual(nativeEventObject);
 			failureListener();
 		});
@@ -830,8 +830,24 @@ describe('Test native event emitter', () => {
 		emitRpcEvent('onConversionDataFail', nativeEventObject);
 	});
 
+	test('unregisterConversionListener clears both success and failure callbacks', () => {
+		appsFlyer.registerConversionListener(jest.fn(), jest.fn());
+		appsFlyer.unregisterConversionListener();
+
+		const successCallback = jest.fn();
+		const failureCallback = jest.fn();
+		appsFlyer.registerConversionListener(successCallback, failureCallback);
+		appsFlyer.unregisterConversionListener();
+
+		emitRpcEvent('onConversionDataSuccess', nativeEventObject);
+		emitRpcEvent('onConversionDataFail', nativeEventObject);
+
+		expect(successCallback).not.toHaveBeenCalled();
+		expect(failureCallback).not.toHaveBeenCalled();
+	});
+
 	test('UDL listener Happy Flow (iOS native event name)', () => {
-		udlListener = appsFlyer.onDeepLink((res) => {
+		udlListener = appsFlyer.registerDeepLinkListener((res) => {
 			expect(res).toEqual(nativeEventObject);
 			udlListener();
 		});
@@ -839,7 +855,7 @@ describe('Test native event emitter', () => {
 	});
 
 	test('UDL listener Happy Flow (Android native event name)', () => {
-		udlListener = appsFlyer.onDeepLink((res) => {
+		udlListener = appsFlyer.registerDeepLinkListener((res) => {
 			expect(res).toEqual(nativeEventObject);
 			udlListener();
 		});
@@ -850,7 +866,7 @@ describe('Test native event emitter', () => {
 	// unregister call must not leak into the next test in this bucket. Reproduces the failure
 	// mode by never removing the listener, then proving the following test only sees its own.
 	test('a listener that throws before self-removing does not leak into the next test', () => {
-		appsFlyer.onDeepLink(() => {
+		appsFlyer.registerDeepLinkListener(() => {
 			throw new Error('simulated assertion failure before self-removal');
 		});
 
@@ -859,14 +875,24 @@ describe('Test native event emitter', () => {
 
 	test('the next test in the same bucket only sees its own listener, not a leaked one', () => {
 		const callback = jest.fn();
-		appsFlyer.onDeepLink(callback);
+		appsFlyer.registerDeepLinkListener(callback);
 
 		emitRpcEvent('onDeepLinkReceived', nativeEventObject, 'ios');
 
 		expect(callback).toHaveBeenCalledTimes(1);
 	});
 
-	test('onAppOpenAttribution / onAttributionFailure were removed and merged into onDeepLink', () => {
+	test('unregisterForDeepLink clears all registered callbacks', () => {
+		const callback = jest.fn();
+		appsFlyer.registerDeepLinkListener(callback);
+		appsFlyer.unregisterForDeepLink();
+
+		emitRpcEvent('onDeepLinkReceived', nativeEventObject, 'ios');
+
+		expect(callback).not.toHaveBeenCalled();
+	});
+
+	test('onAppOpenAttribution / onAttributionFailure were removed and merged into registerDeepLinkListener', () => {
 		expect(appsFlyer.onAppOpenAttribution).toBeUndefined();
 		expect(appsFlyer.onAttributionFailure).toBeUndefined();
 	});
