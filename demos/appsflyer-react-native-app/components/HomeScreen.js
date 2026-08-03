@@ -154,7 +154,7 @@ const HomeScreen = ({navigation}) => {
   };
 
   const handleConversionData = useCallback(res => {
-    console.log(">> onConversionDataSuccess: " , res);
+    console.log(">> registerConversionListener: " , res);
     // Payload is flat (no `.data` wrapper) — verified against native source, see
     // index.ts's ConversionData type comment.
     const isFirstLaunch = res?.is_first_launch;
@@ -163,7 +163,7 @@ const HomeScreen = ({navigation}) => {
       return;
     }
 
-    // Deferred deep links (click happened before install) never reach onDeepLinking —
+    // Deferred deep links (click happened before install) never reach registerDeepLinkListener —
     // the SDK resolves them server-side via GCD and delivers the match here instead,
     // with is_first_launch=true. See known-issues-kb.md § Deferred deep link not working.
     const productName = res?.af_productName;
@@ -180,7 +180,7 @@ const HomeScreen = ({navigation}) => {
   }, [navigation, addProductToCart]);
 
   const handleDeepLink = useCallback(res => {
-    console.log(">> onDeepLinking: " , res);
+    console.log(">> registerDeepLinkListener: " , res);
     if (res?.status === 'found') {
       const productName = res?.deepLink?.af_productName;
       const product = getProductByName(productName);

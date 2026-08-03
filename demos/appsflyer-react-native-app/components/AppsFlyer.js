@@ -16,7 +16,7 @@ export function AFInit(onConversionData, onDeepLink) {
   if (Platform.OS == 'ios') {
     appsFlyer.setCurrentDeviceLanguage('EN');
   }
-  appsFlyer.setIsDebug(true);
+  appsFlyer.enableDebug(true);
 
   appsFlyer.init(DEV_KEY, APP_ID).then(
     (success) => {
@@ -29,7 +29,7 @@ export function AFInit(onConversionData, onDeepLink) {
       if (Platform.OS === 'android') {
         Linking.getInitialURL().then((url) => {
           if (url) {
-            appsFlyer.performOnDeepLinking(url, true);
+            appsFlyer.performDeepLinking(url, true);
           }
         });
       }
@@ -38,8 +38,8 @@ export function AFInit(onConversionData, onDeepLink) {
   );
   
   //Deeplink URL: https://rndemo.onelink.me/neai/by0p3obe
-  const unsubscribeConversion = appsFlyer.onConversionDataSuccess(onConversionData);
-  const unsubscribeDeepLink = appsFlyer.onDeepLinking(onDeepLink);
+  const unsubscribeConversion = appsFlyer.registerConversionListener(onConversionData);
+  const unsubscribeDeepLink = appsFlyer.registerDeepLinkListener(onDeepLink);
 
   appsFlyer.registerSessionReadyListener(() => {
     appsFlyer.start().then(
