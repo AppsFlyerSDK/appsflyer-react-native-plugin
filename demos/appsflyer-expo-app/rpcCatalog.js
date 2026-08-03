@@ -18,6 +18,14 @@ function fired() {
 // network-dependent method for good. Guard so it only ever fires once per app launch.
 let setHostHasRun = false;
 
+// Mirrors App.js's BOOTSTRAP registration: if the session isn't ready (stall recovery, or the
+// listener was unregistered by a prior run), register again directly rather than trusting
+// index.js's one-shot internal guard (known-issues-kb.md — AppsFlyerLib session-ready stall).
+function ensureSessionReady() {
+	if (appsFlyer.isSessionReady()) return Promise.resolve();
+	return new Promise((resolve) => appsFlyer.registerSessionReadyListener(resolve));
+}
+
 export const RPC_CATALOG = [
 	// isSessionReady is safe here (unlike in BOOTSTRAP) — by the time Run All is enabled,
 	// registerSessionReadyListener has already fired its callback, so this is just a status read,
@@ -31,19 +39,19 @@ export const RPC_CATALOG = [
 	{ name: 'setCustomerUserId', group: 'Config', platform: 'both', run: () => { appsFlyer.setCustomerUserId('test_user_123'); return fired(); } },
 	{ name: 'setAdditionalData', group: 'Config', platform: 'both', run: () => { appsFlyer.setAdditionalData({ test_key: 'test_value' }); return fired(); } },
 	{ name: 'setCurrencyCode', group: 'Config', platform: 'both', run: () => { appsFlyer.setCurrencyCode('USD'); return fired(); } },
-	{ name: 'disableAdvertisingIdentifier', group: 'Config', platform: 'both', run: () => { appsFlyer.disableAdvertisingIdentifier(false); return fired(); } },
-	{ name: 'disableSKAD', group: 'Config', platform: 'ios', run: () => { appsFlyer.disableSKAD(false); return fired(); } },
+	{ name: 'setDisableAdvertisingIdentifiers', group: 'Config', platform: 'both', run: () => { appsFlyer.setDisableAdvertisingIdentifiers(false); return fired(); } },
+	{ name: 'setDisableSKAdNetwork', group: 'Config', platform: 'ios', run: () => { appsFlyer.setDisableSKAdNetwork(false); return fired(); } },
 	{ name: 'setCurrentDeviceLanguage', group: 'Config', platform: 'ios', run: () => { appsFlyer.setCurrentDeviceLanguage('en'); return fired(); } },
-	{ name: 'setAppInviteOneLinkID', group: 'Config', platform: 'both', run: () => { appsFlyer.setAppInviteOneLinkID('test_onelink_id'); return fired(); } },
+	{ name: 'setAppInviteOneLink', group: 'Config', platform: 'both', run: () => { appsFlyer.setAppInviteOneLink('test_onelink_id'); return fired(); } },
 	{ name: 'anonymizeUser', group: 'Config', platform: 'both', run: () => { appsFlyer.anonymizeUser(false); return fired(); } },
-	{ name: 'disableCollectASA', group: 'Config', platform: 'ios', run: () => { appsFlyer.disableCollectASA(false); return fired(); } },
+	{ name: 'setDisableCollectASA', group: 'Config', platform: 'ios', run: () => { appsFlyer.setDisableCollectASA(false); return fired(); } },
 	{ name: 'setUseReceiptValidationSandbox', group: 'Config', platform: 'ios', run: () => { appsFlyer.setUseReceiptValidationSandbox(true); return fired(); } },
-	{ name: 'disableIDFVCollection', group: 'Config', platform: 'ios', run: () => { appsFlyer.disableIDFVCollection(false); return fired(); } },
+	{ name: 'setDisableIDFVCollection', group: 'Config', platform: 'ios', run: () => { appsFlyer.setDisableIDFVCollection(false); return fired(); } },
 	{ name: 'setDisableNetworkData', group: 'Config', platform: 'android', run: () => { appsFlyer.setDisableNetworkData(false); return fired(); } },
 
 	// Config — complex setters
 	{ name: 'setResolveDeepLinkURLs', group: 'Config', platform: 'both', run: () => appsFlyer.setResolveDeepLinkURLs(['https://example.com']) },
-	{ name: 'setOneLinkCustomDomains', group: 'Config', platform: 'both', run: () => appsFlyer.setOneLinkCustomDomains(['example.onelink.me']) },
+	{ name: 'setOneLinkCustomDomain', group: 'Config', platform: 'both', run: () => appsFlyer.setOneLinkCustomDomain(['example.onelink.me']) },
 	{ name: 'setMinTimeBetweenSessions', group: 'Config', platform: 'both', run: () => appsFlyer.setMinTimeBetweenSessions(5) },
 	{ name: 'setDeepLinkTimeout', group: 'Config', platform: 'both', run: () => appsFlyer.setDeepLinkTimeout(3000) },
 	{ name: 'setInstallId', group: 'Config', platform: 'both', run: () => appsFlyer.setInstallId('test-install-id-123') },
@@ -63,14 +71,14 @@ export const RPC_CATALOG = [
 
 	// Observability
 	{ name: 'getAppsFlyerUID', group: 'Observability', platform: 'both', run: () => appsFlyer.getAppsFlyerUID() },
-	{ name: 'getSDKVersion', group: 'Observability', platform: 'both', run: () => appsFlyer.getSDKVersion() },
+	{ name: 'getSdkVersion', group: 'Observability', platform: 'both', run: () => appsFlyer.getSdkVersion() },
 
 	// Deep Links
 	{ name: 'appendParametersToDeepLinkingURL', group: 'DeepLink', platform: 'both', run: () => { appsFlyer.appendParametersToDeepLinkingURL('example.com', { key: 'value' }); return fired(); } },
 	{ name: 'addPushNotificationDeepLinkPath', group: 'DeepLink', platform: 'both', run: () => appsFlyer.addPushNotificationDeepLinkPath(['data', 'deeplink']) },
 	{ name: 'enableFacebookDeferredApplinks', group: 'DeepLink', platform: 'both', run: () => appsFlyer.enableFacebookDeferredApplinks(false) },
 	{ name: 'setFacebookDeferredAppLink', group: 'DeepLink', platform: 'ios', run: () => appsFlyer.setFacebookDeferredAppLink({ url: 'https://example.com/deferred' }) },
-	{ name: 'performOnDeepLinking', group: 'DeepLink', platform: 'android', run: () => { appsFlyer.performOnDeepLinking('https://example.com/open', false); return fired(); } },
+	{ name: 'performDeepLinking', group: 'DeepLink', platform: 'android', run: () => { appsFlyer.performDeepLinking('https://example.com/open', false); return fired(); } },
 
 	// Push
 	{ name: 'sendPushNotificationData', group: 'Push', platform: 'both', run: () => { appsFlyer.sendPushNotificationData({ alert: 'test notification' }, { campaign: 'test_campaign', pid: 'test_pid', isRetargeting: false }); return fired(); } },
@@ -89,8 +97,8 @@ export const RPC_CATALOG = [
 	{ name: 'logAdRevenue', group: 'Revenue', platform: 'both', run: () => { appsFlyer.logAdRevenue({ monetizationNetwork: 'test_network', mediationNetwork: MEDIATION_NETWORK.CUSTOM_MEDIATION, currencyIso4217Code: 'USD', revenue: 1.5 }); return fired(); } },
 
 	// Cross Promotion
-	{ name: 'logCrossPromotionImpression', group: 'CrossPromotion', platform: 'both', run: () => { appsFlyer.logCrossPromotionImpression('id123456', 'test_campaign'); return fired(); } },
-	{ name: 'logCrossPromotionAndOpenStore', group: 'CrossPromotion', platform: 'both', run: () => { appsFlyer.logCrossPromotionAndOpenStore('id123456', 'test_campaign'); return fired(); } },
+	{ name: 'logCrossPromoteImpression', group: 'CrossPromotion', platform: 'both', run: () => { appsFlyer.logCrossPromoteImpression('id123456', 'test_campaign'); return fired(); } },
+	{ name: 'logAndOpenStore', group: 'CrossPromotion', platform: 'both', run: () => { appsFlyer.logAndOpenStore('id123456', 'test_campaign'); return fired(); } },
 
 	// Share Invite
 	{ name: 'generateInviteLink', group: 'ShareInvite', platform: 'both', run: () => appsFlyer.generateInviteLink({ channel: 'test_channel', campaign: 'test_campaign' }) },
@@ -110,20 +118,17 @@ export const RPC_CATALOG = [
 	{ name: 'setAppId', group: 'Android', platform: 'android', run: () => appsFlyer.setAppId('com.test.app') },
 	{ name: 'setPreinstallAttribution', group: 'Android', platform: 'android', run: () => appsFlyer.setPreinstallAttribution('test_media_source', 'test_campaign', 'test_site') },
 	{ name: 'logSession', group: 'Android', platform: 'android', run: () => appsFlyer.logSession() },
-	{ name: 'onPause', group: 'Android', platform: 'android', run: () => appsFlyer.onPause() },
 	{ name: 'disableAppSetId', group: 'Android', platform: 'android', run: () => { appsFlyer.disableAppSetId(); return fired(); } },
 
 	// Lifecycle
 	{ name: 'stop', group: 'Lifecycle', platform: 'both', run: () => { appsFlyer.stop(false); return fired(); } },
 
-	// Safe to call directly: BOOTSTRAP's registerSessionReadyListener callback (App.js) already
-	// fired before Run All was enabled, so the session is guaranteed ready by the time this runs —
-	// no need to re-register or poll isSessionReady() here (see bridge-patterns.md §4 stall notes).
-	{ name: 'start', group: 'Start', platform: 'both', run: () => appsFlyer.start() },
+	{ name: 'start', group: 'Start', platform: 'both', run: () => ensureSessionReady().then(() => appsFlyer.start()) },
 	{ name: 'unregisterSessionReadyListener', group: 'Listener', platform: 'both', run: () => { appsFlyer.unregisterSessionReadyListener(); return fired(); } },
 
-	// Events
-	{ name: 'logEvent', group: 'Event', platform: 'both', run: () => appsFlyer.logEvent('test_event', { key: 'value' }, true) },
+	// Events — gated the same way as start: stop() above doesn't touch the session-ready state,
+	// but re-registration (stall recovery) can only be confirmed once, so both gates share ensureSessionReady().
+	{ name: 'logEvent', group: 'Event', platform: 'both', run: () => ensureSessionReady().then(() => appsFlyer.logEvent('test_event', { key: 'value' }, true)) },
 
 	// Config — setHost last: redirects SDK traffic to a custom endpoint. Only fires once per
 	// app launch (see setHostHasRun above) — every run after the first reports itself skipped.

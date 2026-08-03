@@ -102,7 +102,7 @@ export default function App() {
 	};
 
 	// Runs once on launch, mirroring example/src/App.tsx's runAutoFlow order exactly: init() is
-	// fired but deliberately NOT awaited, then setIsDebug/listener registrations run as plain
+	// fired but deliberately NOT awaited, then enableDebug/listener registrations run as plain
 	// synchronous statements right after. bridge-patterns.md §4: awaiting init before registering
 	// listeners is the same too-late `.then()` mistake with different syntax — the native buffer
 	// (RNAppsFlyerImpl.swift's bufferedUntilInitMethods) can flush before the await round-trips
@@ -116,10 +116,9 @@ export default function App() {
 			() => addLog('✓ init OK'),
 			(error) => addLog(`✗ init FAILED: ${safeStringify(error)}`)
 		);
-		appsFlyer.setIsDebug(true);
-		appsFlyer.onConversionDataSuccess(() => {});
-		appsFlyer.onConversionDataFail(() => {});
-		appsFlyer.onDeepLinking(() => {});
+		appsFlyer.enableDebug(true);
+		appsFlyer.registerConversionListener(() => {}, () => {});
+		appsFlyer.registerDeepLinkListener(() => {});
 		appsFlyer.registerSessionReadyListener(() => {
 			if (cancelled) return;
 			addLog('✓ Session ready');
