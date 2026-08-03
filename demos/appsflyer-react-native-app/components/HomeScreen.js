@@ -154,7 +154,7 @@ const HomeScreen = ({navigation}) => {
   };
 
   const handleConversionData = useCallback(res => {
-    console.log(">> onInstallConversionData: " , res);
+    console.log(">> registerConversionListener: " , res);
     // Payload is flat (no `.data` wrapper) — verified against native source, see
     // index.ts's ConversionData type comment.
     const isFirstLaunch = res?.is_first_launch;
