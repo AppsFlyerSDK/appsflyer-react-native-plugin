@@ -14,15 +14,15 @@ More info about testing the SDK for marketers [here](https://support.appsflyer.c
 - [Testing for Android](#testing-for-android)
 
 First, you need to enable debug mode for full logs from the SDK.
-To enable it, call `setIsDebug(true)` — a dedicated call, separate from `init` (see
-[RN_API.md — setIsDebug](RN_API.md#setisdebug)):
+To enable it, call `enableDebug(true)` — a dedicated call, separate from `init` (see
+[RN_API.md — enableDebug](RN_API.md#enabledebug)):
 
 ```javascript
 appsFlyer.init('UsxXxXxXxed', '78xXxXx35').then(
   (result) => console.log(result),
   (error) => console.error(error)
 );
-appsFlyer.setIsDebug(true);
+appsFlyer.enableDebug(true);
 ```
 
 ## Testing for iOS

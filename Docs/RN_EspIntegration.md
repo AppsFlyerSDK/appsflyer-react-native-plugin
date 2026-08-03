@@ -366,16 +366,17 @@ const initializeAppsFlyer = () => {
   configureESPDomains();
 
   // 2. Set up deep link listener
-  appsFlyer.onDeepLink(handleEspDeepLink);
+  appsFlyer.registerDeepLinkListener(handleEspDeepLink);
 
   // 3. Set up conversion data listener
-  appsFlyer.onInstallConversionData((res) => {
-    console.log('📊 Conversion Data:', res);
-  });
-
-  appsFlyer.onInstallConversionFailure((error) => {
-    console.error('❌ Conversion Data Error:', error);
-  });
+  appsFlyer.registerConversionListener(
+    (res) => {
+      console.log('📊 Conversion Data:', res);
+    },
+    (error) => {
+      console.error('❌ Conversion Data Error:', error);
+    }
+  );
 
   // 4. Initialize SDK
   // `initSdk` was removed in 7.0.0 — use `init(devKey, appId)` instead (see MIGRATION.md).
@@ -483,7 +484,7 @@ npx expo run:android / ios --clear
 - Test with iOS Simulator using xcrun
 
 **2. Deep links not triggering:**
-- Ensure `appsFlyer.onDeepLink(...)` is registered synchronously before `init()`'s promise settles (see [Initialization Flow](RN_API.md#initialization-flow))
+- Ensure `appsFlyer.registerDeepLinkListener(...)` is registered synchronously before `init()`'s promise settles (see [Initialization Flow](RN_API.md#initialization-flow))
 - Verify ESP domains are configured before SDK init
 
 ---
