@@ -450,6 +450,10 @@ appsFlyer.init = (devKey: string, appId?: string) => {
   if (typeof appId !== "string" && typeof appId !== "undefined") {
     return Promise.reject("appId should be a string!");
   }
+  callRpcVoid("setPluginInfo", {
+    plugin: NativeModules.ExponentConstants != null ? "expo" : "react_native",
+    pluginVersion: require("./package.json").version,
+  });
   return callRpc("init", { devKey, appId });
 };
 
