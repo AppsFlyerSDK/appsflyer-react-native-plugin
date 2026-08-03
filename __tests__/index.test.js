@@ -18,9 +18,15 @@ describe("Test appsFlyer API's", () => {
 	});
 
 	test('it calls appsFlyer.init with devKey/appId positional args', async () => {
-		NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse());
+		NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse()).mockResolvedValueOnce(mockRpcResponse());
 		await appsFlyer.init('xxxx', '777');
-		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(1);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(2);
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({
+				method: 'setPluginInfo',
+				params: { plugin: 'react_native', pluginVersion: require('../package.json').version },
+			})
+		);
 		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
 			JSON.stringify({ method: 'init', params: { devKey: 'xxxx', appId: '777' } })
 		);
@@ -33,7 +39,9 @@ describe("Test appsFlyer API's", () => {
 	});
 
 	test('it calls appsFlyer.init and rejects on a native RPC failure', async () => {
-		NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcError('devKey missing', 400));
+		NativeAppsFlyer.executeRpc
+			.mockResolvedValueOnce(mockRpcResponse())
+			.mockResolvedValueOnce(mockRpcError('devKey missing', 400));
 		await expect(appsFlyer.init('xxxx', '777')).rejects.toEqual({
 			code: 400,
 			message: 'devKey missing',
