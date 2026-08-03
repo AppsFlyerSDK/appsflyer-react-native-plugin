@@ -32,7 +32,7 @@ useEffect(() => {
     (res) => console.log(res),
     (err) => console.log(err)
   );
-  appsFlyer.setIsDebug(true);
+  appsFlyer.enableDebug(true);
 
   appsFlyer.registerSessionReadyListener(() => {
     // CMP Pseudocode
@@ -72,7 +72,7 @@ useEffect(() => {
         res => console.log(res),
         err => console.log(err)
     );
-    appsFlyer.setIsDebug(true);
+    appsFlyer.enableDebug(true);
 
     appsFlyer.registerSessionReadyListener(() => {
         // User has given consent
@@ -97,7 +97,7 @@ useEffect(() => {
         res => console.log(res),
         err => console.log(err)
     );
-    appsFlyer.setIsDebug(true);
+    appsFlyer.enableDebug(true);
 
     appsFlyer.registerSessionReadyListener(() => {
         // GDPR does not apply to the user
