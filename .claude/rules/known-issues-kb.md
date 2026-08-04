@@ -55,8 +55,8 @@ Issue-based KB derived from real GitHub issues. Reference when debugging user re
 
 ### Swift AppDelegate not supported
 **Issues:** #638, #620
-**Root cause:** Config plugin only modifies ObjC AppDelegate. Expo 52+ defaults to Swift.
-**Fix:** Pending upstream fix. Workaround: manual native setup.
+**Root cause:** Config plugin only modified ObjC AppDelegate. Expo 52+ defaults to Swift.
+**Fix:** `withAppsFlyerIos.js`'s `modifySwiftAppDelegate` now handles the Swift template directly (verified against real `expo prebuild` output). Also fixed as part of the same pass: the plugin never injected `AppsFlyerLib.shared().handleLaunchOptions(launchOptions)` into `didFinishLaunchingWithOptions` (needed for cold-start deep link/attribution resolution) on either ObjC or Swift, and the Swift `continue(userActivity, restorationHandler:)` injection hardcoded `nil` instead of forwarding the real `restorationHandler` closure — both now match the manually-integrated reference pattern in `demos/appsflyer-react-native-app`'s `AppDelegate.swift`.
 
 ### Duplicate manifest entries
 **Issues:** #672
