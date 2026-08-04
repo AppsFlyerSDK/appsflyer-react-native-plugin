@@ -43,6 +43,23 @@ expo install react-native-appsflyer
     ],
 ...
 ```
+### Automatic iOS AppDelegate integration
+
+Running `expo prebuild` with the plugin installed automatically modifies your `AppDelegate` (both
+the Swift template used by Expo SDK 52+ and the legacy Objective-C template) to wire up deep
+linking and attribution. You do not need to add these calls yourself. The plugin injects:
+
+- `AppsFlyerLib.shared().handleLaunchOptions(launchOptions)` in `didFinishLaunchingWithOptions`
+- `AppsFlyerLib.shared().handleOpen(url, options:)` in the `openURL` method
+- `AppsFlyerLib.shared().continue(userActivity, restorationHandler:)` in the `continueUserActivity` method
+
+This only works if your `AppDelegate` matches the Expo SDK default template. If the plugin logs a warning during `expo prebuild`, add the three calls above manually.
+
+To verify the injection landed, after `expo prebuild --clean`:
+```bash
+grep -n "AppsFlyerLib" ios/*/AppDelegate.swift   # or AppDelegate.m/.mm for the ObjC template
+```
+
 ### Backup Rules Configuration (Android)
 
 The AppsFlyer SDK includes built-in backup rules in its Android manifest to ensure accurate install/reinstall detection. By default, the plugin respects your app's backup rules and does not modify them.
@@ -80,69 +97,7 @@ The AppsFlyer SDK includes built-in backup rules in its Android manifest to ensu
 
 ### Handling dataExtractionRules Conflict
 
-When building your Expo app with the AppsFlyer plugin, you might encounter a build error related to the `dataExtractionRules` attribute. This issue arises due to a conflict between the `dataExtractionRules `defined in your project’s `AndroidManifest.xml` and the one included in the AppsFlyer SDK.
-
-<b>Solution:</b> Creating a Custom Plugin to Modify `AndroidManifest.xml`
-
-To resolve this, you can create a custom Expo config plugin that modifies the AndroidManifest.xml during the build process. This approach allows you to adjust the manifest without directly editing it, maintaining compatibility with the managed workflow.
-
-Steps to Implement the Custom Plugin:
-1. Create the Plugin File:
-    -	In your project’s root directory, create a file named withCustomAndroidManifest.js.
-2.	Define the Plugin Function:
-	  -	In withCustomAndroidManifest.js, define a function that uses Expo’s withAndroidManifest to modify the manifest. This function will remove the conflicting dataExtractionRules attribute.
-
-```js
-// withCustomAndroidManifest.js
-const { withAndroidManifest } = require('@expo/config-plugins');
-
-module.exports = function withCustomAndroidManifest(config) {
-  return withAndroidManifest(config, async (config) => {
-    const androidManifest = config.modResults;
-    const manifest = androidManifest.manifest;
-    
-    // Ensure xmlns:tools is present in the <manifest> tag
-    if (!manifest.$['xmlns:tools']) {
-      manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
-    }
-
-    const application = manifest.application[0];
-
-    // Add tools:replace attribute for dataExtractionRules and fullBackupContent
-    application['$']['tools:replace'] = 'android:dataExtractionRules, android:fullBackupContent';
-
-    // Set dataExtractionRules and fullBackupContent as attributes within <application>
-    application['$']['android:dataExtractionRules'] = '@xml/secure_store_data_extraction_rules';
-    application['$']['android:fullBackupContent'] = '@xml/secure_store_backup_rules';
-
-    return config;
-  });
-};
-
-```
-
-3.	Update app.json or app.config.js:
-	  -	In your app configuration file, include the custom plugin to ensure it’s executed during the build process.
-
-```json
-// app.json
-{
-  "expo": {
-    // ... other configurations ...
-    "plugins": [
-      "./withCustomAndroidManifest.js",
-      [
-        "react-native-appsflyer",
-        {
-          "shouldUseStrictMode": true
-        }
-      ]
-    ]
-  }
-}
-```
-
-By implementing this custom plugin, you can resolve the dataExtractionRules conflict without directly modifying the AndroidManifest.xml.
+This conflict is now handled automatically — see the `preferAppsFlyerBackupRules` option in the Backup Rules Configuration section above.
 
 ## The AD_ID permission for android apps
 In v6.8.0 of the AppsFlyer SDK, we added the normal permission com.google.android.gms.permission.AD_ID to the SDK's AndroidManifest, 

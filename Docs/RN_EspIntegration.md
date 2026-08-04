@@ -10,12 +10,6 @@ hidden: false
 
 ESP (Email Service Provider) support allows AppsFlyer to handle deep links that are wrapped by email service providers. When users click links in emails, ESP services often wrap the original URL with their own tracking domains. This can break deep linking functionality. ESP support resolves these wrapped URLs to extract the original deep link.
 
-### How ESP Works:
-1. **Email Campaign**: Your email contains a deep link to your app
-2. **ESP Wrapping**: Email provider wraps your link with their tracking domain
-3. **User Clicks**: User clicks the wrapped link from their email
-4. **ESP Resolution**: AppsFlyer resolves the wrapped URL to get the original link
-5. **Decision**: If original link is a OneLink → continue deep linking; if web URL → open in browser
 
 ## 🚀 Prerequisites
 
@@ -106,7 +100,7 @@ public class AppDelegate: ExpoAppDelegate {
 }
 ```
 
-See [Deep linking integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup) for the full native pattern (this plugin's Expo config plugin auto-injects the `openURL`/`continueUserActivity` calls above at `expo prebuild` time — `handleLaunchOptions` is not auto-injected yet).
+See [Deep linking integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup) for the full native pattern (this plugin's Expo config plugin auto-injects the `openURL`/`continueUserActivity` and `handleLaunchOptions` calls above at `expo prebuild` time).
 
 ---
 
@@ -243,17 +237,15 @@ import appsFlyer from 'react-native-appsflyer';
  * This MUST be called before AppsFlyer SDK initialization
  */
 const configureESPDomains = () => {
-  console.log('🔗 Configuring ESP domains:', ESP_DOMAINS);
+  console.log('Configuring ESP domains:', ESP_DOMAINS);
   
-  appsFlyer.setResolveDeepLinkURLs(
-    ESP_DOMAINS,
-    (result) => {
-      console.log('✅ ESP domains configured successfully:', result);
-    },
-    (error) => {
-      console.error('❌ ESP domain configuration failed:', error);
-    }
-  );
+  appsFlyer.setResolveDeepLinkURLs(ESP_DOMAINS)
+    .then((result) => {
+      console.log('ESP domains configured successfully:', result);
+    })
+    .catch((error) => {
+      console.error('ESP domain configuration failed:', error);
+    });
 };
 ```
 
@@ -266,11 +258,11 @@ const configureESPDomains = () => {
  * Main ESP deep link handler
  */
 const handleEspDeepLink = useCallback((deepLinkData: any) => {
-    console.log('🔗 Deep Link Received:', deepLinkData);
+    console.log('Deep Link Received:', deepLinkData);
     
     // Simply stringify and display the entire deep link data
     const formattedData = JSON.stringify(deepLinkData, null, 2);    
-    console.log('📱 Deep Link Data:', formattedData);
+    console.log('Deep Link Data:', formattedData);
     
     let actualDeepLinkData = deepLinkData;
     
@@ -320,8 +312,7 @@ const handleEspDeepLink = useCallback((deepLinkData: any) => {
                     } else {
                       console.log('[AFSDK] The ESP link is NOT a OneLink link. It will be opened in a browser');
                       console.log('[AFSDK] ESP marks to divert the link to the browser');
-                      console.log('URL to open:', espUrl.toString());                
-                      console.log('📱 Would open in browser:', espUrl.toString());
+                      console.log('URL to open:', espUrl.toString());
                     }
                   } else {
                     console.log('[AFSDK] No host found in the ESP URL');
@@ -345,10 +336,10 @@ const handleEspDeepLink = useCallback((deepLinkData: any) => {
         }
       } else {
         console.log('[AFSDK] The original_link is not found');
-        console.log('📋 Regular Deep Link Data:', actualDeepLinkData.data);
+        console.log('Regular Deep Link Data:', actualDeepLinkData.data);
       }
     }
-  });
+  }, []);
 ```
 
 ### Step 4: SDK Initialization with ESP
@@ -360,7 +351,7 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 const initializeAppsFlyer = () => {
-  console.log('🚀 Initializing AppsFlyer with ESP support...');
+  console.log('Initializing AppsFlyer with ESP support...');
 
   // 1. Configure ESP domains FIRST
   configureESPDomains();
@@ -371,10 +362,10 @@ const initializeAppsFlyer = () => {
   // 3. Set up conversion data listener
   appsFlyer.registerConversionListener(
     (res) => {
-      console.log('📊 Conversion Data:', res);
+      console.log('Conversion Data:', res);
     },
     (error) => {
-      console.error('❌ Conversion Data Error:', error);
+      console.error('Conversion Data Error:', error);
     }
   );
 
@@ -387,10 +378,10 @@ const initializeAppsFlyer = () => {
 
   appsFlyer.init(devKey, "YOUR_IOS_APP_ID").then(
     () => {
-      console.log("✅ AppsFlyer SDK initialized successfully!");
+      console.log("AppsFlyer SDK initialized successfully!");
     },
     (err) => {
-      console.error("❌ AppsFlyer SDK initialization error:", err);
+      console.error("AppsFlyer SDK initialization error:", err);
     }
   );
 };
@@ -407,73 +398,25 @@ useEffect(() => {
 
 ### Common Android Issues
 
-**1. Deep links open Google Play instead of app:**
-- Remove `android:autoVerify="true"` from intent filters
-- Test with ADB for direct app opening
-- Ensure app is installed and intent filters are correct
+For general Android configuration issues (manifest merging, package attribute deprecation, autoVerify behavior, backup rules), refer to the [known-issues knowledge base](../Docs/RN_API.md) and [AppsFlyer Android SDK documentation](https://dev.appsflyer.com/hc/docs/install-android-sdk).
 
-**2. Email deep links redirect to Play Store (Domain Disabled):**
+**ESP-Specific: Domain Verification Issues**
 
-This is a common issue where clicking deep links from emails opens the Play Store instead of your app. This happens when the domain is disabled in Android's app link settings.
+When deep links from emails open the Play Store instead of your app, the domain may be disabled in Android's app link settings.
 
 **Diagnosis:**
 ```bash
-# Check if your app's domain is disabled
 adb shell pm get-app-links com.yourcompany.yourapp
 ```
-
-Look for your domain in the "Selection state" → "Disabled" section.
 
 **Solution:**
 ```bash
-# Enable domain for your app (replace with your actual package name and domain)
+# Enable domain for your app
 adb shell pm set-app-links-user-selection --package com.yourcompany.yourapp --user 0 true your-onelink-domain.onelink.me
 
-# Verify the fix
-adb shell pm get-app-links com.yourcompany.yourapp
-```
-
-**Testing:**
-```bash
-# Test deep link after fix
+# Test the fix
 adb shell am force-stop com.yourcompany.yourapp
 adb shell am start -W -a android.intent.action.VIEW -d "https://your-onelink-domain.onelink.me/test"
-```
-
-**Production Note:** This is a testing solution. For production apps, consider:
-- Domain verification (requires access to domain)
-- User education about setting app as default handler
-- Fallback handling for when app isn't the default handler
-
-**3. Manifest merger conflicts:**
-```xml
-<!-- Add tools namespace and replace directive -->
-<manifest xmlns:tools="http://schemas.android.com/tools">
-  <application android:allowBackup="false" tools:replace="android:allowBackup">
-```
-See [AppsFlyer Android SDK documentation](https://dev.appsflyer.com/hc/docs/install-android-sdk#backup-rules) for more details.
-
-**4. Package attribute deprecated:**
-- Remove `package="com.yourapp"` from AndroidManifest.xml
-- Use `namespace` in build.gradle instead
-
-**5. Build Cache Issues:**
-
-If experiencing persistent build failures, perform a complete clean build:
-```bash
-# Clean everything
-rm -rf node_modules
-rm -rf ios/Pods
-rm -rf android/.gradle
-rm -rf android/app/build
-rm -rf android/build
-
-# Reinstall dependencies
-npm install
-cd ios && pod install && cd ..
-
-# Clean build
-npx expo run:android / ios --clear
 ```
 
 ### Common iOS Issues
