@@ -84,6 +84,7 @@ The list of available methods for this plugin is described below.
   - [logSession](#logsession)
 - [iOS Only APIs](#ios-only-apis)
   - [setDisableCollectASA](#setdisablecollectasa)
+  - [setDisableAppleAdsAttribution](#setdisableappleadsattribution)
   - [setDisableIDFVCollection](#setdisableidfvcollection)
   - [setUseReceiptValidationSandbox](#setusereceiptvalidationsandbox)
   - [setUseUninstallSandbox](#setuseuninstallsandbox)
@@ -1009,6 +1010,8 @@ appsFlyer.setConsentData(consent1);
 | hasConsentForAdsPersonalization  | boolean  | Consent for ads personalization (optional)       |
 | hasConsentForAdStorage  | boolean  | Consent for ad storage (optional)       |
 
+If `isUserSubjectToGDPR` is omitted, it defaults to `false`.
+
 ### logAdRevenue
 `logAdRevenue(data): void`
 
@@ -1425,6 +1428,25 @@ Disables Apple Search Ads collecting
 ```javascript
 if (Platform.OS == 'ios') {
 appsFlyer.setDisableCollectASA(true);
+}
+```
+
+---
+
+### setDisableAppleAdsAttribution
+`setDisableAppleAdsAttribution(disable)`
+
+Disables Apple Ads attribution
+
+| parameter    | type     | description                                                |
+| ------------ |----------|------------------                                          |
+| disable      | boolean  | Flag to disable/enable Apple Ads attribution               |
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'ios') {
+appsFlyer.setDisableAppleAdsAttribution(true);
 }
 ```
 

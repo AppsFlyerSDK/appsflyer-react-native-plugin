@@ -981,6 +981,15 @@ appsFlyer.setDisableCollectASA = (disable: boolean) => {
   callRpcVoid("setDisableCollectASA", { disable });
 };
 
+/**
+ * Disables Apple Ads attribution
+ * @param disable Flag to disable/enable Apple Ads attribution
+ * @platform ios
+ */
+appsFlyer.setDisableAppleAdsAttribution = (disable: boolean) => {
+  callRpcVoid("setDisableAppleAdsAttribution", { disable });
+};
+
 // Export AFPurchaseType enum for the new validateAndLogInAppPurchase API
 export const AFPurchaseType = {
   SUBSCRIPTION: "subscription",
@@ -1196,7 +1205,13 @@ appsFlyer.enableTCFDataCollection = (enabled: boolean) => {
  * @param consentData AppsFlyerConsent object.
  */
 appsFlyer.setConsentData = (consentData: AppsFlyerConsent) => {
-  callRpcVoid("setConsentData", consentData);
+  // iOS's native RPC parser requires isUserSubjectToGDPR (requireBool, no default) and throws
+  // if it's missing; Android already defaults it to false. AppsFlyerConsent's constructor takes
+  // it as optional, so mirror Android's default here rather than let iOS crash on omission.
+  callRpcVoid("setConsentData", {
+    ...consentData,
+    isUserSubjectToGDPR: consentData?.isUserSubjectToGDPR ?? false,
+  });
 };
 
 class AFParseJSONException extends Error {
@@ -1530,6 +1545,10 @@ export interface AppsFlyerApi {
    * For iOS Only
    * */
   setDisableCollectASA(disable: boolean): void;
+  /**
+   * For iOS Only
+   * */
+  setDisableAppleAdsAttribution(disable: boolean): void;
   setUseReceiptValidationSandbox(sandbox: boolean): void;
   setUseUninstallSandbox(sandbox: boolean): void;
   setDisableSKAdNetwork(disable: boolean): void;

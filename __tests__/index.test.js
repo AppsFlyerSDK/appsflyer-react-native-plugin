@@ -731,6 +731,19 @@ describe("Test appsFlyer API's", () => {
 		);
 	});
 
+	// Regression: iOS's native RPC parser requires isUserSubjectToGDPR (requireBool, no default)
+	// and throws if it's missing. AppsFlyerConsent's constructor takes it as optional, so
+	// omitting it used to reach native as `undefined` (dropped entirely by JSON.stringify).
+	test('setConsentData defaults isUserSubjectToGDPR to false when omitted', () => {
+		appsFlyer.setConsentData({ hasConsentForDataUsage: true });
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+			JSON.stringify({
+				method: 'setConsentData',
+				params: { hasConsentForDataUsage: true, isUserSubjectToGDPR: false },
+			})
+		);
+	});
+
 	test('AppsFlyerConsent constructor with all parameters', () => {
 		const consent = new AppsFlyerConsent(true, true, false, true);
 		expect(consent.isUserSubjectToGDPR).toBe(true);

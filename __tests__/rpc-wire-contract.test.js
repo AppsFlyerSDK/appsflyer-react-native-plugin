@@ -211,6 +211,11 @@ const CALL_SITES = [
 	{ api: 'disableIDFVCollection', platforms: [IOS], invoke: () => appsFlyer.setDisableIDFVCollection(true) },
 	{ api: 'disableCollectASA', platforms: [IOS], invoke: () => appsFlyer.setDisableCollectASA(true) },
 	{
+		api: 'setDisableAppleAdsAttribution',
+		platforms: [IOS],
+		invoke: () => appsFlyer.setDisableAppleAdsAttribution(true),
+	},
+	{
 		api: 'setUseReceiptValidationSandbox',
 		platforms: [IOS],
 		invoke: () => appsFlyer.setUseReceiptValidationSandbox(true),
