@@ -58,12 +58,10 @@ export function AFInit(onConversionData, onDeepLink) {
 
 // Sends in-app events to AppsFlyer servers. name is the events name ('simple event') and the values are a JSON ({info: 'fff', size: 5})
 export function AFLogEvent(name, values) {
-  appsFlyer.logEvent(name, values,(res) => {
-    console.log(res);
-  },
-  (err) => {
-    console.log(err);
-  });
+  appsFlyer.logEvent(name, values).then(
+    (res) => console.log(res),
+    (err) => console.log(err),
+  );
 }
 
 function AFLogAdRevenue() {
