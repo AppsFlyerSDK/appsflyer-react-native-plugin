@@ -22,6 +22,10 @@ try {
 
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
+  // react-native-elements@3.4.3's ListItemBase/PadView injects an un-keyed
+  // divider View internally (dist/list/ListItemBase.js) whenever ListItem
+  // gets multiple children, as CartRow does — nothing in our JSX can key it.
+  'Each child in a list should have a unique "key" prop',
 ]);
 
 class App extends Component {
