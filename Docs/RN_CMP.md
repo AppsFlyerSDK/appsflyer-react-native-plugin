@@ -105,7 +105,7 @@ appsFlyer.start();
 //AppsFlyerConsent Constructor:
 
 new AppsFlyerConsent(
-    isUserSubjectToGDPR,          // Boolean (optional) - Whether GDPR applies to the user
+    isUserSubjectToGDPR,          // Boolean (optional, defaults to false) - Whether GDPR applies to the user
     hasConsentForDataUsage,       // Boolean (optional) - Consent for data usage
     hasConsentForAdsPersonalization, // Boolean (optional) - Consent for ads personalization
     hasConsentForAdStorage        // Boolean (optional) - Consent for ad storage
