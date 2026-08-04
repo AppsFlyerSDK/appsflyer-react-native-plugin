@@ -15,12 +15,45 @@ import java.util.concurrent.atomic.AtomicBoolean
 private const val RPC_EVENT_NAME = "RNAppsFlyer_rpcEvent"
 private const val SESSION_READY_EVENT = "onSessionReady"
 private const val SESSION_READY_FALLBACK_TIMEOUT_MS = 1_000L
+private const val DEEP_LINK_EVENT_NAME = "onDeepLinking"
 
-// registerDeeplinkListener has no native counterpart — deep link registration is
-// subscribeForDeepLink on the native side.
-private val CANONICAL_TO_ANDROID_METHOD: Map<String, String> = mapOf(
-    "registerDeeplinkListener" to "subscribeForDeepLink",
+// registerDeeplinkListener has no native counterpart — native side calls it subscribeForDeepLink.
+private const val CANONICAL_DEEP_LINK_METHOD = "registerDeeplinkListener"
+private const val ANDROID_DEEP_LINK_METHOD = "subscribeForDeepLink"
+
+// plugin_bridge's DeepLinkResult.Status is a SHOUTING_CASE enum name ("FOUND"/"NOT_FOUND"/
+// "ERROR"); iOS emits lowerCamelCase ("found"/"notFound"/"failure"), and UnifiedDeepLinkData
+// (index.ts) is typed against iOS's vocabulary — normalize Android's raw name here, the one
+// place both platforms' events cross into JS. `error` has no matching iOS casing (iOS sends
+// a free-text message), so it's just lowercased.
+private val ANDROID_TO_CANONICAL_DEEP_LINK_STATUS: Map<String, String> = mapOf(
+    "FOUND" to "found",
+    "NOT_FOUND" to "notFound",
+    "ERROR" to "failure",
 )
+
+// Shared by every JSON helper below — best-effort parse, `default` instead of throwing.
+private inline fun <T> parseJsonOrDefault(json: String, default: T, block: (JSONObject) -> T): T {
+    return try {
+        block(JSONObject(json))
+    } catch (e: Exception) {
+        default
+    }
+}
+
+// Top-level + `internal` (not a class member) so this is unit-testable without standing up a
+// full ReactApplicationContext.
+internal fun normalizeDeepLinkEvent(eventJson: String): String = parseJsonOrDefault(eventJson, eventJson) { envelope ->
+    if (envelope.optString("event") != DEEP_LINK_EVENT_NAME) return@parseJsonOrDefault eventJson
+    val data = envelope.optJSONObject("data") ?: return@parseJsonOrDefault eventJson
+
+    data.optString("status").takeIf { it.isNotEmpty() }?.let { raw ->
+        data.put("status", ANDROID_TO_CANONICAL_DEEP_LINK_STATUS[raw] ?: raw)
+    }
+    data.optString("error").takeIf { it.isNotEmpty() }?.let { data.put("error", it.lowercase()) }
+
+    envelope.toString()
+}
 
 /** TurboModule bridge — all SDK capabilities dispatched via executeRpc → AppsFlyerRpcHandler. */
 class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyerSpec(reactContext) {
@@ -40,7 +73,8 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
 
     private val rpcHandler = AppsFlyerRpcHandler(
         context = reactApplicationContext,
-        pluginNotifier = { eventJson ->
+        pluginNotifier = { rawEventJson ->
+            val eventJson = normalizeDeepLinkEvent(rawEventJson)
             val isSessionReadyEvent = JSONObject(eventJson).optString("event") == SESSION_READY_EVENT
             val shouldEmit = if (isSessionReadyEvent) {
                 sessionReadyFallback?.cancel(false)
@@ -63,11 +97,11 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
 
         if (canonicalMethod == "init") {
             rpcExecutor.execute {
-                val normalized = dispatchToNative(requestJson)
-                promise.resolve(normalized)
-                initGate.markInitCompleted(isSuccess(normalized)).forEach { (queuedJson, queuedPromise) ->
+                val result = dispatchToNative(requestJson)
+                promise.resolve(result.json)
+                initGate.markInitCompleted(result.success).forEach { (queuedJson, queuedPromise) ->
                     rpcExecutor.execute {
-                        (queuedPromise as Promise).resolve(dispatchToNative(queuedJson))
+                        (queuedPromise as Promise).resolve(dispatchToNative(queuedJson).json)
                     }
                 }
             }
@@ -79,12 +113,14 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
         }
 
         rpcExecutor.execute {
-            promise.resolve(dispatchToNative(requestJson))
+            promise.resolve(dispatchToNative(requestJson).json)
         }
     }
 
+    private class RpcResult(val json: String, val success: Boolean)
+
     // Must run on rpcExecutor — AppsFlyerRpcHandler.execute() can block the calling thread.
-    private fun dispatchToNative(requestJson: String): String {
+    private fun dispatchToNative(requestJson: String): RpcResult {
         val canonicalMethod = canonicalMethodName(requestJson)
         val remappedRequestJson = remapMethodName(requestJson)
 
@@ -100,7 +136,6 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
         }
 
         val response = rpcHandler.execute(remappedRequestJson)
-        val normalized = normalize(response)
 
         when {
             canonicalMethod == "registerSessionReadyListener" && response !is RpcResponse.VoidSuccess -> {
@@ -116,7 +151,7 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
             }
         }
 
-        return normalized
+        return RpcResult(normalize(response), response !is RpcResponse.Error)
     }
 
     // Synthesizes the same onSessionReady envelope AppsFlyerRpcHandler emits natively, in case
@@ -137,21 +172,8 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
         }, SESSION_READY_FALLBACK_TIMEOUT_MS, TimeUnit.MILLISECONDS)
     }
 
-    private fun canonicalMethodName(requestJson: String): String? {
-        return try {
-            JSONObject(requestJson).optString("method").takeIf { it.isNotEmpty() }
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    private fun isSuccess(normalizedResponseJson: String): Boolean {
-        return try {
-            JSONObject(normalizedResponseJson).optBoolean("success", false)
-        } catch (e: Exception) {
-            false
-        }
-    }
+    private fun canonicalMethodName(requestJson: String): String? =
+        parseJsonOrDefault(requestJson, null) { it.optString("method").takeIf { m -> m.isNotEmpty() } }
 
     override fun addListener(eventName: String) {
         // required by NativeEventEmitter; event gating is handled by register*Listener RPCs
@@ -170,19 +192,14 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
         sessionReadyScheduler.shutdown()
     }
 
-    private fun remapMethodName(requestJson: String): String {
-        return try {
-            val request = JSONObject(requestJson)
-            val canonicalMethod = request.optString("method").takeIf { it.isNotEmpty() } ?: return requestJson
-            val androidMethod = CANONICAL_TO_ANDROID_METHOD[canonicalMethod] ?: return requestJson
-            request.put("method", androidMethod)
-            request.toString()
-        } catch (e: Exception) {
-            requestJson
-        }
+    private fun remapMethodName(requestJson: String): String = parseJsonOrDefault(requestJson, requestJson) { request ->
+        val canonicalMethod = request.optString("method").takeIf { it.isNotEmpty() } ?: return@parseJsonOrDefault requestJson
+        if (canonicalMethod != CANONICAL_DEEP_LINK_METHOD) return@parseJsonOrDefault requestJson
+        request.put("method", ANDROID_DEEP_LINK_METHOD)
+        request.toString()
     }
 
-    // Normalizes Android's RpcResponse sealed class into the shared { success, data|error } shape.
+    // Must match the { success, data|error } envelope iOS's bridge also emits — keep in sync.
     private fun normalize(response: RpcResponse): String {
         val normalized = JSONObject()
         when (response) {
