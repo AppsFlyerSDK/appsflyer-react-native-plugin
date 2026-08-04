@@ -84,4 +84,8 @@ dependencies {
     implementation 'com.appsflyer:af-android-plugin-bridge'
 
     testImplementation 'junit:junit:4.13.2'
+    // android.jar's org.json stub throws/returns null for every method under
+    // testOptions.unitTests.returnDefaultValues — pull in the real implementation so
+    // JSON-based logic (e.g. RNAppsFlyerModule's event normalization) is actually exercised.
+    testImplementation 'org.json:json:20231013'
 }

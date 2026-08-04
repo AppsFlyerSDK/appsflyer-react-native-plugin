@@ -9,12 +9,45 @@ import org.json.JSONObject
 import java.util.concurrent.Executors
 
 private const val RPC_EVENT_NAME = "RNAppsFlyer_rpcEvent"
+private const val DEEP_LINK_EVENT_NAME = "onDeepLinking"
 
-// registerDeeplinkListener has no native counterpart — deep link registration is
-// subscribeForDeepLink on the native side.
-private val CANONICAL_TO_ANDROID_METHOD: Map<String, String> = mapOf(
-    "registerDeeplinkListener" to "subscribeForDeepLink",
+// registerDeeplinkListener has no native counterpart — native side calls it subscribeForDeepLink.
+private const val CANONICAL_DEEP_LINK_METHOD = "registerDeeplinkListener"
+private const val ANDROID_DEEP_LINK_METHOD = "subscribeForDeepLink"
+
+// plugin_bridge's DeepLinkResult.Status is a SHOUTING_CASE enum name ("FOUND"/"NOT_FOUND"/
+// "ERROR"); iOS emits lowerCamelCase ("found"/"notFound"/"failure"), and UnifiedDeepLinkData
+// (index.ts) is typed against iOS's vocabulary — normalize Android's raw name here, the one
+// place both platforms' events cross into JS. `error` has no matching iOS casing (iOS sends
+// a free-text message), so it's just lowercased.
+private val ANDROID_TO_CANONICAL_DEEP_LINK_STATUS: Map<String, String> = mapOf(
+    "FOUND" to "found",
+    "NOT_FOUND" to "notFound",
+    "ERROR" to "failure",
 )
+
+// Shared by every JSON helper below — best-effort parse, `default` instead of throwing.
+private inline fun <T> parseJsonOrDefault(json: String, default: T, block: (JSONObject) -> T): T {
+    return try {
+        block(JSONObject(json))
+    } catch (e: Exception) {
+        default
+    }
+}
+
+// Top-level + `internal` (not a class member) so this is unit-testable without standing up a
+// full ReactApplicationContext.
+internal fun normalizeDeepLinkEvent(eventJson: String): String = parseJsonOrDefault(eventJson, eventJson) { envelope ->
+    if (envelope.optString("event") != DEEP_LINK_EVENT_NAME) return@parseJsonOrDefault eventJson
+    val data = envelope.optJSONObject("data") ?: return@parseJsonOrDefault eventJson
+
+    data.optString("status").takeIf { it.isNotEmpty() }?.let { raw ->
+        data.put("status", ANDROID_TO_CANONICAL_DEEP_LINK_STATUS[raw] ?: raw)
+    }
+    data.optString("error").takeIf { it.isNotEmpty() }?.let { data.put("error", it.lowercase()) }
+
+    envelope.toString()
+}
 
 /** TurboModule bridge — all SDK capabilities dispatched via executeRpc → AppsFlyerRpcHandler. */
 class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyerSpec(reactContext) {
@@ -24,10 +57,10 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
 
     private val rpcHandler = AppsFlyerRpcHandler(
         context = reactApplicationContext,
-        pluginNotifier = { eventJson ->
+        pluginNotifier = { rawEventJson ->
             reactApplicationContext
                 .getJSModule(RCTDeviceEventEmitter::class.java)
-                .emit(RPC_EVENT_NAME, eventJson)
+                .emit(RPC_EVENT_NAME, normalizeDeepLinkEvent(rawEventJson))
         },
     )
 
@@ -59,19 +92,14 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
         rpcExecutor.shutdown()
     }
 
-    private fun remapMethodName(requestJson: String): String {
-        return try {
-            val request = JSONObject(requestJson)
-            val canonicalMethod = request.optString("method").takeIf { it.isNotEmpty() } ?: return requestJson
-            val androidMethod = CANONICAL_TO_ANDROID_METHOD[canonicalMethod] ?: return requestJson
-            request.put("method", androidMethod)
-            request.toString()
-        } catch (e: Exception) {
-            requestJson
-        }
+    private fun remapMethodName(requestJson: String): String = parseJsonOrDefault(requestJson, requestJson) { request ->
+        val canonicalMethod = request.optString("method").takeIf { it.isNotEmpty() } ?: return@parseJsonOrDefault requestJson
+        if (canonicalMethod != CANONICAL_DEEP_LINK_METHOD) return@parseJsonOrDefault requestJson
+        request.put("method", ANDROID_DEEP_LINK_METHOD)
+        request.toString()
     }
 
-    // Normalizes Android's RpcResponse sealed class into the shared { success, data|error } shape.
+    // Must match the { success, data|error } envelope iOS's bridge also emits — keep in sync.
     private fun normalize(response: RpcResponse): String {
         val normalized = JSONObject()
         when (response) {
