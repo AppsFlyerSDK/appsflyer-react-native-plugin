@@ -29,9 +29,9 @@ native. Replaced by:
 
 ```js
 appsFlyer.init('devKey', 'appId').then(onSuccess, onError);
-appsFlyer.setIsDebug(true);            // was: isDebug
-appsFlyer.onInstallConversionData(cb); // was: onInstallConversionDataListener
-appsFlyer.onDeepLink(cb);              // was: onDeepLinkListener
+appsFlyer.setIsDebug(true);                // was: isDebug
+appsFlyer.onConversionDataSuccess(cb);     // was: onInstallConversionDataListener
+appsFlyer.onDeepLinking(cb);               // was: onDeepLinkListener
 appsFlyer.registerSessionReadyListener(() => {
   appsFlyer.start().then(onSuccess, onError);
 });
@@ -39,8 +39,9 @@ appsFlyer.registerSessionReadyListener(() => {
 
 Two rules, both easy to get wrong:
 
-- Register listeners **synchronously** — never inside `init().then(...)`. Native buffers
-  registrations until `init` completes; wait for the promise and you may miss the flush.
+- Register listeners **synchronously** — never inside `init().then(...)`. Registration itself
+  is init-order-independent, but dispatch still happens in call order; waiting on the promise
+  first risks missing an event that fires shortly after init.
 - `start()` only inside `registerSessionReadyListener`'s callback — never a bare call right
   after `init()`. Native never auto-starts. Need code to run strictly after start? Wrap it:
 
@@ -101,11 +102,12 @@ a callable 7.0.0 API). Use `setUserEmail(email)`.
 | `setUserEmails({emails, emailsCryptType}, ...)` | removed — use `setUserEmail(email)` (only a single address, no crypt type) |
 | `performOnDeepLinking()` (no-op) | `performOnDeepLinking(url, shouldTriggerSession?)` |
 | `sendPushNotificationData(payload, errorC)` (Android) | `sendPushNotificationData(payload, androidCampaignData)` — `errorC` removed, 2nd arg is now `{campaign?, pid?, isRetargeting?, additionalParameters?}` directly; iOS unaffected |
-| `generateInviteLink({deeplinkPath})` | drop `deeplinkPath` (ignored, no native counterpart); `customerID`/`baseDeeplink` unchanged |
+| `generateInviteLink({deeplinkPath})` | drop `deeplinkPath` (removed, no native counterpart); `customerID`/`baseDeeplink` unchanged |
+| `onInstallConversionData(cb)` / `onInstallConversionFailure(cb)` / `onDeepLink(cb)` | `onConversionDataSuccess(cb)` / `onConversionDataFail(cb)` / `onDeepLinking(cb)` — renamed to match native exactly |
 | `validateAndLogInAppPurchase(purchaseInfo, successC, errorC)` | `validateAndLogInAppPurchase(purchaseDetails, additionalParameters, callback?)` — name reused, `callback` is currently inert |
 | `setCollectIMEI` | removed, no replacement (IMEI is obsolete) |
 | `initInAppPurchaseValidatorListener` (Android) | removed, was dead code |
-| `onAppOpenAttribution` / `onAttributionFailure` / `performOnAppAttribution` | merged into `onDeepLink(callback)` |
+| `onAppOpenAttribution` / `onAttributionFailure` / `performOnAppAttribution` | merged into `onDeepLinking(callback)` |
 | `setSharingFilterForAllPartners` / `setSharingFilter` | `setSharingFilterForPartners(['all'])` / `setSharingFilterForPartners([...])` |
 | `AppsFlyerConsent.forGDPRUser(...)` / `.forNonGDPRUser()` | `new AppsFlyerConsent(isSubjectToGDPR, ...)` |
 | `AppsFlyerConsentType` (TS) | `AppsFlyerConsent` class |

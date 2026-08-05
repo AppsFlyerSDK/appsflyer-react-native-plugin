@@ -117,9 +117,9 @@ export default function App() {
 			(error) => addLog(`✗ init FAILED: ${safeStringify(error)}`)
 		);
 		appsFlyer.setIsDebug(true);
-		appsFlyer.onInstallConversionData(() => {});
-		appsFlyer.onInstallConversionFailure(() => {});
-		appsFlyer.onDeepLink(() => {});
+		appsFlyer.onConversionDataSuccess(() => {});
+		appsFlyer.onConversionDataFail(() => {});
+		appsFlyer.onDeepLinking(() => {});
 		appsFlyer.registerSessionReadyListener(() => {
 			if (cancelled) return;
 			addLog('✓ Session ready');

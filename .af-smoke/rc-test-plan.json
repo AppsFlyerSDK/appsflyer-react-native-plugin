@@ -41,9 +41,9 @@
         },
         {
           "id": "conversion_data",
-          "description": "onInstallConversionData callback fires",
+          "description": "onConversionDataSuccess callback fires",
           "type": "log_contains",
-          "pattern": "[AF_QA][CALLBACK][onInstallConversionData]",
+          "pattern": "[AF_QA][CALLBACK][onConversionDataSuccess]",
           "fail_action": "fail"
         },
         {

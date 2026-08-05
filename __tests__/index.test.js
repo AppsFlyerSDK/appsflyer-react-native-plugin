@@ -793,7 +793,7 @@ describe('Test native event emitter', () => {
 	});
 
 	test('GCD listener Happy Flow', () => {
-		gcdListener = appsFlyer.onInstallConversionData((res) => {
+		gcdListener = appsFlyer.onConversionDataSuccess((res) => {
 			expect(res).toEqual(nativeEventObject);
 			gcdListener();
 		});
@@ -802,7 +802,7 @@ describe('Test native event emitter', () => {
 	});
 
 	test('GCD listener handles a stringified JSON `data` payload (known-issues-kb.md payload-shape delta)', () => {
-		gcdListener = appsFlyer.onInstallConversionData((res) => {
+		gcdListener = appsFlyer.onConversionDataSuccess((res) => {
 			expect(res).toEqual(nativeEventObject);
 			gcdListener();
 		});
@@ -811,7 +811,7 @@ describe('Test native event emitter', () => {
 	});
 
 	test('GCD listener gets an unparsable stringified `data` payload', () => {
-		gcdListener = appsFlyer.onInstallConversionData((error) => {
+		gcdListener = appsFlyer.onConversionDataSuccess((error) => {
 			expect(typeof error).toEqual('object');
 			expect(error.message).toEqual('Invalid data structure');
 			expect(error.name).toEqual('AFParseJSONException');
@@ -821,8 +821,8 @@ describe('Test native event emitter', () => {
 		emitRpcEvent('onConversionDataSuccess', 'not valid json');
 	});
 
-	test('onInstallConversionFailure listener Happy Flow', () => {
-		let failureListener = appsFlyer.onInstallConversionFailure((res) => {
+	test('onConversionDataFail listener Happy Flow', () => {
+		let failureListener = appsFlyer.onConversionDataFail((res) => {
 			expect(res).toEqual(nativeEventObject);
 			failureListener();
 		});
@@ -831,7 +831,7 @@ describe('Test native event emitter', () => {
 	});
 
 	test('UDL listener Happy Flow (iOS native event name)', () => {
-		udlListener = appsFlyer.onDeepLink((res) => {
+		udlListener = appsFlyer.onDeepLinking((res) => {
 			expect(res).toEqual(nativeEventObject);
 			udlListener();
 		});
@@ -839,7 +839,7 @@ describe('Test native event emitter', () => {
 	});
 
 	test('UDL listener Happy Flow (Android native event name)', () => {
-		udlListener = appsFlyer.onDeepLink((res) => {
+		udlListener = appsFlyer.onDeepLinking((res) => {
 			expect(res).toEqual(nativeEventObject);
 			udlListener();
 		});
@@ -850,7 +850,7 @@ describe('Test native event emitter', () => {
 	// unregister call must not leak into the next test in this bucket. Reproduces the failure
 	// mode by never removing the listener, then proving the following test only sees its own.
 	test('a listener that throws before self-removing does not leak into the next test', () => {
-		appsFlyer.onDeepLink(() => {
+		appsFlyer.onDeepLinking(() => {
 			throw new Error('simulated assertion failure before self-removal');
 		});
 
@@ -859,14 +859,14 @@ describe('Test native event emitter', () => {
 
 	test('the next test in the same bucket only sees its own listener, not a leaked one', () => {
 		const callback = jest.fn();
-		appsFlyer.onDeepLink(callback);
+		appsFlyer.onDeepLinking(callback);
 
 		emitRpcEvent('onDeepLinkReceived', nativeEventObject, 'ios');
 
 		expect(callback).toHaveBeenCalledTimes(1);
 	});
 
-	test('onAppOpenAttribution / onAttributionFailure were removed and merged into onDeepLink', () => {
+	test('onAppOpenAttribution / onAttributionFailure were removed and merged into onDeepLinking', () => {
 		expect(appsFlyer.onAppOpenAttribution).toBeUndefined();
 		expect(appsFlyer.onAttributionFailure).toBeUndefined();
 	});

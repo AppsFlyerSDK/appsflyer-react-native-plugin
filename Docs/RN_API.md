@@ -88,11 +88,11 @@ The list of available methods for this plugin is described below.
   - [iOS AppDelegate lifecycle forwarding (native-only)](#ios-appdelegate-lifecycle-forwarding-native-only)
   - [setFacebookDeferredAppLink](#setfacebookdeferredapplink)
 - [AppsFlyerConversionData](#appsflyerconversiondata)
-  - [onInstallConversionData](#oninstallconversiondata)
-  - [onInstallConversionFailure](#oninstallconversionfailure)
+  - [onConversionDataSuccess](#onconversiondatasuccess)
+  - [onConversionDataFail](#onconversiondatafail)
   - [onAppOpenAttribution](#onappopenattribution)
   - [onAttributionFailure](#onattributionfailure)
-  - [onDeepLink](#ondeeplink)
+  - [onDeepLinking](#ondeeplinking)
   - [registerSessionReadyListener](#registersessionreadylistener)
   - [isSessionReady](#issessionready)
   - [unregisterSessionReadyListener](#unregistersessionreadylistener)
@@ -106,7 +106,7 @@ Recommended call order for a 7.0.0 (RPC) integration:
 
 1. `init(devKey, appId)`
 2. `setIsDebug(true)` — not order-critical relative to `init`; call it as early as possible (even before `init`) to get full debug logs from the start of the session
-3. Register `onInstallConversionData` / `onDeepLink` — **synchronously**, in the same call stack as `init`, not inside `init()`'s `.then()`
+3. Register `onConversionDataSuccess` / `onDeepLinking` — **synchronously**, in the same call stack as `init`, not inside `init()`'s `.then()`
 4. `setCustomerUserId(...)` — if you need the CUID associated with the install event
 5. `registerSessionReadyListener(...)` — **synchronously**, same rule as step 3
 6. Inside the `registerSessionReadyListener` callback: collect consent data (`setConsentData`) / ATT authorization status if your app requires it, then call `start()`
@@ -122,10 +122,10 @@ appsFlyer.init('K2***********99', '41*****44').then(
 );
 appsFlyer.setIsDebug(true);
 
-appsFlyer.onInstallConversionData((res) => {
+appsFlyer.onConversionDataSuccess((res) => {
   // ...
 });
-appsFlyer.onDeepLink((res) => {
+appsFlyer.onDeepLinking((res) => {
   // ...
 });
 
@@ -143,7 +143,7 @@ appsFlyer.registerSessionReadyListener(() => {
 
 **Why the order matters:**
 - `init` must be issued first. `setIsDebug` and the buffered listener registrations below all go over the same native RPC channel in call order — issuing them right after `init` guarantees the native side processes `init` first, even though `init()`'s own JS Promise resolves later, asynchronously.
-- `onInstallConversionData`, `onDeepLink`, and `registerSessionReadyListener` must be registered before `init()`'s promise settles. The native layer buffers these registrations and flushes them once `init` completes — but only catches registrations that arrived before that point. Registering them inside `init().then()` risks the native side having already resolved, silently dropping the registration.
+- `onConversionDataSuccess`, `onDeepLinking`, and `registerSessionReadyListener` must be registered before `init()`'s promise settles. Registration itself is init-order-independent, but dispatch still happens in call order — registering inside `init().then()` delays dispatch and risks missing an event that fires shortly after init.
 - `start()` must be called from inside the `registerSessionReadyListener` callback, never chained off `init().then()` — see [start](#start).
 
 ---
@@ -152,7 +152,7 @@ appsFlyer.registerSessionReadyListener(() => {
 
 `initSdk(options, success, error)` is **removed**. Use `init(devKey, appId)` instead — a Promise-only call. `isDebug`, `onInstallConversionDataListener`, `onDeepLinkListener`, and `manualStart` are no longer options on the init call; see
 [MIGRATION.md](../MIGRATION.md#initsdkoptions--replaced-by-initdevkey-appid) for the full
-replacement pattern (`setIsDebug`, `onInstallConversionData`, `onDeepLink`,
+replacement pattern (`setIsDebug`, `onConversionDataSuccess`, `onDeepLinking`,
 `registerSessionReadyListener` + `start`), and [Initialization Flow](#initialization-flow) above for the recommended call order. 
 
 *Example:*
@@ -730,7 +730,7 @@ appsFlyer.generateInviteLink(
 A complete list of supported parameters is available [here](https://support.appsflyer.com/hc/en-us/articles/115004480866-User-Invite-Tracking). Custom parameters can be passed using a userParams{} nested object, as in the example above.
 
 Note:<br>
-1. `deeplinkPath` is **deprecated and ignored** — it has no native counterpart on either platform. Passing it logs a warning.
+1. `deeplinkPath` is **removed** — it has no native counterpart on either platform and never shipped.
 2. `customerID` and `baseDeeplink` are supported. The plugin translates them to the native key names for you (iOS `referrerCustomerId`, Android `customerId`, both `baseDeepLink`).
 
 ---
@@ -1254,7 +1254,7 @@ appsFlyer.setDisableNetworkData(true);
 `performOnDeepLinking(url, shouldTriggerSession)`
 
 Enables manual triggering of deep link resolution for a given URL. This method allows apps that are delaying the call to `appsFlyer.start()` to resolve deep links before the SDK starts.<br>
-Note:<br>This API will trigger the `appsFlyer.onDeepLink` callback. In the following example, we check if `res.deepLinkStatus` is equal to “FOUND” inside `appsFlyer.onDeepLink` callback to extract the deeplink parameters.
+Note:<br>This API will trigger the `appsFlyer.onDeepLinking` callback. In the following example, we check if `res.deepLinkStatus` is equal to “FOUND” inside `appsFlyer.onDeepLinking` callback to extract the deeplink parameters.
 
 | parameter            | type     | description               |
 | ----------           |----------|------------------         |
@@ -1265,7 +1265,7 @@ Note:<br>This API will trigger the `appsFlyer.onDeepLink` callback. In the follo
 ```javascript
 // Let's say we want the resolve a deeplink and get the deeplink params when the user clicks on it but delay the actual 'start' of the sdk (not sending launch to appsflyer). 
 
-const onDeepLink = appsFlyer.onDeepLink(res => {
+const onDeepLinking = appsFlyer.onDeepLinking(res => {
   if (res.deepLinkStatus == 'FOUND') {
       // here we will get the deeplink params after resolving it.
       // more flow...
@@ -1645,8 +1645,8 @@ if (Platform.OS == 'ios') {
 
 ## AppsFlyerConversionData
 
-### onInstallConversionData 
-`onInstallConversionData(callback) : function:unregister`
+### onConversionDataSuccess 
+`onConversionDataSuccess(callback) : function:unregister`
 
 Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking).<br/>
 
@@ -1660,7 +1660,7 @@ The code implementation for the conversion listener must be made prior to the in
 *Example:*
 
 ```javascript
-const onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
+const onConversionDataSuccessCanceller = appsFlyer.onConversionDataSuccess(
   (res) => {
     if (JSON.parse(res.data.is_first_launch) == true) {
       if (res.data.af_status === 'Non-organic') {
@@ -1679,7 +1679,7 @@ const onInstallConversionDataCanceller = appsFlyer.onInstallConversionData(
 appsFlyer.init(/*...*/);
 ```
 
-*Example onInstallConversionData:*
+*Example onConversionDataSuccess:*
 
 ```javascript
 {
@@ -1695,12 +1695,12 @@ appsFlyer.init(/*...*/);
 
  Note** is_first_launch will be "true" (string) on Android and true (boolean) on iOS. To solve this issue wrap is_first_launch with JSON.parse(res.data.is_first_launch) as in the example above.
 
-`appsFlyer.onInstallConversionData` returns a function the will allow us to call `NativeAppEventEmitter.remove()`.<br/>
+`appsFlyer.onConversionDataSuccess` returns a function the will allow us to call `NativeAppEventEmitter.remove()`.<br/>
 
 ---
 
-### onInstallConversionFailure
-`onInstallConversionFailure(callback) : function:unregister`
+### onConversionDataFail
+`onConversionDataFail(callback) : function:unregister`
  
 
 | parameter    | type     | description                               |
@@ -1711,16 +1711,16 @@ appsFlyer.init(/*...*/);
 *Example:*
 
 ```javascript
-    const onInstallGCDFailure = appsFlyer.onInstallConversionFailure(res => {
+    const onInstallGCDFailure = appsFlyer.onConversionDataFail(res => {
       console.log(JSON.stringify(res, null, 2));
     });
 ```
-*Example onInstallConversionFailure:*
+*Example onConversionDataFail:*
 
 ```javascript
 {
   "status": "failure",
-  "type": "onInstallConversionFailure",
+  "type": "onConversionDataFail",
   "data": "DevKey is incorrect"
 }
 ```
@@ -1729,14 +1729,14 @@ appsFlyer.init(/*...*/);
 ### onAppOpenAttribution / onAttributionFailure — removed in 7.0.0
 
 Both are **removed**, along with `performOnAppAttribution`. Attribution data is now delivered
-through `onDeepLink` instead (documented below), matching what `onInstallConversionData`
+through `onDeepLinking` instead (documented below), matching what `onConversionDataSuccess`
 already does for deferred deep links. See
-[MIGRATION.md](../MIGRATION.md#onappopenattribution--onattributionfailure--performonappattribution--merged-into-ondeeplink).
+[MIGRATION.md](../MIGRATION.md#onappopenattribution--onattributionfailure--performonappattribution--merged-into-ondeeplinking).
 
 ---
 
-### onDeepLink
-`onDeepLink(callback) : function:unregister`
+### onDeepLinking
+`onDeepLinking(callback) : function:unregister`
  
  This API is related to DeepLinks. Please read more [here](https://dev.appsflyer.com/hc/docs/rn_deeplinkintegrate)
 
@@ -1747,7 +1747,7 @@ already does for deferred deep links. See
 *Example:*
 
 ```javascript
-const onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
+const onDeepLinkCanceller = appsFlyer.onDeepLinking(res => {
   if (res?.deepLinkStatus !== 'NOT_FOUND') {
         const DLValue = res?.data.deep_link_value;
         const mediaSrc = res?.data.media_source;

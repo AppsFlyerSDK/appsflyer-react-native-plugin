@@ -13,8 +13,8 @@ import {
 const Item = ({route, navigation}) => {
   const {product, addToCart, deepLinkValues = null} = route.params;
 
-  // deepLinkValues is the raw onDeepLink payload ({deepLink: {...}}) when it came from a
-  // direct/warm-start link, or the raw onInstallConversionData payload (flat, custom params
+  // deepLinkValues is the raw onDeepLinking payload ({deepLink: {...}}) when it came from a
+  // direct/warm-start link, or the raw onConversionDataSuccess payload (flat, custom params
   // at the top level) when it came from a deferred link resolved after first install.
   const discount = deepLinkValues
     ? parseFloat(deepLinkValues.deepLink?.af_discount ?? deepLinkValues.af_discount)

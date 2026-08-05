@@ -31,17 +31,12 @@ if (typeof jest === "undefined") {
 // `onConversionDataSuccess` emits the SDK's raw conversion dict directly) and
 // AppsFlyerRpcHandler.kt (Android, `notifyPlugin("onConversionDataSuccess", conversionData)`).
 // Both platforms emit the conversion fields flat — there is no `status`/`type`/`data` wrapper.
-export type ConversionData = {
-  is_first_launch: boolean;
-  media_source?: string;
-  campaign?: string;
-  af_status?: "Organic" | "Non-organic";
-  [key: string]: any;
-};
+// Native hands back an untyped Map<String, Object>, not a fixed shape — stick to that.
+export type ConversionData = { [key: string]: any };
 
 // both platforms emit {status, deepLink?, error?} —
 // there is no `deepLinkStatus`/`data`/`type`/`isDeferred` field.
-export type UnifiedDeepLinkData = {
+export type DeepLinkResult = {
   status: "found" | "notFound" | "failure";
   error?: string;
   deepLink?: {
@@ -87,8 +82,6 @@ export interface GenerateInviteLinkParams {
   };
   referrerName?: string;
   referrerImageUrl?: string;
-  /** @deprecated No native counterpart on either platform — ignored (logs a warning). */
-  deeplinkPath?: string;
   baseDeeplink?: string;
   brandDomain?: string;
 }
@@ -615,13 +608,8 @@ appsFlyer.setAppInviteOneLinkID = (oneLinkID: string) => {
  * @param parameters Dictionary.
  */
 appsFlyer.generateInviteLink = (parameters: GenerateInviteLinkParams = {} as GenerateInviteLinkParams) => {
-  // customerID → both referrerCustomerId (iOS) and customerId (Android); deeplinkPath has no native counterpart.
-  const { customerID, baseDeeplink, deeplinkPath, ...rest } = parameters;
-  if (deeplinkPath !== undefined) {
-    console.warn(
-      "[AppsFlyer] generateInviteLink: `deeplinkPath` is not supported by the native SDK and is ignored."
-    );
-  }
+  // customerID → both referrerCustomerId (iOS) and customerId (Android).
+  const { customerID, baseDeeplink, ...rest } = parameters;
   const payload: Record<string, unknown> = { ...rest };
   if (customerID !== undefined) {
     payload.referrerCustomerId = customerID;
@@ -701,17 +689,17 @@ const RPC_EVENT_NAME = "RNAppsFlyer_rpcEvent";
 
 // Maps native event name → JS listener bucket (iOS uses onDeepLinkReceived, Android uses onDeepLinking).
 const RPC_EVENT_DEMUX: Record<string, string> = {
-  onConversionDataSuccess: "onInstallConversionData",
-  onConversionDataFail: "onInstallConversionFailure",
-  onDeepLinkReceived: "onDeepLink",
-  onDeepLinking: "onDeepLink",
+  onConversionDataSuccess: "onConversionDataSuccess",
+  onConversionDataFail: "onConversionDataFail",
+  onDeepLinkReceived: "onDeepLinking",
+  onDeepLinking: "onDeepLinking",
   onSessionReady: "onSessionReady",
 };
 
 const rpcListenerBuckets: Record<string, Array<(data: any) => void>> = {
-  onInstallConversionData: [],
-  onInstallConversionFailure: [],
-  onDeepLink: [],
+  onConversionDataSuccess: [],
+  onConversionDataFail: [],
+  onDeepLinking: [],
   onSessionReady: [],
 };
 
@@ -783,7 +771,7 @@ const ensureConversionListenerRegistered = onceRegistrar("registerConversionList
 const ensureDeepLinkListenerRegistered = onceRegistrar("registerDeeplinkListener");
 const ensureSessionReadyListenerRegistered = onceRegistrar("registerSessionReadyListener");
 
-// Shared shape for onInstallConversionData/onInstallConversionFailure/onDeepLink: subscribe to
+// Shared shape for onConversionDataSuccess/onConversionDataFail/onDeepLinking: subscribe to
 // the demuxed event bucket, request native registration once, return an unsubscribe function.
 function createBucketListener(bucket: string, ensureRegistered: () => void) {
   return (callback: (data: any) => void) => {
@@ -804,22 +792,22 @@ function createBucketListener(bucket: string, ensureRegistered: () => void) {
  *   `campaign`, `af_status`, custom params like `af_dp`/`deep_link_value`, ...) — no wrapper object.
  * @returns call to unregister the listener (e.g. from componentWillUnmount).
  */
-appsFlyer.onInstallConversionData = createBucketListener(
-  "onInstallConversionData",
+appsFlyer.onConversionDataSuccess = createBucketListener(
+  "onConversionDataSuccess",
   ensureConversionListenerRegistered
 );
 
-appsFlyer.onInstallConversionFailure = createBucketListener(
-  "onInstallConversionFailure",
+appsFlyer.onConversionDataFail = createBucketListener(
+  "onConversionDataFail",
   ensureConversionListenerRegistered
 );
 
 /**
  * Access unified deep link data (direct + deferred deep linking).
- * @param callback receives `{status, deepLink?, error?}` — see `UnifiedDeepLinkData`.
+ * @param callback receives `{status, deepLink?, error?}` — see `DeepLinkResult`.
  * @returns call to unregister the listener (e.g. from componentWillUnmount).
  */
-appsFlyer.onDeepLink = createBucketListener("onDeepLink", ensureDeepLinkListenerRegistered);
+appsFlyer.onDeepLinking = createBucketListener("onDeepLinking", ensureDeepLinkListenerRegistered);
 
 /**
  * Fires once the native SDK's session becomes ready to serve attribution / deep-link data.
@@ -1362,9 +1350,9 @@ appsFlyer.logSession = () => callRpc("logSession");
 appsFlyer.onPause = () => callRpc("onPause");
 
 export interface AppsFlyerApi {
-  onInstallConversionData(callback: (data: ConversionData) => any): () => void;
-  onInstallConversionFailure(callback: (data: ConversionData) => any): () => void;
-  onDeepLink(callback: (data: UnifiedDeepLinkData) => any): () => void;
+  onConversionDataSuccess(callback: (data: ConversionData) => any): () => void;
+  onConversionDataFail(callback: (data: ConversionData) => any): () => void;
+  onDeepLinking(callback: (data: DeepLinkResult) => any): () => void;
   /**
    * Fires once the native SDK's session becomes ready to serve attribution/deep-link data.
    * Net-new in 7.0.0 -- see MIGRATION.md.

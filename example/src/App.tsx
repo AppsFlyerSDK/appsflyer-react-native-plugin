@@ -45,7 +45,7 @@ async function runAutoFlow() {
     return;
   }
 
-  // Resolves on the first onInstallConversionData delivery — lets the stop/resume
+  // Resolves on the first onConversionDataSuccess delivery — lets the stop/resume
   // sequence below wait on the real event instead of a guessed timeout, so stop(true)
   // can't fire while conversion data is still in flight.
   let resolveConversionDataReceived: () => void;
@@ -55,11 +55,12 @@ async function runAutoFlow() {
 
   // 1. init -> setIsDebug -> register listeners.
   // Deliberately NOT awaited: registration calls below must reach native before init's
-  // promise resolves (bridge-patterns.md §4) — RpcInitGate only buffers them until init
-  // *completes*, and awaiting init here would round-trip back to JS after that buffer may
-  // already have flushed, risking a dropped onInstallConversionData/onDeepLink event that
-  // fires shortly after init. appId is always safe to pass — Android's RPC init handler
-  // only reads devKey and ignores extra fields; only iOS actually requires/uses appId.
+  // promise resolves (bridge-patterns.md §4) — listener registration is init-order-independent
+  // by design on both platforms, but dispatch still happens in call order, so registering
+  // inside init().then() would delay dispatch and risk missing an onConversionDataSuccess/
+  // onDeepLinking event that fires shortly after init. appId is always safe to pass —
+  // Android's RPC init handler only reads devKey and ignores extra fields; only iOS actually
+  // requires/uses appId.
   appsFlyer.init(devKey, appId).then(
     result => afLog('init', `result: ${JSON.stringify(result)}`),
     error => afLog('init', `error: ${JSON.stringify(error)}`),
@@ -67,12 +68,12 @@ async function runAutoFlow() {
 
   appsFlyer.setIsDebug(true);
 
-  appsFlyer.onInstallConversionData(data => {
-    afCallbackLog('onInstallConversionData', JSON.stringify(data));
+  appsFlyer.onConversionDataSuccess(data => {
+    afCallbackLog('onConversionDataSuccess', JSON.stringify(data));
     resolveConversionDataReceived();
   });
-  // onAppOpenAttribution removed in 7.0.0 — attribution data now arrives via onDeepLink (MIGRATION.md)
-  appsFlyer.onDeepLink(data => {
+  // onAppOpenAttribution removed in 7.0.0 — attribution data now arrives via onDeepLinking (MIGRATION.md)
+  appsFlyer.onDeepLinking(data => {
     const deepLinkValue =
       typeof data.deepLink === 'object' ? data.deepLink?.deep_link_value : undefined;
     afCallbackLog(
@@ -176,7 +177,7 @@ async function runAutoFlow() {
   afLog('setConsentData', 'result: GDPR consent set');
 
   // 9. Stop/resume cycle (E2E-006)
-  // Wait for the real onInstallConversionData event instead of a guessed timeout —
+  // Wait for the real onConversionDataSuccess event instead of a guessed timeout —
   // stop(true) firing before conversion data arrives kills the in-flight request.
   await conversionDataReceived;
 

@@ -28,7 +28,7 @@ This is a recurring source of issues (#670, #575, #475, #218, #194):
 export function initSdk(options: InitSdkOptions, successC?: SuccessCB, errorC?: ErrorCB): Promise<string>;
 
 // Event listener registration — returns cleanup function
-export function onDeepLink(callback: (data: UnifiedDeepLinkData) => void): () => void;
+export function onDeepLinking(callback: (data: DeepLinkResult) => void): () => void;
 
 // Enum-like frozen objects (AFInAppEventType is now a plain JS object, not from getConstants())
 export const AFInAppEventType: { PURCHASE: string; ACHIEVEMENT_UNLOCKED: string; /* ... */ };

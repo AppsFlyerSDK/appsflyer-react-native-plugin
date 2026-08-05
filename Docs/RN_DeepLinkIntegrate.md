@@ -67,7 +67,7 @@ In your app’s manifest add the following intent-filter to your relevant activi
 For more on URI Scheme check out the guide [here](https://dev.appsflyer.com/hc/docs/dl_android_init_setup#procedures-for-uri-scheme).
 
 ##  iOS Deeplink Setup
-In order to record retargeting and use the `onDeepLink`/UDL callback in iOS (`onAppOpenAttribution` was removed in 7.0.0 and merged into `onDeepLink` — see MIGRATION.md), the app needs to forward opened URLs / Universal Links / cold-start launch options to the native SDK. This is done entirely in your app's native **AppDelegate** — there is no JavaScript API for this (`handleOpenURL`/`handleOpenUrl`/`continueUserActivity`/`handleLaunchOptions` are not exposed by this plugin's JS surface):
+In order to record retargeting and use the `onDeepLinking`/UDL callback in iOS (`onAppOpenAttribution` was removed in 7.0.0 and merged into `onDeepLinking` — see MIGRATION.md), the app needs to forward opened URLs / Universal Links / cold-start launch options to the native SDK. This is done entirely in your app's native **AppDelegate** — there is no JavaScript API for this (`handleOpenURL`/`handleOpenUrl`/`continueUserActivity`/`handleLaunchOptions` are not exposed by this plugin's JS surface):
 
 ```swift
 import AppsFlyerLib

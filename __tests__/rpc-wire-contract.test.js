@@ -190,11 +190,11 @@ const CALL_SITES = [
 			}),
 	},
 	{
-		api: 'onInstallConversionData',
+		api: 'onConversionDataSuccess',
 		platforms: BOTH,
-		invoke: () => appsFlyer.onInstallConversionData(jest.fn()),
+		invoke: () => appsFlyer.onConversionDataSuccess(jest.fn()),
 	},
-	{ api: 'onDeepLink', platforms: BOTH, invoke: () => appsFlyer.onDeepLink(jest.fn()) },
+	{ api: 'onDeepLinking', platforms: BOTH, invoke: () => appsFlyer.onDeepLinking(jest.fn()) },
 	{
 		api: 'registerSessionReadyListener',
 		platforms: BOTH,

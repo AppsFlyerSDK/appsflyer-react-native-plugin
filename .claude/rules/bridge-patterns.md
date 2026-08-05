@@ -115,7 +115,7 @@ the *app* controls — it cannot make native's `onSessionReady` fire any faster,
 fires, `start()` never dispatches (there is no timeout/fallback — see the known-issues KB's
 session-ready-stall entry for the one confirmed native cause).
 
-`onAppOpenAttribution`, `onAttributionFailure`, and `performOnAppAttribution` are **removed** in 7.0.0 — route attribution data through `onDeepLink` instead (see MIGRATION.md).
+`onAppOpenAttribution`, `onAttributionFailure`, and `performOnAppAttribution` are **removed** in 7.0.0 — route attribution data through `onDeepLinking` instead (see MIGRATION.md).
 
 ## 5. No transpilation
 

@@ -64,7 +64,7 @@ cd demos/demo/android && ./gradlew clean
 
 ## Critical constraints
 
-- `onDeepLink` / conversion-data / `registerSessionReadyListener` registration must be called **synchronously, before `init`'s promise settles** — not because native buffers/gates these (it doesn't; registration is init-order-independent by design on both platforms), but because deferring into `init(...).then(...)` delays *dispatch*, which delays the one callback that's supposed to trigger `start()`. See `.claude/rules/bridge-patterns.md` §4.
+- `onDeepLinking` / conversion-data / `registerSessionReadyListener` registration must be called **synchronously, before `init`'s promise settles** — not because native buffers/gates these (it doesn't; registration is init-order-independent by design on both platforms), but because deferring into `init(...).then(...)` delays *dispatch*, which delays the one callback that's supposed to trigger `start()`. See `.claude/rules/bridge-patterns.md` §4.
 - `appId` is required on iOS (numeric Apple ID), unused on Android — pass it unconditionally to `init(devKey, appId)`; no `Platform.select()` needed. Confirmed against Android's own RPC source (`plugin_bridge`'s `InitRequest` data class has no `appId` field at all — the parser reads only `devKey` and silently ignores any extra JSON fields).
 - `index.js` is the published entry point with no transpilation — write ES module syntax compatible with Metro
 - `index.d.ts` is hand-maintained — verify against the `data-model.md` Method Catalog and test on both platforms when changing

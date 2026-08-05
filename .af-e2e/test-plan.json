@@ -41,9 +41,9 @@
         },
         {
           "id": "is_first_launch_true",
-          "description": "onInstallConversionData fires with is_first_launch=true",
+          "description": "onConversionDataSuccess fires with is_first_launch=true",
           "type": "log_contains",
-          "pattern": "[AF_QA][CALLBACK][onInstallConversionData]",
+          "pattern": "[AF_QA][CALLBACK][onConversionDataSuccess]",
           "payload_check": {"field": "is_first_launch", "expected": "true"},
           "fail_action": "abort"
         },
@@ -327,9 +327,9 @@
         },
         {
           "id": "is_first_launch_true",
-          "description": "onInstallConversionData still fires with is_first_launch=true",
+          "description": "onConversionDataSuccess still fires with is_first_launch=true",
           "type": "log_contains",
-          "pattern": "[AF_QA][CALLBACK][onInstallConversionData]",
+          "pattern": "[AF_QA][CALLBACK][onConversionDataSuccess]",
           "payload_check": {"field": "is_first_launch", "expected": "true"},
           "fail_action": "fail"
         },
