@@ -5,13 +5,12 @@ paths:
 
 # Native Android bridge rules
 
-Scope: `android/` directory — `RNAppsFlyerModule.kt`, `RNAppsFlyerPackage.kt`, `RNAppsFlyerConstants.java`, `RpcInitGate.kt`, `RNUtil.java`.
+Scope: `android/` directory — `RNAppsFlyerModule.kt`, `RNAppsFlyerPackage.kt`, `RNAppsFlyerConstants.java`, `RNUtil.java`.
 
 ## 1. Module structure
 
-- `RNAppsFlyerModule.kt` — TurboModule; extends `NativeAppsFlyerSpec` (Codegen-generated); implements `executeRpc(requestJson)` which delegates into `AppsFlyerRpcHandler`
+- `RNAppsFlyerModule.kt` — TurboModule; extends `NativeAppsFlyerSpec` (Codegen-generated); implements `executeRpc(requestJson)` which delegates into `AppsFlyerRpcHandler`. `executeRpc` dispatches every RPC (including `init` and listener registration) immediately, in submission order, on a single-thread executor — no listener-registration buffer. (One existed — `RpcInitGate.kt` — removed 2026-08 after confirming against the native RPC source that registration is init-order-independent by design; see `bridge-patterns.md` §4.)
 - `RNAppsFlyerPackage.kt` — package registration (replaces old `RNAppsFlyerPackage.java`)
-- `RpcInitGate.kt` — listener-registration buffer: holds `registerConversionListener` / `registerDeeplinkListener` / `registerSessionReadyListener` RPC dispatches until `init` resolves, then flushes; mirrors the Cordova prior-art fix
 - `android/libs/` — vendored Phase A binaries: `plugin_bridge.aar` + `af-android-sdk.aar`; declared via `flatDir` + `implementation(name: ...)` in `build.gradle`; replaced by Maven in Phase B
 
 The module no longer extends `ReactContextBaseJavaModule` or uses `@ReactMethod`.

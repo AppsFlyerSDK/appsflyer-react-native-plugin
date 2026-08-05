@@ -27,9 +27,9 @@ To add a new SDK capability: expose it in the native `AppsFlyerRPCBridge` handle
 - Event emissions back to JS must be dispatched to the JS thread via the TurboModule event emitter — not `performSelectorOnMainThread`
 - `AppsFlyerRPCBridge` calls complete asynchronously; results are delivered via completion handler on whatever thread the SDK chooses
 
-## 4. Listener-registration buffering
+## 4. Listener registration — no buffering
 
-`RNAppsFlyerImpl.swift` holds `registerConversionListener` / `registerDeeplinkListener` / `registerSessionReadyListener` RPC dispatches if called before `init` resolves, then flushes them immediately after. This matches the Cordova prior-art fix (commit `9ee0552`). Do not remove this buffer — removing it silently drops events on the first launch.
+`RNAppsFlyerImpl.swift` dispatches every RPC (including `init` and listener registration) immediately, in submission order — there is no listener-registration buffer. One existed (an `initCompleted`/`pendingRegistrations` gate modeled on the Cordova prior-art fix, commit `9ee0552`) on the assumption that native silently drops early registrations; removed 2026-08 after confirming against the vendored `AppsFlyerRPC` source (`AFRPCCoreHandler.swift`, `AFRPCListenerHandler.swift`) that registration is init-order-independent by design — each just assigns a delegate/callback on the persistent SDK singleton, and the `AppsFlyerRPC` README documents this as intended parity with the native SDK. Do not re-add a buffer here without first confirming an actual native regression (and filing it upstream) — see `bridge-patterns.md` §4 and PR #693's review discussion.
 
 ## 5. IDFA / strict mode
 

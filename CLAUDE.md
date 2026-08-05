@@ -24,7 +24,6 @@ ios/RNAppsFlyer.mm              ← iOS TurboModule (NativeAppsFlyerSpec, delega
 ios/RNAppsFlyerImpl.swift       ← iOS RPC dispatch + event-channel wiring
 android/…/RNAppsFlyerModule.kt  ← Android TurboModule (NativeAppsFlyerSpec)
 android/…/RNAppsFlyerPackage.kt ← Android package registration
-android/…/RpcInitGate.kt        ← Listener-registration buffer (holds dispatch until init resolves)
 ios/Frameworks/                 ← Vendored AppsFlyerRPC.xcframework (Phase A; replaced by CocoaPods in Phase B)
 android/libs/                   ← Vendored plugin_bridge + af-android-sdk .aar (Phase A; replaced by Maven in Phase B)
 expo/                           ← Expo config plugin (withAppsFlyer*)
@@ -65,7 +64,7 @@ cd demos/demo/android && ./gradlew clean
 
 ## Critical constraints
 
-- `onDeepLink` / conversion-data / `registerSessionReadyListener` registration must be called **synchronously, before `init`'s promise settles** — the native RPC layer buffers listener-registration RPCs internally (`RpcInitGate.kt` / `RNAppsFlyerImpl.swift`) until `init` resolves, gated on actual native completion, not JS source-line order. Never defer registration into `init(...).then(...)` — that's too late. See `.claude/rules/bridge-patterns.md` §4.
+- `onDeepLink` / conversion-data / `registerSessionReadyListener` registration must be called **synchronously, before `init`'s promise settles** — not because native buffers/gates these (it doesn't; registration is init-order-independent by design on both platforms), but because deferring into `init(...).then(...)` delays *dispatch*, which delays the one callback that's supposed to trigger `start()`. See `.claude/rules/bridge-patterns.md` §4.
 - `appId` is required on iOS (numeric Apple ID), unused on Android — pass it unconditionally to `init(devKey, appId)`; no `Platform.select()` needed. Confirmed against Android's own RPC source (`plugin_bridge`'s `InitRequest` data class has no `appId` field at all — the parser reads only `devKey` and silently ignores any extra JSON fields).
 - `index.js` is the published entry point with no transpilation — write ES module syntax compatible with Metro
 - `index.d.ts` is hand-maintained — verify against the `data-model.md` Method Catalog and test on both platforms when changing

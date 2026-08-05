@@ -17,17 +17,6 @@ public final class RNAppsFlyerImpl: NSObject {
         "updateServerUninstallToken": "registerUninstall",
     ]
 
-    /// register*Listener RPCs silently dropped if they arrive before init resolves — buffer and flush after.
-    private static let bufferedUntilInitMethods: Set<String> = [
-        "registerConversionListener",
-        "registerDeeplinkListener",
-        "registerSessionReadyListener",
-    ]
-
-    private let initGateQueue = DispatchQueue(label: "com.appsflyer.reactnative.initGate")
-    private var initCompleted = false
-    private var pendingRegistrations: [(String, RCTPromiseResolveBlock)] = []
-
     @objc public init(eventEmitter: @escaping (String) -> Void) {
         self.eventEmitter = eventEmitter
         super.init()
@@ -47,41 +36,7 @@ public final class RNAppsFlyerImpl: NSObject {
         resolve: @escaping RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) {
-        let canonicalMethod = Self.canonicalMethodName(fromRequestJson: requestJson)
-
-        if canonicalMethod == "init" {
-            dispatchToNative(requestJson: requestJson) { [weak self] normalizedResponseJson in
-                resolve(normalizedResponseJson)
-                if Self.isSuccess(normalizedResponseJson: normalizedResponseJson) {
-                    self?.flushPendingRegistrations()
-                }
-            }
-            return
-        }
-
-        if let canonicalMethod, Self.bufferedUntilInitMethods.contains(canonicalMethod) {
-            let buffered: Bool = initGateQueue.sync {
-                guard !initCompleted else { return false }
-                pendingRegistrations.append((requestJson, resolve))
-                return true
-            }
-            if buffered {
-                return
-            }
-        }
-
         dispatchToNative(requestJson: requestJson) { resolve($0) }
-    }
-
-    private func flushPendingRegistrations() {
-        let pending: [(String, RCTPromiseResolveBlock)] = initGateQueue.sync {
-            initCompleted = true
-            defer { pendingRegistrations = [] }
-            return pendingRegistrations
-        }
-        for (requestJson, resolve) in pending {
-            dispatchToNative(requestJson: requestJson) { resolve($0) }
-        }
     }
 
     private func dispatchToNative(requestJson: String, completion: @escaping (String) -> Void) {
@@ -91,26 +46,6 @@ public final class RNAppsFlyerImpl: NSObject {
                 completion(Self.normalize(iosResponseJson: responseJson))
             }
         }
-    }
-
-    private static func canonicalMethodName(fromRequestJson requestJson: String) -> String? {
-        guard
-            let data = requestJson.data(using: .utf8),
-            let request = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else {
-            return nil
-        }
-        return request["method"] as? String
-    }
-
-    private static func isSuccess(normalizedResponseJson responseJson: String) -> Bool {
-        guard
-            let data = responseJson.data(using: .utf8),
-            let response = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else {
-            return false
-        }
-        return response["success"] as? Bool == true
     }
 
     /// Rewrites `method` to the platform's real RPC name; falls back to original JSON on parse failure.

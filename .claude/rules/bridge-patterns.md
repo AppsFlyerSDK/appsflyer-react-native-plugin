@@ -52,32 +52,44 @@ The raw `origin` and `timestamp` envelope fields are stripped before handing `da
 
 ## 4. Listener registration order
 
-JS must call `onDeepLink` / `onInstallConversionData` / `onInstallConversionFailure` /
-`registerSessionReadyListener` registration **synchronously, before `init`'s promise settles**
-— these trigger `registerDeeplinkListener` / `registerConversionListener` /
-`registerSessionReadyListener` RPC calls, and the native layer (`RpcInitGate` on Android,
-equivalent buffer in `RNAppsFlyerImpl.swift`) only holds these dispatches until `init`
-*completes*, not until the JS call site for `init()` executes.
+`registerDeeplinkListener` / `registerConversionListener` / `registerSessionReadyListener` are
+**init-order-independent by design** — verified directly against the vendored native RPC
+source on both platforms (`AppsFlyerRpcHandler.kt` on Android, `AFRPCCoreHandler.swift` /
+`AFRPCListenerHandler.swift` on iOS): each just assigns a delegate/callback on the persistent
+native SDK singleton, with no state check on `init`. The iOS `AppsFlyerRPC` README documents
+this explicitly as intended parity with the native SDK — only `start`/`logEvent` require `init`
+to have run first; listener registration does not.
 
-What actually matters: the registration calls must not be deferred into `init(...).then(...)`
-— that's genuinely too late, since native's buffer gate may have already flushed by then. The
-literal source-line order of the registration calls relative to the `init()` *call statement*
-does not matter, because `init()` dispatches asynchronously (both platforms hop threads before
-doing real work) — synchronous JS statements after `init()` but outside its `.then()` still
-reach native well before `init` actually resolves. `example/src/App.tsx` calls `init()` first
-and registers listeners as separate synchronous statements right after it, matching the
-reference `RPCTestApp`'s own call order (`initialize` → `isDebug` → listeners → ... → `start`)
-— this is correct, not a violation of this rule. **Do not `await appsFlyer.init(...)` before
-registering listeners** — that's the same `.then()` mistake with different syntax; it was
-tried and reverted in `example/src/App.tsx` for exactly this reason.
+There used to be a JS-repo-side buffer (`RpcInitGate.kt` on Android, an equivalent
+`initCompleted`/`pendingRegistrations` gate in `RNAppsFlyerImpl.swift`) that held these RPCs
+until `init` resolved, on the assumption native silently dropped early registrations. That
+assumption didn't hold up — removed 2026-08 after confirming against the native source with
+the SDK team. **Do not re-add a buffer/gate here without first confirming an actual native
+regression** (and filing it upstream) — see PR #693 review discussion.
+
+`executeRpc` on both platforms now dispatches every RPC immediately, in submission order.
+Because Android's `rpcExecutor` is a single-thread `Executors.newSingleThreadExecutor()` and
+iOS's `dispatchToNative` hops via `Task { @MainActor in ... }` (Swift Concurrency queues Tasks
+FIFO per actor), calling `init()` and then registering listeners as separate synchronous JS
+statements still dispatches them to native in that same order — this is incidental to the
+existing single-thread/single-actor serialization, not an explicit ordering contract, but it's
+what makes the documented call order below still worth following.
+
+**Still call registration synchronously, not inside `init(...).then()` / after `await
+init(...)`** — not because of any buffer, but because deferring into a promise callback
+delays the *dispatch*, and delayed dispatch of `registerSessionReadyListener` delays the one
+callback that's supposed to trigger `start()` (see the recommended pattern below).
+`example/src/App.tsx` calls `init()` first and registers listeners as separate synchronous
+statements right after it, matching the reference `RPCTestApp`'s own call order (`initialize` →
+`isDebug` → listeners → ... → `start`).
 
 ### Recommended pattern for deterministic ordering after start()
 
 `registerSessionReadyListener`'s callback is the only place `startSdk()` should be called
 (`AppsFlyerLib.h`: *"Call start inside the block. The SDK does not call start automatically"*)
-— this doesn't change. But because that callback fires asynchronously (real native event, or
-this repo's Android session-ready fallback — see
-`specs/001-turbomodule-rpc-bridge/android-session-ready-race.md`), any JS code written after
+— this doesn't change. But because that callback fires asynchronously (a real native event —
+there is no plugin-side fallback/synthesized event; if it never fires, that's a native SDK bug
+to file, not something this plugin should paper over), any JS code written after
 the `registerSessionReadyListener(...)` call in source order actually runs *before* the
 callback does, not after — `registerSessionReadyListener` returns immediately, JS doesn't wait
 for it. If a consuming app wants some of its own logic (e.g. logging events) to run strictly
@@ -99,8 +111,9 @@ await startWhenSessionReady();
 ```
 
 `example/src/App.tsx` uses this exact pattern (`startWhenSessionReady`). It only reorders code
-the *app* controls — it cannot make native's `onSessionReady` fire any faster; on Android in
-particular, `startSdk()` may still be bounded by the fallback's timeout in the worst case.
+the *app* controls — it cannot make native's `onSessionReady` fire any faster, and if it never
+fires, `startSdk()` never dispatches (there is no timeout/fallback — see the known-issues KB's
+session-ready-stall entry for the one confirmed native cause).
 
 `onAppOpenAttribution`, `onAttributionFailure`, and `performOnAppAttribution` are **removed** in 7.0.0 — route attribution data through `onDeepLink` instead (see MIGRATION.md).
 

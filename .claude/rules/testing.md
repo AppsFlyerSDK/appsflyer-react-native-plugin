@@ -58,7 +58,6 @@ Test the event channel by constructing a `NativeEventEmitter` from the fresh moc
 
 - Native-level iOS XCTest (`RNAppsFlyerImpl.swift` RPC dispatch, error normalization, threading) — T062
 - Native-level Android JUnit/Robolectric (`RNAppsFlyerModule.kt`) — T063
-- Listener-registration buffering (`RpcInitGate.kt` / equivalent Swift) — T050a, deferred to T062/T063
 - Expo config plugins (`expo/withAppsFlyer*.js`) — T064
 - Live-device quickstart scenarios (killed-state deep link, full parity check) — T051, T061, T067
 

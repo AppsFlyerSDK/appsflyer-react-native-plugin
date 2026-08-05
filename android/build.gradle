@@ -51,6 +51,12 @@ android {
     testOptions {
         unitTests.includeAndroidResources = true
         unitTests.returnDefaultValues = true
+        // ponytail: no unit tests remain now that RpcInitGate.kt is gone (bridge module is a pure
+        // passthrough); avoid Gradle 8+ failing the build on an empty test source set. Add tests
+        // back here (and drop this) if real branching logic returns to this module.
+        unitTests.all {
+            it.failOnNoDiscoveredTests = false
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
