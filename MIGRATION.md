@@ -55,7 +55,8 @@ Two rules, both easy to get wrong:
 
 - Register listeners **synchronously** — never inside `init().then(...)`. Registration itself
   is init-order-independent, but dispatch still happens in call order; waiting on the promise
-  first risks missing an event that fires shortly after init.
+  first risks missing an event that fires shortly after init. These calls are ordered by
+  dispatch, not by completion — that's why registration doesn't need (and shouldn't use) `await`.
 - `start()` only inside `registerSessionReadyListener`'s callback — never a bare call right
   after `init()`. Native never auto-starts. Need code to run strictly after start? Wrap it:
 

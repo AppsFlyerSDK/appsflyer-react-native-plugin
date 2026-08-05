@@ -153,6 +153,7 @@ appsFlyer.registerSessionReadyListener(() => {
 - `init` must be issued first. `enableDebug` and the listener registrations below all go over the same native RPC channel in call order — issuing them right after `init` guarantees the native side processes `init` first, even though `init()`'s own JS Promise resolves later, asynchronously.
 - `registerConversionListener`, `registerDeepLinkListener`, and `registerSessionReadyListener` must be registered before `init()`'s promise settles. Registration itself is init-order-independent, but dispatch still happens in call order — registering inside `init().then()` delays dispatch and risks missing an event that fires shortly after init.
 - `start()` must be called from inside the `registerSessionReadyListener` callback, never chained off `init().then()` — see [start](#start).
+- These calls are ordered by *dispatch*, not by *completion*: it's the call order on the native RPC channel that matters, not whether `init()`'s promise has resolved yet.
 
 ---
 
@@ -251,6 +252,13 @@ appsFlyer.logEvent(eventName, eventValues).then(
 ```
 
 `awaitResponse` (optional, positional after `eventValues` when no callbacks are passed, or as the trailing arg alongside callbacks): by default resolves once the SDK accepts the event onto its internal queue — not once it's delivered to AppsFlyer's server. Pass `awaitResponse: true` to instead wait for the native SDK's own completion handler (round-trips to AppsFlyer's server).
+
+Every plugin API call returns a Promise, so where you genuinely need one call to complete before the next, use `async`/`await` normally — e.g. `await appsFlyer.init(devKey, appId)` before your first `logEvent` call:
+
+```javascript
+await appsFlyer.init(devKey, appId);
+await appsFlyer.logEvent(eventName, eventValues);
+```
 
 #### AFInAppEventType
 

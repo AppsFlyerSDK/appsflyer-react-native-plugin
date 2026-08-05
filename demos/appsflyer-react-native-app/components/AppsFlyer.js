@@ -12,31 +12,31 @@ export const AF_removedFromCart = 'af_removed_from_cart';
 export const AF_checkout = 'af_check_out';
 export const AF_clickOnItem = 'af_click_on_item';
 
-export function AFInit(onConversionData, onDeepLink) {
+export async function AFInit(onConversionData, onDeepLink) {
   if (Platform.OS == 'ios') {
     appsFlyer.setCurrentDeviceLanguage('EN');
   }
   appsFlyer.enableDebug(true);
 
-  appsFlyer.init(DEV_KEY, APP_ID).then(
-    (success) => {
-      console.log('init SDK success', success);
-      // Android: MainActivity.onNewIntent only forwards warm-start VIEW intents to
-      // performDeepLinking — the native SDK doesn't inspect the launch Intent until
-      // init() has actually completed, so a cold-start deep link's Intent is present
-      // at Activity onCreate but must be re-delivered here (once JS/native init has
-      // resolved) via getInitialURL, or it's silently dropped.
-      if (Platform.OS === 'android') {
-        Linking.getInitialURL().then((url) => {
-          if (url) {
-            appsFlyer.performDeepLinking(url, true);
-          }
-        });
+  try {
+    const success = await appsFlyer.init(DEV_KEY, APP_ID);
+    console.log('init SDK success', success);
+
+    // Android: MainActivity.onNewIntent only forwards warm-start VIEW intents to 
+    // performDeepLinking — the native SDK doesn't inspect the launch Intent until 
+    // init() has actually completed, so a cold-start deep link's Intent is present 
+    // at Activity onCreate but must be re-delivered here (once JS/native init has 
+    // resolved) via getInitialURL, or it's silently dropped.
+    if (Platform.OS === 'android') {
+      const url = await Linking.getInitialURL();
+      if (url) {
+        appsFlyer.performDeepLinking(url, true);
       }
-    },
-    (error) => console.log('init SDK failed', error),
-  );
-  
+    }
+  } catch (error) {
+    console.log('init SDK failed', error);
+  }
+
   //Deeplink URL: https://rndemo.onelink.me/neai/by0p3obe
   const unsubscribeConversion = appsFlyer.registerConversionListener(
     onConversionData,
