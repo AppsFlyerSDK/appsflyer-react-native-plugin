@@ -741,7 +741,14 @@ function ensureRpcEventSubscription() {
       if (!bucket) {
         return; // unmapped/forward-compatible native event -- not this release's concern
       }
-      const data = normalizeRpcEventData(envelope.data);
+      let data = normalizeRpcEventData(envelope.data);
+      // Native emits the raw conversion-fetch failure as a plain string (Android
+      // AppsFlyerConversionListener.onConversionDataFail(String), iOS AppsFlyerLibDelegate's
+      // Error localizedDescription) -- the RPC layer wraps it as {error, code?} in transit;
+      // unwrap it back to a string here so the JS callback matches native's own shape.
+      if (bucket === "onConversionDataFail" && data && typeof data === "object") {
+        data = data.error ?? data;
+      }
       rpcListenerBuckets[bucket].forEach((callback) => {
         if (typeof callback === "function") {
           callback(data);
@@ -793,29 +800,28 @@ function createBucketListener(bucket: string, ensureRegistered: () => void) {
  * Access AppsFlyer attribution/conversion data (deferred deep linking).
  * @param onConversionDataSuccess receives the raw conversion data dict flat (`is_first_launch`,
  *   `media_source`, `campaign`, `af_status`, custom params like `af_dp`/`deep_link_value`, ...).
- * @param onConversionDataFail optional, receives conversion-data-fetch failures.
+ * @param onConversionDataFail receives the conversion-data-fetch failure message. Required --
+ *   native's own conversion listener interface requires both callbacks together (Android's
+ *   AppsFlyerConversionListener has no default implementation for either method; iOS's RPC
+ *   bridge implements both unconditionally in one delegate conformance).
  * @returns call to unregister just this pair of callbacks (e.g. from componentWillUnmount). To
  *   also stop the underlying native listener, call `unregisterConversionListener()`.
  */
 appsFlyer.registerConversionListener = (
   onConversionDataSuccess: (data: ConversionData) => any,
-  onConversionDataFail?: (data: ConversionData) => any
+  onConversionDataFail: (error: string) => any
 ) => {
   ensureRpcEventSubscription();
   ensureConversionListenerRegistered();
   rpcListenerBuckets.onConversionDataSuccess.push(onConversionDataSuccess);
-  if (onConversionDataFail) {
-    rpcListenerBuckets.onConversionDataFail.push(onConversionDataFail);
-  }
+  rpcListenerBuckets.onConversionDataFail.push(onConversionDataFail);
   return function remove() {
     rpcListenerBuckets.onConversionDataSuccess = rpcListenerBuckets.onConversionDataSuccess.filter(
       (registered) => registered !== onConversionDataSuccess
     );
-    if (onConversionDataFail) {
-      rpcListenerBuckets.onConversionDataFail = rpcListenerBuckets.onConversionDataFail.filter(
-        (registered) => registered !== onConversionDataFail
-      );
-    }
+    rpcListenerBuckets.onConversionDataFail = rpcListenerBuckets.onConversionDataFail.filter(
+      (registered) => registered !== onConversionDataFail
+    );
   };
 };
 
@@ -1404,13 +1410,14 @@ appsFlyer.logSession = () => callRpc("logSession");
 
 export interface AppsFlyerApi {
   /**
-   * Register the native conversion listener and its callback(s).
+   * Register the native conversion listener and its callbacks. Both are required -- native's
+   * own conversion listener interface requires both together on each platform.
    * @returns call to unregister just these callbacks; call `unregisterConversionListener()` to
    *   also stop the underlying native listener.
    */
   registerConversionListener(
     onConversionDataSuccess: (data: ConversionData) => any,
-    onConversionDataFail?: (data: ConversionData) => any
+    onConversionDataFail: (error: string) => any
   ): () => void;
   /** Stop the native conversion listener and clear all registered callbacks. */
   unregisterConversionListener(): void;

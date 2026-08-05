@@ -30,7 +30,7 @@ native. Replaced by:
 ```js
 appsFlyer.init('devKey', 'appId').then(onSuccess, onError);
 appsFlyer.enableDebug(true);                     // was: isDebug
-appsFlyer.registerConversionListener(cb);        // was: onInstallConversionDataListener
+appsFlyer.registerConversionListener(cb, onFail); // was: onInstallConversionDataListener
 appsFlyer.registerDeepLinkListener(cb);          // was: onDeepLinkListener
 appsFlyer.registerSessionReadyListener(() => {
   appsFlyer.start().then(onSuccess, onError);
@@ -149,6 +149,11 @@ register/unregister pairs, matching the Matrix's `registerConversionListener` /
 `registerDeepLinkListener` naming. The returned unsubscribe closure still works for removing
 just that callback; call the new `unregister*` method to also stop the underlying native
 listener.
+
+`registerConversionListener`'s two callbacks are both **required** (native's own conversion
+listener interface on each platform requires both together — there's no success-only
+registration at the native level), and `onFailure` now receives the failure message as a
+plain `string`, not a `ConversionData`-shaped object.
 
 ```js
 // Before

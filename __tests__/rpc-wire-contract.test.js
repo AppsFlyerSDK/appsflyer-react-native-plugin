@@ -192,7 +192,7 @@ const CALL_SITES = [
 	{
 		api: 'registerConversionListener',
 		platforms: BOTH,
-		invoke: () => appsFlyer.registerConversionListener(jest.fn()),
+		invoke: () => appsFlyer.registerConversionListener(jest.fn(), jest.fn()),
 	},
 	{
 		api: 'unregisterConversionListener',

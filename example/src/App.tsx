@@ -68,10 +68,13 @@ async function runAutoFlow() {
 
   appsFlyer.enableDebug(true);
 
-  appsFlyer.registerConversionListener(data => {
-    afCallbackLog('registerConversionListener', JSON.stringify(data));
-    resolveConversionDataReceived();
-  });
+  appsFlyer.registerConversionListener(
+    data => {
+      afCallbackLog('registerConversionListener', JSON.stringify(data));
+      resolveConversionDataReceived();
+    },
+    error => afCallbackLog('registerConversionListener', `error: ${error}`),
+  );
   // onAppOpenAttribution removed in 7.0.0 — attribution data now arrives via registerDeepLinkListener (MIGRATION.md)
   appsFlyer.registerDeepLinkListener(data => {
     const deepLinkValue =

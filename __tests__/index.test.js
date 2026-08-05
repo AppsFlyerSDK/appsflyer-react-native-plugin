@@ -796,7 +796,7 @@ describe('Test native event emitter', () => {
 		gcdListener = appsFlyer.registerConversionListener((res) => {
 			expect(res).toEqual(nativeEventObject);
 			gcdListener();
-		});
+		}, jest.fn());
 
 		emitRpcEvent('onConversionDataSuccess', nativeEventObject);
 	});
@@ -805,7 +805,7 @@ describe('Test native event emitter', () => {
 		gcdListener = appsFlyer.registerConversionListener((res) => {
 			expect(res).toEqual(nativeEventObject);
 			gcdListener();
-		});
+		}, jest.fn());
 
 		emitRpcEvent('onConversionDataSuccess', JSON.stringify(nativeEventObject));
 	});
@@ -816,18 +816,20 @@ describe('Test native event emitter', () => {
 			expect(error.message).toEqual('Invalid data structure');
 			expect(error.name).toEqual('AFParseJSONException');
 			gcdListener();
-		});
+		}, jest.fn());
 
 		emitRpcEvent('onConversionDataSuccess', 'not valid json');
 	});
 
 	test('registerConversionListener onConversionDataFail Happy Flow', () => {
-		let failureListener = appsFlyer.registerConversionListener(() => {}, (res) => {
-			expect(res).toEqual(nativeEventObject);
+		// Native emits {error, code?} in transit (see index.ts's RPC_EVENT_DEMUX handler) --
+		// the plugin unwraps it back to the plain string native's own delegate/listener receives.
+		let failureListener = appsFlyer.registerConversionListener(() => {}, (error) => {
+			expect(error).toEqual('DevKey is incorrect');
 			failureListener();
 		});
 
-		emitRpcEvent('onConversionDataFail', nativeEventObject);
+		emitRpcEvent('onConversionDataFail', { error: 'DevKey is incorrect' });
 	});
 
 	test('unregisterConversionListener clears both success and failure callbacks', () => {
@@ -840,7 +842,7 @@ describe('Test native event emitter', () => {
 		appsFlyer.unregisterConversionListener();
 
 		emitRpcEvent('onConversionDataSuccess', nativeEventObject);
-		emitRpcEvent('onConversionDataFail', nativeEventObject);
+		emitRpcEvent('onConversionDataFail', { error: 'DevKey is incorrect' });
 
 		expect(successCallback).not.toHaveBeenCalled();
 		expect(failureCallback).not.toHaveBeenCalled();

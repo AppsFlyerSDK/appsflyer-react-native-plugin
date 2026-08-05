@@ -1668,17 +1668,21 @@ if (Platform.OS == 'ios') {
 ## AppsFlyerConversionData
 
 ### registerConversionListener 
-`registerConversionListener(onConversionDataSuccess, onConversionDataFail?) : function:unregister`
+`registerConversionListener(onConversionDataSuccess, onConversionDataFail) : function:unregister`
 
 Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking).<br/>
 
 The code implementation for the conversion listener must be made prior to the initialization code of the SDK.
 
+Both callbacks are **required** — native's own conversion listener interface requires both
+together on each platform (Android's `AppsFlyerConversionListener` has no default
+implementation for either method; iOS implements both unconditionally in one delegate
+conformance). There's no native-level way to register success without failure.
 
-| parameter                | type     | description                               |
-| ------------------------ |----------|------------------------------------------ |
-| onConversionDataSuccess  | function | conversion data result                    |
-| onConversionDataFail     | function | optional; failed conversion data result   |
+| parameter                | type     | description                                          |
+| ------------------------ |----------|------------------------------------------------------ |
+| onConversionDataSuccess  | function | conversion data result (`ConversionData`)            |
+| onConversionDataFail     | function | required; receives the failure message as a `string` |
 
 *Example:*
 
@@ -1697,8 +1701,8 @@ const removeConversionListener = appsFlyer.registerConversionListener(
       alert('This is not first launch');
     }
   },
-  (res) => {
-    console.log(JSON.stringify(res, null, 2));
+  (error) => {
+    console.log(error);
   }
 );
 

@@ -38,7 +38,10 @@ export function AFInit(onConversionData, onDeepLink) {
   );
   
   //Deeplink URL: https://rndemo.onelink.me/neai/by0p3obe
-  const unsubscribeConversion = appsFlyer.registerConversionListener(onConversionData);
+  const unsubscribeConversion = appsFlyer.registerConversionListener(
+    onConversionData,
+    (error) => console.log('conversion data error:', error),
+  );
   const unsubscribeDeepLink = appsFlyer.registerDeepLinkListener(onDeepLink);
 
   appsFlyer.registerSessionReadyListener(() => {

@@ -107,11 +107,11 @@ describe('Listener registration triggers the matching register*Listener RPC once
 	test('registerConversionListener RPC fires exactly once, shared across two registerConversionListener attaches', () => {
 		const { appsFlyer, nativeAppsFlyer } = freshModule();
 
-		const removeA = appsFlyer.registerConversionListener(jest.fn());
+		const removeA = appsFlyer.registerConversionListener(jest.fn(), jest.fn());
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerConversionListener')).toHaveLength(1);
 
 		// same native registration backs both — must not re-dispatch
-		const removeB = appsFlyer.registerConversionListener(jest.fn());
+		const removeB = appsFlyer.registerConversionListener(jest.fn(), jest.fn());
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerConversionListener')).toHaveLength(1);
 
 		removeA();
