@@ -61,10 +61,9 @@ describe('scripts/bump-native-deps.sh', () => {
 
 		expect(podspecAfter).toMatch(/s\.dependency 'AppsFlyerRPC', '9\.9\.9'/);
 		expect(podspecAfter).toMatch(/s\.dependency 'AppsFlyerRPC\/Strict', '9\.9\.9'/);
-		expect(buildGradleAfter).toMatch(/api 'com\.appsflyer:af-android-sdk:9\.9\.9'/);
-		expect(buildGradleAfter).toMatch(
-			/implementation 'com\.appsflyer:af-android-plugin-bridge:9\.9\.9'/
-		);
+		// af-android-sdk and af-android-plugin-bridge share one version via the BOM now —
+		// both flags bump the same line, so this is one assertion, not two.
+		expect(buildGradleAfter).toMatch(/platform\('com\.appsflyer:af-android-sdk-bom:9\.9\.9'\)/);
 		expect(buildGradleAfter).toContain(purchaseConnectorBefore);
 	});
 
@@ -101,7 +100,7 @@ describe('scripts/bump-native-deps.sh', () => {
 		const { podspec, buildGradle } = trackedTempCopies();
 		const buildGradleBefore = fs
 			.readFileSync(buildGradle, 'utf8')
-			.replace('af-android-sdk:', 'af-android-sdk-renamed:');
+			.replace('af-android-sdk-bom:', 'af-android-sdk-bom-renamed:');
 		fs.writeFileSync(buildGradle, buildGradleBefore);
 
 		try {

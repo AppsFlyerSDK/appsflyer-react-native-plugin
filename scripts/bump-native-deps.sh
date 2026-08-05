@@ -79,17 +79,21 @@ if [[ -n "$PC_VERSION" ]] && grep -q "PurchaseConnector" "$PODSPEC"; then
     "PurchaseConnector" "$PC_VERSION"
 fi
 
+# af-android-sdk and af-android-plugin-bridge are both versioned by the af-android-sdk-bom
+# platform import now (one line, one version) — release.yml always supplies both flags with
+# the same value, so both bump the same BOM line; bumping it twice with an identical value is
+# a harmless no-op on the second call.
 if [[ -n "$ANDROID_SDK_VERSION" ]]; then
   bump_line "$BUILD_GRADLE" \
-    "api 'com\.appsflyer:af-android-sdk:[^']*'" \
-    "s/api 'com\.appsflyer:af-android-sdk:[^']*'/api 'com.appsflyer:af-android-sdk:${ANDROID_SDK_VERSION}'/" \
+    "platform\('com\.appsflyer:af-android-sdk-bom:[^']*'\)" \
+    "s/platform\('com\.appsflyer:af-android-sdk-bom:[^']*'\)/platform('com.appsflyer:af-android-sdk-bom:${ANDROID_SDK_VERSION}')/" \
     "af-android-sdk" "$ANDROID_SDK_VERSION"
 fi
 
 if [[ -n "$ANDROID_PLUGIN_BRIDGE_VERSION" ]]; then
   bump_line "$BUILD_GRADLE" \
-    "implementation 'com\.appsflyer:af-android-plugin-bridge:[^']*'" \
-    "s/implementation 'com\.appsflyer:af-android-plugin-bridge:[^']*'/implementation 'com.appsflyer:af-android-plugin-bridge:${ANDROID_PLUGIN_BRIDGE_VERSION}'/" \
+    "platform\('com\.appsflyer:af-android-sdk-bom:[^']*'\)" \
+    "s/platform\('com\.appsflyer:af-android-sdk-bom:[^']*'\)/platform('com.appsflyer:af-android-sdk-bom:${ANDROID_PLUGIN_BRIDGE_VERSION}')/" \
     "af-android-plugin-bridge" "$ANDROID_PLUGIN_BRIDGE_VERSION"
 fi
 

@@ -79,11 +79,9 @@ dependencies {
     if (includeConnector){
         implementation 'com.appsflyer:purchase-connector:2.2.0'
     }
-
-    // Phase B (research.md R8): published Maven coordinates replace the vendored
-    // android/libs/*.aar files from Phase A.
-    api 'com.appsflyer:af-android-sdk:7.0.1'
-    implementation 'com.appsflyer:af-android-plugin-bridge:7.0.1'
+    implementation platform('com.appsflyer:af-android-sdk-bom:7.0.1')
+    implementation 'com.appsflyer:af-android-sdk'
+    implementation 'com.appsflyer:af-android-plugin-bridge'
 
     testImplementation 'junit:junit:4.13.2'
 }

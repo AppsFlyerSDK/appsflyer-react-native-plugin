@@ -1201,15 +1201,12 @@ jobs:
         env:
           VERSION: ${{ needs.validate-production.outputs.version }}
         run: |
-          # Extract Android SDK version from build.gradle's literal Maven coordinate
-          ANDROID_SDK_VERSION=$(grep -oP "af-android-sdk:\K[0-9][^'\"]*" android/build.gradle | head -1)
+          # af-android-sdk and af-android-plugin-bridge share one version via the af-android-sdk-bom
+          # platform import now (PR #694 review) — extract it once, both outputs get the same value.
+          ANDROID_SDK_VERSION=$(grep -oP "af-android-sdk-bom:\K[0-9][^'\"]*" android/build.gradle | head -1)
           [[ "$ANDROID_SDK_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::android_sdk version '$ANDROID_SDK_VERSION' is not X.Y.Z"; exit 1; }
           echo "android_sdk=$ANDROID_SDK_VERSION" >> "$GITHUB_OUTPUT"
-
-          # Extract Android plugin-bridge version from build.gradle's literal Maven coordinate
-          ANDROID_PLUGIN_BRIDGE_VERSION=$(grep -oP "af-android-plugin-bridge:\K[0-9][^'\"]*" android/build.gradle | head -1)
-          [[ "$ANDROID_PLUGIN_BRIDGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::android_plugin_bridge version '$ANDROID_PLUGIN_BRIDGE_VERSION' is not X.Y.Z"; exit 1; }
-          echo "android_plugin_bridge=$ANDROID_PLUGIN_BRIDGE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "android_plugin_bridge=$ANDROID_SDK_VERSION" >> "$GITHUB_OUTPUT"
 
           # Extract iOS SDK version from the podspec's plain AppsFlyerRPC line, excluding /Strict
           IOS_SDK_VERSION=$(grep -oP "'AppsFlyerRPC', '\K[^']*" react-native-appsflyer.podspec | head -1)
