@@ -57,7 +57,10 @@ function modifySwiftAppDelegate(appDelegateContents) {
     continue userActivity: NSUserActivity,
     restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
   ) -> Bool {`;
-  const RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE = 'AppsFlyerLib.shared().continue(userActivity, restorationHandler: restorationHandler)';
+  // AppsFlyer's restorationHandler is `([Any]?) -> Void`, not `([UIUserActivityRestoring]?) -> Void` —
+  // passing ours directly is a type mismatch Swift reports as "ambiguous". AppsFlyer only needs
+  // userActivity to extract the OneLink URL, so pass nil; the real restorationHandler goes to RCTLinkingManager below.
+  const RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE = 'AppsFlyerLib.shared().continue(userActivity, restorationHandler: nil)';
 
   if (!appDelegateContents.includes(SWIFT_IMPORT)) {
     appDelegateContents = `${SWIFT_IMPORT}\n${appDelegateContents}`;
@@ -96,7 +99,7 @@ Please add AppsFlyer integration manually:
   AppsFlyerLib.shared().handleOpen(url, options: options)
 
 4. Add this to your continueUserActivity method:
-  AppsFlyerLib.shared().continue(userActivity, restorationHandler: restorationHandler)
+  AppsFlyerLib.shared().continue(userActivity, restorationHandler: nil)
 
 Supported format: Expo SDK default template
 `
