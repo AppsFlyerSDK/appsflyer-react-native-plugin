@@ -32,7 +32,7 @@ appsFlyer.init('K2***********99', '41*****44');
 appsFlyer.enableDebug(true);
 
 // Register listeners synchronously, before init's promise settles
-appsFlyer.registerConversionListener((res) => { /* ... */ });
+appsFlyer.registerConversionListener((res) => { /* ... */ }, (error) => { /* ... */ });
 appsFlyer.registerDeepLinkListener((res) => { /* ... */ });
 
 appsFlyer.registerSessionReadyListener(() => {
