@@ -57,6 +57,8 @@ https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/pull/695
 
 **Read:** lines 1365–1367 turned out to be the bare native method names, pointing at the `AppsFlyerApi` interface members directly above — confirmed with the user this meant a full public-API rename to match native exactly, not just a comment/doc note. Since 7.0.0 hasn't shipped (no git tag yet), this lands as one rename within the same unreleased major rather than a second breaking change on top of it.
 
+**Note (found during the #696 rebase):** #695's `onConversionDataSuccess`/`onConversionDataFail`/`onDeepLinking` rename above is itself superseded one branch later by #696's `registerConversionListener`/`registerDeepLinkListener` + `unregisterConversionListener`/`unregisterForDeepLink` redesign (already authored in `af6ff95e` before #695's fix landed). Resolved every resulting rebase conflict in #696/#697 in favor of #696's register/unregister API — it's the real, final shape; #695's rename was still correct/necessary work on its own branch, just short-lived up the stack. Also caught and fixed a latent gap this exposed: `.af-e2e/test-plan.json`/`.af-smoke/rc-test-plan.json`'s log-pattern matchers were never updated for either rename and would have silently stopped matching.
+
 ---
 
 ## PR #696 — `stack/5-api-alignment`
