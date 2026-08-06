@@ -20,9 +20,9 @@ Initialize the SDK to enable AppsFlyer to detect installations, sessions (app op
 | appId      | [App ID](https://support.appsflyer.com/hc/en-us/articles/207377436-Adding-a-new-app#available-in-the-app-store-google-play-store-windows-phone-store) (required on iOS, unused on Android) you configured in your AppsFlyer dashboard  |
 
 `isDebug`, `onInstallConversionDataListener`, `onDeepLinkListener`, and `manualStart` are no
-longer options on the init call — call [`setIsDebug`](RN_API.md#setisdebug),
-[`onConversionDataSuccess`](RN_API.md#onconversiondatasuccess), and
-[`onDeepLinking`](RN_API.md#ondeeplinking) as separate methods instead, and always finish with an
+longer options on the init call — call [`enableDebug`](RN_API.md#enabledebug),
+[`registerConversionListener`](RN_API.md#registerconversionlistener), and
+[`registerDeepLinkListener`](RN_API.md#registerdeeplinklistener) as separate methods instead, and always finish with an
 explicit [`start()`](RN_API.md#start) (SDK7 never auto-starts).
 
 ```javascript
@@ -32,13 +32,13 @@ appsFlyer.init('K2***********99', '41*****44').then(
   (result) => console.log(result),
   (error) => console.error(error)
 );
-appsFlyer.setIsDebug(true);
+appsFlyer.enableDebug(true);
 
 // Register these synchronously, right after init() — never inside init().then()
-appsFlyer.onConversionDataSuccess((res) => {
+appsFlyer.registerConversionListener((res) => {
   // ...
 });
-appsFlyer.onDeepLinking((res) => {
+appsFlyer.registerDeepLinkListener((res) => {
   // ...
 });
 

@@ -29,9 +29,9 @@ native. Replaced by:
 
 ```js
 appsFlyer.init('devKey', 'appId').then(onSuccess, onError);
-appsFlyer.setIsDebug(true);                // was: isDebug
-appsFlyer.onConversionDataSuccess(cb);     // was: onInstallConversionDataListener
-appsFlyer.onDeepLinking(cb);               // was: onDeepLinkListener
+appsFlyer.enableDebug(true);                     // was: isDebug
+appsFlyer.registerConversionListener(cb, onFail); // was: onInstallConversionDataListener
+appsFlyer.registerDeepLinkListener(cb);          // was: onDeepLinkListener
 appsFlyer.registerSessionReadyListener(() => {
   appsFlyer.start().then(onSuccess, onError);
 });
@@ -103,11 +103,11 @@ a callable 7.0.0 API). Use `setUserEmail(email)`.
 | `performOnDeepLinking()` (no-op) | `performOnDeepLinking(url, shouldTriggerSession?)` |
 | `sendPushNotificationData(payload, errorC)` (Android) | `sendPushNotificationData(payload, androidCampaignData)` — `errorC` removed, 2nd arg is now `{campaign?, pid?, isRetargeting?, additionalParameters?}` directly; iOS unaffected |
 | `generateInviteLink({deeplinkPath})` | drop `deeplinkPath` (removed, no native counterpart); `customerID`/`baseDeeplink` unchanged |
-| `onInstallConversionData(cb)` / `onInstallConversionFailure(cb)` / `onDeepLink(cb)` | `onConversionDataSuccess(cb)` / `onConversionDataFail(cb)` / `onDeepLinking(cb)` — renamed to match native exactly |
+| `onInstallConversionData(cb)` / `onInstallConversionFailure(cb)` / `onDeepLink(cb)` | `registerConversionListener(onSuccess, onFail?)` / `registerDeepLinkListener(cb)` — see [API alignment fixes](#api-alignment-fixes-same-701-release-line) below |
 | `validateAndLogInAppPurchase(purchaseInfo, successC, errorC)` | `validateAndLogInAppPurchase(purchaseDetails, additionalParameters, callback?)` — name reused, `callback` is currently inert |
 | `setCollectIMEI` | removed, no replacement (IMEI is obsolete) |
 | `initInAppPurchaseValidatorListener` (Android) | removed, was dead code |
-| `onAppOpenAttribution` / `onAttributionFailure` / `performOnAppAttribution` | merged into `onDeepLinking(callback)` |
+| `onAppOpenAttribution` / `onAttributionFailure` / `performOnAppAttribution` | merged into `registerDeepLinkListener(callback)` |
 | `setSharingFilterForAllPartners` / `setSharingFilter` | `setSharingFilterForPartners(['all'])` / `setSharingFilterForPartners([...])` |
 | `AppsFlyerConsent.forGDPRUser(...)` / `.forNonGDPRUser()` | `new AppsFlyerConsent(isSubjectToGDPR, ...)` |
 | `AppsFlyerConsentType` (TS) | `AppsFlyerConsent` class |
@@ -115,6 +115,94 @@ a callable 7.0.0 API). Use `setUserEmail(email)`.
 | `AFInAppEventType.*` via `NativeModules.RNAppsFlyer.*` | `import { AFInAppEventType } from 'react-native-appsflyer'` |
 | `setHost(prefix, host, cb)` | `setHost(hostPrefix, hostName)` — `cb` removed, await the returned Promise instead |
 | `logEvent(...)` resolve | means "accepted onto send queue", not "delivered to server" (was blocking on Android before) |
+
+## API alignment fixes (same 7.0.1 release line)
+
+This renames several methods/params to match the org's RPC-to-Plugin-API Alignment Matrix
+(verified against Android RPC 7.0.1 / iOS RPC 7.0.12). No RPC wire behavior changed — only the
+JS-facing names. `PurchaseConnector` is untouched.
+
+| Before | After |
+|---|---|
+| `setIsDebug(isDebug)` | `enableDebug(enabled)` |
+| `getSDKVersion()` | `getSdkVersion()` |
+| `setAppInviteOneLinkID(oneLinkID)` | `setAppInviteOneLink(oneLinkId)` |
+| `logCrossPromotionImpression(appId, campaign, parameters)` | `logCrossPromoteImpression(appId, campaign, userParams)` |
+| `logCrossPromotionAndOpenStore(appId, campaign, params)` | `logAndOpenStore(promotedAppId, campaign, userParams)` |
+| `setOneLinkCustomDomains(domains)` | `setOneLinkCustomDomain(domains)` |
+| `disableAdvertisingIdentifier(isDisable)` | `setDisableAdvertisingIdentifiers(disable)` |
+| `disableIDFVCollection(shouldDisable)` | `setDisableIDFVCollection(disable)` |
+| `disableCollectASA(shouldDisable)` | `setDisableCollectASA(disable)` |
+| `disableSKAD(disableSkad)` | `setDisableSKAdNetwork(disable)` |
+| `setUseReceiptValidationSandbox(isSandbox)` | `setUseReceiptValidationSandbox(sandbox)` — param rename only |
+| `setDisableNetworkData(disable)` | `setDisableNetworkData(isDisable)` — param rename only |
+| `performOnDeepLinking(url, shouldTriggerSession)` | `performDeepLinking(url, shouldTriggerSession)` |
+| `stop(isStopped)` | `stop(shouldStop)` — param rename only |
+| `onPause()` (Android) | removed — the Matrix marks this a Cocos2dx-only lifecycle hook, not applicable to RN |
+| — | net-new: `setUseUninstallSandbox(sandbox)` (iOS) |
+| — | net-new: `setShouldCollectDeviceName(collect)` (iOS) |
+
+### Listener API: `onX` closures → `register*`/`unregister*` pairs
+
+`onInstallConversionData`/`onInstallConversionFailure`/`onDeepLink` are replaced by explicit
+register/unregister pairs, matching the Matrix's `registerConversionListener` /
+`registerDeepLinkListener` naming. The returned unsubscribe closure still works for removing
+just that callback; call the new `unregister*` method to also stop the underlying native
+listener.
+
+`registerConversionListener`'s two callbacks are both **required** (native's own conversion
+listener interface on each platform requires both together — there's no success-only
+registration at the native level), and `onFailure` now receives the failure message as a
+plain `string`, not a `ConversionData`-shaped object.
+
+```js
+// Before
+appsFlyer.onInstallConversionData(onSuccess);
+appsFlyer.onInstallConversionFailure(onFailure);
+appsFlyer.onDeepLink(onDeepLink);
+
+// After
+appsFlyer.registerConversionListener(onSuccess, onFailure);
+appsFlyer.registerDeepLinkListener(onDeepLink);
+
+// to fully tear down (e.g. componentWillUnmount), in addition to or instead of the
+// returned per-callback unsubscribe closure:
+appsFlyer.unregisterConversionListener();
+appsFlyer.unregisterForDeepLink(); // Android-only RPC, matches the Matrix
+```
+
+### `validateAndLogInAppPurchase`: `AFPurchaseDetails` split by platform
+
+The single `AFPurchaseDetails` type conflated Android's `purchaseToken` and iOS's
+`transactionId` under one `transactionId` field. It's now a union of two platform-shaped
+interfaces — pass whichever matches your target platform:
+
+```ts
+// Before
+appsFlyer.validateAndLogInAppPurchase({ productId, transactionId, purchaseType });
+
+// After — iOS
+appsFlyer.validateAndLogInAppPurchase({ productId, transactionId, purchaseType }); // AFPurchaseDetailsIOS, unchanged
+// After — Android
+appsFlyer.validateAndLogInAppPurchase({ productId, purchaseToken, purchaseType }); // AFPurchaseDetailsAndroid, new
+```
+
+### `AFAdRevenueData` type removed
+
+`logAdRevenue`'s call signature is unchanged (still takes one params object) — only the
+exported `AFAdRevenueData` type name is gone, since the Matrix's Flutter reference has no
+dedicated model for this call. If you imported the type for an annotation, inline the shape
+(`{ monetizationNetwork, mediationNetwork, currencyIso4217Code, revenue, additionalParameters? }`).
+
+### `GenerateInviteLinkParams` → `AppsFlyerInviteLinkParams`
+
+Renamed to match the Matrix's naming for `generateInviteLink`'s params type. Same shape, same
+call site (`generateInviteLink(params)`) — only the exported type name changed.
+
+### `generateInviteLink`'s `deeplinkPath` param removed
+
+It was already `@deprecated` and a no-op on both platforms (no native counterpart — every call
+just logged a warning). Removed outright rather than carried forward again.
 
 ## Migrating with an LLM coding assistant
 

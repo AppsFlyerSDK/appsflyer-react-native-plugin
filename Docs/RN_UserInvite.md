@@ -9,19 +9,18 @@ hidden: false
 # User invite
 
 
-##### 1. `setAppInviteOneLinkID(oneLinkID, callback)`
+##### 1. `setAppInviteOneLink(oneLinkId)`
 
 Set the OneLink ID that should be used for User-Invite-API.
 The link that is generated for the user invite will use this OneLink ID as the base link ID.
 
 | parameter       | type     | description               |
 | ----------      |----------|------------------         |
-| oneLinkID       | string   | oneLinkID                 |
-| callback        | function | success callback          |
+| oneLinkId       | string   | oneLinkId                 |
  
  > 📘 Note
  > 
- > - Make sure to call `setAppInviteOneLinkID()` **before** calling `start`.
+ > - Make sure to call `setAppInviteOneLink()` **before** calling `start`.
  > - The OneLink template must be assigned to the app. 
 
  ##### 2. `generateInviteLink(parameters, success, error)`
@@ -41,7 +40,7 @@ The link that is generated for the user invite will use this OneLink ID as the b
 ```javascript
 
 // set the template ID before you generate a link. Without it UserInvite won't work.
-appsFlyer.setAppInviteOneLinkID('scVs', null);
+appsFlyer.setAppInviteOneLink('scVs');
 
 // set the user invite params
 appsFlyer.generateInviteLink(

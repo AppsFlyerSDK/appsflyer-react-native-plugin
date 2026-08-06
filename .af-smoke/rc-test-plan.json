@@ -41,9 +41,9 @@
         },
         {
           "id": "conversion_data",
-          "description": "onConversionDataSuccess callback fires",
+          "description": "registerConversionListener callback fires",
           "type": "log_contains",
-          "pattern": "[AF_QA][CALLBACK][onConversionDataSuccess]",
+          "pattern": "[AF_QA][CALLBACK][registerConversionListener]",
           "fail_action": "fail"
         },
         {

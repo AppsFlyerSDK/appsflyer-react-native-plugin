@@ -14,20 +14,20 @@ The list of available methods for this plugin is described below.
   - [Initialization Flow](#initialization-flow)
   - [initSdk](#initsdk)
   - [start](#start)
-  - [setIsDebug](#setisdebug)
+  - [enableDebug](#enabledebug)
   - [logEvent](#logevent)
     - [AFInAppEventType](#afinappeventtype)
   - [setCustomerUserId](#setcustomeruserid)
   - [stop](#stop)
-  - [setAppInviteOneLinkID](#setappinviteonelinkid)
+  - [setAppInviteOneLink](#setappinviteonelink)
   - [setAdditionalData](#setadditionaldata)
   - [setResolveDeepLinkURLs](#setresolvedeeplinkurls)
-  - [setOneLinkCustomDomains](#setonelinkcustomdomains)
+  - [setOneLinkCustomDomain](#setonelinkcustomdomain)
   - [setCurrencyCode](#setcurrencycode)
   - [logLocation](#loglocation)
   - [anonymizeUser](#anonymizeuser)
   - [getAppsFlyerUID](#getappsflyeruid)
-  - [getSDKVersion](#getsdkversion)
+  - [getSdkVersion](#getsdkversion)
   - [setHost](#sethost)
   - [setUserEmail](#setuseremail)
   - [setUserEmails *Deprecated*](#setuseremails-deprecated)
@@ -38,21 +38,21 @@ The list of available methods for this plugin is described below.
   - [clearUserPii](#clearuserpii)
   - [generateInviteLink](#generateinvitelink)
   - [logInvite](#loginvite)
-  - [logCrossPromotionImpression](#logcrosspromotionimpression)
-  - [logCrossPromotionAndOpenStore](#logcrosspromotionandopenstore)
+  - [logCrossPromoteImpression](#logcrosspromoteimpression)
+  - [logAndOpenStore](#logandopenstore)
   - [setSharingFilterForAllPartners](#setsharingfilterforallpartners)
   - [setSharingFilter](#setsharingfilter)
   - [setSharingFilterForPartners](#setsharingfilterforpartners)
   - [setPartnerData](#setpartnerdata)
   - [validateAndLogInAppPurchase](#validateandloginapppurchase)
     - [AFPurchaseType Enum](#afpurchasetype-enum)
-    - [AFPurchaseDetails Interface](#afpurchasedetails-interface)
+    - [AFPurchaseDetailsAndroid / AFPurchaseDetailsIOS Interfaces](#afpurchasedetailsandroid--afpurchasedetailsios-interfaces)
     - [Usage Example](#usage-example)
   - [updateServerUninstallToken](#updateserveruninstalltoken)
   - [sendPushNotificationData](#sendpushnotificationdata)
   - [addPushNotificationDeepLinkPath](#addpushnotificationdeeplinkpath)
   - [appendParametersToDeepLinkingURL](#appendparameterstodeeplinkingurl)
-  - [disableAdvertisingIdentifier](#disableadvertisingidentifier)
+  - [setDisableAdvertisingIdentifiers](#setdisableadvertisingidentifiers)
   - [enableTCFDataCollection](#enabletcfdatacollection)
   - [setConsentData](#setconsentdata)
   - [logAdRevenue](#logadrevenue)
@@ -63,8 +63,8 @@ The list of available methods for this plugin is described below.
 - [Android Only APIs](#android-only-apis)
   - [setCollectAndroidID](#setcollectandroidid)
   - [setCollectIMEI](#setcollectimei)
-  - [setDisableNetworkData `setDisableNetworkData(disable)`](#setdisablenetworkdata-setdisablenetworkdatadisable)
-  - [performOnDeepLinking](#performondeeplinking)
+  - [setDisableNetworkData `setDisableNetworkData(isDisable)`](#setdisablenetworkdata-setdisablenetworkdataisdisable)
+  - [performDeepLinking](#performdeeplinking)
   - [disableAppSetId](#disableappsetid)
   - [getHostName](#gethostname)
   - [getHostPrefix](#gethostprefix)
@@ -78,21 +78,23 @@ The list of available methods for this plugin is described below.
   - [setAppId](#setappid)
   - [setPreinstallAttribution](#setpreinstallattribution)
   - [logSession](#logsession)
-  - [onPause](#onpause)
 - [iOS Only APIs](#ios-only-apis)
-  - [disableCollectASA](#disablecollectasa)
-  - [disableIDFVCollection](#disableidfvcollection)
+  - [setDisableCollectASA](#setdisablecollectasa)
+  - [setDisableIDFVCollection](#setdisableidfvcollection)
   - [setUseReceiptValidationSandbox](#setusereceiptvalidationsandbox)
-  - [disableSKAD](#disableskad)
+  - [setUseUninstallSandbox](#setuseuninstallsandbox)
+  - [setDisableSKAdNetwork](#setdisableskadnetwork)
   - [setCurrentDeviceLanguage](#setcurrentdevicelanguage)
+  - [setShouldCollectDeviceName](#setshouldcollectdevicename)
   - [iOS AppDelegate lifecycle forwarding (native-only)](#ios-appdelegate-lifecycle-forwarding-native-only)
   - [setFacebookDeferredAppLink](#setfacebookdeferredapplink)
 - [AppsFlyerConversionData](#appsflyerconversiondata)
-  - [onConversionDataSuccess](#onconversiondatasuccess)
-  - [onConversionDataFail](#onconversiondatafail)
+  - [registerConversionListener](#registerconversionlistener)
+  - [unregisterConversionListener](#unregisterconversionlistener)
   - [onAppOpenAttribution](#onappopenattribution)
   - [onAttributionFailure](#onattributionfailure)
-  - [onDeepLinking](#ondeeplinking)
+  - [registerDeepLinkListener](#registerdeeplinklistener)
+  - [unregisterForDeepLink](#unregisterfordeeplink)
   - [registerSessionReadyListener](#registersessionreadylistener)
   - [isSessionReady](#issessionready)
   - [unregisterSessionReadyListener](#unregistersessionreadylistener)
@@ -105,8 +107,8 @@ The list of available methods for this plugin is described below.
 Recommended call order for a 7.0.0 (RPC) integration:
 
 1. `init(devKey, appId)`
-2. `setIsDebug(true)` — not order-critical relative to `init`; call it as early as possible (even before `init`) to get full debug logs from the start of the session
-3. Register `onConversionDataSuccess` / `onDeepLinking` — **synchronously**, in the same call stack as `init`, not inside `init()`'s `.then()`
+2. `enableDebug(true)` — not order-critical relative to `init`; call it as early as possible (even before `init`) to get full debug logs from the start of the session
+3. Register `registerConversionListener` / `registerDeepLinkListener` — **synchronously**, in the same call stack as `init`, not inside `init()`'s `.then()`
 4. `setCustomerUserId(...)` — if you need the CUID associated with the install event
 5. `registerSessionReadyListener(...)` — **synchronously**, same rule as step 3
 6. Inside the `registerSessionReadyListener` callback: collect consent data (`setConsentData`) / ATT authorization status if your app requires it, then call `start()`
@@ -120,12 +122,12 @@ appsFlyer.init('K2***********99', '41*****44').then(
   (res) => console.log('init', res),
   (err) => console.error('init failed', err)
 );
-appsFlyer.setIsDebug(true);
+appsFlyer.enableDebug(true);
 
-appsFlyer.onConversionDataSuccess((res) => {
+appsFlyer.registerConversionListener((res) => {
   // ...
 });
-appsFlyer.onDeepLinking((res) => {
+appsFlyer.registerDeepLinkListener((res) => {
   // ...
 });
 
@@ -142,8 +144,8 @@ appsFlyer.registerSessionReadyListener(() => {
 ```
 
 **Why the order matters:**
-- `init` must be issued first. `setIsDebug` and the buffered listener registrations below all go over the same native RPC channel in call order — issuing them right after `init` guarantees the native side processes `init` first, even though `init()`'s own JS Promise resolves later, asynchronously.
-- `onConversionDataSuccess`, `onDeepLinking`, and `registerSessionReadyListener` must be registered before `init()`'s promise settles. Registration itself is init-order-independent, but dispatch still happens in call order — registering inside `init().then()` delays dispatch and risks missing an event that fires shortly after init.
+- `init` must be issued first. `enableDebug` and the listener registrations below all go over the same native RPC channel in call order — issuing them right after `init` guarantees the native side processes `init` first, even though `init()`'s own JS Promise resolves later, asynchronously.
+- `registerConversionListener`, `registerDeepLinkListener`, and `registerSessionReadyListener` must be registered before `init()`'s promise settles. Registration itself is init-order-independent, but dispatch still happens in call order — registering inside `init().then()` delays dispatch and risks missing an event that fires shortly after init.
 - `start()` must be called from inside the `registerSessionReadyListener` callback, never chained off `init().then()` — see [start](#start).
 
 ---
@@ -152,7 +154,7 @@ appsFlyer.registerSessionReadyListener(() => {
 
 `initSdk(options, success, error)` is **removed**. Use `init(devKey, appId)` instead — a Promise-only call. `isDebug`, `onInstallConversionDataListener`, `onDeepLinkListener`, and `manualStart` are no longer options on the init call; see
 [MIGRATION.md](../MIGRATION.md#initsdkoptions--replaced-by-initdevkey-appid) for the full
-replacement pattern (`setIsDebug`, `onConversionDataSuccess`, `onDeepLinking`,
+replacement pattern (`enableDebug`, `registerConversionListener`, `registerDeepLinkListener`,
 `registerSessionReadyListener` + `start`), and [Initialization Flow](#initialization-flow) above for the recommended call order. 
 
 *Example:*
@@ -195,8 +197,8 @@ appsFlyer.registerSessionReadyListener(() => {
 ```
 ---
 
-### setIsDebug
-`setIsDebug(isDebug)`
+### enableDebug
+`enableDebug(enabled)`
 
 Enable native SDK debug logging. Dispatched as its own RPC call, separate from `init`. Not
 order-critical relative to `init` — call it as early as possible (even before `init`) to get
@@ -204,12 +206,12 @@ full debug logs from the start of the session.
 
 | parameter | type    | description                |
 | --------- |---------|----------------------------|
-| isDebug   | boolean | true to enable debug logs  |
+| enabled   | boolean | true to enable debug logs  |
 
 *Example:*
 
 ```javascript
-appsFlyer.setIsDebug(true);
+appsFlyer.enableDebug(true);
 ```
 
 ---
@@ -291,7 +293,7 @@ appsFlyer.setCustomerUserId('some_user_id', (res) => {
 ---
 
 ### stop
-`stop(isStopped, callback)`
+`stop(shouldStop)`
 
 In some extreme cases you might want to shut down all SDK functions due to legal and privacy compliance. This can be achieved with the stopSDK API. Once this API is invoked, our SDK no longer communicates with our servers and stops functioning.
 
@@ -299,40 +301,33 @@ There are several different scenarios for user opt-out. We highly recommend foll
 
 In any event, the SDK can be reactivated by calling the same API, by passing false.
 
-| parameter       | type     | description                                          |
-| ----------      |----------|------------------                                    |
-| isStopped  | boolean  | True if the SDK is stopped (default value is false). |
-| callback        | function | success callback                                     |
-
+| parameter   | type     | description                                          |
+| ----------  |----------|------------------                                    |
+| shouldStop  | boolean  | True if the SDK is stopped (default value is false). |
 
 *Example:*
 
 ```javascript
-appsFlyer.stop(true, (res) => {
-  //...
-});
+appsFlyer.stop(true);
 ```
 
 ---
 
-### setAppInviteOneLinkID
-`setAppInviteOneLinkID(oneLinkID, callback)`
+### setAppInviteOneLink
+`setAppInviteOneLink(oneLinkId)`
 
 Set the OneLink ID that should be used for User-Invite-API.<br/>
 The link that is generated for the user invite will use this OneLink ID as the base link ID.
 
-| parameter       | type     | description               |
-| ----------      |----------|------------------         |
-| oneLinkID       | string   | oneLinkID                 |
-| callback        | function | success callback          |
+| parameter   | type     | description               |
+| ----------  |----------|------------------         |
+| oneLinkId   | string   | oneLinkId                 |
 
 
 *Example:*
 
 ```javascript
-appsFlyer.setAppInviteOneLinkID('abcd', (res) => {
-  //...
-});
+appsFlyer.setAppInviteOneLink('abcd');
 ```
 
 ---
@@ -392,8 +387,8 @@ appsFlyer.setResolveDeepLinkURLs(["click.esp-domain.com"],
 
 ---
 
-### setOneLinkCustomDomains
-`setOneLinkCustomDomains(domains, successC, errorC)`
+### setOneLinkCustomDomain
+`setOneLinkCustomDomain(domains) : Promise<unknown>`
 
  Set Onelink custom/branded domains<br/>
  Use this API during the SDK Initialization to indicate branded domains.<br/>
@@ -402,14 +397,12 @@ appsFlyer.setResolveDeepLinkURLs(["click.esp-domain.com"],
 | parameter                   | type     | description                                                |
 | ----------                  |----------|------------------                                          |
 | domains                     | array    | Comma separated array of branded domains                   |
-| successC                    | function | success callback                                           |
-| errorC                      | function | error callback                                             |
 
 
 *Example:*
 
 ```javascript
-appsFlyer.setOneLinkCustomDomains(["click.mybrand.com"],
+appsFlyer.setOneLinkCustomDomain(["click.mybrand.com"]).then(
     (res) => {
         console.log(res);
     }, (error) => {
@@ -515,25 +508,16 @@ appsFlyer.getAppsFlyerUID((err, appsFlyerUID) => {
 
 ---
 
-### getSDKVersion
-`getSDKVersion(callback)`
+### getSdkVersion
+`getSdkVersion() : Promise<string>`
 
 Returns the AppsFlyer native SDK version used by the plugin.
-
-| parameter | type     | description                          |
-| ----------|----------|--------------------------------------|
-| callback  | function | returns `(error, sdkVersion)` |
 
 *Example:*
 
 ```javascript
-appsFlyer.getSDKVersion((err, sdkVersion) => {
-  if (err) {
-    console.error(err);
-  } else {
-    console.log('AppsFlyer SDK version: ' + sdkVersion);
-  }
-});
+const version = await appsFlyer.getSdkVersion();
+console.log('AppsFlyer SDK version: ' + version);
 ```
 
 ---
@@ -730,8 +714,7 @@ appsFlyer.generateInviteLink(
 A complete list of supported parameters is available [here](https://support.appsflyer.com/hc/en-us/articles/115004480866-User-Invite-Tracking). Custom parameters can be passed using a userParams{} nested object, as in the example above.
 
 Note:<br>
-1. `deeplinkPath` is **removed** — it has no native counterpart on either platform and never shipped.
-2. `customerID` and `baseDeeplink` are supported. The plugin translates them to the native key names for you (iOS `referrerCustomerId`, Android `customerId`, both `baseDeepLink`).
+1. `customerID` and `baseDeeplink` are supported. The plugin translates them to the native key names for you (iOS `referrerCustomerId`, Android `customerId`, both `baseDeepLink`).
 
 ---
 
@@ -753,8 +736,8 @@ appsFlyer.logInvite('facebook', { af_content_id: 'id123' });
 
 ---
 
-### logCrossPromotionImpression
-`logCrossPromotionImpression(appId, campaign, parameters)`
+### logCrossPromoteImpression
+`logCrossPromoteImpression(appId, campaign, userParams)`
 
 Attribute an impression for a cross-promotion. Use the promoted App ID as it appears within the AppsFlyer dashboard.
 
@@ -762,31 +745,31 @@ Attribute an impression for a cross-promotion. Use the promoted App ID as it app
 | ---------- |--------|--------------------------------------------------------|
 | appId      | string | promoted App ID                                        |
 | campaign   | string | cross promotion campaign                                |
-| parameters | object | additional params to be added to the attribution link  |
+| userParams | object | additional params to be added to the attribution link  |
 
 *Example:*
 
 ```javascript
-appsFlyer.logCrossPromotionImpression('123456789', 'myCampaign', { af_sub1: 'value' });
+appsFlyer.logCrossPromoteImpression('123456789', 'myCampaign', { af_sub1: 'value' });
 ```
 
 ---
 
-### logCrossPromotionAndOpenStore
-`logCrossPromotionAndOpenStore(appId, campaign, params)`
+### logAndOpenStore
+`logAndOpenStore(promotedAppId, campaign, userParams)`
 
 Attribute a cross-promotion click and launch the app store's app page.
 
-| parameter | type   | description                    |
-| --------- |--------|-----------------------------------|
-| appId     | string | promoted App ID                   |
-| campaign  | string | cross promotion campaign          |
-| params    | object | additional user params            |
+| parameter     | type   | description                    |
+| ------------- |--------|-----------------------------------|
+| promotedAppId | string | promoted App ID                   |
+| campaign      | string | cross promotion campaign          |
+| userParams    | object | additional user params            |
 
 *Example:*
 
 ```javascript
-appsFlyer.logCrossPromotionAndOpenStore('123456789', 'myCampaign', { af_sub1: 'value' });
+appsFlyer.logAndOpenStore('123456789', 'myCampaign', { af_sub1: 'value' });
 ```
 
 ---
@@ -853,7 +836,7 @@ Learn more - https://support.appsflyer.com/hc/en-us/articles/207032106-Receipt-v
 ❗Important❗ for iOS - set SandBox to ```true```
 ```appsFlyer.setUseReceiptValidationSandbox(true);```
 
-The `validateAndLogInAppPurchase` API uses `AFPurchaseDetails` and `AFPurchaseType` enum for structured purchase validation.
+The `validateAndLogInAppPurchase` API uses `AFPurchaseDetails` (a union of `AFPurchaseDetailsAndroid` and `AFPurchaseDetailsIOS`) and `AFPurchaseType` enum for structured purchase validation. The two platforms report different native purchase identifiers — Android's `purchaseToken` vs. iOS's `transactionId` — so the shape is now split per platform instead of conflating both fields into one.
 
 #### AFPurchaseType Enum
 
@@ -864,14 +847,22 @@ AFPurchaseType.SUBSCRIPTION        // "subscription"
 AFPurchaseType.ONE_TIME_PURCHASE   // "one_time_purchase"
 ```
 
-#### AFPurchaseDetails Interface
+#### AFPurchaseDetailsAndroid / AFPurchaseDetailsIOS Interfaces
 
 ```typescript
-interface AFPurchaseDetails {
-  purchaseType: AFPurchaseType;    // Type of purchase
-  transactionId: string;           // Unique transaction identifier
+interface AFPurchaseDetailsAndroid {
   productId: string;               // Product identifier
+  purchaseToken: string;           // Android purchase token
+  purchaseType: AFPurchaseType;    // Type of purchase
 }
+
+interface AFPurchaseDetailsIOS {
+  productId: string;               // Product identifier
+  transactionId: string;           // iOS transaction identifier
+  purchaseType: AFPurchaseType;    // Type of purchase
+}
+
+type AFPurchaseDetails = AFPurchaseDetailsAndroid | AFPurchaseDetailsIOS;
 ```
 
 #### Usage Example
@@ -879,18 +870,24 @@ interface AFPurchaseDetails {
 ```javascript
 import appsFlyer, { AFPurchaseType } from 'react-native-appsflyer';
 
-const purchaseDetails = {
-  purchaseType: AFPurchaseType.ONE_TIME_PURCHASE,
-  transactionId: "2000000569065806",
-  productId: "deviceIdconsumableid"
-};
-
 const additionalParams = {
   revenue: 9.99,
   currency: "USD"
 };
 
-appsFlyer.validateAndLogInAppPurchase(purchaseDetails, additionalParams);
+// iOS
+appsFlyer.validateAndLogInAppPurchase({
+  productId: "deviceIdconsumableid",
+  transactionId: "2000000569065806",
+  purchaseType: AFPurchaseType.ONE_TIME_PURCHASE,
+}, additionalParams);
+
+// Android
+appsFlyer.validateAndLogInAppPurchase({
+  productId: "deviceIdconsumableid",
+  purchaseToken: "purchase-token-from-billing-client",
+  purchaseType: AFPurchaseType.ONE_TIME_PURCHASE,
+}, additionalParams);
 ```
 
 **Important Notes:**
@@ -1031,21 +1028,21 @@ appsFlyer.appendParametersToDeepLinkingURL('substring-of-url', {param1: 'value',
 ```
 
 ---
-### disableAdvertisingIdentifier
-`disableAdvertisingIdentifier(shouldDisdable): void`
+### setDisableAdvertisingIdentifiers
+`setDisableAdvertisingIdentifiers(disable): void`
 
 Disables collection of various Advertising IDs by the SDK.<br>
 **Anroid:** Google Advertising ID (GAID), OAID and Amazon Advertising ID (AAID)<br>
 **iOS:** Apple's advertisingIdentifier (IDFA)
 
-| parameter       | type     | description                      |
-| ----------      |----------|------------------                |
-| shouldDisdable  | boolean  | Flag that disable/enable Advertising ID collection       |
+| parameter | type     | description                      |
+| --------- |----------|------------------                |
+| disable   | boolean  | Flag that disable/enable Advertising ID collection       |
 
 *Example:*
 
 ```javascript
-appsFlyer.disableAdvertisingIdentifier(true);
+appsFlyer.setDisableAdvertisingIdentifiers(true);
 ```
 
 ---
@@ -1097,15 +1094,15 @@ appsFlyer.setConsentData(consent1);
 | hasConsentForAdStorage  | boolean  | Consent for ad storage (optional)       |
 
 ### logAdRevenue
-`logAdRevenue(data: AFAdRevenueData): void`
+`logAdRevenue(data): void`
 
 Use this method to log your ad revenue.</br>
 By attributing ad revenue, app owners gain the complete view of user LTV and campaign ROI.
 Ad revenue is generated by displaying ads on rewarded videos, offer walls, interstitials, and banners in an app.
 
-| Param          | Type                                                       |
-| -------------- | ---------------------------------------------------------- |
-| **`data`**     | `AFAdRevenueData`        |
+| Param      | Type                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------ |
+| **`data`** | `{ monetizationNetwork, mediationNetwork, currencyIso4217Code, revenue, additionalParameters? }` |
 
 *Example:*
 
@@ -1129,7 +1126,7 @@ Here's how you use `appsFlyer.logAdRevenue` within a React Native app:
 1. Prepare the `adRevenueData` object as shown, including any additional parameters you wish to track along with the ad revenue event.
 2. Call the `appsFlyer.logAdRevenue` method with the `adRevenueData` object.
 
-By passing all the required fields in `AFAdRevenueData`, you help ensure accurate tracking within the AppsFlyer platform. This enables you to analyze your ad revenue alongside other user acquisition data to optimize your app's overall monetization strategy.
+By passing all the required fields (`monetizationNetwork`, `mediationNetwork`, `currencyIso4217Code`, `revenue`), you help ensure accurate tracking within the AppsFlyer platform. This enables you to analyze your ad revenue alongside other user acquisition data to optimize your app's overall monetization strategy.
 
 **Note:** The `additionalParameters` object is optional. You can add any additional data you want to log with the ad revenue event in this object. This can be useful for detailed analytics or specific event tracking later on. Make sure that the custom parameters follow the data types and structures specified by AppsFlyer in their documentation.
 
@@ -1234,13 +1231,13 @@ Android IMEI-collection opt-out has no RPC equivalent and is **removed** with no
 (IMEI collection has also been phased out at the OS level on modern Android versions). See
 [MIGRATION.md](../MIGRATION.md#setcollectimei--removed).
 
-### setDisableNetworkData `setDisableNetworkData(disable)`
+### setDisableNetworkData `setDisableNetworkData(isDisable)`
 
 Use to opt-out of collecting the network operator name (carrier) and sim operator name from the device.
 
-| parameter       | type     | description               |
-| ----------      |----------|------------------         |
-| disable         | boolean  | Defaults to false.        |
+| parameter  | type     | description               |
+| ---------- |----------|------------------         |
+| isDisable  | boolean  | Defaults to false.        |
 
 
 *Example:*
@@ -1250,11 +1247,11 @@ appsFlyer.setDisableNetworkData(true);
 }
 ```
 
-### performOnDeepLinking 
-`performOnDeepLinking(url, shouldTriggerSession)`
+### performDeepLinking 
+`performDeepLinking(url, shouldTriggerSession)`
 
 Enables manual triggering of deep link resolution for a given URL. This method allows apps that are delaying the call to `appsFlyer.start()` to resolve deep links before the SDK starts.<br>
-Note:<br>This API will trigger the `appsFlyer.onDeepLinking` callback. In the following example, we check if `res.deepLinkStatus` is equal to “FOUND” inside `appsFlyer.onDeepLinking` callback to extract the deeplink parameters.
+Note:<br>This API will trigger the `appsFlyer.registerDeepLinkListener` callback. In the following example, we check if `res.deepLinkStatus` is equal to “FOUND” inside `appsFlyer.registerDeepLinkListener` callback to extract the deeplink parameters.
 
 | parameter            | type     | description               |
 | ----------           |----------|------------------         |
@@ -1265,7 +1262,7 @@ Note:<br>This API will trigger the `appsFlyer.onDeepLinking` callback. In the fo
 ```javascript
 // Let's say we want the resolve a deeplink and get the deeplink params when the user clicks on it but delay the actual 'start' of the sdk (not sending launch to appsflyer). 
 
-const onDeepLinking = appsFlyer.onDeepLinking(res => {
+const onDeepLink = appsFlyer.registerDeepLinkListener(res => {
   if (res.deepLinkStatus == 'FOUND') {
       // here we will get the deeplink params after resolving it.
       // more flow...
@@ -1279,7 +1276,7 @@ appsFlyer.registerSessionReadyListener(() => {
 appsFlyer.init('UsxXxXxed', '75xXxXxXxXx11');
 
 if (Platform.OS == 'android') {
-  appsFlyer.performOnDeepLinking(deepLinkUrl);
+  appsFlyer.performDeepLinking(deepLinkUrl);
 }
 
 // more app flow...
@@ -1503,55 +1500,42 @@ if (Platform.OS == 'android') {
 
 ---
 
-### onPause
-`onPause() : Promise<void>`
-
-Forward the host Activity's `onPause` lifecycle event to the SDK.
-
-*Example:*
-
-```javascript
-if (Platform.OS == 'android') {
-  appsFlyer.onPause();
-}
-```
-
 ## iOS Only APIs
 
-### disableCollectASA 
-`disableCollectASA(shouldDisable)`
+### setDisableCollectASA 
+`setDisableCollectASA(disable)`
 
 Disables Apple Search Ads collecting
 
-| parameter                   | type     | description                                                |
-| ----------                  |----------|------------------                                          |
-| shouldDisable               | boolean  | Flag to disable/enable Apple Search Ads data collection    |
+| parameter    | type     | description                                                |
+| ------------ |----------|------------------                                          |
+| disable      | boolean  | Flag to disable/enable Apple Search Ads data collection    |
 
 *Example:*
 
 ```javascript
 if (Platform.OS == 'ios') {
-appsFlyer.disableCollectASA(true);
+appsFlyer.setDisableCollectASA(true);
 }
 ```
 
 ---
 
-### disableIDFVCollection 
-`disableIDFVCollection(shouldDisable)`
+### setDisableIDFVCollection 
+`setDisableIDFVCollection(disable)`
 
 Disables app vendor identifier (IDFV) collection in iOS.<br>
 Default is false (the SDK will collect IDFV).
 
-| parameter                   | type     | description                                                |
-| ----------                  |----------|------------------                                          |
-| shouldDisable               | boolean  | Flag to disable/enable IDFV collection    |
+| parameter    | type     | description                                                |
+| ------------ |----------|------------------                                          |
+| disable      | boolean  | Flag to disable/enable IDFV collection    |
 
 *Example:*
 
 ```javascript
 if (Platform.OS == 'ios') {
-appsFlyer.disableIDFVCollection(true);
+appsFlyer.setDisableIDFVCollection(true);
 }
 ```
 
@@ -1574,21 +1558,40 @@ appsFlyer.setUseReceiptValidationSandbox(true);
 
 ---
 
-### disableSKAD 
-`disableSKAD(disableSkad)`
+### setUseUninstallSandbox
+`setUseUninstallSandbox(sandbox): void`
 
-❗Important❗ `disableSKAD` must be called before calling `initSDK` and for iOS ONLY!
+Use the sandbox endpoint for uninstall-token registration.
+
+| parameter | type     | description                                    |
+| --------- |----------|-------------------------------------------------|
+| sandbox   | boolean  | true to use the sandbox uninstall-token endpoint |
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'ios') {
+  appsFlyer.setUseUninstallSandbox(true);
+}
+```
+
+---
+
+### setDisableSKAdNetwork 
+`setDisableSKAdNetwork(disable)`
+
+❗Important❗ `setDisableSKAdNetwork` must be called before calling `initSDK` and for iOS ONLY!
 
 | parameter | type     | description      |
 | ----------|----------|------------------|
-| disableSkad    | boolean   | true if you want to disable SKADNetwork |
+| disable   | boolean  | true if you want to disable SKADNetwork |
 
 
 *Example:*
 
 ```javascript
 if (Platform.OS == 'ios') {
-    appsFlyer.disableSKAD(true);
+    appsFlyer.setDisableSKAdNetwork(true);
 }
 ```
 
@@ -1610,6 +1613,25 @@ If you want to clear this property, set an empty string. ("")
 ```javascript
 if (Platform.OS == 'ios') {
     appsFlyer.setCurrentDeviceLanguage("EN");
+}
+```
+
+---
+
+### setShouldCollectDeviceName
+`setShouldCollectDeviceName(collect): void`
+
+Enable or disable collection of the device's name.
+
+| parameter | type     | description                          |
+| --------- |----------|----------------------------------------|
+| collect   | boolean  | true to enable device-name collection |
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'ios') {
+  appsFlyer.setShouldCollectDeviceName(true);
 }
 ```
 
@@ -1645,22 +1667,27 @@ if (Platform.OS == 'ios') {
 
 ## AppsFlyerConversionData
 
-### onConversionDataSuccess 
-`onConversionDataSuccess(callback) : function:unregister`
+### registerConversionListener 
+`registerConversionListener(onConversionDataSuccess, onConversionDataFail) : function:unregister`
 
 Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking).<br/>
 
 The code implementation for the conversion listener must be made prior to the initialization code of the SDK.
 
+Both callbacks are **required** — native's own conversion listener interface requires both
+together on each platform (Android's `AppsFlyerConversionListener` has no default
+implementation for either method; iOS implements both unconditionally in one delegate
+conformance). There's no native-level way to register success without failure.
 
-| parameter    | type     | description                               |
-| -----------  |----------|------------------------------------------ |
-| callback     | function | conversion data result                    |
+| parameter                | type     | description                                          |
+| ------------------------ |----------|------------------------------------------------------ |
+| onConversionDataSuccess  | function | conversion data result (`ConversionData`)            |
+| onConversionDataFail     | function | required; receives the failure message as a `string` |
 
 *Example:*
 
 ```javascript
-const onConversionDataSuccessCanceller = appsFlyer.onConversionDataSuccess(
+const removeConversionListener = appsFlyer.registerConversionListener(
   (res) => {
     if (JSON.parse(res.data.is_first_launch) == true) {
       if (res.data.af_status === 'Non-organic') {
@@ -1673,13 +1700,16 @@ const onConversionDataSuccessCanceller = appsFlyer.onConversionDataSuccess(
     } else {
       alert('This is not first launch');
     }
+  },
+  (error) => {
+    console.log(error);
   }
 );
 
 appsFlyer.init(/*...*/);
 ```
 
-*Example onConversionDataSuccess:*
+*Example onConversionDataSuccess payload:*
 
 ```javascript
 {
@@ -1693,29 +1723,7 @@ appsFlyer.init(/*...*/);
 }
 ```
 
- Note** is_first_launch will be "true" (string) on Android and true (boolean) on iOS. To solve this issue wrap is_first_launch with JSON.parse(res.data.is_first_launch) as in the example above.
-
-`appsFlyer.onConversionDataSuccess` returns a function the will allow us to call `NativeAppEventEmitter.remove()`.<br/>
-
----
-
-### onConversionDataFail
-`onConversionDataFail(callback) : function:unregister`
- 
-
-| parameter    | type     | description                               |
-| -----------  |----------|------------------------------------------ |
-| callback     | function | Failed conversion data result                    |
-
-
-*Example:*
-
-```javascript
-    const onInstallGCDFailure = appsFlyer.onConversionDataFail(res => {
-      console.log(JSON.stringify(res, null, 2));
-    });
-```
-*Example onConversionDataFail:*
+*Example onConversionDataFail payload:*
 
 ```javascript
 {
@@ -1724,19 +1732,37 @@ appsFlyer.init(/*...*/);
   "data": "DevKey is incorrect"
 }
 ```
+
+ Note** is_first_launch will be "true" (string) on Android and true (boolean) on iOS. To solve this issue wrap is_first_launch with JSON.parse(res.data.is_first_launch) as in the example above.
+
+`appsFlyer.registerConversionListener` returns a function that unregisters just this pair of callbacks (e.g. from `componentWillUnmount`). To also stop the underlying native listener, call `unregisterConversionListener()`.
+
+---
+
+### unregisterConversionListener
+`unregisterConversionListener() : void`
+
+Stop the native conversion listener and clear all registered callbacks.
+
+*Example:*
+
+```javascript
+appsFlyer.unregisterConversionListener();
+```
+
 ---
 
 ### onAppOpenAttribution / onAttributionFailure — removed in 7.0.0
 
 Both are **removed**, along with `performOnAppAttribution`. Attribution data is now delivered
-through `onDeepLinking` instead (documented below), matching what `onConversionDataSuccess`
+through `registerDeepLinkListener` instead (documented below), matching what `registerConversionListener`
 already does for deferred deep links. See
 [MIGRATION.md](../MIGRATION.md#onappopenattribution--onattributionfailure--performonappattribution--merged-into-ondeeplinking).
 
 ---
 
-### onDeepLinking
-`onDeepLinking(callback) : function:unregister`
+### registerDeepLinkListener
+`registerDeepLinkListener(callback) : function:unregister`
  
  This API is related to DeepLinks. Please read more [here](https://dev.appsflyer.com/hc/docs/rn_deeplinkintegrate)
 
@@ -1747,7 +1773,7 @@ already does for deferred deep links. See
 *Example:*
 
 ```javascript
-const onDeepLinkCanceller = appsFlyer.onDeepLinking(res => {
+const onDeepLinkCanceller = appsFlyer.registerDeepLinkListener(res => {
   if (res?.deepLinkStatus !== 'NOT_FOUND') {
         const DLValue = res?.data.deep_link_value;
         const mediaSrc = res?.data.media_source;
@@ -1757,6 +1783,23 @@ const onDeepLinkCanceller = appsFlyer.onDeepLinking(res => {
 })
 
 appsFlyer.init(/*...*/);
+```
+
+`appsFlyer.registerDeepLinkListener` returns a function that unregisters just this callback (e.g. from `componentWillUnmount`). To also stop the underlying native listener, call `unregisterForDeepLink()`.
+
+---
+
+### unregisterForDeepLink
+`unregisterForDeepLink() : void`
+
+Stop the native deep-link listener and clear all registered callbacks. Android only.
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'android') {
+  appsFlyer.unregisterForDeepLink();
+}
 ```
 
 ---

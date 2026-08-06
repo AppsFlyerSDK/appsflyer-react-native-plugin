@@ -69,12 +69,12 @@ Or with nested structure:
 import appsFlyer from 'react-native-appsflyer';
 
 // 1. Handle conversions and attribution (BEFORE init)
-appsFlyer.onConversionDataSuccess((data) => {
+appsFlyer.registerConversionListener((data) => {
   console.log('Install conversion data:', data);
 });
 
 // 2. Handle deep links (BEFORE init)
-appsFlyer.onDeepLinking((data) => {
+appsFlyer.registerDeepLinkListener((data) => {
   console.log('Deep link data:', data);
 });
 
@@ -237,11 +237,11 @@ For the JSON Legacy Method, you only need steps 1, 2, and 3 from the OneLink met
 
 ```jsx
 // 1. Set up listeners (BEFORE init)
-appsFlyer.onConversionDataSuccess((data) => {
+appsFlyer.registerConversionListener((data) => {
   console.log('Install conversion data:', data);
 });
 
-appsFlyer.onDeepLinking((data) => {
+appsFlyer.registerDeepLinkListener((data) => {
   console.log('Deep link data:', data);
 });
 
@@ -266,11 +266,11 @@ import messaging from '@react-native-firebase/messaging';
 const AppsflyerPushIntegration = () => {
   useEffect(() => {
     // 1. Set up attribution and deep link handlers (BEFORE init)
-    appsFlyer.onConversionDataSuccess((data) => {
+    appsFlyer.registerConversionListener((data) => {
       console.log('Conversion data:', data);
     });
 
-    appsFlyer.onDeepLinking((data) => {
+    appsFlyer.registerDeepLinkListener((data) => {
       console.log('Deep link:', data);
     });
 

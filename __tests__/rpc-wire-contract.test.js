@@ -41,7 +41,7 @@ const CALL_SITES = [
 		crossPlatformParams: ['appId'],
 		invoke: () => appsFlyer.init('devkey', '123456789'),
 	},
-	{ api: 'setIsDebug', platforms: BOTH, invoke: () => appsFlyer.setIsDebug(true) },
+	{ api: 'setIsDebug', platforms: BOTH, invoke: () => appsFlyer.enableDebug(true) },
 	{ api: 'start', platforms: BOTH, invoke: () => appsFlyer.start() },
 	{ api: 'logEvent', platforms: BOTH, invoke: () => appsFlyer.logEvent('af_purchase', { af_revenue: 1 }) },
 	{
@@ -59,7 +59,7 @@ const CALL_SITES = [
 	{ api: 'setUserEmail', platforms: BOTH, invoke: () => appsFlyer.setUserEmail('a@b.com') },
 	{ api: 'setAdditionalData', platforms: BOTH, invoke: () => appsFlyer.setAdditionalData({ tenant: 'qa' }) },
 	{ api: 'getAppsFlyerUID', platforms: BOTH, invoke: () => appsFlyer.getAppsFlyerUID() },
-	{ api: 'getSDKVersion', platforms: BOTH, invoke: () => appsFlyer.getSDKVersion() },
+	{ api: 'getSDKVersion', platforms: BOTH, invoke: () => appsFlyer.getSdkVersion() },
 	{
 		api: 'updateServerUninstallToken',
 		platforms: BOTH,
@@ -69,7 +69,7 @@ const CALL_SITES = [
 	},
 	{ api: 'setCustomerUserId', platforms: BOTH, invoke: () => appsFlyer.setCustomerUserId('uid-1') },
 	{ api: 'stop', platforms: BOTH, invoke: () => appsFlyer.stop(true) },
-	{ api: 'setAppInviteOneLinkID', platforms: BOTH, invoke: () => appsFlyer.setAppInviteOneLinkID('abc1') },
+	{ api: 'setAppInviteOneLinkID', platforms: BOTH, invoke: () => appsFlyer.setAppInviteOneLink('abc1') },
 	{
 		api: 'generateInviteLink',
 		platforms: BOTH,
@@ -87,12 +87,12 @@ const CALL_SITES = [
 	{
 		api: 'logCrossPromotionImpression',
 		platforms: BOTH,
-		invoke: () => appsFlyer.logCrossPromotionImpression('123', 'c1', { k: 'v' }),
+		invoke: () => appsFlyer.logCrossPromoteImpression('123', 'c1', { k: 'v' }),
 	},
 	{
 		api: 'logCrossPromotionAndOpenStore',
 		platforms: BOTH,
-		invoke: () => appsFlyer.logCrossPromotionAndOpenStore('123', 'c1', { k: 'v' }),
+		invoke: () => appsFlyer.logAndOpenStore('123', 'c1', { k: 'v' }),
 	},
 	{ api: 'setCurrencyCode', platforms: BOTH, invoke: () => appsFlyer.setCurrencyCode('USD') },
 	{ api: 'isSessionReady', platforms: BOTH, invoke: () => appsFlyer.isSessionReady() },
@@ -121,14 +121,14 @@ const CALL_SITES = [
 		],
 	},
 	{ api: 'anonymizeUser', platforms: BOTH, invoke: () => appsFlyer.anonymizeUser(true) },
-	{ api: 'setOneLinkCustomDomains', platforms: BOTH, invoke: () => appsFlyer.setOneLinkCustomDomains(['d.com']) },
+	{ api: 'setOneLinkCustomDomains', platforms: BOTH, invoke: () => appsFlyer.setOneLinkCustomDomain(['d.com']) },
 	{ api: 'setResolveDeepLinkURLs', platforms: BOTH, invoke: () => appsFlyer.setResolveDeepLinkURLs(['u.com']) },
 	{
 		api: 'disableAdvertisingIdentifier',
 		platforms: BOTH,
 		// iOS reads `disable`, Android reads `isDisable`.
 		crossPlatformParams: ['disable', 'isDisable'],
-		invoke: () => appsFlyer.disableAdvertisingIdentifier(true),
+		invoke: () => appsFlyer.setDisableAdvertisingIdentifiers(true),
 	},
 	{ api: 'setHost', platforms: BOTH, invoke: () => appsFlyer.setHost('pre', 'host.com') },
 	{
@@ -190,11 +190,17 @@ const CALL_SITES = [
 			}),
 	},
 	{
-		api: 'onConversionDataSuccess',
+		api: 'registerConversionListener',
 		platforms: BOTH,
-		invoke: () => appsFlyer.onConversionDataSuccess(jest.fn()),
+		invoke: () => appsFlyer.registerConversionListener(jest.fn(), jest.fn()),
 	},
-	{ api: 'onDeepLinking', platforms: BOTH, invoke: () => appsFlyer.onDeepLinking(jest.fn()) },
+	{
+		api: 'unregisterConversionListener',
+		// Android-only RPC per the Alignment Matrix; iOS has no unregisterConversionListener.
+		platforms: [ANDROID],
+		invoke: () => appsFlyer.unregisterConversionListener(),
+	},
+	{ api: 'registerDeepLinkListener', platforms: BOTH, invoke: () => appsFlyer.registerDeepLinkListener(jest.fn()) },
 	{
 		api: 'registerSessionReadyListener',
 		platforms: BOTH,
@@ -202,15 +208,25 @@ const CALL_SITES = [
 	},
 
 	// iOS-only surface
-	{ api: 'disableIDFVCollection', platforms: [IOS], invoke: () => appsFlyer.disableIDFVCollection(true) },
-	{ api: 'disableCollectASA', platforms: [IOS], invoke: () => appsFlyer.disableCollectASA(true) },
+	{ api: 'disableIDFVCollection', platforms: [IOS], invoke: () => appsFlyer.setDisableIDFVCollection(true) },
+	{ api: 'disableCollectASA', platforms: [IOS], invoke: () => appsFlyer.setDisableCollectASA(true) },
 	{
 		api: 'setUseReceiptValidationSandbox',
 		platforms: [IOS],
 		invoke: () => appsFlyer.setUseReceiptValidationSandbox(true),
 	},
-	{ api: 'disableSKAD', platforms: [IOS], invoke: () => appsFlyer.disableSKAD(true) },
+	{
+		api: 'setUseUninstallSandbox',
+		platforms: [IOS],
+		invoke: () => appsFlyer.setUseUninstallSandbox(true),
+	},
+	{ api: 'disableSKAD', platforms: [IOS], invoke: () => appsFlyer.setDisableSKAdNetwork(true) },
 	{ api: 'setCurrentDeviceLanguage', platforms: [IOS], invoke: () => appsFlyer.setCurrentDeviceLanguage('en') },
+	{
+		api: 'setShouldCollectDeviceName',
+		platforms: [IOS],
+		invoke: () => appsFlyer.setShouldCollectDeviceName(true),
+	},
 	{
 		api: 'setFacebookDeferredAppLink',
 		platforms: [IOS],
@@ -223,7 +239,12 @@ const CALL_SITES = [
 	{
 		api: 'performOnDeepLinking',
 		platforms: [ANDROID],
-		invoke: () => appsFlyer.performOnDeepLinking('https://a.com', true),
+		invoke: () => appsFlyer.performDeepLinking('https://a.com', true),
+	},
+	{
+		api: 'unregisterForDeepLink',
+		platforms: [ANDROID],
+		invoke: () => appsFlyer.unregisterForDeepLink(),
 	},
 	{ api: 'disableAppSetId', platforms: [ANDROID], invoke: () => appsFlyer.disableAppSetId() },
 	{ api: 'getHostName', platforms: [ANDROID], invoke: () => appsFlyer.getHostName() },
@@ -242,7 +263,6 @@ const CALL_SITES = [
 		invoke: () => appsFlyer.setPreinstallAttribution('ms', 'camp', 'site'),
 	},
 	{ api: 'logSession', platforms: [ANDROID], invoke: () => appsFlyer.logSession() },
-	{ api: 'onPause', platforms: [ANDROID], invoke: () => appsFlyer.onPause() },
 ];
 
 const PLATFORMS = {
