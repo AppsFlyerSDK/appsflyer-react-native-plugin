@@ -1,14 +1,29 @@
 import { NativeEventEmitter, NativeModules } from "react-native";
+import NativeAppsFlyer from "./src/NativeAppsFlyer";
 import AppsFlyerConstants from "./PurchaseConnector/constants/constants";
 import InAppPurchaseValidationResult from "./PurchaseConnector/models/in_app_purchase_validation_result";
 import ValidationFailureData from "./PurchaseConnector/models/validation_failure_data";
 import SubscriptionValidationResult from "./PurchaseConnector/models/subscription_validation_result";
 import { MissingConfigurationException } from "./PurchaseConnector/models/missing_configuration_exception";
 
-const { RNAppsFlyer } = NativeModules;
+// 7.0.0+ has no legacy-bridge fallback — fail fast on Old Architecture instead of a
+// confusing native crash later. Skipped under Jest (no RN globals in a plain Node env).
+if (typeof jest === "undefined") {
+  const isNewArchitectureEnabled =
+    global.RN$Bridgeless === true || global.__turboModuleProxy != null;
+  if (!isNewArchitectureEnabled) {
+    throw new Error(
+      "react-native-appsflyer 7.0.0+ requires React Native's New Architecture (TurboModules). " +
+        "Enable it via `newArchEnabled=true` in android/gradle.properties (Android) and " +
+        "`RCT_NEW_ARCH_ENABLED=1` before `pod install` (iOS), or stay on react-native-appsflyer ^6 " +
+        "if you cannot migrate to New Architecture yet."
+    );
+  }
+}
+
 const appsFlyer = {};
 const eventsMap = {};
-const appsFlyerEventEmitter = new NativeEventEmitter(RNAppsFlyer);
+const appsFlyerEventEmitter = new NativeEventEmitter(NativeAppsFlyer);
 
 //Purchase Connector native bridge objects
 const { PCAppsFlyer } = NativeModules;
@@ -239,7 +254,6 @@ AppsFlyerPurchaseConnector.setPurchaseRevenueDataSourceStoreKit2 = (dataSource) 
 	PCAppsFlyer.setPurchaseRevenueDataSourceStoreKit2(dataSource);
 };
 
-
 const AppsFlyerPurchaseConnectorConfig = {
   setConfig: ({ logSubscriptions, logInApps, sandbox, storeKitVersion }) => {
     return {
@@ -260,71 +274,81 @@ function create(config) {
 
 AppsFlyerPurchaseConnector.create = create;
 export { AppsFlyerPurchaseConnector, AppsFlyerPurchaseConnectorConfig };
-/********************************************************/
 
-function initSdkCallback(options, successC, errorC) {
-  if (
-    typeof options.appId !== "string" &&
-    typeof options.appId !== "undefined"
-  ) {
-    return errorC("appId should be a string!");
-  }
-  if (
-    typeof options.isDebug !== "boolean" &&
-    typeof options.isDebug !== "undefined"
-  ) {
-    return errorC("isDebug should be a boolean!");
-  }
-  return RNAppsFlyer.initSdkWithCallBack(options, successC, errorC);
+// Encodes {method, params}, calls the TurboModule, decodes response. Rejects only on transport failure.
+function dispatchRpc(method, params) {
+  const requestJson = JSON.stringify({ method, params });
+  return NativeAppsFlyer.executeRpc(requestJson).then((responseJson) =>
+    JSON.parse(responseJson)
+  );
 }
 
-function initSdkPromise(options) {
-  if (
-    typeof options.appId !== "string" &&
-    typeof options.appId !== "undefined"
-  ) {
+// Unwraps normalized { success, data|error } into resolve(data)/reject(error).
+function callRpc(method, params = {}) {
+  return dispatchRpc(method, params).then((response) => {
+    if (!response.success) {
+      const error = response.error;
+      // ponytail: Android maps unknown-method to 422 with this message substring; normalize to 404
+      // to match iOS's dedicated 404 per rpc-error-normalization-contract.md §FR-007 Decision —
+      // remove when Android throws METHOD_NOT_FOUND (404) for real.
+      if (
+        error &&
+        error.code === 422 &&
+        typeof error.message === "string" &&
+        error.message.indexOf("Unknown or missing method") !== -1
+      ) {
+        return Promise.reject({ code: 404, message: error.message });
+      }
+      return Promise.reject(error);
+    }
+    return response.data;
+  });
+}
+
+// For void-returning config setters: fire the call, log instead of throwing on failure.
+function callRpcVoid(method, params) {
+  callRpc(method, params).catch((error) =>
+    console.warn(`[AppsFlyer] ${method} failed:`, error)
+  );
+}
+
+// For the "single callback, console.log fallback" methods (bridge-patterns.md #2).
+function callRpcWithCallback(method, params, successC) {
+  const callback = successC || ((result) => console.log(result));
+  callRpc(method, params).then(callback, callback);
+}
+
+// Coerces a value to a string, falling back when null/undefined.
+function toStringOrEmpty(value, fallback = "") {
+  return value == null ? fallback : String(value);
+}
+
+// devKey/appId only, positional — matches AFRPCInitRequest's real wire shape (see MIGRATION.md).
+// appId is required on iOS, unused on Android.
+appsFlyer.init = (devKey, appId) => {
+  if (typeof appId !== "string" && typeof appId !== "undefined") {
     return Promise.reject("appId should be a string!");
   }
-  if (
-    typeof options.isDebug !== "boolean" &&
-    typeof options.isDebug !== "undefined"
-  ) {
-    return Promise.reject("isDebug should be a boolean!");
+  return callRpc("init", { devKey, appId });
+};
+
+// Dedicated RPC call, separate from init (matches native SDK7 alignment).
+appsFlyer.setIsDebug = (isDebug) => callRpcVoid("isDebug", { isDebug });
+
+appsFlyer.logEvent = (eventName, eventValues, successCOrAwait, error, awaitResponse) => {
+  if (typeof successCOrAwait === "function" && typeof error === "function") {
+    callRpc("logEvent", { eventName, eventValues, awaitResponse: !!awaitResponse }).then(
+      successCOrAwait,
+      error
+    );
+  } else {
+    return callRpc("logEvent", {
+      eventName,
+      eventValues,
+      awaitResponse: !!successCOrAwait,
+    });
   }
-  return RNAppsFlyer.initSdkWithPromise(options);
-}
-
-function initSdk(options, success, error) {
-  if (success && error) {
-    //initSdk is a callback function
-    initSdkCallback(options, success, error);
-  } else if (!success) {
-    //initSdk is a promise function
-    return initSdkPromise(options);
-  }
-}
-
-appsFlyer.initSdk = initSdk;
-
-function logEventCallback(eventName, eventValues, successC, errorC) {
-  return RNAppsFlyer.logEvent(eventName, eventValues, successC, errorC);
-}
-
-function logEventPromise(eventName, eventValues) {
-  return RNAppsFlyer.logEventWithPromise(eventName, eventValues);
-}
-
-function logEvent(eventName, eventValues, success, error) {
-  if (success && error) {
-    //logEvent is a callback function
-    logEventCallback(eventName, eventValues, success, error);
-  } else if (!success) {
-    // logEvent is a promise function
-    return logEventPromise(eventName, eventValues);
-  }
-}
-
-appsFlyer.logEvent = logEvent;
+};
 
 export const MEDIATION_NETWORK = Object.freeze({
 	IRONSOURCE : "ironsource",
@@ -343,11 +367,9 @@ export const MEDIATION_NETWORK = Object.freeze({
 	DIRECT_MONETIZATION_NETWORK : "direct_monetization_network"
 });
 
-function logAdRevenue(adRevenueData) {
-  RNAppsFlyer.logAdRevenue(adRevenueData);
-}
-
-appsFlyer.logAdRevenue = logAdRevenue;
+appsFlyer.logAdRevenue = (adRevenueData) => {
+  callRpcVoid("logAdRevenue", adRevenueData);
+};
 
 /**
  * Manually record the location of the user
@@ -370,13 +392,7 @@ appsFlyer.logLocation = (longitude, latitude, callback) => {
     longitude = parseFloat(longitude);
     latitude = parseFloat(latitude);
   }
-  if (callback) {
-    return RNAppsFlyer.logLocation(longitude, latitude, callback);
-  } else {
-    return RNAppsFlyer.logLocation(longitude, latitude, (result) =>
-      console.log(result)
-    );
-  }
+  return callRpcWithCallback("logLocation", { longitude, latitude }, callback);
 };
 
 /**
@@ -387,7 +403,12 @@ appsFlyer.logLocation = (longitude, latitude, callback) => {
  * @param errorC error callback function.
  */
 appsFlyer.setUserEmails = (options, successC, errorC) => {
-  return RNAppsFlyer.setUserEmails(options, successC, errorC);
+  // Android has no array-accepting native method, so it loops and calls `setUserEmail`
+  // once per address internally; the JS signature here is unchanged on both platforms.
+  return callRpc("setUserEmails", options).then(
+    (data) => successC && successC(data),
+    (error) => errorC && errorC(error)
+  );
 };
 
 /**
@@ -397,13 +418,7 @@ appsFlyer.setUserEmails = (options, successC, errorC) => {
  * @param successC success callback function.
  */
 appsFlyer.setAdditionalData = (additionalData, successC) => {
-  if (successC) {
-    return RNAppsFlyer.setAdditionalData(additionalData, successC);
-  } else {
-    return RNAppsFlyer.setAdditionalData(additionalData, (result) =>
-      console.log(result)
-    );
-  }
+  callRpcWithCallback("setAdditionalData", additionalData, successC);
 };
 
 /**
@@ -412,11 +427,17 @@ appsFlyer.setAdditionalData = (additionalData, successC) => {
  * @callback callback function that returns (error,uid)
  */
 appsFlyer.getAppsFlyerUID = (callback) => {
-  return RNAppsFlyer.getAppsFlyerUID(callback);
+  callRpc("getAppsFlyerUID", {}).then(
+    (data) => callback(null, data),
+    (error) => callback(error, null)
+  );
 };
 
 appsFlyer.getSDKVersion = (callback) => {
-  return RNAppsFlyer.getSDKVersion(callback);
+  callRpc("getSDKVersion", {}).then(
+    (data) => callback(null, data),
+    (error) => callback(error, null)
+  );
 };
 
 /**
@@ -426,19 +447,8 @@ appsFlyer.getSDKVersion = (callback) => {
  * @param successC success callback function.
  */
 appsFlyer.updateServerUninstallToken = (token, successC) => {
-  if (token == null) {
-    token = "";
-  }
-  if (typeof token != "string") {
-    token = token.toString();
-  }
-  if (successC) {
-    return RNAppsFlyer.updateServerUninstallToken(token, successC);
-  } else {
-    return RNAppsFlyer.updateServerUninstallToken(token, (result) =>
-      console.log(result)
-    );
-  }
+  // iOS natively hex-encodes this token before dispatching; Android passes it through as-is.
+  callRpcWithCallback("updateServerUninstallToken", { token: toStringOrEmpty(token) }, successC);
 };
 
 /**
@@ -449,19 +459,7 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
  * @param successC callback function.
  */
 appsFlyer.setCustomerUserId = (userId, successC) => {
-  if (userId == null) {
-    userId = "";
-  }
-  if (typeof userId != "string") {
-    userId = userId.toString();
-  }
-  if (successC) {
-    return RNAppsFlyer.setCustomerUserId(userId, successC);
-  } else {
-    return RNAppsFlyer.setCustomerUserId(userId, (result) =>
-      console.log(result)
-    );
-  }
+  callRpcWithCallback("setCustomerUserId", { userId: toStringOrEmpty(userId) }, successC);
 };
 
 /**
@@ -473,24 +471,7 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
  * @param successC callback function.
  */
 appsFlyer.stop = (isStopped, successC) => {
-  if (successC) {
-    return RNAppsFlyer.stop(isStopped, successC);
-  } else {
-    return RNAppsFlyer.stop(isStopped, (result) => console.log(result));
-  }
-};
-
-/**
- * Opt-out of collection of IMEI.
- * If the app does NOT contain Google Play Services, device IMEI is collected by the SDK.
- * However, apps with Google play services should avoid IMEI collection as this is in violation of the Google Play policy.
- *
- * @param {boolean} isCollect boolean, false to opt out.
- * @param successC callback function.
- * @platform android
- */
-appsFlyer.setCollectIMEI = (isCollect, successC) => {
-  return RNAppsFlyer.setCollectIMEI(isCollect, successC);
+  callRpcWithCallback("stop", { isStopped }, successC);
 };
 
 /**
@@ -503,7 +484,7 @@ appsFlyer.setCollectIMEI = (isCollect, successC) => {
  * @platform android
  */
 appsFlyer.setCollectAndroidID = (isCollect, successC) => {
-  return RNAppsFlyer.setCollectAndroidID(isCollect, successC);
+  callRpcWithCallback("setCollectAndroidID", { isCollect }, successC);
 };
 
 /**
@@ -514,19 +495,7 @@ appsFlyer.setCollectAndroidID = (isCollect, successC) => {
  * @param successC callback function.
  */
 appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
-  if (oneLinkID == null) {
-    oneLinkID = "";
-  }
-  if (typeof oneLinkID != "string") {
-    oneLinkID = oneLinkID.toString();
-  }
-  if (successC) {
-    return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, successC);
-  } else {
-    return RNAppsFlyer.setAppInviteOneLinkID(oneLinkID, (result) =>
-      console.log(result)
-    );
-  }
+  callRpcWithCallback("setAppInviteOneLink", { oneLinkID: toStringOrEmpty(oneLinkID) }, successC);
 };
 
 /**
@@ -538,7 +507,16 @@ appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
  * @param error error callback function.
  */
 appsFlyer.generateInviteLink = (parameters, success, error) => {
-  return RNAppsFlyer.generateInviteLink(parameters, success, error);
+  return callRpc("generateInviteLink", parameters).then(success, error);
+};
+
+/**
+ * Log a user invite event.
+ * @param channel the channel through which the invite was sent (optional).
+ * @param eventParameters additional event parameters (optional).
+ */
+appsFlyer.logInvite = (channel, eventParameters) => {
+  callRpcVoid("logInvite", { channel, eventParameters });
 };
 
 /**
@@ -554,14 +532,11 @@ appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
     console.log("appid is missing!");
     return;
   }
-  if (campaign == null) {
-    campaign = "";
-  }
-  if (typeof appId != "string" || typeof campaign != "string") {
-    appId = appId.toString();
-    campaign = campaign.toString();
-  }
-  return RNAppsFlyer.logCrossPromotionImpression(appId, campaign, parameters);
+  callRpcVoid("logCrossPromoteImpression", {
+    appId: toStringOrEmpty(appId),
+    campaign: toStringOrEmpty(campaign),
+    parameters,
+  });
 };
 
 /**
@@ -576,14 +551,11 @@ appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
     console.log("appid is missing!");
     return;
   }
-  if (campaign == null) {
-    campaign = "";
-  }
-  if (typeof appId != "string" || typeof campaign != "string") {
-    appId = appId.toString();
-    campaign = campaign.toString();
-  }
-  return RNAppsFlyer.logCrossPromotionAndOpenStore(appId, campaign, params);
+  callRpcVoid("logAndOpenStore", {
+    appId: toStringOrEmpty(appId),
+    campaign: toStringOrEmpty(campaign),
+    params,
+  });
 };
 
 /**
@@ -598,156 +570,169 @@ appsFlyer.setCurrencyCode = (currencyCode, successC) => {
     console.log("currencyCode is missing!");
     return;
   }
-  if (typeof currencyCode != "string") {
-    currencyCode = currencyCode.toString();
+  callRpcWithCallback("setCurrencyCode", { currencyCode: toStringOrEmpty(currencyCode) }, successC);
+};
+
+// Both platforms emit one shared event; this block demuxes the envelope onto public listener APIs.
+const RPC_EVENT_NAME = "RNAppsFlyer_rpcEvent";
+
+// Maps native event name → JS listener bucket (iOS uses onDeepLinkReceived, Android uses onDeepLinking).
+const RPC_EVENT_DEMUX = {
+  onConversionDataSuccess: "onInstallConversionData",
+  onConversionDataFail: "onInstallConversionFailure",
+  onDeepLinkReceived: "onDeepLink",
+  onDeepLinking: "onDeepLink",
+  onSessionReady: "onSessionReady",
+};
+
+const rpcListenerBuckets = {
+  onInstallConversionData: [],
+  onInstallConversionFailure: [],
+  onDeepLink: [],
+  onSessionReady: [],
+};
+
+// Android historically sends stringified JSON where iOS sends an object — normalize defensively.
+function normalizeRpcEventData(rawData) {
+  if (typeof rawData !== "string") {
+    return rawData;
   }
-  if (successC) {
-    return RNAppsFlyer.setCurrencyCode(currencyCode, successC);
-  } else {
-    return RNAppsFlyer.setCurrencyCode(currencyCode, (result) =>
-      console.log(result)
+  try {
+    return JSON.parse(rawData);
+  } catch (_error) {
+    return new AFParseJSONException("Invalid data structure", rawData);
+  }
+}
+
+let rpcEventSubscription = null;
+function ensureRpcEventSubscription() {
+  if (rpcEventSubscription) {
+    return;
+  }
+  rpcEventSubscription = appsFlyerEventEmitter.addListener(
+    RPC_EVENT_NAME,
+    (envelopeRaw) => {
+      let envelope;
+      try {
+        envelope =
+          typeof envelopeRaw === "string" ? JSON.parse(envelopeRaw) : envelopeRaw;
+      } catch (error) {
+        console.error(
+          "AppsFlyer: failed to parse native RPC event envelope",
+          error
+        );
+        return;
+      }
+      const bucket = envelope && RPC_EVENT_DEMUX[envelope.event];
+      if (!bucket) {
+        return; // unmapped/forward-compatible native event -- not this release's concern
+      }
+      const data = normalizeRpcEventData(envelope.data);
+      rpcListenerBuckets[bucket].forEach((callback) => {
+        if (typeof callback === "function") {
+          callback(data);
+        }
+      });
+    }
+  );
+}
+
+// Fires the register*Listener RPC on first attach only; subsequent attaches are no-ops.
+// Calls made before init resolves are buffered natively and flushed after init completes.
+function onceRegistrar(method) {
+  let requested = false;
+  const ensure = () => {
+    if (requested) {
+      return;
+    }
+    requested = true;
+    callRpc(method, {}).catch((error) =>
+      console.error(`AppsFlyer: ${method} RPC failed`, error)
     );
-  }
+  };
+  ensure.reset = () => {
+    requested = false;
+  };
+  return ensure;
+}
+
+const ensureConversionListenerRegistered = onceRegistrar("registerConversionListener");
+const ensureDeepLinkListenerRegistered = onceRegistrar("registerDeeplinkListener");
+const ensureSessionReadyListenerRegistered = onceRegistrar("registerSessionReadyListener");
+
+// Shared shape for onInstallConversionData/onInstallConversionFailure/onDeepLink: subscribe to
+// the demuxed event bucket, request native registration once, return an unsubscribe function.
+function createBucketListener(bucket, ensureRegistered) {
+  return (callback) => {
+    ensureRpcEventSubscription();
+    ensureRegistered();
+    rpcListenerBuckets[bucket].push(callback);
+    return function remove() {
+      rpcListenerBuckets[bucket] = rpcListenerBuckets[bucket].filter(
+        (registered) => registered !== callback
+      );
+    };
+  };
+}
+
+/**
+ * Access AppsFlyer attribution/conversion data (deferred deep linking).
+ * @param callback receives `{status, type, data}` — see AppsFlyer docs for the payload shape.
+ * @returns {function} call to unregister the listener (e.g. from componentWillUnmount).
+ */
+appsFlyer.onInstallConversionData = createBucketListener(
+  "onInstallConversionData",
+  ensureConversionListenerRegistered
+);
+
+appsFlyer.onInstallConversionFailure = createBucketListener(
+  "onInstallConversionFailure",
+  ensureConversionListenerRegistered
+);
+
+appsFlyer.onDeepLink = createBucketListener("onDeepLink", ensureDeepLinkListenerRegistered);
+
+/**
+ * Fires once the native SDK's session becomes ready to serve attribution / deep-link data.
+ * Both platforms emit a real `onSessionReady` event once registered — this was previously
+ * silently dropped (no bucket wired for it). Net-new in 7.0.0 — no 6.x equivalent.
+ * @param callback invoked with no arguments when the session becomes ready.
+ * @returns {function} call to unregister the listener (e.g. from componentWillUnmount).
+ */
+appsFlyer.registerSessionReadyListener = createBucketListener(
+  "onSessionReady",
+  ensureSessionReadyListenerRegistered
+);
+
+/**
+ * Query whether the native SDK's session is ready to serve attribution / deep-link data.
+ * Net-new in 7.0.0 — no 6.x equivalent.
+ * @returns {Promise<boolean>}
+ */
+appsFlyer.isSessionReady = () => {
+  ensureSessionReadyListenerRegistered();
+  return callRpc("isSessionReady", {}).then((data) => {
+    if (data && typeof data === "object" && "isSessionReady" in data) {
+      return Boolean(data.isSessionReady);
+    }
+    return Boolean(data);
+  });
 };
 
 /**
- * Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking)
- * @param callback: contains fields:
- *    status: success/failure
- *    type:
- *          onAppOpenAttribution
- *          onInstallConversionDataLoaded
- *          onAttributionFailure
- *          onInstallConversionFailure
- *    data: metadata,
- * @example {"status":"success","type":"onInstallConversionDataLoaded","data":{"af_status":"Organic","af_message":"organic install"}}
- *
- * @returns {remove: function - unregister listener}
+ * Remove a previously registered session-ready listener.
+ * Net-new in 7.0.0 — no 6.x equivalent.
  */
-appsFlyer.onInstallConversionData = (callback) => {
-  const listener = appsFlyerEventEmitter.addListener(
-    "onInstallConversionDataLoaded",
-    (_data) => {
-      if (callback && typeof callback === typeof Function) {
-        try {
-          let data = JSON.parse(_data);
-          callback(data);
-        } catch (_error) {
-          //throw new AFParseJSONException("...");
-          //TODO: for today we return an error in callback
-          callback(new AFParseJSONException("Invalid data structure", _data));
-        }
-      }
-    }
-  );
-
-  eventsMap["onInstallConversionData"] = listener;
-
-  // unregister listener (suppose should be called from componentWillUnmount() )
-  return function remove() {
-    listener.remove();
-  };
+appsFlyer.unregisterSessionReadyListener = () => {
+  ensureSessionReadyListenerRegistered.reset();
+  rpcListenerBuckets.onSessionReady = [];
+  callRpcVoid("unregisterSessionReadyListener", {});
 };
-
-appsFlyer.onInstallConversionFailure = (callback) => {
-  const listener = appsFlyerEventEmitter.addListener(
-    "onInstallConversionFailure",
-    (_data) => {
-      if (callback && typeof callback === typeof Function) {
-        try {
-          let data = JSON.parse(_data);
-          callback(data);
-        } catch (_error) {
-          //throw new AFParseJSONException("...");
-          //TODO: for today we return an error in callback
-          callback(new AFParseJSONException("Invalid data structure", _data));
-        }
-      }
-    }
-  );
-
-  eventsMap["onInstallConversionFailure"] = listener;
-
-  // unregister listener (suppose should be called from componentWillUnmount() )
-  return function remove() {
-    listener.remove();
-  };
-};
-
-appsFlyer.onAppOpenAttribution = (callback) => {
-  const listener = appsFlyerEventEmitter.addListener(
-    "onAppOpenAttribution",
-    (_data) => {
-      if (callback && typeof callback === typeof Function) {
-        try {
-          let data = JSON.parse(_data);
-          callback(data);
-        } catch (_error) {
-          callback(new AFParseJSONException("Invalid data structure", _data));
-        }
-      }
-    }
-  );
-
-  eventsMap["onAppOpenAttribution"] = listener;
-
-  // unregister listener (suppose should be called from componentWillUnmount() )
-  return function remove() {
-    listener.remove();
-  };
-};
-
-appsFlyer.onAttributionFailure = (callback) => {
-  const listener = appsFlyerEventEmitter.addListener(
-    "onAttributionFailure",
-    (_data) => {
-      if (callback && typeof callback === typeof Function) {
-        try {
-          let data = JSON.parse(_data);
-          callback(data);
-        } catch (_error) {
-          callback(new AFParseJSONException("Invalid data structure", _data));
-        }
-      }
-    }
-  );
-
-  eventsMap["onAttributionFailure"] = listener;
-
-  // unregister listener (suppose should be called from componentWillUnmount() )
-  return function remove() {
-    listener.remove();
-  };
-};
-
-appsFlyer.onDeepLink = (callback) => {
-  const listener = appsFlyerEventEmitter.addListener(
-    "onDeepLinking",
-    (_data) => {
-      if (callback && typeof callback === typeof Function) {
-        try {
-          let data = JSON.parse(_data);
-          callback(data);
-        } catch (_error) {
-          callback(new AFParseJSONException("Invalid data structure", _data));
-        }
-      }
-    }
-  );
-
-  eventsMap["onDeepLinking"] = listener;
-
-  // unregister listener (suppose should be called from componentWillUnmount() )
-  return function remove() {
-    listener.remove();
-  };
-};
-
 
 /**
  * validateAndLogInAppPurchase API with AFPurchaseDetails support.
  */
-appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters , callback) => {
+appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters, callback) => {
   const listener = appsFlyerEventEmitter.addListener("onValidationResult", (_data) => {
     if (callback && typeof callback === 'function') {
       if (typeof _data === 'string') {
@@ -765,7 +750,8 @@ appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters
 
   eventsMap["onValidationResult"] = listener;
 
-  RNAppsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, additionalParameters);
+  // Result arrives via the `onValidationResult` event registered above, not this call's response.
+  callRpcVoid("validateAndLogInAppPurchase", { purchaseDetails, additionalParameters });
 
   // unregister listener (suppose should be called from componentWillUnmount() )
   return function remove() {
@@ -781,13 +767,7 @@ appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters
  * @param successC success callback function.
  */
 appsFlyer.anonymizeUser = (shouldAnonymize, successC) => {
-  if (successC) {
-    return RNAppsFlyer.anonymizeUser(shouldAnonymize, successC);
-  } else {
-    return RNAppsFlyer.anonymizeUser(shouldAnonymize, (result) =>
-      console.log(result)
-    );
-  }
+  callRpcWithCallback("anonymizeUser", { shouldAnonymize }, successC);
 };
 
 /**
@@ -799,7 +779,7 @@ appsFlyer.anonymizeUser = (shouldAnonymize, successC) => {
  * @param errorC error callback function.
  */
 appsFlyer.setOneLinkCustomDomains = (domains, successC, errorC) => {
-  return RNAppsFlyer.setOneLinkCustomDomains(domains, successC, errorC);
+  return callRpc("setOneLinkCustomDomains", { domains }).then(successC, errorC);
 };
 
 /**
@@ -812,46 +792,7 @@ appsFlyer.setOneLinkCustomDomains = (domains, successC, errorC) => {
  * @param errorC error callback function.
  */
 appsFlyer.setResolveDeepLinkURLs = (urls, successC, errorC) => {
-  return RNAppsFlyer.setResolveDeepLinkURLs(urls, successC, errorC);
-};
-
-/**
- * This function allows developers to manually re-trigger onAppOpenAttribution with a specific link (URI or URL),
- * without recording a new re-engagement.
- * This method may be required if the app needs to redirect users based on the given link,
- * or resolve the AppsFlyer short URL while staying in the foreground/opened. This might be needed because
- * regular onAppOpenAttribution callback is only called if the app was opened with the deep link.
- * @param urlString String representing the URL that needs to be resolved/returned in the onAppOpenAttribution callback
- * @param callback Result callback
- */
-appsFlyer.performOnAppAttribution = (urlString, successC, errorC) => {
-  if (typeof urlString != "string") {
-    urlString = urlString.toString();
-  }
-  return RNAppsFlyer.performOnAppAttribution(urlString, successC, errorC);
-};
-
-/**
- * @deprecated starting SDK version 6.4.0, please use setSharingFilterForPartners()
- * Used by advertisers to exclude **all** networks/integrated partners from getting data.
- * Learn more - https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data
- */
-
-appsFlyer.setSharingFilterForAllPartners = () => {
-  return appsFlyer.setSharingFilterForPartners(["all"]);
-};
-
-/**
- * @deprecated starting SDK version 6.4.0, please use setSharingFilterForPartners()
- * Used by advertisers to exclude specified networks/integrated partners from getting data.
- * Learn more - https://support.appsflyer.com/hc/en-us/articles/207032126#additional-apis-exclude-partners-from-getting-data
- * @param partners Comma separated array of partners that need to be excluded
- * @param successC Success callback
- * @param errorC Error callback
- */
-
-appsFlyer.setSharingFilter = (partners, _successC, _errorC) => {
-  return appsFlyer.setSharingFilterForPartners(partners);
+  return callRpc("setResolveDeepLinkURLs", { urls }).then(successC, errorC);
 };
 
 /**
@@ -859,25 +800,25 @@ appsFlyer.setSharingFilter = (partners, _successC, _errorC) => {
  * @param shouldDisable Flag to disable/enable IDFA collection
  */
 appsFlyer.disableAdvertisingIdentifier = (isDisable) => {
-  return RNAppsFlyer.disableAdvertisingIdentifier(isDisable);
+  callRpcVoid("setDisableAdvertisingIdentifiers", { isDisable });
 };
 
 /**
  * Disables app vendor identifier (IDFV) collection in iOS
  * @param shouldDisable Flag to disable/enable IDFA collection
- * @platform iOS only
+ * @platform ios
  */
 appsFlyer.disableIDFVCollection = (shouldDisable) => {
-  return RNAppsFlyer.disableIDFVCollection(shouldDisable);
+  callRpcVoid("setDisableIDFVCollection", { shouldDisable });
 };
 
 /**
  * Disables Apple Search Ads collecting
  * @param shouldDisable Flag to disable/enable Apple Search Ads data collection
- * @platform iOS only
+ * @platform ios
  */
 appsFlyer.disableCollectASA = (shouldDisable) => {
-  return RNAppsFlyer.disableCollectASA(shouldDisable);
+  callRpcVoid("setDisableCollectASA", { shouldDisable });
 };
 
 // Export AFPurchaseType enum for the new validateAndLogInAppPurchase API
@@ -886,16 +827,42 @@ export const AFPurchaseType = {
   ONE_TIME_PURCHASE: "one_time_purchase"
 };
 
-/**
- * @deprecated This API is deprecated. Use validateAndLogInAppPurchaseV2 instead.
- */
-appsFlyer.validateAndLogInAppPurchase = (purchaseInfo, successCallback, errorCallback) => {
-  console.warn('[AppsFlyer] validateAndLogInAppPurchase is deprecated. Use validateAndLogInAppPurchaseV2 instead.');
-  return RNAppsFlyer.validateAndLogInAppPurchase(purchaseInfo, successCallback, errorCallback);
-};
+// Pre-7.0.0 these were exposed via the legacy native module's getConstants(); the TurboModule
+// spec has no equivalent, so they're plain JS constants now, under the same names. Values
+// confirmed against the vendored native SDK's AFInAppEventType interface.
+export const AFInAppEventType = Object.freeze({
+  ACHIEVEMENT_UNLOCKED: "af_achievement_unlocked",
+  ADD_PAYMENT_INFO: "af_add_payment_info",
+  ADD_TO_CART: "af_add_to_cart",
+  ADD_TO_WISH_LIST: "af_add_to_wishlist",
+  COMPLETE_REGISTRATION: "af_complete_registration",
+  CONTENT_VIEW: "af_content_view",
+  INITIATED_CHECKOUT: "af_initiated_checkout",
+  INVITE: "af_invite",
+  LEVEL_ACHIEVED: "af_level_achieved",
+  LOCATION_CHANGED: "af_location_changed",
+  LOCATION_COORDINATES: "af_location_coordinates",
+  LOGIN: "af_login",
+  OPENED_FROM_PUSH_NOTIFICATION: "af_opened_from_push_notification",
+  ORDER_ID: "af_order_id",
+  PURCHASE: "af_purchase",
+  RATE: "af_rate",
+  RE_ENGAGE: "af_re_engage",
+  SEARCH: "af_search",
+  SHARE: "af_share",
+  SPENT_CREDIT: "af_spent_credits",
+  TRAVEL_BOOKING: "af_travel_booking",
+  TUTORIAL_COMPLETION: "af_tutorial_completion",
+  UPDATE: "af_update",
+});
 
+/**
+ * Use the sandbox receipt-validation endpoint for in-app purchase validation.
+ * @param isSandbox
+ * @platform ios
+ */
 appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
-  return RNAppsFlyer.setUseReceiptValidationSandbox(isSandbox);
+  callRpcVoid("setUseReceiptValidationSandbox", { isSandbox });
 };
 
 /**
@@ -906,7 +873,9 @@ appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
  * @param pushPayload
  */
 appsFlyer.sendPushNotificationData = (pushPayload, errorC = null) => {
-  return RNAppsFlyer.sendPushNotificationData(pushPayload, errorC);
+  // Note: on Android this triggers an extra Launch event even mid-session — inherited
+  // native SDK behavior, not something this wrapper can suppress.
+  callRpcWithCallback("sendPushNotificationData", pushPayload, errorC);
 };
 
 /**
@@ -916,7 +885,12 @@ appsFlyer.sendPushNotificationData = (pushPayload, errorC = null) => {
  * @param successC: success callback
  */
 appsFlyer.setHost = (hostPrefix, hostName, successC) => {
-  RNAppsFlyer.setHost(hostPrefix, hostName, successC);
+  // Breaking: SDK7 renamed/reordered these into {hostPrefixName, hostName} — see MIGRATION.md.
+  callRpcWithCallback(
+    "setHost",
+    { hostPrefixName: hostPrefix, hostName },
+    successC
+  );
 };
 
 /**
@@ -927,24 +901,26 @@ appsFlyer.setHost = (hostPrefix, hostName, successC) => {
  * @param errorC: error callback
  */
 appsFlyer.addPushNotificationDeepLinkPath = (path, successC, errorC) => {
-  RNAppsFlyer.addPushNotificationDeepLinkPath(path, successC, errorC);
+  callRpc("addPushNotificationDeepLinkPath", { path }).then(successC, errorC);
 };
 
 /**
  * enable or disable SKAD support. set True if you want to disable it!
  * @param isDisabled
+ * @platform ios
  */
 appsFlyer.disableSKAD = (disableSkad) => {
-  return RNAppsFlyer.disableSKAD(disableSkad);
+  callRpcVoid("setDisableSKAdNetwork", { disableSkad });
 };
 
 /**
  * Set the language of the device. The data will be displayed in Raw Data Reports
  * @param language
+ * @platform ios
  */
 appsFlyer.setCurrentDeviceLanguage = (language) => {
   if (typeof language === "string") {
-    return RNAppsFlyer.setCurrentDeviceLanguage(language);
+    callRpcVoid("setCurrentDeviceLanguage", { language });
   }
 };
 
@@ -952,7 +928,7 @@ appsFlyer.setCurrentDeviceLanguage = (language) => {
  *  Used by advertisers to exclude specified networks/integrated partners from getting data.
  */
 appsFlyer.setSharingFilterForPartners = (partners) => {
-  return RNAppsFlyer.setSharingFilterForPartners(partners);
+  callRpcVoid("setSharingFilterForPartners", { partners });
 };
 /**
  * Allows sending custom data for partner integration purposes.
@@ -961,7 +937,7 @@ appsFlyer.setSharingFilterForPartners = (partners) => {
  */
 appsFlyer.setPartnerData = (partnerId, partnerData) => {
   if (typeof partnerId === "string" && typeof partnerData === "object") {
-    return RNAppsFlyer.setPartnerData(partnerId, partnerData);
+    callRpcVoid("setPartnerData", { partnerId, partnerData });
   }
 };
 
@@ -972,20 +948,27 @@ appsFlyer.setPartnerData = (partnerId, partnerData) => {
  */
 appsFlyer.appendParametersToDeepLinkingURL = (contains, parameters) => {
   if (typeof contains === "string" && typeof parameters === "object") {
-    return RNAppsFlyer.appendParametersToDeepLinkingURL(contains, parameters);
+    callRpcVoid("appendParametersToDeepLinkingURL", { contains, parameters });
   }
 };
 
 appsFlyer.setDisableNetworkData = (disable) => {
-  return RNAppsFlyer.setDisableNetworkData(disable);
+  callRpcVoid("setDisableNetworkData", { disable });
 };
 
+// Now returns a Promise (it didn't pre-7.0.0) — callers that ignored the return value are
+// unaffected; callers may now await/.then() it if they choose.
 appsFlyer.startSdk = () => {
-  return RNAppsFlyer.startSdk();
+  return dispatchRpc("start", { awaitResponse: true }).then((response) => {
+    if (!response.success) {
+      return Promise.reject(response.error);
+    }
+    return response.data;
+  });
 };
 
 appsFlyer.performOnDeepLinking = () => {
-  return RNAppsFlyer.performOnDeepLinking();
+  callRpcVoid("performDeepLinking", {});
 };
 
 /**
@@ -993,7 +976,7 @@ appsFlyer.performOnDeepLinking = () => {
  * This method is only relevant for Android platform.
  */
 appsFlyer.disableAppSetId = () => {
-  return RNAppsFlyer.disableAppSetId();
+  callRpcVoid("disableAppSetId", {});
 };
 
 /**
@@ -1001,7 +984,7 @@ appsFlyer.disableAppSetId = () => {
  * @param enabled: if the sdk should collect the TCF data. true/false
  */
 appsFlyer.enableTCFDataCollection = (enabled) => {
-  return RNAppsFlyer.enableTCFDataCollection(enabled);
+  callRpcVoid("enableTCFDataCollection", { enabled });
 };
 
 /**
@@ -1009,19 +992,19 @@ appsFlyer.enableTCFDataCollection = (enabled) => {
  * @param  consentData: AppsFlyerConsent object.
  */
 appsFlyer.setConsentData = (consentData) => {
-  return RNAppsFlyer.setConsentData(consentData);
+  callRpcVoid("setConsentData", consentData);
 };
 
-function AFParseJSONException(_message, _data) {
-  this.message = _message;
-  this.data = _data;
-  this.name = "AFParseJSONException";
+class AFParseJSONException extends Error {
+  constructor(message, data) {
+    super(message);
+    this.name = "AFParseJSONException";
+    this.data = data;
+  }
 }
 
-// Export AFParseJSONException for testing
 export { AFParseJSONException };
 
-// Consent object
 export class AppsFlyerConsent {
     /**
      * Creates an instance of AppsFlyerConsent.
@@ -1041,26 +1024,204 @@ export class AppsFlyerConsent {
         this.hasConsentForAdsPersonalization = hasConsentForAdsPersonalization;
         this.hasConsentForAdStorage = hasConsentForAdStorage;
     }
-
-    /**
-     * @deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.
-     */
-    static forGDPRUser(hasConsentForDataUsage, hasConsentForAdsPersonalization) {
-        console.warn(
-            'AppsFlyerConsent.forGDPRUser is deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.'
-        );
-        return new AppsFlyerConsent(true, hasConsentForDataUsage, hasConsentForAdsPersonalization);
-    }
-
-    /**
-     * @deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.
-     */
-    static forNonGDPRUser() {
-        console.warn(
-            'AppsFlyerConsent.forNonGDPRUser is deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.'
-        );
-        return new AppsFlyerConsent(false);
-    }
 }
+
+// --- Complex config ---
+
+/**
+ * Set the minimum time that must elapse between app launches for a new session to be
+ * counted.
+ * @param {number} seconds minimum number of seconds between sessions.
+ */
+appsFlyer.setMinTimeBetweenSessions = (seconds) =>
+  callRpc("setMinTimeBetweenSessions", { seconds });
+
+/**
+ * Override the AppsFlyer-generated install ID with a custom identifier.
+ * @param {string} installId custom install ID.
+ */
+appsFlyer.setInstallId = (installId) => callRpc("setInstallId", { installId });
+
+/**
+ * Set how long the SDK waits to resolve a deep link before giving up.
+ * @param {number} timeout deep link resolution timeout, in milliseconds.
+ * @remarks Param units (milliseconds) follow the native SDK's documented convention but
+ *   are not independently confirmed against live native source — verify before relying on it.
+ */
+appsFlyer.setDeepLinkTimeout = (timeout) =>
+  callRpc("setDeepLinkTimeout", { timeout });
+
+// --- Deep-link ---
+
+/**
+ * Forward an opened URL (iOS AppDelegate `application:openURL:options:`) to the SDK for
+ * deep link resolution.
+ * @param {string} url the opened URL string.
+ * @param {object} [options] iOS `UIApplication.OpenURLOptionsKey` dictionary, passed
+ *   through as-is.
+ * @platform ios
+ */
+appsFlyer.handleOpenURL = (url, options = {}) =>
+  callRpc("handleOpenURL", { url, options });
+
+/**
+ * Legacy (pre-iOS 9) `application:openURL:sourceApplication:annotation:` deep link path.
+ * Case-sensitive and a distinct RPC method from {@link appsFlyer.handleOpenURL} — do not
+ * collapse the two.
+ * @param {string} url the opened URL string.
+ * @param {string} [sourceApplication] bundle ID of the app that opened this URL.
+ * @param {unknown} [annotation] the annotation property list passed by the source app.
+ * @platform ios
+ */
+appsFlyer.handleOpenUrl = (url, sourceApplication, annotation) =>
+  callRpc("handleOpenUrl", { url, sourceApplication, annotation });
+
+/**
+ * Forward a Universal Link `NSUserActivity` (from AppDelegate's
+ * `application:continueUserActivity:restorationHandler:`) to the SDK.
+ * @param {object} userActivity serializable representation of the user activity
+ *   (e.g. `{webpageURL}`).
+ * @platform ios
+ */
+appsFlyer.continueUserActivity = (userActivity) =>
+  callRpc("continueUserActivity", { userActivity });
+
+/**
+ * Enable or disable resolution of Facebook deferred app links.
+ * @param {boolean} isEnabled
+ */
+appsFlyer.enableFacebookDeferredApplinks = (isEnabled) =>
+  callRpc("enableFacebookDeferredApplinks", { isEnabled });
+
+/**
+ * Explicitly resolve a Facebook deferred app link from the app's `open(url:options:)`
+ * payload.
+ * @param {object} [options] iOS open-URL options dictionary containing the Facebook
+ *   app link data.
+ * @platform ios
+ * @remarks Best-effort passthrough — param shape not confirmed against live native source.
+ */
+appsFlyer.setFacebookDeferredAppLink = (options = {}) =>
+  callRpc("setFacebookDeferredAppLink", options);
+
+// --- Hashed PII (hashed by the native SDK before transmission) ---
+
+/** @param {string} phone */
+appsFlyer.setUserPhone = (phone) => callRpc("setUserPhone", { phone });
+
+/** @param {string} firstName */
+appsFlyer.setUserFirstName = (firstName) =>
+  callRpc("setUserFirstName", { firstName });
+
+/** @param {string} lastName */
+appsFlyer.setUserLastName = (lastName) =>
+  callRpc("setUserLastName", { lastName });
+
+/** @param {string} fbLoginId */
+appsFlyer.setUserFbLoginId = (fbLoginId) =>
+  callRpc("setUserFbLoginId", { fbLoginId });
+
+/** Clear all previously set hashed PII (phone, first/last name, Facebook login ID, emails). */
+appsFlyer.clearUserPii = () => callRpc("clearUserPii");
+
+/**
+ * Forward the app's cold-start launch options (e.g. from a push notification or deep
+ * link) to the SDK during startup.
+ * @param {object} launchOptions the raw launch options dictionary.
+ * @platform ios
+ */
+appsFlyer.handleLaunchOptions = (launchOptions) =>
+  callRpc("handleLaunchOptions", { launchOptions });
+
+// --- Android-only ---
+
+/**
+ * @returns {Promise<string>} the currently configured custom host name.
+ * @platform android
+ */
+appsFlyer.getHostName = () => callRpc("getHostName");
+
+/**
+ * @returns {Promise<string>} the currently configured custom host prefix.
+ * @platform android
+ */
+appsFlyer.getHostPrefix = () => callRpc("getHostPrefix");
+
+/**
+ * @returns {Promise<string>} the currently configured out-of-store source name.
+ * @platform android
+ */
+appsFlyer.getOutOfStore = () => callRpc("getOutOfStore");
+
+/**
+ * @returns {Promise<string>} the Google Play install referrer attribution ID.
+ * @platform android
+ */
+appsFlyer.getAttributionId = () => callRpc("getAttributionId");
+
+/**
+ * @returns {Promise<boolean>} whether the SDK is currently stopped (see {@link appsFlyer.stop}).
+ * @platform android
+ */
+appsFlyer.isStopped = () => callRpc("isStopped");
+
+/**
+ * @returns {Promise<boolean>} whether the app was pre-installed on the device.
+ * @platform android
+ */
+appsFlyer.isPreInstalledApp = () => callRpc("isPreInstalledApp");
+
+/**
+ * Report an out-of-store source (e.g. an alternative app store) for attribution.
+ * @param {string} sourceName
+ * @platform android
+ */
+appsFlyer.setOutOfStore = (sourceName) =>
+  callRpc("setOutOfStore", { sourceName });
+
+/**
+ * Set the native SDK's log verbosity.
+ * @param {string} logLevel one of the native SDK's log level names (e.g. "NONE",
+ *   "DEBUG", "VERBOSE").
+ * @platform android
+ */
+appsFlyer.setLogLevel = (logLevel) => callRpc("setLogLevel", { logLevel });
+
+/**
+ * Mark the current install as an update rather than a fresh install (testing aid).
+ * @param {boolean} isUpdate
+ * @platform android
+ */
+appsFlyer.setIsUpdate = (isUpdate) => callRpc("setIsUpdate", { isUpdate });
+
+/**
+ * Override the app ID reported to AppsFlyer (for apps whose package name differs from
+ * their store listing ID).
+ * @param {string} appId
+ * @platform android
+ */
+appsFlyer.setAppId = (appId) => callRpc("setAppId", { appId });
+
+/**
+ * Report pre-install attribution for apps bundled directly onto a device (OEM deals).
+ * @param {string} mediaSource
+ * @param {string} campaign
+ * @param {string} siteId
+ * @platform android
+ */
+appsFlyer.setPreinstallAttribution = (mediaSource, campaign, siteId) =>
+  callRpc("setPreinstallAttribution", { mediaSource, campaign, siteId });
+
+/**
+ * Explicitly log a new session.
+ * @platform android
+ */
+appsFlyer.logSession = () => callRpc("logSession");
+
+/**
+ * Forward the host Activity's `onPause` lifecycle event to the SDK.
+ * @platform android
+ */
+appsFlyer.onPause = () => callRpc("onPause");
 
 export default appsFlyer;

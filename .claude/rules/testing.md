@@ -12,67 +12,65 @@ Scope: `__tests__/` directory, `jest.config.js`, test-related changes.
 
 - Jest via `react-native` preset with `ts-jest` for TypeScript test support
 - Config: `jest.config.js`
-- Setup: `__tests__/setup.js` — mocks `NativeModules.RNAppsFlyer` (every native method is `jest.fn()`) and `NativeEventEmitter`
+- Setup: `__tests__/setup.js` — mocks `src/NativeAppsFlyer` (the TurboModule spec) so every `executeRpc` call returns a configurable resolved Promise; also mocks `NativeEventEmitter` using RN's own official manual mock
 - Run: `npm test` (jest with coverage)
 
 ## 2. Test files
 
 | File | Focus |
 |------|-------|
-| `__tests__/index.test.js` | Core API surface + event emitters (~80 tests) |
-| `__tests__/compatibility.test.js` | Backward compat for consent, StoreKit, callbacks (~15 tests) |
-| `__tests__/linting.test.js` | ESLint validation of source files (~6 tests) |
-| `__tests__/purchase-connector.test.ts` | PurchaseConnector models + interface (~40 tests) |
+| `__tests__/index.test.js` | Core API surface — asserts each typed wrapper calls `executeRpc` with the correct method name and params |
+| `__tests__/rpc-contract.test.js` | Generic `executeRpc` round-trip: normalized success/error shapes, event-channel pass-through, listener-registration RPC wiring, FR-007 unsupported-method normalization |
+| `__tests__/threading.test.js` | Constitution gate: `start()` settles with a distinguishable timeout failure instead of hanging |
+| `__tests__/compatibility.test.js` | Backward compat for consent, StoreKit, callbacks |
+| `__tests__/linting.test.js` | ESLint validation of source files |
+| `__tests__/purchase-connector.test.ts` | PurchaseConnector models + interface (legacy bridge, unchanged) |
 
 ## 3. Test pattern: mock-and-verify
 
-All tests follow the same pattern:
-1. Call the JS API method
-2. Assert the correct **native method** was called with expected arguments
-3. For event emitters: emit an event, assert the handler received correct data
+All JS tests mock `src/NativeAppsFlyer.executeRpc` and assert against the serialized request:
 
 ```js
 // Example pattern
-appsFlyer.logEvent('af_purchase', { af_revenue: 10 }, successCB, errorCB);
-expect(RNAppsFlyer.logEvent).toHaveBeenCalledWith('af_purchase', { af_revenue: 10 }, successCB, errorCB);
+NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
+await appsFlyer.setCustomerUserId('uid-123');
+const [requestJson] = NativeAppsFlyer.executeRpc.mock.calls[0];
+expect(JSON.parse(requestJson)).toEqual({ method: 'setCustomerUserId', params: { customerId: 'uid-123' } });
 ```
 
-No integration tests or native-level tests exist. All native modules are fully mocked.
+Do **not** assert on `NativeModules.RNAppsFlyer` — that object is not used in the TurboModule path.
 
 ## 4. Event listener tests
 
-Test both paths:
-- Happy path: native emits valid JSON string → handler receives parsed object
-- Parse failure: native emits invalid JSON → handler receives `AFParseJSONException` object
+Use `freshModule()` (defined in `rpc-contract.test.js`) when a test needs a clean module instance — it calls `jest.resetModules()` and re-requires `index.js` + `NativeAppsFlyer` + `NativeEventEmitter` fresh, because listener-registration state is module-level.
+
+Test the event channel by constructing a `NativeEventEmitter` from the fresh mock and calling `.emit('onRPCEvent', envelopePayload)` directly.
 
 ## 5. Compatibility tests
 
-`compatibility.test.js` verifies deprecated APIs still work at runtime. When deprecating a method, add a test here proving the old call signature still routes correctly.
+`compatibility.test.js` verifies that the public API still works for known patterns. When making a breaking change, update or remove the relevant compat test and add a migration-guide pointer.
 
 ## 6. Linting-as-tests
 
-`linting.test.js` runs ESLint programmatically inside Jest. This is unusual but ensures lint rules are enforced in CI even without a separate lint step.
+`linting.test.js` runs ESLint programmatically inside Jest. This ensures lint rules are enforced in CI without a separate lint step.
 
-## 7. Coverage gaps (known)
+## 7. Coverage gaps (known, open tasks)
 
-These areas have **no test coverage** — adding tests here is high-value:
-- Expo config plugins (`expo/withAppsFlyer.js`, `expo/withAppsFlyerIos.js`, `expo/withAppsFlyerAndroid.js`)
-- Native-level unit tests (no XCTest, no Android JUnit)
-- `logAdRevenue`, `logLocation`, `logCrossPromotionImpression`, `logCrossPromotionAndOpenStore`
-- Edge cases in event listener cleanup (multiple listeners, unmount timing)
+- Native-level iOS XCTest (`RNAppsFlyerImpl.swift` RPC dispatch, error normalization, threading) — T062
+- Native-level Android JUnit/Robolectric (`RNAppsFlyerModule.kt`) — T063
+- Expo config plugins (`expo/withAppsFlyer*.js`) — T064
+- Live-device quickstart scenarios (killed-state deep link, full parity check) — T051, T061, T067
 
-## 8. What to test when adding a new method
+## 8. What to test when adding a new RPC method
 
-1. JS API calls correct native method name with correct arguments
-2. Promise variant returns a Promise (not undefined)
-3. Callback variant invokes the provided callbacks
-4. Input validation (if any) rejects invalid types
-5. Add backward-compat test if the method replaces a deprecated one
+1. `index.test.js`: the JS wrapper calls `executeRpc` with the exact method name and correct param object
+2. `rpc-contract.test.js` (if relevant): any normalized error-handling or event-demux behavior
+3. No native-level test required for the wrapper itself — the native handler is tested at the native tier (T062/T063)
 
 ## 9. Do not mock internals
 
-Tests should only mock `NativeModules` (via `setup.js`). Do not mock internal JS functions within `index.js` — test through the public API surface.
+Tests should only mock `src/NativeAppsFlyer` (via `setup.js`) and `NativeEventEmitter` (via the official RN manual mock). Do not mock internal helpers (`callRpc`, `dispatchRpc`, etc.) inside `index.js` — test through the public API surface.
 
 ## 10. Avoid tautological tests
 
-Some existing tests assert constants equal themselves (e.g., `expect('ironsource').toBe('ironsource')`). Do not add more of these — they test nothing.
+Do not assert constants equal themselves. Tests must be able to fail if the implementation breaks.

@@ -2,13 +2,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import {View, Text, StyleSheet, FlatList, Pressable, Platform} from 'react-native';
 import {ListItem, Avatar, Button} from 'react-native-elements';
-import {
-  getSubscriptions,
-  requestPurchase,
-  requestSubscription,
-  RequestPurchase,
-  finishTransaction,
-} from 'react-native-iap';
 import Confetti from './Confetti';
 
 // Memoized row: re-renders only when its product or remove handler changes, so
@@ -76,55 +69,6 @@ const groupKeyExtractor = group => group.key;
 const Cart = ({route, navigation}) => {
   const {productList, removeProductFromCart, checkout} = route.params;
   const [summary, setSummary] = useState(null);
-
-  /*
-  // Added methods
-  const purchase = async (sku: string) => {
-    try {
-      let purchaseParams: RequestPurchase = {
-        sku,
-        andDangerouslyFinishTransactionAutomaticallyIOS: false,
-      };
-      if (Platform.OS === 'android') {
-        purchaseParams = {skus: [sku]};
-      }
-      await requestPurchase(purchaseParams);
-    } catch (err) {
-      console.warn(err.code, err.message);
-    }
-  };
-
-  const subscribe = async (sku, offerToken) => {
-    try {
-      const offerDetails = await getSubscriptions({skus: [sku]});
-      const subscriptionOffer = offerDetails.find(
-        offer => offer.productId === sku,
-      );
-
-      // Check if offer details exist for the sku
-      if (Platform.OS == 'android') {
-        if (
-          !subscriptionOffer ||
-          !subscriptionOffer.subscriptionOfferDetails ||
-          subscriptionOffer.subscriptionOfferDetails.length === 0
-        ) {
-          throw new Error(
-            'Subscription offer details not found for sku: ' + sku,
-          );
-        }
-        const offerToken =
-          subscriptionOffer.subscriptionOfferDetails[0].offerToken;
-      }
-
-      await requestSubscription({
-        sku,
-        ...(offerToken && {subscriptionOffers: [{sku, offerToken}]}),
-      });
-    } catch (err) {
-      console.warn(err.code, err.message);
-    }
-  };
-  */
 
   const total = useMemo(
     () => productList.reduce((sum, p) => sum + p.price, 0),

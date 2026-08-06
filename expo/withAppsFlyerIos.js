@@ -1,36 +1,14 @@
-const { withAppDelegate, withDangerousMod, withXcodeProject, WarningAggregator } = require('@expo/config-plugins');
+const { withAppDelegate, withDangerousMod, WarningAggregator } = require('@expo/config-plugins');
 const { mergeContents } = require('@expo/config-plugins/build/utils/generateCode');
-const { getAppDelegate } = require('@expo/config-plugins/build/ios/Paths');
 const fs = require('fs');
 const path = require('path');
 
-function getBridgingHeaderPathFromXcode(project) {
-  const buildConfigs = project.pbxXCBuildConfigurationSection();
-
-  for (const key in buildConfigs) {
-    const config = buildConfigs[key];
-    if (
-      typeof config === 'object' &&
-      config.buildSettings &&
-      config.buildSettings['SWIFT_OBJC_BRIDGING_HEADER']
-    ) {
-      const bridgingHeaderPath = config.buildSettings[
-        'SWIFT_OBJC_BRIDGING_HEADER'
-      ].replace(/"/g, '');
-
-      return bridgingHeaderPath;
-    }
-  }
-
-  return null;
-}
-
 function modifyObjcAppDelegate(appDelegate) {
-  const RNAPPSFLYER_IMPORT = `#import <RNAppsFlyer.h>\n`;
+  const RNAPPSFLYER_IMPORT = `#import <AppsFlyerLib/AppsFlyerLib.h>\n`;
   const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER = `- (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {`;
   const RNAPPSFLYER_OPENURL_IDENTIFIER = `- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {`;
-  const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE = `[[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];\n`;
-  const RNAPPSFLYER_OPENURL_CODE = `[[AppsFlyerAttribution shared] handleOpenUrl:url options:options];\n`;
+  const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE = `[[AppsFlyerLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];\n`;
+  const RNAPPSFLYER_OPENURL_CODE = `[[AppsFlyerLib shared] handleOpenUrl:url options:options];\n`;
 
   if (!appDelegate.includes(RNAPPSFLYER_IMPORT)) {
     appDelegate = RNAPPSFLYER_IMPORT + appDelegate;
@@ -51,19 +29,25 @@ function modifyObjcAppDelegate(appDelegate) {
 }
 
 function modifySwiftAppDelegate(appDelegateContents) {
+  const SWIFT_IMPORT = 'import AppsFlyerLib';
+
   const SWIFT_OPENURL_IDENTIFIER = `  public override func application(
     _ app: UIApplication,
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {`;
-  const RNAPPSFLYER_SWIFT_OPENURL_CODE = 'AppsFlyerAttribution.shared().handleOpen(url, options: options)';
+  const RNAPPSFLYER_SWIFT_OPENURL_CODE = 'AppsFlyerLib.shared().handleOpen(url, options: options)';
 
   const SWIFT_CONTINUE_USER_ACTIVITY_IDENTIFIER = `  public override func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
     restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
   ) -> Bool {`;
-  const RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE = 'AppsFlyerAttribution.shared().continue(userActivity, restorationHandler: nil)';
+  const RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE = 'AppsFlyerLib.shared().continue(userActivity, restorationHandler: nil)';
+
+  if (!appDelegateContents.includes(SWIFT_IMPORT)) {
+    appDelegateContents = `${SWIFT_IMPORT}\n${appDelegateContents}`;
+  }
 
   if (appDelegateContents.includes(SWIFT_OPENURL_IDENTIFIER) && !appDelegateContents.includes(RNAPPSFLYER_SWIFT_OPENURL_CODE)) {
     appDelegateContents = appDelegateContents.replace(SWIFT_OPENURL_IDENTIFIER, `${SWIFT_OPENURL_IDENTIFIER}\n    ${RNAPPSFLYER_SWIFT_OPENURL_CODE}`);
@@ -80,11 +64,14 @@ function modifySwiftAppDelegate(appDelegateContents) {
 Automatic Swift AppDelegate modification failed.
 Please add AppsFlyer integration manually:
 
-1. Add this to your openURL method:
-  AppsFlyerAttribution.shared().handleOpen(url, options: options)
+1. Add this import:
+  import AppsFlyerLib
 
-2. Add this to your continueUserActivity method:
-  AppsFlyerAttribution.shared().continue(userActivity, restorationHandler: nil)
+2. Add this to your openURL method:
+  AppsFlyerLib.shared().handleOpen(url, options: options)
+
+3. Add this to your continueUserActivity method:
+  AppsFlyerLib.shared().continue(userActivity, restorationHandler: nil)
 
 Supported format: Expo SDK default template
 `
@@ -108,50 +95,6 @@ function withAppsFlyerAppDelegate(config) {
     return config;
   });
 }
-
-const withIosBridgingHeader = (config) => {
-  return withXcodeProject(config, (action) => {
-    const projectRoot = action.modRequest.projectRoot;
-    const appDelegate = getAppDelegate(projectRoot);
-
-    if (appDelegate.language === 'swift') {
-      const bridgingHeaderPath = getBridgingHeaderPathFromXcode(
-        action.modResults,
-      );
-
-      const bridgingHeaderFilePath = path.join(
-        action.modRequest.platformProjectRoot,
-        bridgingHeaderPath,
-      );
-
-      if (fs.existsSync(bridgingHeaderFilePath)) {
-        let content = fs.readFileSync(bridgingHeaderFilePath, 'utf8');
-        const appsFlyerImport = '#import <RNAppsFlyer.h>';
-
-        if (!content.includes(appsFlyerImport)) {
-          content += `${appsFlyerImport}\n`;
-          fs.writeFileSync(bridgingHeaderFilePath, content);
-        }
-
-        return action;
-      }
-
-      WarningAggregator.addWarningIOS(
-        'withIosBridgingHeader',
-`
-Failed to detect ${bridgingHeaderPath} file. Please add AppsFlyer integration manually:
-#import <RNAppsFlyer.h>
-
-Supported format: Expo SDK default template
-`
-      );
-
-      return action; 
-    }
-
-    return action;
-  });
-};
 
 function withPodfile(config, shouldUseStrictMode, shouldUsePurchaseConnector) {
   return withDangerousMod(config, [
@@ -212,7 +155,6 @@ module.exports = function withAppsFlyerIos(config, {
   shouldUsePurchaseConnector = false 
 } = {}) {
   config = withPodfile(config, shouldUseStrictMode, shouldUsePurchaseConnector);
-  config = withIosBridgingHeader(config);
   config = withAppsFlyerAppDelegate(config);
   return config;
 };

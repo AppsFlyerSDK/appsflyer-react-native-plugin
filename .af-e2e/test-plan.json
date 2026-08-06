@@ -106,10 +106,10 @@
         },
         {
           "id": "on_deep_linking_callback",
-          "description": "onDeepLinking fires (NOT_FOUND expected on clean launch)",
+          "description": "onDeepLinking fires (NOT_FOUND expected on clean launch) — iOS always invokes this callback on cold launch even with no deep link; Android's SDK only invokes it when an actual deep link is present, so this warns instead of fails on Android",
           "type": "log_contains",
           "pattern": "[AF_QA][CALLBACK][onDeepLinking]",
-          "fail_action": "fail"
+          "fail_action": "warn"
         },
         {
           "id": "no_fatal_errors",
@@ -293,6 +293,7 @@
       "scenario_ref": "E2E-005",
       "description": "Fresh install. Verify setCustomerUserId, setCurrencyCode, setAdditionalData propagate correctly. Identity-check event receives HTTP 200. is_first_launch=true still fires.",
       "requires_fresh_install": true,
+      "requires_device_identity_reset": true,
       "wait_after_launch_sec": 420,
       "checks": [
         {

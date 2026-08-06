@@ -1,13 +1,13 @@
 // @ts-nocheck — QA test app; runtime correctness verified against index.d.ts signatures
 import React, {useEffect} from 'react';
-import {Platform, View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 import appsFlyer, {AppsFlyerConsent} from 'react-native-appsflyer';
 import {afLog, afCallbackLog, afLifecycleLog} from './AfQaLogger';
 import Config from 'react-native-config';
 
 export default function App() {
   useEffect(() => {
-    runAutoFlow();
+    runAutoFlow().catch(error => afLog('runAutoFlow', `error: ${JSON.stringify(error)}`));
   }, []);
 
   return (
@@ -17,7 +17,25 @@ export default function App() {
   );
 }
 
-function runAutoFlow() {
+// startSdk() still lives inside registerSessionReadyListener's callback — that's the
+// documented contract (AppsFlyerLib.h: "Call start inside the block. The SDK does not call
+// start automatically."), unchanged. This only wraps it in a Promise so the caller can
+// await the whole thing: makes start() deterministically first in the RPC dispatch order
+// instead of racing whatever synchronous JS runs after the (fire-and-forget) registration
+// call returns.
+function startWhenSessionReady() {
+  return new Promise<void>((resolve, reject) => {
+    appsFlyer.registerSessionReadyListener(() => {
+      afCallbackLog('onSessionReady', 'session ready — starting SDK');
+      appsFlyer.startSdk().then(() => {
+        afLog('startSDK', 'result: called');
+        resolve();
+      }, reject);
+    });
+  });
+}
+
+async function runAutoFlow() {
   const devKey = Config.DEV_KEY;
   const appId = Config.APP_ID;
 
@@ -26,13 +44,33 @@ function runAutoFlow() {
     return;
   }
 
-  // 1. Register callbacks BEFORE initSdk (critical — listeners must be attached first)
+  // Resolves on the first onInstallConversionData delivery — lets the stop/resume
+  // sequence below wait on the real event instead of a guessed timeout, so stop(true)
+  // can't fire while conversion data is still in flight.
+  let resolveConversionDataReceived: () => void;
+  const conversionDataReceived = new Promise<void>(resolve => {
+    resolveConversionDataReceived = resolve;
+  });
+
+  // 1. init -> setIsDebug -> register listeners.
+  // Deliberately NOT awaited: registration calls below must reach native before init's
+  // promise resolves (bridge-patterns.md §4) — RpcInitGate only buffers them until init
+  // *completes*, and awaiting init here would round-trip back to JS after that buffer may
+  // already have flushed, risking a dropped onInstallConversionData/onDeepLink event that
+  // fires shortly after init. appId is always safe to pass — Android's RPC init handler
+  // only reads devKey and ignores extra fields; only iOS actually requires/uses appId.
+  appsFlyer.init(devKey, appId).then(
+    result => afLog('init', `result: ${JSON.stringify(result)}`),
+    error => afLog('init', `error: ${JSON.stringify(error)}`),
+  );
+
+  appsFlyer.setIsDebug(true);
+
   appsFlyer.onInstallConversionData(data => {
     afCallbackLog('onInstallConversionData', JSON.stringify(data));
+    resolveConversionDataReceived();
   });
-  appsFlyer.onAppOpenAttribution(data => {
-    afCallbackLog('onAppOpenAttribution', JSON.stringify(data));
-  });
+  // onAppOpenAttribution removed in 7.0.0 — attribution data now arrives via onDeepLink (MIGRATION.md)
   appsFlyer.onDeepLink(data => {
     afCallbackLog(
       'onDeepLinking',
@@ -58,27 +96,10 @@ function runAutoFlow() {
 
   afLifecycleLog('--- Pre-start auto APIs complete ---');
 
-  // 3. Start SDK with manualStart — initSdk configures, startSdk fires the actual start
-  appsFlyer.initSdk(
-    {
-      devKey: devKey,
-      isDebug: true,
-      appId: Platform.OS === 'ios' ? appId : undefined,
-      manualStart: true,
-      onInstallConversionDataListener: true,
-      onDeepLinkListener: true,
-    },
-    result => {
-      afLog('initSdk', `result: ${JSON.stringify(result)}`);
-    },
-    error => {
-      afLog('initSdk', `error: ${JSON.stringify(error)}`);
-    },
-  );
-
-  // startSdk() is void (fire-and-forget); success confirmed via onInstallConversionData callback
-  appsFlyer.startSdk();
-  afLog('startSDK', 'result: called');
+  // 3. startSdk only fires once registerSessionReadyListener's callback confirms the SDK is
+  // ready (real native callback, or the bridge's own fallback — either way this resolves).
+  // Everything below only runs after start() has dispatched.
+  await startWhenSessionReady();
 
   // 4. Post-start APIs
   appsFlyer.getAppsFlyerUID((err, uid) => {
@@ -96,7 +117,7 @@ function runAutoFlow() {
   appsFlyer
     .logEvent('af_demo_launch', {platform: 'react-native'})
     .then((result: any) => afLog('logEvent(af_demo_launch)', `result: ${result}`))
-    .catch((error: any) => afLog('logEvent(af_demo_launch)', `error: ${error}`));
+    .catch((error: any) => afLog('logEvent(af_demo_launch)', `error: ${JSON.stringify(error)}`));
 
   appsFlyer
     .logEvent('af_purchase', {
@@ -105,7 +126,7 @@ function runAutoFlow() {
       af_content_id: 'qa-item-001',
     })
     .then((result: any) => afLog('logEvent(af_purchase)', `result: ${result}`))
-    .catch((error: any) => afLog('logEvent(af_purchase)', `error: ${error}`));
+    .catch((error: any) => afLog('logEvent(af_purchase)', `error: ${JSON.stringify(error)}`));
 
   appsFlyer
     .logEvent('af_content_view', {
@@ -113,7 +134,7 @@ function runAutoFlow() {
       af_content_type: 'test',
     })
     .then((result: any) => afLog('logEvent(af_content_view)', `result: ${result}`))
-    .catch((error: any) => afLog('logEvent(af_content_view)', `error: ${error}`));
+    .catch((error: any) => afLog('logEvent(af_content_view)', `error: ${JSON.stringify(error)}`));
 
   // 6. Custom event with rich params (E2E-004)
   const customPurchaseParams = {
@@ -133,7 +154,7 @@ function runAutoFlow() {
       afLog('logEvent(af_qa_custom_purchase)', `result: ${result}`),
     )
     .catch((error: any) =>
-      afLog('logEvent(af_qa_custom_purchase)', `error: ${error}`),
+      afLog('logEvent(af_qa_custom_purchase)', `error: ${JSON.stringify(error)}`),
     );
 
   // 7. Identity-check event (E2E-005)
@@ -144,7 +165,7 @@ function runAutoFlow() {
       afLog('logEvent(af_qa_identity_check)', `result: ${result}`),
     )
     .catch((error: any) =>
-      afLog('logEvent(af_qa_identity_check)', `error: ${error}`),
+      afLog('logEvent(af_qa_identity_check)', `error: ${JSON.stringify(error)}`),
     );
 
   // 8. Consent & sharing APIs
@@ -156,40 +177,46 @@ function runAutoFlow() {
   afLog('setConsentData', 'result: GDPR consent set');
 
   // 9. Stop/resume cycle (E2E-006)
-  // Delay so the SDK has time to receive onInstallConversionData from the
-  // server before we stop it. Without this, stop(true) fires ~9ms after
-  // startSdk() and kills the in-flight conversion data request.
-  setTimeout(() => {
-  appsFlyer.stop(true, () => {
-    afLog('stop', 'result: true');
+  // Wait for the real onInstallConversionData event instead of a guessed timeout —
+  // stop(true) firing before conversion data arrives kills the in-flight request.
+  await conversionDataReceived;
 
-    appsFlyer
-      .logEvent('af_qa_suppressed', {phase: 'stopped'})
-      .then((result: any) =>
-        afLog('logEvent(af_qa_suppressed)', `result: ${result}`),
-      )
-      .catch((error: any) =>
-        afLog('logEvent(af_qa_suppressed)', `error: ${error}`),
-      );
-
-    setTimeout(() => {
-      appsFlyer.stop(false, () => {
-        afLog('stop', 'result: false');
-
-        appsFlyer
-          .logEvent('af_qa_resumed', {phase: 'restarted'})
-          .then((result: any) =>
-            afLog('logEvent(af_qa_resumed)', `result: ${result}`),
-          )
-          .catch((error: any) =>
-            afLog('logEvent(af_qa_resumed)', `error: ${error}`),
-          );
-
-        afLifecycleLog('--- Auto run complete ---');
-      });
-    }, 3000);
+  await new Promise<void>(resolve => {
+    appsFlyer.stop(true, () => {
+      afLog('stop', 'result: true');
+      resolve();
+    });
   });
-  }, 10000);
+
+  // awaitResponse: true — round-trips to AppsFlyerLib's real completionHandler so we can
+  // observe whether isStopped actually suppresses this event. Awaited so stop(false) below
+  // cannot fire until this round-trip is done — otherwise the "stopped" window wouldn't
+  // cover the full request and the result would say nothing about suppression.
+  try {
+    const result = await appsFlyer.logEvent('af_qa_suppressed', {phase: 'stopped'}, true);
+    afLog('logEvent(af_qa_suppressed)', `result: ${JSON.stringify(result)}`);
+  } catch (error: any) {
+    afLog('logEvent(af_qa_suppressed)', `error: ${JSON.stringify(error)}`);
+  }
+
+  await new Promise<void>(resolve => {
+    appsFlyer.stop(false, () => {
+      afLog('stop', 'result: false');
+      resolve();
+    });
+  });
+
+  // Awaited too — the harness polls for the "Auto run complete" marker below as its
+  // signal to stop waiting and collect logs, so it must not print until this result
+  // (and its HTTP round-trip) has actually landed in the log file.
+  try {
+    const result = await appsFlyer.logEvent('af_qa_resumed', {phase: 'restarted'}, true);
+    afLog('logEvent(af_qa_resumed)', `result: ${JSON.stringify(result)}`);
+  } catch (error: any) {
+    afLog('logEvent(af_qa_resumed)', `error: ${JSON.stringify(error)}`);
+  }
+
+  afLifecycleLog('--- Auto run complete ---');
 }
 
 const styles = StyleSheet.create({

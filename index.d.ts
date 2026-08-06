@@ -1,6 +1,3 @@
-/**
- * Typescript Definition Sync with v5.1.1
- **/
 import InAppPurchaseValidationResult from "./PurchaseConnector/models/in_app_purchase_validation_result";
 import SubscriptionValidationResult from "./PurchaseConnector/models/subscription_validation_result";
 import {
@@ -10,7 +7,6 @@ import {
 } from "./PurchaseConnector/utils/connector_callbacks";
 
 declare module "react-native-appsflyer" {
-  type Response<T> = void | Promise<T>;
   type SuccessCB = (result?: unknown) => unknown;
   type ErrorCB = (error?: Error) => unknown;
   export type ConversionData = {
@@ -21,36 +17,6 @@ declare module "react-native-appsflyer" {
       media_source: string;
       campaign: string;
       af_status: "Organic" | "Non-organic";
-      [key: string]: any;
-    };
-  };
-
-  export type OnAppOpenAttributionData = {
-    status: "success" | "failure";
-    type: "onAppOpenAttribution" | "onAttributionFailure";
-    data: {
-      af_dp?: string;
-      is_retargeting?: string;
-      af_channel?: string;
-      af_cost_currency?: string;
-      c?: string;
-      af_adset?: string;
-      af_click_lookback: string;
-      deep_link_sub1?: string;
-      campaign: string;
-      deep_link_value: string;
-      link: string;
-      media_source: string;
-      pid?: string;
-      path?: string; // Uri-Scheme
-      host?: string; // Uri-Scheme
-      shortlink?: string; // Uri-Scheme
-      scheme?: string; // Uri-Scheme
-      af_sub1?: string;
-      af_sub2?: string;
-      af_sub3?: string;
-      af_sub4?: string;
-      af_sub5?: string;
       [key: string]: any;
     };
   };
@@ -72,6 +38,17 @@ declare module "react-native-appsflyer" {
             af_sub3?: string;
             af_sub4?: string;
             af_sub5?: string;
+            af_dp?: string;
+            is_retargeting?: string;
+            af_channel?: string;
+            af_cost_currency?: string;
+            c?: string;
+            af_adset?: string;
+            af_click_lookback?: string;
+            path?: string; // Uri-Scheme
+            host?: string; // Uri-Scheme
+            shortlink?: string; // Uri-Scheme
+            scheme?: string; // Uri-Scheme
             [key: string]: any;
         }
     }
@@ -79,27 +56,6 @@ declare module "react-native-appsflyer" {
   export enum AF_EMAIL_CRYPT_TYPE {
     NONE,
     SHA256,
-  }
-
-  export interface InitSDKOptions {
-    devKey: string;
-    appId?: string; // iOS only
-    isDebug?: boolean;
-    onInstallConversionDataListener?: boolean;
-    onDeepLinkListener?: boolean;
-    timeToWaitForATTUserAuthorization?: number; // iOS only
-    manualStart?: boolean;
-  }
-
-  export interface InAppPurchase {
-    publicKey: string;
-    productIdentifier: string;
-    signature: string;
-    transactionId: string;
-    purchaseData: string;
-    price: string;
-    currency: string;
-    additionalParameters?: object;
   }
 
   export enum AFPurchaseType {
@@ -152,25 +108,6 @@ declare module "react-native-appsflyer" {
             hasConsentForAdsPersonalization?: boolean,
             hasConsentForAdStorage?: boolean
         );
-
-        /**
-         * @deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.
-         */
-        static forGDPRUser(hasConsentForDataUsage: boolean, hasConsentForAdsPersonalization: boolean): AppsFlyerConsent;
-
-        /**
-         * @deprecated since version 6.16.2. Use the AppsFlyerConsent constructor instead for more flexibility with optional booleans.
-         */
-        static forNonGDPRUser(): AppsFlyerConsent;
-    }
-
-    /**
-     * @deprecated since version 6.16.2. Use the AppsFlyerConsent class instead for a more integrated approach to consent management.
-     */
-    export interface AppsFlyerConsentType {
-        isUserSubjectToGDPR: boolean;
-        hasConsentForDataUsage?: boolean;
-        hasConsentForAdsPersonalization?: boolean;
     }
 
   //Log Ad Revenue Section
@@ -191,7 +128,6 @@ declare module "react-native-appsflyer" {
     DIRECT_MONETIZATION_NETWORK,
   }
 
-  //Interface representing ad revenue information
   export interface AFAdRevenueData {
     monetizationNetwork: string;
     mediationNetwork: MEDIATION_NETWORK;
@@ -221,12 +157,10 @@ declare module "react-native-appsflyer" {
 
   // iOS interfaces
 
-  //PurchaseRevenueDataSourceSK1
   export interface PurchaseRevenueDataSource {
     additionalParameters?: { [key: string]: any };
   }
-  
-  // PurchaseRevenueDataSourceStoreKit2
+
   export interface PurchaseRevenueDataSourceStoreKit2 {
     additionalParameters?: { [key: string]: any };
   }
@@ -275,8 +209,6 @@ declare module "react-native-appsflyer" {
 
   export const AppsFlyerPurchaseConnector: PurchaseConnector;
 
-  /**********************************/
-
   const appsFlyer: {
     onInstallConversionData(
       callback: (data: ConversionData) => any
@@ -284,25 +216,51 @@ declare module "react-native-appsflyer" {
     onInstallConversionFailure(
       callback: (data: ConversionData) => any
     ): () => void;
-    onAppOpenAttribution(
-      callback: (data: OnAppOpenAttributionData) => any
-    ): () => void;
-    onAttributionFailure(
-      callback: (data: OnAppOpenAttributionData) => any
-    ): () => void;
     onDeepLink(callback: (data: UnifiedDeepLinkData) => any): () => void;
-    initSdk(options: InitSDKOptions): Promise<string>;
-    initSdk(
-      options: InitSDKOptions,
-      successC: SuccessCB,
-      errorC: ErrorCB
-    ): void;
-    logEvent(eventName: string, eventValues: object): Promise<string>;
+    /**
+     * Fires once the native SDK's session becomes ready to serve attribution/deep-link data.
+     * Net-new in 7.0.0 -- see MIGRATION.md.
+     */
+    registerSessionReadyListener(callback: () => void): () => void;
+    /**
+     * Query whether the native SDK's session is ready to serve attribution/deep-link data.
+     * Net-new in 7.0.0 -- see MIGRATION.md.
+     */
+    isSessionReady(): Promise<boolean>;
+    /**
+     * Remove a previously registered session-ready listener.
+     * Net-new in 7.0.0 -- see MIGRATION.md.
+     */
+    unregisterSessionReadyListener(): void;
+    /**
+     * Set the native SDK's debug logging flag. A dedicated RPC call, separate from `init`.
+     */
+    setIsDebug(isDebug: boolean): void;
+    /**
+     * Initialize the SDK with the dev key (and appId, required on iOS).
+     */
+    init(devKey: string, appId?: string): Promise<string>;
+    /**
+     * By default (`awaitResponse` omitted or `false`), resolves once the SDK accepts the
+     * event onto its internal queue — not once it's delivered to AppsFlyer's server.
+     * Delivery is fire-and-forget; use the native SDK's own debug logs to verify server
+     * receipt if needed.
+     *
+     * Pass `awaitResponse: true` to instead wait for the native SDK's own completion
+     * handler (round-trips to AppsFlyer's server) — use when the caller needs to know the
+     * event actually reached the server, e.g. to observe `isStopped`-suppression behavior.
+     */
+    logEvent(
+      eventName: string,
+      eventValues: object,
+      awaitResponse?: boolean
+    ): Promise<string>;
     logEvent(
       eventName: string,
       eventValues: object,
       successC: SuccessCB,
-      errorC: ErrorCB
+      errorC: ErrorCB,
+      awaitResponse?: boolean
     ): void;
     setUserEmails(
       options: SetEmailsOptions,
@@ -320,6 +278,7 @@ declare module "react-native-appsflyer" {
       successC: SuccessCB,
       errorC: ErrorCB
     ): void;
+    logInvite(channel?: string, eventParameters?: object): void;
     logCrossPromotionImpression(
       appId: string,
       campaign: string,
@@ -342,30 +301,11 @@ declare module "react-native-appsflyer" {
       successC: SuccessCB,
       errorC: ErrorCB
     ): void;
-    performOnAppAttribution(
-      urlString: string,
-      successC: SuccessCB,
-      errorC: ErrorCB
-    ): void;
-    setSharingFilterForAllPartners(): void;
-    setSharingFilter(
-      partners: string[],
-      successC?: SuccessCB,
-      errorC?: ErrorCB
-    ): void;
     logLocation(
       longitude: number,
       latitude: number,
       successC?: SuccessCB
     ): void;
-    /**
-     * @deprecated This API is deprecated. Use validateAndLogInAppPurchaseV2 instead.
-     */
-    validateAndLogInAppPurchase(
-      purchaseInfo: InAppPurchase,
-      successC: SuccessCB,
-      errorC: ErrorCB
-    ): Response<string>;
     /**
      * validateAndLogInAppPurchase API with AFPurchaseDetails.
      * Uses event emitter pattern for callback handling.
@@ -407,11 +347,116 @@ declare module "react-native-appsflyer" {
     /**
      * For Android Only
      * */
-    setCollectIMEI(isCollect: boolean, successC?: SuccessCB): void;
     setCollectAndroidID(isCollect: boolean, successC?: SuccessCB): void;
     setDisableNetworkData(disable: boolean): void;
     performOnDeepLinking(): void;
     disableAppSetId(): void;
+
+    // --- Complex config (net-new) ---
+
+    /** Minimum number of seconds that must elapse between sessions for a new one to count. */
+    setMinTimeBetweenSessions(seconds: number): Promise<void>;
+    /** Override the AppsFlyer-generated install ID with a custom identifier. */
+    setInstallId(installId: string): Promise<void>;
+    /**
+     * Deep link resolution timeout, in milliseconds.
+     * @remarks Param key/units inferred from native SDK convention, not independently
+     * confirmed against live native source for this plugin version.
+     */
+    setDeepLinkTimeout(timeout: number): Promise<void>;
+
+    // --- Deep-link (net-new) ---
+
+    /**
+     * Forward an opened URL (iOS `application:openURL:options:`) for deep link resolution.
+     * @platform ios
+     */
+    handleOpenURL(url: string, options?: Record<string, unknown>): Promise<void>;
+    /**
+     * Legacy (pre-iOS 9) `application:openURL:sourceApplication:annotation:` path.
+     * Case-sensitive and distinct from {@link handleOpenURL} — do not collapse the two.
+     * @platform ios
+     */
+    handleOpenUrl(
+      url: string,
+      sourceApplication?: string,
+      annotation?: unknown
+    ): Promise<void>;
+    /**
+     * Forward a Universal Link `NSUserActivity` for deep link resolution.
+     * @platform ios
+     */
+    continueUserActivity(userActivity: Record<string, unknown>): Promise<void>;
+    /** Enable or disable resolution of Facebook deferred app links. */
+    enableFacebookDeferredApplinks(isEnabled: boolean): Promise<void>;
+    /**
+     * Explicitly resolve a Facebook deferred app link from the app's `open(url:options:)` payload.
+     * @platform ios
+     * @remarks Param shape is a best-effort passthrough, not confirmed against live
+     * native source — not present in the Android RPC contract at all.
+     */
+    setFacebookDeferredAppLink(options?: Record<string, unknown>): Promise<void>;
+
+    // --- Hashed PII (net-new) ---
+
+    /** Set the user's phone number. Hashed by the native SDK before transmission. */
+    setUserPhone(phone: string): Promise<void>;
+    /** Set the user's first name. Hashed by the native SDK before transmission. */
+    setUserFirstName(firstName: string): Promise<void>;
+    /** Set the user's last name. Hashed by the native SDK before transmission. */
+    setUserLastName(lastName: string): Promise<void>;
+    /** Set the user's Facebook login ID. Hashed by the native SDK before transmission. */
+    setUserFbLoginId(fbLoginId: string): Promise<void>;
+    /** Clear all previously set hashed PII (phone, first/last name, Facebook login ID, emails). */
+    clearUserPii(): Promise<void>;
+
+    // --- Lifecycle (net-new) ---
+
+    /**
+     * Forward the app's cold-start launch options to the SDK during startup.
+     * @platform ios
+     * @remarks Not present in the Android RPC contract's supported method list.
+     */
+    handleLaunchOptions(launchOptions: Record<string, unknown>): Promise<void>;
+
+    // --- Android-only (net-new) ---
+
+    /** @platform android */
+    getHostName(): Promise<string>;
+    /** @platform android */
+    getHostPrefix(): Promise<string>;
+    /** @platform android */
+    getOutOfStore(): Promise<string>;
+    /** @platform android */
+    getAttributionId(): Promise<string>;
+    /** @platform android */
+    isStopped(): Promise<boolean>;
+    /** @platform android */
+    isPreInstalledApp(): Promise<boolean>;
+    /** @platform android */
+    setOutOfStore(sourceName: string): Promise<void>;
+    /**
+     * @platform android
+     * @param logLevel one of the native SDK's log level names (e.g. "NONE", "DEBUG", "VERBOSE").
+     */
+    setLogLevel(logLevel: string): Promise<void>;
+    /** @platform android */
+    setIsUpdate(isUpdate: boolean): Promise<void>;
+    /** @platform android */
+    setAppId(appId: string): Promise<void>;
+    /**
+     * Report pre-install attribution for apps bundled directly onto a device (OEM deals).
+     * @platform android
+     */
+    setPreinstallAttribution(
+      mediaSource: string,
+      campaign: string,
+      siteId: string
+    ): Promise<void>;
+    /** @platform android */
+    logSession(): Promise<void>;
+    /** @platform android */
+    onPause(): Promise<void>;
   };
 
   export default appsFlyer;

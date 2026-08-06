@@ -6,7 +6,6 @@ import { Money } from '../PurchaseConnector/models/money_model';
 import { OfferDetails } from '../PurchaseConnector/models/offer_details';
 import { AutoRenewingPlan } from '../PurchaseConnector/models/auto_renewing_plan';
 
-// Mock PCAppsFlyer
 jest.mock('../node_modules/react-native/Libraries/BatchedBridge/NativeModules', () => ({
   PCAppsFlyer: {
     startObservingTransactions: jest.fn(),
@@ -20,20 +19,22 @@ jest.mock('../node_modules/react-native/Libraries/BatchedBridge/NativeModules', 
   },
 }));
 
-// Mock NativeEventEmitter
-jest.mock('react-native/Libraries/EventEmitter/NativeEventEmitter', () => {
-  return jest.fn().mockImplementation(() => ({
+// Mock NativeEventEmitter. RN's NativeEventEmitter.js is an ES `export default class` —
+// the mock factory must return the same { __esModule, default } interop shape, or
+// react-native's own barrel re-export (`export {default as NativeEventEmitter} from ...`)
+// resolves to undefined and `new NativeEventEmitter(...)` throws "is not a constructor".
+jest.mock('react-native/Libraries/EventEmitter/NativeEventEmitter', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => ({
     addListener: jest.fn().mockReturnValue({
       remove: jest.fn(),
     }),
-  }));
-});
+  })),
+}));
 
-// Mock the PCAppsFlyer import
 const { PCAppsFlyer } = require('../node_modules/react-native/Libraries/BatchedBridge/NativeModules');
 const { NativeEventEmitter } = require('react-native');
 
-// Import the actual modules using require
 const { AppsFlyerPurchaseConnector, AppsFlyerPurchaseConnectorConfig, StoreKitVersion } = require('../index');
 
 describe('PurchaseConnector Models', () => {

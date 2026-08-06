@@ -1,3 +1,28 @@
+## 7.0.1
+ Release date: *TBD*
+
+- React Native >> Rewrite native bridge as a New-Architecture-only TurboModule, routing every native call through each platform's RPC layer (`AppsFlyerRPCBridge` on iOS, `AppsFlyerRpcHandler` on Android)
+- React Native >> Remove legacy vendored native SDK headers/sources under `ios/` left over from the pre-RPC bridge (`AppsFlyerLib.h` and related deep-link/consent/ad-revenue/cross-promotion/share-invite headers, unused `AppsFlyerAttribution` class) — none were referenced by the TurboModule bridge or `PurchaseConnector`
+- React Native >> Consolidate duplicated string-coercion logic in `index.js` setters into a single helper; align `initSdk`/`logEvent`/`logAdRevenue` with the rest of the file's direct-arrow-assignment convention; `AFParseJSONException` now extends `Error`
+
+### Breaking changes
+
+See [MIGRATION.md](MIGRATION.md) for full before/after examples for each item below.
+
+- **New Architecture required** — React Native >=0.76.0 with New Architecture enabled. Apps not yet on New Architecture must stay on 6.x (critical/security fixes for 6 months from release).
+- **`validateAndLogInAppPurchase` removed** — legacy non-V2 purchase validation API removed with no adapter. Use `validateAndLogInAppPurchaseV2` or `AppsFlyerPurchaseConnector`.
+- **`setCollectIMEI` removed** — Android IMEI collection has no RPC equivalent; IMEI is unavailable on modern Android anyway.
+- **`initInAppPurchaseValidatorListener` removed** — was unreachable dead code in the Android module; no JS call site ever invoked it.
+- **`onAppOpenAttribution` / `onAttributionFailure` / `performOnAppAttribution` removed** — merged into `onDeepLink` on both platforms, matching iOS SDK post-SDK7 unified model.
+- **`AFInAppEventType.*` constants moved** — no longer exposed via `NativeModules.RNAppsFlyer.getConstants()`; import from the package directly: `import { AFInAppEventType } from 'react-native-appsflyer'`.
+- **`setSharingFilterForAllPartners` / `setSharingFilter` removed** — deprecated since 6.4.0. Use `setSharingFilterForPartners`.
+- **`AppsFlyerConsent.forGDPRUser` / `AppsFlyerConsent.forNonGDPRUser` removed** — deprecated since 6.16.2. Use the `AppsFlyerConsent` constructor.
+- **`AppsFlyerConsentType` (TS interface) removed** — deprecated since 6.16.2. Use the `AppsFlyerConsent` class for typing.
+- **`InAppPurchase` (TS interface) removed** — unused dead type from the pre-V2 purchase-validation API; use `AFPurchaseDetails`.
+- **`initSdk(options)` replaced by `init(devKey, appId?)`** — Promise-only, positional, matches the native RPC call's real shape. `isDebug`/`onInstallConversionDataListener`/`onDeepLinkListener`/`timeToWaitForATTUserAuthorization`/`manualStart` removed from the old options object; use `setIsDebug()`, `onInstallConversionData()`/`onDeepLink()` (already register natively), and always-explicit `startSdk()` instead. `InitSDKOptions` TS interface removed. `timeToWaitForATTUserAuthorization` has no current replacement.
+- **`registerSessionReadyListener` added** — both native RPC layers already emitted a real `onSessionReady` event; the JS event demux had no bucket wired for it, so the event was silently dropped. Now a public listener method matching `onDeepLink`'s pattern.
+- **`logEvent` no longer waits for server delivery** — previously sent `awaitResponse: true` on Android, blocking the native RPC thread until the event's HTTP request to AppsFlyer's server completed (or timed out), which could also delay other queued RPC calls (e.g. `registerSessionReadyListener`/`start()`) behind it. The resolved/rejected Promise (or success/error callback) now reflects only that the SDK accepted the event onto its internal queue, not that it reached the server.
+
 ## 6.18.0-rc3
  Release date: *2026-05-18*
 

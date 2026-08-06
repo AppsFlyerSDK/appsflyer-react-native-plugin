@@ -19,6 +19,7 @@ buildscript {
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android' // Apply Kotlin Android plugin
+apply plugin: 'com.facebook.react'
 
 def includeConnector = project.hasProperty('appsflyer.enable_purchase_connector') ? project.property('appsflyer.enable_purchase_connector').toBoolean() : false // Moved outside of android block
 
@@ -30,10 +31,8 @@ android {
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 21)
         targetSdkVersion safeExtGet('targetSdkVersion', 34)
-        versionCode 1
-        versionName "1.0"
         ndk {
-            abiFilters "armeabi-v7a", "x86"
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
 
         buildConfigField 'boolean', 'INCLUDE_CONNECTOR', includeConnector.toString()
@@ -52,6 +51,12 @@ android {
     testOptions {
         unitTests.includeAndroidResources = true
         unitTests.returnDefaultValues = true
+        // ponytail: no unit tests remain now that RpcInitGate.kt is gone (bridge module is a pure
+        // passthrough); avoid Gradle 8+ failing the build on an empty test source set. Add tests
+        // back here (and drop this) if real branching logic returns to this module.
+        unitTests.all {
+            it.failOnNoDiscoveredTests = false
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -65,14 +70,32 @@ android {
 repositories {
     mavenCentral()
     maven { url "https://maven.google.com" }
+    // Phase A (research.md R8): plugin_bridge + a matching af-android-sdk build are not yet
+    // published to Maven — vendored .aar files are resolved from android/libs/ via flatDir.
+    // Phase B (once published): drop this flatDir block and the two `name:`-based
+    // implementations below in favor of real `com.appsflyer:<artifact>:<version>` coordinates.
+    flatDir { dirs 'libs' }
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10" // Add Kotlin standard library
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    api "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.18.0')}"
+    // af-android-sdk now comes from the vendored aars below (Phase A, research.md R8) —
+    // NOT also from Maven, to avoid a duplicate-class conflict (plugin_bridge's af-android-sdk
+    // build vs a separately-resolved Maven version). PCAppsFlyer compiles against this same
+    // vendored SDK build.
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.2')}"
     if (includeConnector){
         implementation 'com.appsflyer:purchase-connector:2.2.0'
     }
+
+    // Phase A vendored RPC binaries (research.md R8) — af-android-sdk-base/dev.aar together
+    // constitute af-android-sdk itself; af-android-plugin-bridge.aar is the RPC handler.
+    // Phase B (once published): replace all three with real com.appsflyer:<artifact>:<version>
+    // Maven coordinates and delete the vendored .aar files from android/libs/.
+    api(name: 'af-android-sdk-base', ext: 'aar')
+    api(name: 'af-android-sdk-dev', ext: 'aar')
+    implementation(name: 'af-android-plugin-bridge', ext: 'aar')
+
+    testImplementation 'junit:junit:4.13.2'
 }

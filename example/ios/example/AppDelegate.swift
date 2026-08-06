@@ -3,6 +3,7 @@ import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
 import react_native_appsflyer
+import AppsFlyerLib
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -64,7 +65,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
     NSLog("[AF_QA][DEEPLINK_NATIVE] openURL received: %@", url.absoluteString)
-    AppsFlyerAttribution.shared().handleOpen(url, options: options)
+    AppsFlyerLib.shared().handleOpen(url, options: options)
     return true
   }
 
@@ -74,7 +75,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     restorationHandler: @escaping ([Any]?) -> Void
   ) -> Bool {
     NSLog("[AF_QA][DEEPLINK_NATIVE] continueUserActivity: %@", userActivity.webpageURL?.absoluteString ?? "nil")
-    AppsFlyerAttribution.shared().continue(userActivity, restorationHandler: restorationHandler)
+    _ = AppsFlyerLib.shared().continue(userActivity, restorationHandler: restorationHandler)
     return true
   }
 }
