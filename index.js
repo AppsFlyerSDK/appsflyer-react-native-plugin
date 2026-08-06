@@ -1,4 +1,4 @@
-import { NativeEventEmitter, NativeModules } from "react-native";
+import { NativeEventEmitter, NativeModules, Platform } from "react-native";
 import NativeAppsFlyer from "./src/NativeAppsFlyer";
 import AppsFlyerConstants from "./PurchaseConnector/constants/constants";
 import InAppPurchaseValidationResult from "./PurchaseConnector/models/in_app_purchase_validation_result";
@@ -22,7 +22,6 @@ if (typeof jest === "undefined") {
 }
 
 const appsFlyer = {};
-const eventsMap = {};
 const appsFlyerEventEmitter = new NativeEventEmitter(NativeAppsFlyer);
 
 //Purchase Connector native bridge objects
@@ -283,26 +282,29 @@ function dispatchRpc(method, params) {
   );
 }
 
-// Unwraps normalized { success, data|error } into resolve(data)/reject(error).
-function callRpc(method, params = {}) {
-  return dispatchRpc(method, params).then((response) => {
-    if (!response.success) {
-      const error = response.error;
-      // ponytail: Android maps unknown-method to 422 with this message substring; normalize to 404
-      // to match iOS's dedicated 404 per rpc-error-normalization-contract.md §FR-007 Decision —
-      // remove when Android throws METHOD_NOT_FOUND (404) for real.
-      if (
-        error &&
-        error.code === 422 &&
-        typeof error.message === "string" &&
-        error.message.indexOf("Unknown or missing method") !== -1
-      ) {
-        return Promise.reject({ code: 404, message: error.message });
-      }
-      return Promise.reject(error);
+// Unwraps normalized { success, data|error } into resolve(data)/reject(error). Shared by callRpc
+// and setUserFbLoginId, which bypasses callRpc's JSON.stringify to avoid Number()'s precision loss.
+function unwrapRpcResponse(response) {
+  if (!response.success) {
+    const error = response.error;
+    // ponytail: Android maps unknown-method to 422 with this message substring; normalize to 404
+    // to match iOS's dedicated 404 per rpc-error-normalization-contract.md §FR-007 Decision —
+    // remove when Android throws METHOD_NOT_FOUND (404) for real.
+    if (
+      error &&
+      error.code === 422 &&
+      typeof error.message === "string" &&
+      error.message.indexOf("Unknown or missing method") !== -1
+    ) {
+      return Promise.reject({ code: 404, message: error.message });
     }
-    return response.data;
-  });
+    return Promise.reject(error);
+  }
+  return response.data;
+}
+
+function callRpc(method, params = {}) {
+  return dispatchRpc(method, params).then(unwrapRpcResponse);
 }
 
 // For void-returning config setters: fire the call, log instead of throwing on failure.
@@ -312,15 +314,23 @@ function callRpcVoid(method, params) {
   );
 }
 
-// For the "single callback, console.log fallback" methods (bridge-patterns.md #2).
+// Legacy single-callback methods (bridge-patterns.md #2) receive errors too, so warn before forwarding.
 function callRpcWithCallback(method, params, successC) {
   const callback = successC || ((result) => console.log(result));
-  callRpc(method, params).then(callback, callback);
+  callRpc(method, params).then(callback, (error) => {
+    console.warn(`[AppsFlyer] ${method} failed:`, error);
+    callback(error);
+  });
 }
 
 // Coerces a value to a string, falling back when null/undefined.
 function toStringOrEmpty(value, fallback = "") {
   return value == null ? fallback : String(value);
+}
+
+// iOS wraps getter values in a keyed dict ({uid}, {version}), Android returns the bare value; `in` (not truthiness) so a falsy value like isSessionReady:false still unwraps.
+function unwrapKeyed(data, key) {
+  return data && typeof data === "object" && key in data ? data[key] : data;
 }
 
 // devKey/appId only, positional — matches AFRPCInitRequest's real wire shape (see MIGRATION.md).
@@ -367,8 +377,27 @@ export const MEDIATION_NETWORK = Object.freeze({
 	DIRECT_MONETIZATION_NETWORK : "direct_monetization_network"
 });
 
+const MEDIATION_NETWORK_OVERRIDES = {
+  [MEDIATION_NETWORK.APPLOVIN_MAX]: { android: "applovinmax" },
+  [MEDIATION_NETWORK.GOOGLE_ADMOB]: { android: "googleadmob" },
+  [MEDIATION_NETWORK.TOPON_PTE]: { android: "toponpte" },
+  [MEDIATION_NETWORK.CUSTOM_MEDIATION]: { android: "customMediation", ios: "custom" },
+  [MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK]: {
+    android: "directMonetizationNetwork",
+    ios: "directmonetization",
+  },
+};
+
+function resolveMediationNetworkWireValue(mediationNetwork) {
+  const override = MEDIATION_NETWORK_OVERRIDES[mediationNetwork];
+  return (override && override[Platform.OS]) || mediationNetwork;
+}
+
 appsFlyer.logAdRevenue = (adRevenueData) => {
-  callRpcVoid("logAdRevenue", adRevenueData);
+  callRpcVoid("logAdRevenue", {
+    ...adRevenueData,
+    mediationNetwork: resolveMediationNetworkWireValue(adRevenueData && adRevenueData.mediationNetwork),
+  });
 };
 
 /**
@@ -396,19 +425,40 @@ appsFlyer.logLocation = (longitude, latitude, callback) => {
 };
 
 /**
- * Set the user emails and encrypt them.
+ * Set the user's email address. Hashed by the native SDK before transmission.
  *
- * @param options latitude as double.
+ * @param email the email address.
  * @param successC success callback function.
  * @param errorC error callback function.
  */
-appsFlyer.setUserEmails = (options, successC, errorC) => {
-  // Android has no array-accepting native method, so it loops and calls `setUserEmail`
-  // once per address internally; the JS signature here is unchanged on both platforms.
-  return callRpc("setUserEmails", options).then(
+appsFlyer.setUserEmail = (email, successC, errorC) => {
+  return callRpc("setUserEmail", { email: toStringOrEmpty(email) }).then(
     (data) => successC && successC(data),
     (error) => errorC && errorC(error)
   );
+};
+
+/**
+ * @deprecated since 7.0.0 — use {@link appsFlyer.setUserEmail}. SDK7's RPC layer exposes only
+ * a single-address `setUserEmail`; neither the email array nor `emailsCryptType` has a native
+ * counterpart on either platform. Only the first address is sent.
+ */
+appsFlyer.setUserEmails = (options, successC, errorC) => {
+  const { emails, emailsCryptType } = options || {};
+  console.warn(
+    "[AppsFlyer] setUserEmails is deprecated and will be removed — use setUserEmail(email). " +
+      "SDK7 supports a single address" +
+      (emailsCryptType !== undefined
+        ? " and no longer supports emailsCryptType (ignored)."
+        : ".")
+  );
+  const [first, ...rest] = Array.isArray(emails) ? emails : [];
+  if (rest.length) {
+    console.warn(
+      `[AppsFlyer] setUserEmails: only the first of ${rest.length + 1} addresses is sent.`
+    );
+  }
+  return appsFlyer.setUserEmail(first, successC, errorC);
 };
 
 /**
@@ -418,7 +468,7 @@ appsFlyer.setUserEmails = (options, successC, errorC) => {
  * @param successC success callback function.
  */
 appsFlyer.setAdditionalData = (additionalData, successC) => {
-  callRpcWithCallback("setAdditionalData", additionalData, successC);
+  callRpcWithCallback("setAdditionalData", { customData: additionalData }, successC);
 };
 
 /**
@@ -428,14 +478,14 @@ appsFlyer.setAdditionalData = (additionalData, successC) => {
  */
 appsFlyer.getAppsFlyerUID = (callback) => {
   callRpc("getAppsFlyerUID", {}).then(
-    (data) => callback(null, data),
+    (data) => callback(null, unwrapKeyed(data, "uid")),
     (error) => callback(error, null)
   );
 };
 
 appsFlyer.getSDKVersion = (callback) => {
-  callRpc("getSDKVersion", {}).then(
-    (data) => callback(null, data),
+  callRpc("getSdkVersion", {}).then(
+    (data) => callback(null, unwrapKeyed(data, "version")),
     (error) => callback(error, null)
   );
 };
@@ -447,8 +497,13 @@ appsFlyer.getSDKVersion = (callback) => {
  * @param successC success callback function.
  */
 appsFlyer.updateServerUninstallToken = (token, successC) => {
-  // iOS natively hex-encodes this token before dispatching; Android passes it through as-is.
-  callRpcWithCallback("updateServerUninstallToken", { token: toStringOrEmpty(token) }, successC);
+  // iOS reads `deviceToken` (via registerUninstall), Android reads `token` — send both.
+  const value = toStringOrEmpty(token);
+  callRpcWithCallback(
+    "updateServerUninstallToken",
+    { token: value, deviceToken: value },
+    successC
+  );
 };
 
 /**
@@ -459,7 +514,7 @@ appsFlyer.updateServerUninstallToken = (token, successC) => {
  * @param successC callback function.
  */
 appsFlyer.setCustomerUserId = (userId, successC) => {
-  callRpcWithCallback("setCustomerUserId", { userId: toStringOrEmpty(userId) }, successC);
+  callRpcWithCallback("setCustomerUserId", { customerId: toStringOrEmpty(userId) }, successC);
 };
 
 /**
@@ -471,7 +526,8 @@ appsFlyer.setCustomerUserId = (userId, successC) => {
  * @param successC callback function.
  */
 appsFlyer.stop = (isStopped, successC) => {
-  callRpcWithCallback("stop", { isStopped }, successC);
+  // Wire param is `shouldStop` on both platforms; public JS arg name stays `isStopped` for compatibility.
+  callRpcWithCallback("stop", { shouldStop: isStopped }, successC);
 };
 
 /**
@@ -495,7 +551,7 @@ appsFlyer.setCollectAndroidID = (isCollect, successC) => {
  * @param successC callback function.
  */
 appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
-  callRpcWithCallback("setAppInviteOneLink", { oneLinkID: toStringOrEmpty(oneLinkID) }, successC);
+  callRpcWithCallback("setAppInviteOneLink", { oneLinkId: toStringOrEmpty(oneLinkID) }, successC);
 };
 
 /**
@@ -506,8 +562,23 @@ appsFlyer.setAppInviteOneLinkID = (oneLinkID, successC) => {
  * @param success success callback function..
  * @param error error callback function.
  */
-appsFlyer.generateInviteLink = (parameters, success, error) => {
-  return callRpc("generateInviteLink", parameters).then(success, error);
+appsFlyer.generateInviteLink = (parameters = {}, success, error) => {
+  // customerID → both referrerCustomerId (iOS) and customerId (Android); deeplinkPath has no native counterpart.
+  const { customerID, baseDeeplink, deeplinkPath, ...rest } = parameters;
+  if (deeplinkPath !== undefined) {
+    console.warn(
+      "[AppsFlyer] generateInviteLink: `deeplinkPath` is not supported by the native SDK and is ignored."
+    );
+  }
+  const payload = { ...rest };
+  if (customerID !== undefined) {
+    payload.referrerCustomerId = customerID;
+    payload.customerId = customerID;
+  }
+  if (baseDeeplink !== undefined) {
+    payload.baseDeepLink = baseDeeplink;
+  }
+  return callRpc("generateInviteLink", payload).then(success, error);
 };
 
 /**
@@ -535,7 +606,7 @@ appsFlyer.logCrossPromotionImpression = (appId, campaign, parameters) => {
   callRpcVoid("logCrossPromoteImpression", {
     appId: toStringOrEmpty(appId),
     campaign: toStringOrEmpty(campaign),
-    parameters,
+    userParams: parameters,
   });
 };
 
@@ -551,10 +622,11 @@ appsFlyer.logCrossPromotionAndOpenStore = (appId, campaign, params) => {
     console.log("appid is missing!");
     return;
   }
+  // `promotedAppId`, not `appId` — differs from logCrossPromoteImpression on both platforms.
   callRpcVoid("logAndOpenStore", {
-    appId: toStringOrEmpty(appId),
+    promotedAppId: toStringOrEmpty(appId),
     campaign: toStringOrEmpty(campaign),
-    params,
+    userParams: params,
   });
 };
 
@@ -709,15 +781,10 @@ appsFlyer.registerSessionReadyListener = createBucketListener(
  * Net-new in 7.0.0 — no 6.x equivalent.
  * @returns {Promise<boolean>}
  */
-appsFlyer.isSessionReady = () => {
-  ensureSessionReadyListenerRegistered();
-  return callRpc("isSessionReady", {}).then((data) => {
-    if (data && typeof data === "object" && "isSessionReady" in data) {
-      return Boolean(data.isSessionReady);
-    }
-    return Boolean(data);
-  });
-};
+appsFlyer.isSessionReady = () =>
+  callRpc("isSessionReady", {}).then((data) =>
+    Boolean(unwrapKeyed(data, "isSessionReady"))
+  );
 
 /**
  * Remove a previously registered session-ready listener.
@@ -729,34 +796,44 @@ appsFlyer.unregisterSessionReadyListener = () => {
   callRpcVoid("unregisterSessionReadyListener", {});
 };
 
+// Maps Android's AFPurchaseType spelling to the camelCase form iOS's purchaseTypeMapping requires.
+const IOS_PURCHASE_TYPES = Object.freeze({
+  one_time_purchase: "oneTimePurchase",
+  subscription: "subscription",
+});
+
 /**
  * validateAndLogInAppPurchase API with AFPurchaseDetails support.
+ *
+ * @remarks The `callback` param is currently inert: neither native side emits a
+ *   validation-result event through the single RPC channel (bridge-patterns.md §3), so there is
+ *   nothing to deliver it. A prior version of this method subscribed to a raw `"onValidationResult"`
+ *   event name that no native code ever emitted — under New Architecture, RCTEventEmitter crashes
+ *   on `addListener` for any event outside the module's declared `supportedEvents`, so every call
+ *   to this method crashed the host app. Wiring a real result event requires native emission work
+ *   on both platforms; until then this only dispatches the RPC (see the 401/500 you get back if
+ *   the app isn't registered for purchase validation — that's an expected server-side response,
+ *   not a bridge failure).
  */
-appsFlyer.validateAndLogInAppPurchaseV2 = (purchaseDetails, additionalParameters, callback) => {
-  const listener = appsFlyerEventEmitter.addListener("onValidationResult", (_data) => {
-    if (callback && typeof callback === 'function') {
-      if (typeof _data === 'string') {
-        try {
-          const parsed = JSON.parse(_data);
-          callback(parsed);
-        } catch {
-          callback(new AFParseJSONException('Invalid JSON string', _data));
-        }
-      } else {
-        callback(_data);
-      }
-    }
+appsFlyer.validateAndLogInAppPurchase = (purchaseDetails, additionalParameters, _callback) => {
+  // iOS wants nested {product:{productId}, transaction:{transactionId, purchaseType}}; Android
+  // wants flat {productId, purchaseToken, purchaseType} (purchaseToken == transactionId). Send
+  // the union — each side reads its own keys and its own purchaseType spelling (IOS_PURCHASE_TYPES).
+  const { productId, transactionId, purchaseType } = purchaseDetails || {};
+  callRpcVoid("validateAndLogInAppPurchase", {
+    product: { productId },
+    transaction: {
+      transactionId,
+      purchaseType: IOS_PURCHASE_TYPES[purchaseType] || purchaseType,
+    },
+    productId,
+    purchaseToken: transactionId,
+    purchaseType,
+    additionalParameters,
   });
 
-  eventsMap["onValidationResult"] = listener;
-
-  // Result arrives via the `onValidationResult` event registered above, not this call's response.
-  callRpcVoid("validateAndLogInAppPurchase", { purchaseDetails, additionalParameters });
-
-  // unregister listener (suppose should be called from componentWillUnmount() )
-  return function remove() {
-    listener.remove();
-  };
+  // No-op: kept for signature compatibility with callers that unregister in componentWillUnmount().
+  return function remove() {};
 };
 
 /**
@@ -779,7 +856,7 @@ appsFlyer.anonymizeUser = (shouldAnonymize, successC) => {
  * @param errorC error callback function.
  */
 appsFlyer.setOneLinkCustomDomains = (domains, successC, errorC) => {
-  return callRpc("setOneLinkCustomDomains", { domains }).then(successC, errorC);
+  return callRpc("setOneLinkCustomDomain", { domains }).then(successC, errorC);
 };
 
 /**
@@ -800,7 +877,11 @@ appsFlyer.setResolveDeepLinkURLs = (urls, successC, errorC) => {
  * @param shouldDisable Flag to disable/enable IDFA collection
  */
 appsFlyer.disableAdvertisingIdentifier = (isDisable) => {
-  callRpcVoid("setDisableAdvertisingIdentifiers", { isDisable });
+  // Divergent key names for the same flag: iOS reads `disable`, Android reads `isDisable`.
+  callRpcVoid("setDisableAdvertisingIdentifiers", {
+    isDisable,
+    disable: isDisable,
+  });
 };
 
 /**
@@ -809,7 +890,7 @@ appsFlyer.disableAdvertisingIdentifier = (isDisable) => {
  * @platform ios
  */
 appsFlyer.disableIDFVCollection = (shouldDisable) => {
-  callRpcVoid("setDisableIDFVCollection", { shouldDisable });
+  callRpcVoid("setDisableIDFVCollection", { disable: shouldDisable });
 };
 
 /**
@@ -818,7 +899,7 @@ appsFlyer.disableIDFVCollection = (shouldDisable) => {
  * @platform ios
  */
 appsFlyer.disableCollectASA = (shouldDisable) => {
-  callRpcVoid("setDisableCollectASA", { shouldDisable });
+  callRpcVoid("setDisableCollectASA", { disable: shouldDisable });
 };
 
 // Export AFPurchaseType enum for the new validateAndLogInAppPurchase API
@@ -862,7 +943,7 @@ export const AFInAppEventType = Object.freeze({
  * @platform ios
  */
 appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
-  callRpcVoid("setUseReceiptValidationSandbox", { isSandbox });
+  callRpcVoid("setUseReceiptValidationSandbox", { sandbox: isSandbox });
 };
 
 /**
@@ -872,10 +953,34 @@ appsFlyer.setUseReceiptValidationSandbox = (isSandbox) => {
  * Learn more - https://support.appsflyer.com/hc/en-us/articles/207364076-Measuring-Push-Notification-Re-Engagement-Campaigns
  * @param pushPayload
  */
-appsFlyer.sendPushNotificationData = (pushPayload, errorC = null) => {
-  // Note: on Android this triggers an extra Launch event even mid-session — inherited
-  // native SDK behavior, not something this wrapper can suppress.
-  callRpcWithCallback("sendPushNotificationData", pushPayload, errorC);
+appsFlyer.sendPushNotificationData = (
+  pushPayload,
+  errorC = null,
+  androidCampaignData = null
+) => {
+  // Note: on Android this triggers an extra Launch event even mid-session — inherited native SDK behavior.
+  // iOS locates the `af` block in the raw payload itself; Android SDK7 dropped raw-payload
+  // support and needs campaign/pid/isRetargeting supplied explicitly by the caller instead.
+  const { campaign, pid, isRetargeting, additionalParameters } =
+    androidCampaignData || {};
+  if (!androidCampaignData) {
+    console.warn(
+      "[AppsFlyer] sendPushNotificationData: no androidCampaignData supplied — Android " +
+        "requires explicit {campaign, pid, isRetargeting} and will report an empty " +
+        "re-engagement without it. iOS is unaffected."
+    );
+  }
+  callRpcWithCallback(
+    "sendPushNotificationData",
+    {
+      pushPayload,
+      campaign: toStringOrEmpty(campaign),
+      pid: toStringOrEmpty(pid),
+      isRetargeting: !!isRetargeting,
+      additionalParameters,
+    },
+    errorC
+  );
 };
 
 /**
@@ -901,7 +1006,7 @@ appsFlyer.setHost = (hostPrefix, hostName, successC) => {
  * @param errorC: error callback
  */
 appsFlyer.addPushNotificationDeepLinkPath = (path, successC, errorC) => {
-  callRpc("addPushNotificationDeepLinkPath", { path }).then(successC, errorC);
+  callRpc("addPushNotificationDeepLinkPath", { deepLinkPath: path }).then(successC, errorC);
 };
 
 /**
@@ -910,7 +1015,7 @@ appsFlyer.addPushNotificationDeepLinkPath = (path, successC, errorC) => {
  * @platform ios
  */
 appsFlyer.disableSKAD = (disableSkad) => {
-  callRpcVoid("setDisableSKAdNetwork", { disableSkad });
+  callRpcVoid("setDisableSKAdNetwork", { disable: disableSkad });
 };
 
 /**
@@ -937,7 +1042,7 @@ appsFlyer.setSharingFilterForPartners = (partners) => {
  */
 appsFlyer.setPartnerData = (partnerId, partnerData) => {
   if (typeof partnerId === "string" && typeof partnerData === "object") {
-    callRpcVoid("setPartnerData", { partnerId, partnerData });
+    callRpcVoid("setPartnerData", { partnerId, data: partnerData });
   }
 };
 
@@ -952,23 +1057,31 @@ appsFlyer.appendParametersToDeepLinkingURL = (contains, parameters) => {
   }
 };
 
+/**
+ * Disable the SDK's network data collection.
+ * @param disable
+ * @platform android
+ */
 appsFlyer.setDisableNetworkData = (disable) => {
-  callRpcVoid("setDisableNetworkData", { disable });
+  callRpcVoid("setDisableNetworkData", { isDisable: disable });
 };
 
 // Now returns a Promise (it didn't pre-7.0.0) — callers that ignored the return value are
 // unaffected; callers may now await/.then() it if they choose.
-appsFlyer.startSdk = () => {
-  return dispatchRpc("start", { awaitResponse: true }).then((response) => {
-    if (!response.success) {
-      return Promise.reject(response.error);
-    }
-    return response.data;
-  });
-};
+appsFlyer.startSdk = () => callRpc("start", { awaitResponse: true });
 
-appsFlyer.performOnDeepLinking = () => {
-  callRpcVoid("performDeepLinking", {});
+/**
+ * Re-run deep link resolution for a URL.
+ * @param {string} url the deep link URL to resolve.
+ * @param {boolean} [shouldTriggerSession=false] whether resolution should also start a session.
+ * @platform android
+ */
+appsFlyer.performOnDeepLinking = (url, shouldTriggerSession = false) => {
+  // Native reads {url, shouldTriggerSession}; the old no-arg form resolved the empty string.
+  callRpcVoid("performDeepLinking", {
+    url: toStringOrEmpty(url),
+    shouldTriggerSession,
+  });
 };
 
 /**
@@ -984,7 +1097,7 @@ appsFlyer.disableAppSetId = () => {
  * @param enabled: if the sdk should collect the TCF data. true/false
  */
 appsFlyer.enableTCFDataCollection = (enabled) => {
-  callRpcVoid("enableTCFDataCollection", { enabled });
+  callRpcVoid("enableTCFDataCollection", { shouldCollect: enabled });
 };
 
 /**
@@ -1069,22 +1182,27 @@ appsFlyer.handleOpenURL = (url, options = {}) =>
  * Case-sensitive and a distinct RPC method from {@link appsFlyer.handleOpenURL} — do not
  * collapse the two.
  * @param {string} url the opened URL string.
- * @param {string} [sourceApplication] bundle ID of the app that opened this URL.
- * @param {unknown} [annotation] the annotation property list passed by the source app.
+ * @param {object} [options] the openURL options dictionary.
  * @platform ios
  */
-appsFlyer.handleOpenUrl = (url, sourceApplication, annotation) =>
-  callRpc("handleOpenUrl", { url, sourceApplication, annotation });
+appsFlyer.handleOpenUrl = (url, options = {}) =>
+  // The native handler reads only {url, options}; the old `sourceApplication`/`annotation`
+  // arguments were never read by any RPC layer and are gone rather than silently dropped.
+  callRpc("handleOpenUrl", { url, options });
 
 /**
- * Forward a Universal Link `NSUserActivity` (from AppDelegate's
+ * Forward a Universal Link (from AppDelegate's
  * `application:continueUserActivity:restorationHandler:`) to the SDK.
- * @param {object} userActivity serializable representation of the user activity
- *   (e.g. `{webpageURL}`).
+ * @param {string} url the activity's `webpageURL`.
+ * @param {string} [activityType] defaults natively to `NSUserActivityTypeBrowsingWeb`.
  * @platform ios
  */
-appsFlyer.continueUserActivity = (userActivity) =>
-  callRpc("continueUserActivity", { userActivity });
+appsFlyer.continueUserActivity = (url, activityType) =>
+  // Native requires a flat `url` (parsed via requireURL) — it never read a `userActivity` object.
+  callRpc("continueUserActivity", {
+    url,
+    ...(activityType === undefined ? {} : { activityType }),
+  });
 
 /**
  * Enable or disable resolution of Facebook deferred app links.
@@ -1106,8 +1224,16 @@ appsFlyer.setFacebookDeferredAppLink = (options = {}) =>
 
 // --- Hashed PII (hashed by the native SDK before transmission) ---
 
-/** @param {string} phone */
-appsFlyer.setUserPhone = (phone) => callRpc("setUserPhone", { phone });
+/**
+ * Native reads a split country code + number, never a single combined `phone` string.
+ * @param {string} countryCode e.g. "1" or "+1".
+ * @param {string} phoneNumber the subscriber number, without the country code.
+ */
+appsFlyer.setUserPhone = (countryCode, phoneNumber) =>
+  callRpc("setUserPhone", {
+    countryCode: toStringOrEmpty(countryCode),
+    phoneNumber: toStringOrEmpty(phoneNumber),
+  });
 
 /** @param {string} firstName */
 appsFlyer.setUserFirstName = (firstName) =>
@@ -1117,9 +1243,22 @@ appsFlyer.setUserFirstName = (firstName) =>
 appsFlyer.setUserLastName = (lastName) =>
   callRpc("setUserLastName", { lastName });
 
-/** @param {string} fbLoginId */
-appsFlyer.setUserFbLoginId = (fbLoginId) =>
-  callRpc("setUserFbLoginId", { fbLoginId });
+/**
+ * @param {string|number} fbLoginId numeric Facebook login ID (commonly 15-18 digits). iOS
+ *   requires a JSON number (`requireInt64`), but a JS `Number` only safely holds integers up to
+ *   2^53 — `Number(fbLoginId)` silently rounds longer IDs (e.g. "100003456789012345" ->
+ *   100003456789012350) before it ever reaches JSON.stringify. The validated digits are spliced
+ *   into the request body directly instead, so the exact value reaches native on both platforms.
+ */
+appsFlyer.setUserFbLoginId = (fbLoginId) => {
+  const digits = String(fbLoginId).trim();
+  if (!/^-?\d+$/.test(digits)) {
+    return Promise.reject(new TypeError("setUserFbLoginId: fbLoginId must be an integer"));
+  }
+  return NativeAppsFlyer.executeRpc(
+    `{"method":"setUserFbLoginId","params":{"fbLoginId":${digits}}}`
+  ).then((responseJson) => unwrapRpcResponse(JSON.parse(responseJson)));
+};
 
 /** Clear all previously set hashed PII (phone, first/last name, Facebook login ID, emails). */
 appsFlyer.clearUserPii = () => callRpc("clearUserPii");

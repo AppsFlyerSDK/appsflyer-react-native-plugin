@@ -10,7 +10,7 @@ Scope: `ios/` directory — `RNAppsFlyer.mm`, `RNAppsFlyer.h`, `RNAppsFlyerImpl.
 ## 1. Module structure
 
 - `RNAppsFlyer.mm` — thin ObjC++ TurboModule shim; conforms to `NativeAppsFlyerSpec` (Codegen-generated); delegates everything to `RNAppsFlyerImpl.swift`
-- `RNAppsFlyerImpl.swift` — all real logic: RPC dispatch into `AppsFlyerRPCBridge`, event-channel wiring, listener-registration buffering
+- `RNAppsFlyerImpl.swift` — all real logic: RPC dispatch into `AppsFlyerRPCBridge`, event-channel wiring
 - `ios/Frameworks/AppsFlyerRPC.xcframework` — vendored Phase A dependency; declared via `s.vendored_frameworks` in podspec; replaced by `s.dependency 'AppsFlyerRPC', '<version>'` in Phase B
 
 The module no longer subclasses `RCTEventEmitter`. Event emission goes through the TurboModule's `NativeEventEmitter` channel — one shared event name, demuxed in JS.

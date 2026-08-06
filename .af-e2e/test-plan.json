@@ -353,9 +353,19 @@
       "checks": [
         {
           "id": "stop_true",
-          "description": "stop(true) readback present",
+          "description": "stop(true) resolves null — the void-RPC success value on both platforms",
           "type": "log_contains",
-          "pattern": "[AF_QA][stop] result: true",
+          "pattern": "[AF_QA][stop(true)] result: null",
+          "fail_action": "fail"
+        },
+        {
+          "id": "stop_no_error_payload",
+          "description": "Neither stop call forwarded an RPC error through its single callback",
+          "type": "absent",
+          "patterns": [
+            "[AF_QA][stop(true)] result: {\"code\"",
+            "[AF_QA][stop(false)] result: {\"code\""
+          ],
           "fail_action": "fail"
         },
         {
@@ -367,9 +377,9 @@
         },
         {
           "id": "stop_false",
-          "description": "stop(false) readback present",
+          "description": "stop(false) resolves null — the void-RPC success value on both platforms",
           "type": "log_contains",
-          "pattern": "[AF_QA][stop] result: false",
+          "pattern": "[AF_QA][stop(false)] result: null",
           "fail_action": "fail"
         },
         {

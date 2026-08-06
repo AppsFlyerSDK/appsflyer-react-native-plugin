@@ -3,7 +3,7 @@ import appsFlyer, {
   AppsFlyerPurchaseConnectorConfig,
   MEDIATION_NETWORK,
 } from 'react-native-appsflyer';
-import {Platform} from 'react-native';
+import {Linking, Platform} from 'react-native';
 import {DEV_KEY, APP_ID} from '@env';
 
 // events
@@ -13,29 +13,51 @@ export const AF_removedFromCart = 'af_removed_from_cart';
 export const AF_checkout = 'af_check_out';
 export const AF_clickOnItem = 'af_click_on_item';
 
-const initOptions = {
-  isDebug: true,
-  devKey: DEV_KEY,
-  onInstallConversionDataListener: true,
-  timeToWaitForATTUserAuthorization: 10,
-  onDeepLinkListener: true,
-  appId: APP_ID,
-};
-
-// AppsFlyer initialization flow. ends with initSdk.
+// AppsFlyer initialization flow (7.0.0 RPC API — see MIGRATION.md).
+// timeToWaitForATTUserAuthorization has no RPC replacement yet (known gap, not a
+// silent regression — see MIGRATION.md § initSdk).
 export function AFInit() {
   if (Platform.OS == 'ios') {
     appsFlyer.setCurrentDeviceLanguage('EN');
   }
   //appsFlyer.setAppInviteOneLinkID('oW4R');
-  appsFlyer.initSdk(initOptions,
+
+  appsFlyer.setIsDebug(true);
+
+  appsFlyer.init(DEV_KEY, APP_ID).then(
     (success) => {
-      console.log("init SDK success", success);
-      // Demonstrate logAdRevenue once after init — not on every in-app event.
-      AFLogAdRevenue();
+      console.log('init SDK success', success);
+      // Android: MainActivity.onNewIntent only forwards warm-start VIEW intents to
+      // performDeepLinking — the native SDK doesn't inspect the launch Intent until
+      // init() has actually completed, so a cold-start deep link's Intent is present
+      // at Activity onCreate but must be re-delivered here (once JS/native init has
+      // resolved) via getInitialURL, or it's silently dropped.
+      if (Platform.OS === 'android') {
+        Linking.getInitialURL().then((url) => {
+          if (url) {
+            appsFlyer.performOnDeepLinking(url, true);
+          }
+        });
+      }
     },
-    (error) =>{
-      console.log("init SDK failed", error);
+    (error) => console.log('init SDK failed', error),
+  );
+
+  // startSdk() must fire from inside registerSessionReadyListener's callback — the native
+  // SDK does not auto-start (AppsFlyerLib.h contract, bridge-patterns.md §4). Registering
+  // this listener here is also required to happen synchronously, before init()'s promise
+  // settles, same as onInstallConversionData/onDeepLink in HomeScreen.js.
+  appsFlyer.registerSessionReadyListener(() => {
+    appsFlyer.startSdk().then(
+      (success) => {
+        console.log('start SDK success', success);
+        // Demonstrate logAdRevenue once after start — not on every in-app event.
+        AFLogAdRevenue();
+      },
+      (error) => {
+        console.log('start SDK failed', error);
+      },
+    );
   });
 }
 

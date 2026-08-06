@@ -92,10 +92,12 @@ public final class RNAppsFlyerImpl: NSObject {
             return encodeNormalizedError(code: 500, message: message)
         }
 
-        return encodeNormalizedSuccess(data: result)
+        // `result` is a status envelope ({success, message, data?}) — unwrap to the bare `data`
+        // (NSNull if absent) so iOS resolves the same shape as Android instead of the whole envelope.
+        return encodeNormalizedSuccess(data: result["data"] ?? NSNull())
     }
 
-    private static func encodeNormalizedSuccess(data: [String: Any]) -> String {
+    private static func encodeNormalizedSuccess(data: Any) -> String {
         let normalized: [String: Any] = ["success": true, "data": data]
         return encodeJSONOrFallback(normalized)
     }

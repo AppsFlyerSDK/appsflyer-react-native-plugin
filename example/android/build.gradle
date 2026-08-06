@@ -18,16 +18,4 @@ buildscript {
     }
 }
 
-// flatDir must be visible to the *consuming* project's (:app) dependency resolution, not just
-// buildscript's own plugin classpath — a bare RN template has no `allprojects` block by default,
-// so this is added specifically for react-native-appsflyer's vendored .aar files (Phase A;
-// see android/build.gradle's own flatDir comment in the plugin repo root).
-allprojects {
-    repositories {
-        flatDir {
-            dirs "$rootDir/../node_modules/react-native-appsflyer/android/libs"
-        }
-    }
-}
-
 apply plugin: "com.facebook.react.rootproject"

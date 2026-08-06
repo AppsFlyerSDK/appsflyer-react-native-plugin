@@ -7,6 +7,11 @@ import {Card, Button} from 'react-native-elements';
 const Product = ({product, goToProductScreen, addToCart}) => (
   <Card containerStyle={styles.card}>
     <Card.Image
+      // react-native-elements' Image sizes its actual <Image> via `style`, but the outer
+      // box that Card's layout measures comes from `containerStyle` — without it, the
+      // outer box had no explicit size and doubled up with the (also `style`-sized) inner
+      // children container, leaving a blank gap the height of the image below it.
+      containerStyle={styles.image}
       style={styles.image}
       resizeMode="cover"
       source={{uri: product.image}}
@@ -41,8 +46,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   image: {
+    // Card.Image defaults to height:150 (react-native-elements/dist/card/CardImage.js).
+    // aspectRatio alongside that default fought it (either an inflated gap with the fixed
+    // height still winning, or the image stretching to fill available height once height
+    // was cleared) — an explicit fixed height matching that component's own convention is
+    // the stable fix.
     width: '100%',
-    aspectRatio: 16 / 9,
+    height: 190,
   },
   body: {
     padding: 12,

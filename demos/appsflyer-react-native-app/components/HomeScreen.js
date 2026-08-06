@@ -197,8 +197,6 @@ const HomeScreen = ({navigation}) => {
     };
   }, []);
 
-  useEffect(() => {}, [itemsInCart]);
-  
   /*
   const handleValidationSuccess = (validationResult) => {
     console.log('>> ValidationSuccess: ', validationResult);

@@ -41,7 +41,7 @@ The TurboModule Promise rejects (transport failure) only if the call never reach
 
 ## 3. Event channel contract
 
-Async native events (conversion data, deep link, session ready) arrive via `NativeEventEmitter` on a **single shared event name** (`onRPCEvent` on both platforms).
+Async native events (conversion data, deep link, session ready) arrive via `NativeEventEmitter` on a **single shared event name** (`RNAppsFlyer_rpcEvent` on both platforms).
 
 `index.js` demuxes on `envelope.event` — one of:
 - `onConversionDataSuccess` / `onConversionDataFail`
