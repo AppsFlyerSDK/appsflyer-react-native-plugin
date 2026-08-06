@@ -16,7 +16,7 @@ For more information please check the following pages:
 
 > *When submitting an issue please specify your AppsFlyer sign-up (account) email , your app ID , production steps, logs, code snippets and any additional relevant information.*
 
-## <a id="important-note"></a>Important Note ⚠️ ⚠️
+## <a id="important-note"></a>Important Note
 
 The Purchase Connector feature of the AppsFlyer SDK depends on specific libraries provided by Google and Apple for managing in-app purchases:
 
@@ -72,8 +72,8 @@ The `PurchaseConnector` requires a configuration object of type `PurchaseConnect
 
 To properly set up the configuration object, you must specify certain parameters:
 
-- `logSubscriptions`: If set to `true`, the connector logs all subscription events.
-- `logInApps`: If set to `true`, the connector logs all in-app purchase events.
+- `logSubscriptions` (required): Set to `true` to enable logging of subscription events, or `false` to disable.
+- `logInApps` (required): Set to `true` to enable logging of in-app purchase events, or `false` to disable.
 - `sandbox`: If set to `true`, transactions are tested in a sandbox environment. Be sure to set this to `false` in production.
 - `storeKitVersion`: (iOS only) Specifies which StoreKit version to use. Defaults to `StoreKitVersion.SK1` if not specified. Use `StoreKitVersion.SK2` for iOS 15.0+ features.
 
@@ -86,31 +86,22 @@ import appsFlyer, {
   StoreKitVersion,
 } from 'react-native-appsflyer';
 
-// Example 1: StoreKit1 (default if storeKitVersion is not specified)
+// StoreKit1 (default - storeKitVersion is not required)
 const purchaseConnectorConfig: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
-    logSubscriptions: true,
-    logInApps: true,
-    sandbox: true,
-    // storeKitVersion defaults to StoreKit1 if not specified
-  });
+  logSubscriptions: true,
+  logInApps: true,
+  sandbox: true,
+});
 
-// Example 2: Explicitly setting StoreKit1
-const purchaseConnectorConfigSK1: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
-    logSubscriptions: true,
-    logInApps: true,
-    sandbox: true,
-    storeKitVersion: StoreKitVersion.SK1
-  });
+// For StoreKit2 (iOS 15.0+), specify the storeKitVersion:
+// const purchaseConnectorConfig: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
+//   logSubscriptions: true,
+//   logInApps: true,
+//   sandbox: true,
+//   storeKitVersion: StoreKitVersion.SK2
+// });
 
-// Example 3: StoreKit2 (iOS 15.0+)
-const purchaseConnectorConfigSK2: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
-    logSubscriptions: true,
-    logInApps: true,
-    sandbox: true,
-    storeKitVersion: StoreKitVersion.SK2
-  });
-
-//Create the object
+// Create the connector instance
 AppsFlyerPurchaseConnector.create(purchaseConnectorConfig);
 
 // Continue with your application logic...
@@ -118,30 +109,7 @@ AppsFlyerPurchaseConnector.create(purchaseConnectorConfig);
 
 **IMPORTANT**: The `PurchaseConnectorConfig` is required only the first time you instantiate `PurchaseConnector`. If you attempt to create a `PurchaseConnector` instance and no instance has been initialized yet, you must provide a `PurchaseConnectorConfig`. If an instance already exists, the system will ignore the configuration provided and will return the existing instance to enforce the singleton pattern.
 
-For example:
-
-```javascript
-  // Correct usage: Providing configuration at first instantiation
-  const purchaseConnectorConfig1: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
-    logSubscriptions: true,
-    logInApps: true,
-    sandbox: true,
-  });
-
-  // Additional instantiations will ignore the provided configuration
-  // and will return the previously created instance.
-  const purchaseConnectorConfig2: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
-    logSubscriptions: true,
-    logInApps: true,
-    sandbox: true,
-    storeKitVersion: StoreKitVersion.SK1  // This will be ignored since instance already exists
-  });
-
-  // purchaseConnector1 and purchaseConnector2 point to the same instance
-  assert(purchaseConnectorConfig1 == purchaseConnectorConfig2);
-```
-
-Thus, always ensure that the initial configuration fully suits your requirements, as subsequent changes are not considered.
+If you call `create()` multiple times, only the first configuration is used. Subsequent calls return the existing instance without creating a new one. Thus, always ensure that the initial configuration fully suits your requirements, as subsequent changes are not considered.
 
 Remember to set `sandbox` to `false` before releasing your app to production. If the production purchase event is sent in sandbox mode, your event won't be validated properly by AppsFlyer.
 ### <a id="start-observing-transactions"></a>Start Observing Transactions
@@ -191,52 +159,9 @@ Stop the SDK instance from observing transactions. </br>
 
 ```javascript
         //Stop listening to transactions after start and after creating the AppsFlyerPurchaseConnector
-        AppsFlyerPurchaseConnector.startObservingTransactions();
+        AppsFlyerPurchaseConnector.stopObservingTransactions();
 ```
 
-### <a id="log-subscriptions"></a>Log Subscriptions
-Enables automatic logging of subscription events.  
-Set `true` to enable, `false` to disable.  
-If this field is not used, by default, the connector will not record Subscriptions.
-
-```javascript
-const purchaseConnectorConfig = {
-  logSubscriptions: true, // Set to true to enable logging of subscriptions
-  // ... other configuration options
-};
-```
-
-### <a id="log-in-app-purchases"></a>Log In App Purchases
-Enables automatic logging of In-App purchase events  
-Set `true` to enable, `false` to disable.  
-If this field is not used, by default, the connector will not record In App Purchases.
-
-```javascript
-const purchaseConnectorConfig = {
-  logInApps: true, // Set to true to enable logging of in-app purchases
-  // ... other configuration options
-};
-```
-
-And integrating both options into the example you provided would look like this:
-
-```javascript
-// StoreKit1 configuration (default)
-const purchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
-  logSubscriptions: true, // Enable automatic logging of subscription events
-  logInApps: true,        // Enable automatic logging of in-app purchase events
-  sandbox: true,          // Additional configuration option
-  // storeKitVersion: StoreKitVersion.SK1 // Optional - defaults to SK1
-});
-
-// StoreKit2 configuration (iOS 15.0+)
-const purchaseConnectorConfigSK2 = AppsFlyerPurchaseConnectorConfig.setConfig({
-  logSubscriptions: true, // Enable automatic logging of subscription events
-  logInApps: true,        // Enable automatic logging of in-app purchase events
-  sandbox: true,          // Additional configuration option
-  storeKitVersion: StoreKitVersion.SK2 // Required for StoreKit2
-});
-```
 
 ### <a id="logging-consumable-transactions"></a>Logging Consumable Transactions
 
@@ -494,28 +419,20 @@ For Android, there are two types of data sources:
 
 #### Subscription Purchase Data Source
 ```javascript
-// Set additional parameters for subscription purchases
+// Set callback for subscription purchase events
 AppsFlyerPurchaseConnector.setSubscriptionPurchaseEventDataSource({
-  additionalParameters: {
-    user_id: '12345',
-    user_type: 'premium',
-    purchase_source: 'play_store',
-    custom_param1: 'value1',
-    custom_param2: 'value2'
+  onNewPurchases: (purchaseEvents) => {
+    console.log('Subscription purchase events:', purchaseEvents);
   }
 });
 ```
 
 #### In-App Purchase Data Source
 ```javascript
-// Set additional parameters for in-app purchases
+// Set callback for in-app purchase events
 AppsFlyerPurchaseConnector.setInAppPurchaseEventDataSource({
-  additionalParameters: {
-    user_id: '12345',
-    user_type: 'premium',
-    purchase_source: 'play_store',
-    custom_param1: 'value1',
-    custom_param2: 'value2'
+  onNewPurchases: (purchaseEvents) => {
+    console.log('In-app purchase events:', purchaseEvents);
   }
 });
 ```
@@ -550,19 +467,15 @@ const setupPurchaseDataSources = () => {
   } else if (Platform.OS === 'android') {
     // Android subscription data source
     AppsFlyerPurchaseConnector.setSubscriptionPurchaseEventDataSource({
-      additionalParameters: {
-        user_id: '12345',
-        user_type: 'premium',
-        purchase_source: 'play_store'
+      onNewPurchases: (purchaseEvents) => {
+        console.log('Subscription purchase events:', purchaseEvents);
       }
     });
 
     // Android in-app purchase data source
     AppsFlyerPurchaseConnector.setInAppPurchaseEventDataSource({
-      additionalParameters: {
-        user_id: '12345',
-        user_type: 'premium',
-        purchase_source: 'play_store'
+      onNewPurchases: (purchaseEvents) => {
+        console.log('In-app purchase events:', purchaseEvents);
       }
     });
   }
@@ -574,35 +487,10 @@ const setupPurchaseDataSources = () => {
 1. **iOS StoreKit2**: The StoreKit2 data source is only available on iOS 15.0 and later. Make sure to check the iOS version before using it.
 
 2. **Parameter Structure**: 
-   - For iOS StoreKit1 and Android, use the `additionalParameters` object to add custom parameters
-   - For iOS StoreKit2, use the `products` and `transactions` arrays to specify product and transaction IDs
+   - For iOS StoreKit1 and StoreKit2, use the `additionalParameters` object to add custom parameters
+   - For Android, use the `onNewPurchases` callback to handle purchase events
 
-3. **Timing**: Set up the data sources after creating the Purchase Connector instance but before starting to observe transactions:
-
-```javascript
-// 1. Create the connector
-// StoreKit1 (default)
-AppsFlyerPurchaseConnector.create({
-  logSubscriptions: true,
-  logInApps: true,
-  sandbox: __DEV__,
-  // storeKitVersion: StoreKitVersion.SK1 // Optional - defaults to SK1
-});
-
-// OR for StoreKit2 (iOS 15.0+)
-// AppsFlyerPurchaseConnector.create({
-//   logSubscriptions: true,
-//   logInApps: true,
-//   sandbox: __DEV__,
-//   storeKitVersion: StoreKitVersion.SK2
-// });
-
-// 2. Set up data sources
-setupPurchaseDataSources();
-
-// 3. Start observing transactions
-await AppsFlyerPurchaseConnector.startObservingTransactions();
-```
+3. **Timing**: Initialization order is: (1) Create the Purchase Connector instance with configuration, (2) Set up any data sources, (3) Call `startObservingTransactions()`. See the "Create PurchaseConnector Instance" and "Platform-Specific Implementation" sections above for configuration and data source examples.
 
 ## <a id="testing-the-integration"></a>Testing the Integration
 

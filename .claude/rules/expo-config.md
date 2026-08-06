@@ -14,21 +14,26 @@ Scope: `expo/` directory — `withAppsFlyer.js`, `withAppsFlyerIos.js`, `withApp
 ```
 expo/
 ├── withAppsFlyer.js          ← Entry point, composes iOS + Android plugins
-├── withAppsFlyerIos.js       ← Modifies AppDelegate for deep link handling
-├── withAppsFlyerAndroid.js   ← Modifies AndroidManifest.xml
-└── withAppsFlyerAppDelegate.js ← AppDelegate code injection
+├── withAppsFlyerIos.js       ← Modifies AppDelegate (ObjC + Swift) + Podfile
+└── withAppsFlyerAndroid.js   ← Modifies AndroidManifest.xml
 ```
 
 These are Expo Config Plugins — they run at `expo prebuild` time to modify native project files.
 
-## 2. Swift AppDelegate problem (critical, unresolved)
+## 2. Swift AppDelegate support
 
-Starting with Expo SDK 52 / RN 0.76, the default AppDelegate is **Swift** (not Objective-C). The plugin's `withAppsFlyerAppDelegate.js` modifies ObjC code and **fails silently** on Swift AppDelegates (#638, #620).
+Starting with Expo SDK 52 / RN 0.76, the default AppDelegate is **Swift** (not Objective-C).
+`withAppsFlyerIos.js`'s `modifySwiftAppDelegate` handles this case explicitly (string-matches the
+Expo SDK default Swift template for `didFinishLaunchingWithOptions`/`openURL`/`continueUserActivity`
+and injects `handleLaunchOptions`/`handleOpen`/`continue` calls) — verified against the real
+`expo prebuild` output in `demos/appsflyer-expo-app`. `modifyObjcAppDelegate` handles the legacy
+ObjC template the same way.
 
-Until this is fixed:
-- Do not assume AppDelegate is ObjC in config plugin code
-- Test with both `expo prebuild` (Swift default) and legacy ObjC projects
-- This is the #1 Expo compatibility blocker
+Both matchers are exact-string-match against one specific template shape. If Expo or RN changes
+the default AppDelegate boilerplate again, the matcher silently misses (falls through to
+`WarningAggregator.addWarningIOS`, not a build failure) rather than adapting — re-verify the
+identifier strings against a fresh `expo prebuild` output whenever bumping the supported Expo SDK
+version.
 
 ## 3. Manifest merge duplication
 

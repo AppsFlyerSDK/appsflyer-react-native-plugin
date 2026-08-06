@@ -5,13 +5,21 @@ const path = require('path');
 
 function modifyObjcAppDelegate(appDelegate) {
   const RNAPPSFLYER_IMPORT = `#import <AppsFlyerLib/AppsFlyerLib.h>\n`;
+  const RNAPPSFLYER_DID_FINISH_LAUNCHING_IDENTIFIER = `- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions`;
   const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER = `- (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {`;
   const RNAPPSFLYER_OPENURL_IDENTIFIER = `- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {`;
+  const RNAPPSFLYER_DID_FINISH_LAUNCHING_CODE = `[[AppsFlyerLib shared] handleLaunchOptions:launchOptions];\n`;
   const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE = `[[AppsFlyerLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];\n`;
   const RNAPPSFLYER_OPENURL_CODE = `[[AppsFlyerLib shared] handleOpenUrl:url options:options];\n`;
 
   if (!appDelegate.includes(RNAPPSFLYER_IMPORT)) {
     appDelegate = RNAPPSFLYER_IMPORT + appDelegate;
+  }
+  if (appDelegate.includes(RNAPPSFLYER_DID_FINISH_LAUNCHING_IDENTIFIER) && !appDelegate.includes(RNAPPSFLYER_DID_FINISH_LAUNCHING_CODE)) {
+    const openBraceIndex = appDelegate.indexOf('{', appDelegate.indexOf(RNAPPSFLYER_DID_FINISH_LAUNCHING_IDENTIFIER));
+    appDelegate = appDelegate.slice(0, openBraceIndex + 1) + `\n${RNAPPSFLYER_DID_FINISH_LAUNCHING_CODE}` + appDelegate.slice(openBraceIndex + 1);
+  } else {
+    WarningAggregator.addWarningIOS('withAppsFlyerAppDelegate', "Failed to detect didFinishLaunchingWithOptions in AppDelegate or AppsFlyer's delegate method already exists");
   }
   if (appDelegate.includes(RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER) && !appDelegate.includes(RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE)) {
     const block = RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER + '\n' + RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE;
@@ -31,6 +39,12 @@ function modifyObjcAppDelegate(appDelegate) {
 function modifySwiftAppDelegate(appDelegateContents) {
   const SWIFT_IMPORT = 'import AppsFlyerLib';
 
+  const SWIFT_DID_FINISH_LAUNCHING_IDENTIFIER = `  public override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+  ) -> Bool {`;
+  const RNAPPSFLYER_SWIFT_DID_FINISH_LAUNCHING_CODE = 'AppsFlyerLib.shared().handleLaunchOptions(launchOptions)';
+
   const SWIFT_OPENURL_IDENTIFIER = `  public override func application(
     _ app: UIApplication,
     open url: URL,
@@ -43,10 +57,17 @@ function modifySwiftAppDelegate(appDelegateContents) {
     continue userActivity: NSUserActivity,
     restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
   ) -> Bool {`;
+  // AppsFlyer's restorationHandler is `([Any]?) -> Void`, not `([UIUserActivityRestoring]?) -> Void` —
+  // passing ours directly is a type mismatch Swift reports as "ambiguous". AppsFlyer only needs
+  // userActivity to extract the OneLink URL, so pass nil; the real restorationHandler goes to RCTLinkingManager below.
   const RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE = 'AppsFlyerLib.shared().continue(userActivity, restorationHandler: nil)';
 
   if (!appDelegateContents.includes(SWIFT_IMPORT)) {
     appDelegateContents = `${SWIFT_IMPORT}\n${appDelegateContents}`;
+  }
+
+  if (appDelegateContents.includes(SWIFT_DID_FINISH_LAUNCHING_IDENTIFIER) && !appDelegateContents.includes(RNAPPSFLYER_SWIFT_DID_FINISH_LAUNCHING_CODE)) {
+    appDelegateContents = appDelegateContents.replace(SWIFT_DID_FINISH_LAUNCHING_IDENTIFIER, `${SWIFT_DID_FINISH_LAUNCHING_IDENTIFIER}\n    ${RNAPPSFLYER_SWIFT_DID_FINISH_LAUNCHING_CODE}`);
   }
 
   if (appDelegateContents.includes(SWIFT_OPENURL_IDENTIFIER) && !appDelegateContents.includes(RNAPPSFLYER_SWIFT_OPENURL_CODE)) {
@@ -57,7 +78,11 @@ function modifySwiftAppDelegate(appDelegateContents) {
     appDelegateContents = appDelegateContents.replace(SWIFT_CONTINUE_USER_ACTIVITY_IDENTIFIER, `${SWIFT_CONTINUE_USER_ACTIVITY_IDENTIFIER}\n    ${RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE}`);
   }
 
-  if (!appDelegateContents.includes(RNAPPSFLYER_SWIFT_OPENURL_CODE) || !appDelegateContents.includes(RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE)) {
+  if (
+    !appDelegateContents.includes(RNAPPSFLYER_SWIFT_DID_FINISH_LAUNCHING_CODE) ||
+    !appDelegateContents.includes(RNAPPSFLYER_SWIFT_OPENURL_CODE) ||
+    !appDelegateContents.includes(RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE)
+  ) {
     WarningAggregator.addWarningIOS(
       'withAppsFlyerAppDelegate',
 `
@@ -67,10 +92,13 @@ Please add AppsFlyer integration manually:
 1. Add this import:
   import AppsFlyerLib
 
-2. Add this to your openURL method:
+2. Add this to your didFinishLaunchingWithOptions method:
+  AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
+
+3. Add this to your openURL method:
   AppsFlyerLib.shared().handleOpen(url, options: options)
 
-3. Add this to your continueUserActivity method:
+4. Add this to your continueUserActivity method:
   AppsFlyerLib.shared().continue(userActivity, restorationHandler: nil)
 
 Supported format: Expo SDK default template

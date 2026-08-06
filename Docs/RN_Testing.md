@@ -8,11 +8,6 @@ hidden: false
 
 ## Testing
 
-More info about testing the SDK for marketers [here](https://support.appsflyer.com/hc/en-us/articles/360001559405-Test-mobile-SDK-integration-with-the-app#introduction).
-
-- [Testing for iOS](#testing-for-ios)
-- [Testing for Android](#testing-for-android)
-
 First, you need to enable debug mode for full logs from the SDK.
 To enable it, call `enableDebug(true)` — a dedicated call, separate from `init` (see
 [RN_API.md — enableDebug](RN_API.md#enabledebug)):
@@ -30,18 +25,15 @@ Open your ios project with XCode (`appName.xcworkspace`) and run it. In the logs
 Search for launch event that looks like this:
 ```
 <~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~~+~>
-<~+~   SEND Start:   https://launches.appsflyer.com/api/v6.4/iosevent?app_id=7xXxXxX1&buildnumber=6.4.4
+<~+~   SEND Start:   https://launches.appsflyer.com/api/v6.4/iosevent?app_id=7xXxXxX1&buildnumber=7.0.1
 <~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~~+~>
-{ launch event payload } // Just an example of a JSON. you will see the full payload
 ```
-and also:
+
+The response should include `statusCode = 200` (success). For example:
 ```
 Result: {
-    data = {length = 64, bytes = 0x7b226f6c 5f696422 3a224476 5769222c ... 696e6b2e 6d65227d };
-    dataStr = "{\"oxXxXxd\":\"DXxXxi\",\"oXxXer\":ss,\"olXxXxain\":\"xXxXxXx\"}";
-    retries = 2;
     statusCode = 200; // ~~> success!
-    taskIdentifier = 4;
+    ...
 }
 ```
 For more iOS integration tests, see [Here](https://dev.appsflyer.com/hc/docs/testing-ios)
@@ -50,11 +42,7 @@ For more iOS integration tests, see [Here](https://dev.appsflyer.com/hc/docs/tes
 Open your Android project with Android studio (`android` folder) and run it. In the logs section (adb), you will see logs related to AppsFlyer start with `I/AppsFlyer_x.x.x`.<br>
 Search for launch event that looks like this:
 ```
-I/AppsFlyer_6.4.3: url: https://launches.appsflyer.com/api/v6.4/androidevent?app_id=com.aXxXxt.rxXxXxt&buildnumber=6.4.3
-I/AppsFlyer_6.4.3: data: { launch event payload } // Just an example of a JSON. you will see the full payload
-```
-and also:
-```
-I/AppsFlyer_6.4.3: response code: 200 // ~~> success!
+I/AppsFlyer_7.0.1: url: https://launches.appsflyer.com/api/v6.4/androidevent?app_id=com.aXxXxt.rxXxXxt&buildnumber=7.0.1
+I/AppsFlyer_7.0.1: response code: 200 // ~~> success!
 ```
 For more Android integration tests, see [Here](https://dev.appsflyer.com/hc/docs/testing-android)

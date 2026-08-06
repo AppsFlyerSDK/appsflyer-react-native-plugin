@@ -65,7 +65,7 @@
           "id": "get_sdk_version",
           "description": "getSDKVersion returns a value",
           "type": "log_contains",
-          "pattern": "[AF_QA][getSDKVersion] result:",
+          "pattern": "[AF_QA][getSdkVersion] result:",
           "fail_action": "fail"
         },
         {
