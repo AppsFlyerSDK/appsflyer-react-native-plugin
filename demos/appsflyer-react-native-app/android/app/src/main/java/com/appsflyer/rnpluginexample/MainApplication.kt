@@ -1,4 +1,4 @@
-package com.appsflyerexample
+package com.appsflyer.rnpluginexample
 
 import android.app.Application
 import com.facebook.react.PackageList

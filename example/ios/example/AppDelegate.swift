@@ -31,6 +31,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       launchOptions: launchOptions
     )
 
+    AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
+    
     // QA: when launched via `simctl launch ... -deepLinkURL "<url>"`, replay
     // the URL through application(_:open:options:) so the AppsFlyer plugin
     // sees it as a real custom-scheme open. Bypasses the iOS 17/18

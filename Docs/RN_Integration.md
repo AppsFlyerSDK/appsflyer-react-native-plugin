@@ -21,9 +21,9 @@ Initialize the SDK to enable AppsFlyer to detect installations, sessions (app op
 
 `isDebug`, `onInstallConversionDataListener`, `onDeepLinkListener`, and `manualStart` are no
 longer options on the init call — call [`setIsDebug`](RN_API.md#setisdebug),
-[`onInstallConversionData`](RN_API.md#oninstallconversiondata), and
-[`onDeepLink`](RN_API.md#ondeeplink) as separate methods instead, and always finish with an
-explicit [`startSdk()`](RN_API.md#startsdk) (SDK7 never auto-starts).
+[`onConversionDataSuccess`](RN_API.md#onconversiondatasuccess), and
+[`onDeepLinking`](RN_API.md#ondeeplinking) as separate methods instead, and always finish with an
+explicit [`start()`](RN_API.md#start) (SDK7 never auto-starts).
 
 ```javascript
 import appsFlyer from 'react-native-appsflyer';
@@ -35,15 +35,15 @@ appsFlyer.init('K2***********99', '41*****44').then(
 appsFlyer.setIsDebug(true);
 
 // Register these synchronously, right after init() — never inside init().then()
-appsFlyer.onInstallConversionData((res) => {
+appsFlyer.onConversionDataSuccess((res) => {
   // ...
 });
-appsFlyer.onDeepLink((res) => {
+appsFlyer.onDeepLinking((res) => {
   // ...
 });
 
 appsFlyer.registerSessionReadyListener(() => {
-  appsFlyer.startSdk().then(
+  appsFlyer.start().then(
     () => console.log('SDK started'),
     (err) => console.error('start failed', err)
   );

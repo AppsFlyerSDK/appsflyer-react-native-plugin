@@ -1,9 +1,10 @@
-import { memo, useCallback, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
-import { RPC_CATALOG } from './rpcCatalog';
+import appsFlyer from 'react-native-appsflyer';
+import { APP_ID, DEV_KEY, RPC_CATALOG } from './rpcCatalog';
 
 // Only the methods that apply to this platform — matches how MethodCatalog.swift is iOS-only;
 // here one catalog covers both, filtered by Platform.OS instead of two separate app targets.
@@ -58,6 +59,19 @@ function getResultItemLayout(data, index) {
 	return { length: RESULT_ROW_PITCH, offset: RESULT_ROW_PITCH * index, index };
 }
 
+// Defensive net for any RPC that hangs (native deadlock, dropped response) — not hooks/state, so
+// it lives outside the component instead of being redefined every render. Must exceed the native
+// SDK's own bounded timeouts (AppsFlyerRPC's SDKTimeoutHelper.swift TimeoutConfig.default: 10s for
+// start/logEvent/crossPromotion/shareInvite, 30s for purchase) — otherwise this fires first and
+// reports a false FAILED for a call native would have legitimately resolved a couple seconds later.
+const RPC_TIMEOUT_MS = 15000;
+function withTimeout(promise, label) {
+	return Promise.race([
+		promise,
+		new Promise((_, reject) => setTimeout(() => reject(new Error(`${label} timed out after ${RPC_TIMEOUT_MS}ms`)), RPC_TIMEOUT_MS)),
+	]);
+}
+
 export default function App() {
 	const [results, setResults] = useState([]);
 	const [logs, setLogs] = useState([]);
@@ -66,6 +80,8 @@ export default function App() {
 	const [selected, setSelected] = useState(null);
 	const [activeTab, setActiveTab] = useState('results');
 	const [copyLabel, setCopyLabel] = useState('Copy');
+	const [sessionReady, setSessionReady] = useState(false);
+	const [showStallHint, setShowStallHint] = useState(false);
 	const logIdRef = useRef(0);
 	const logListRef = useRef(null);
 	const isRunningRef = useRef(false);
@@ -85,8 +101,53 @@ export default function App() {
 		setLogs((prev) => [...prev, { key: String(id), time, text }]);
 	};
 
+	// Runs once on launch, mirroring example/src/App.tsx's runAutoFlow order exactly: init() is
+	// fired but deliberately NOT awaited, then setIsDebug/listener registrations run as plain
+	// synchronous statements right after. bridge-patterns.md §4: awaiting init before registering
+	// listeners is the same too-late `.then()` mistake with different syntax — the native buffer
+	// (RNAppsFlyerImpl.swift's bufferedUntilInitMethods) can flush before the await round-trips
+	// back to JS, so a registerSessionReadyListener call made after `await init()` can miss the
+	// one-shot ready event entirely. Run All stays disabled until the callback below fires.
+	useEffect(() => {
+		let cancelled = false;
+		addLog('========== Bootstrap Started ==========');
+
+		appsFlyer.init(DEV_KEY, APP_ID).then(
+			() => addLog('✓ init OK'),
+			(error) => addLog(`✗ init FAILED: ${safeStringify(error)}`)
+		);
+		appsFlyer.setIsDebug(true);
+		appsFlyer.onConversionDataSuccess(() => {});
+		appsFlyer.onConversionDataFail(() => {});
+		appsFlyer.onDeepLinking(() => {});
+		appsFlyer.registerSessionReadyListener(() => {
+			if (cancelled) return;
+			addLog('✓ Session ready');
+			setSessionReady(true);
+		});
+
+		return () => {
+			cancelled = true;
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	// AppsFlyerLib's registerSessionReadyListener can stall natively and never fire its callback
+	// (known-issues-kb.md — AppsFlyerLib session-ready stall, unpatchable vendor bug). The only
+	// known workaround is backgrounding then foregrounding the app, which forces UIKit to process
+	// whatever was pending. Surface that as a hint instead of leaving "Bootstrapping…" unexplained.
+	useEffect(() => {
+		if (sessionReady) {
+			setShowStallHint(false);
+			return;
+		}
+		const timer = setTimeout(() => setShowStallHint(true), 6000);
+		return () => clearTimeout(timer);
+	}, [sessionReady]);
+
 	const runAll = async () => {
 		if (isRunningRef.current) return;
+		if (!sessionReady) return;
 		isRunningRef.current = true;
 		setIsRunning(true);
 		setResults([]);
@@ -121,7 +182,7 @@ export default function App() {
 				let status = 'success';
 				let response = null;
 				try {
-					response = await method.run();
+					response = await withTimeout(method.run(), method.name);
 				} catch (error) {
 					status = 'failure';
 					response = error;
@@ -164,18 +225,26 @@ export default function App() {
 
 				<View style={styles.runSection}>
 					<Pressable
-						style={[styles.runButton, isRunning && styles.runButtonDisabled]}
+						style={[styles.runButton, (isRunning || !sessionReady) && styles.runButtonDisabled]}
 						onPress={runAll}
-						disabled={isRunning}
+						disabled={isRunning || !sessionReady}
 						accessibilityLabel='runAllButton'>
 						{isRunning ? (
 							<ActivityIndicator color={ON_ACCENT} />
 						) : (
 							<Text style={styles.runButtonText}>
-								{total > 0 ? 'Run Again' : 'Run All Methods'}
+								{!sessionReady ? 'Waiting for session…' : total > 0 ? 'Run Again' : 'Run All Methods'}
 							</Text>
 						)}
 					</Pressable>
+
+					<Text style={styles.progressText}>{sessionReady ? 'Session ready' : 'Bootstrapping…'}</Text>
+
+					{showStallHint && (
+						<Text style={[styles.progressText, styles.summaryFail]}>
+							Stuck? Known AppsFlyerLib issue — background the app, then reopen it to unstick the native SDK.
+						</Text>
+					)}
 
 					{isRunning && (
 						<Text style={styles.progressText}>

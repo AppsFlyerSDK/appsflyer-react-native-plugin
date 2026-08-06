@@ -17,7 +17,7 @@ export default function App() {
   );
 }
 
-// startSdk() still lives inside registerSessionReadyListener's callback — that's the
+// start() still lives inside registerSessionReadyListener's callback — that's the
 // documented contract (AppsFlyerLib.h: "Call start inside the block. The SDK does not call
 // start automatically."), unchanged. This only wraps it in a Promise so the caller can
 // await the whole thing: makes start() deterministically first in the RPC dispatch order
@@ -28,8 +28,8 @@ function startWhenSessionReady() {
     const remove = appsFlyer.registerSessionReadyListener(() => {
       remove();
       afCallbackLog('onSessionReady', 'session ready — starting SDK');
-      appsFlyer.startSdk().then(() => {
-        afLog('startSDK', 'result: called');
+      appsFlyer.start().then(() => {
+        afLog('start', 'result: called');
         resolve();
       }, reject);
     });
@@ -45,7 +45,7 @@ async function runAutoFlow() {
     return;
   }
 
-  // Resolves on the first onInstallConversionData delivery — lets the stop/resume
+  // Resolves on the first onConversionDataSuccess delivery — lets the stop/resume
   // sequence below wait on the real event instead of a guessed timeout, so stop(true)
   // can't fire while conversion data is still in flight.
   let resolveConversionDataReceived: () => void;
@@ -55,11 +55,12 @@ async function runAutoFlow() {
 
   // 1. init -> setIsDebug -> register listeners.
   // Deliberately NOT awaited: registration calls below must reach native before init's
-  // promise resolves (bridge-patterns.md §4) — RpcInitGate only buffers them until init
-  // *completes*, and awaiting init here would round-trip back to JS after that buffer may
-  // already have flushed, risking a dropped onInstallConversionData/onDeepLink event that
-  // fires shortly after init. appId is always safe to pass — Android's RPC init handler
-  // only reads devKey and ignores extra fields; only iOS actually requires/uses appId.
+  // promise resolves (bridge-patterns.md §4) — listener registration is init-order-independent
+  // by design on both platforms, but dispatch still happens in call order, so registering
+  // inside init().then() would delay dispatch and risk missing an onConversionDataSuccess/
+  // onDeepLinking event that fires shortly after init. appId is always safe to pass —
+  // Android's RPC init handler only reads devKey and ignores extra fields; only iOS actually
+  // requires/uses appId.
   appsFlyer.init(devKey, appId).then(
     result => afLog('init', `result: ${JSON.stringify(result)}`),
     error => afLog('init', `error: ${JSON.stringify(error)}`),
@@ -67,49 +68,47 @@ async function runAutoFlow() {
 
   appsFlyer.setIsDebug(true);
 
-  appsFlyer.onInstallConversionData(data => {
-    afCallbackLog('onInstallConversionData', JSON.stringify(data));
+  appsFlyer.onConversionDataSuccess(data => {
+    afCallbackLog('onConversionDataSuccess', JSON.stringify(data));
     resolveConversionDataReceived();
   });
-  // onAppOpenAttribution removed in 7.0.0 — attribution data now arrives via onDeepLink (MIGRATION.md)
-  appsFlyer.onDeepLink(data => {
+  // onAppOpenAttribution removed in 7.0.0 — attribution data now arrives via onDeepLinking (MIGRATION.md)
+  appsFlyer.onDeepLinking(data => {
+    const deepLinkValue =
+      typeof data.deepLink === 'object' ? data.deepLink?.deep_link_value : undefined;
     afCallbackLog(
       'onDeepLinking',
-      `status=${data.deepLinkStatus}, deepLinkValue=${data.data?.deep_link_value || 'N/A'}`,
+      `status=${data.status}, deepLinkValue=${deepLinkValue || 'N/A'}`,
     );
   });
 
-  // 2. Pre-start APIs
-  appsFlyer.setCustomerUserId('qa-test-user', result => {
-    afLog('setCustomerUserId', `result: ${result}`);
-  });
+  // 2. Pre-start APIs — void/fire-and-forget in 7.0.0 (MIGRATION.md: callback params removed)
+  appsFlyer.setCustomerUserId('qa-test-user');
+  afLog('setCustomerUserId', 'result: called');
 
-  appsFlyer.setCurrencyCode('USD', result => {
-    afLog('setCurrencyCode', `result: ${result}`);
-  });
+  appsFlyer.setCurrencyCode('USD');
+  afLog('setCurrencyCode', 'result: called');
 
-  appsFlyer.setAdditionalData(
-    {tenant: 'qa_eu', experiment: 'rc_pipeline_v1'},
-    result => {
-      afLog('setAdditionalData', `result: ${result}`);
-    },
-  );
+  appsFlyer.setAdditionalData({tenant: 'qa_eu', experiment: 'rc_pipeline_v1'});
+  afLog('setAdditionalData', 'result: called');
 
   afLifecycleLog('--- Pre-start auto APIs complete ---');
 
-  // 3. startSdk only fires once registerSessionReadyListener's callback confirms the SDK is
+  // 3. start() only fires once registerSessionReadyListener's callback confirms the SDK is
   // ready (real native callback, or the bridge's own fallback — either way this resolves).
   // Everything below only runs after start() has dispatched.
   await startWhenSessionReady();
 
-  // 4. Post-start APIs
-  appsFlyer.getAppsFlyerUID((err, uid) => {
-    afLog('getAppsFlyerUID', `result: ${uid || err}`);
-  });
+  // 4. Post-start APIs — Promise-only in 7.0.0 (MIGRATION.md: callback params removed)
+  appsFlyer
+    .getAppsFlyerUID()
+    .then(uid => afLog('getAppsFlyerUID', `result: ${uid}`))
+    .catch(error => afLog('getAppsFlyerUID', `error: ${JSON.stringify(error)}`));
 
-  appsFlyer.getSDKVersion((err, version) => {
-    afLog('getSDKVersion', `result: ${version || err}`);
-  });
+  appsFlyer
+    .getSDKVersion()
+    .then(version => afLog('getSDKVersion', `result: ${version}`))
+    .catch(error => afLog('getSDKVersion', `error: ${JSON.stringify(error)}`));
 
   afLifecycleLog('--- Post-start auto APIs complete ---');
 
@@ -178,17 +177,15 @@ async function runAutoFlow() {
   afLog('setConsentData', 'result: GDPR consent set');
 
   // 9. Stop/resume cycle (E2E-006)
-  // Wait for the real onInstallConversionData event instead of a guessed timeout —
+  // Wait for the real onConversionDataSuccess event instead of a guessed timeout —
   // stop(true) firing before conversion data arrives kills the in-flight request.
   await conversionDataReceived;
 
-  // stop()'s single callback receives BOTH outcomes — a hardcoded 'result: true' here previously masked an RPC hard-failure, so log the actual payload.
-  await new Promise<void>(resolve => {
-    appsFlyer.stop(true, (result: any) => {
-      afLog('stop(true)', `result: ${JSON.stringify(result)}`);
-      resolve();
-    });
-  });
+  // stop() is fire-and-forget void in 7.0.0 (MIGRATION.md: callback params removed) — no
+  // completion signal to await; any callback passed is silently ignored, not invoked. Logged
+  // as 'result: null' to match the void-RPC success convention used elsewhere in this file.
+  appsFlyer.stop(true);
+  afLog('stop(true)', 'result: null');
 
   // awaitResponse: true — round-trips to AppsFlyerLib's real completionHandler so we can
   // observe whether isStopped actually suppresses this event. Awaited so stop(false) below
@@ -201,12 +198,8 @@ async function runAutoFlow() {
     afLog('logEvent(af_qa_suppressed)', `error: ${JSON.stringify(error)}`);
   }
 
-  await new Promise<void>(resolve => {
-    appsFlyer.stop(false, (result: any) => {
-      afLog('stop(false)', `result: ${JSON.stringify(result)}`);
-      resolve();
-    });
-  });
+  appsFlyer.stop(false);
+  afLog('stop(false)', 'result: null');
 
   // Awaited too — the harness polls for the "Auto run complete" marker below as its
   // signal to stop waiting and collect logs, so it must not print until this result

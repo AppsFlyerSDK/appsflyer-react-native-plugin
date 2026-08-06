@@ -46,16 +46,16 @@ https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/pull/694
 ## PR #695 — `stack/4-index-ts-rename`
 https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/pull/695
 
-| File | Line | Comment |
-|---|---|---|
-| `index.ts` | 40 | The Native SDK just provides `Map<String, Object>` in the callback, so why not stick to it? |
-| `index.ts` | 44 | I would change the name to `DeepLinkResult`, similar to the native one. Also, please make sure the keys match to native |
-| `index.ts` | 90 | remove completely, don't deprecate |
-| `index.ts` | 1365 | onConversionDataSuccess |
-| `index.ts` | 1366 | onConversionDataFail |
-| `index.ts` | 1367 | onDeepLinking |
+| File | Line | Comment | Status |
+|---|---|---|---|
+| `index.ts` | 40 | The Native SDK just provides `Map<String, Object>` in the callback, so why not stick to it? | **Addressed** — `ConversionData` collapsed to `{ [key: string]: any }`, named fields dropped |
+| `index.ts` | 44 | I would change the name to `DeepLinkResult`, similar to the native one. Also, please make sure the keys match to native | **Addressed** — `UnifiedDeepLinkData` renamed to `DeepLinkResult`; shape unchanged (already verified against native source) |
+| `index.ts` | 90 | remove completely, don't deprecate | **Addressed** — `GenerateInviteLinkParams.deeplinkPath` and its `generateInviteLink` warning branch removed outright (never shipped, no deprecation window needed) |
+| `index.ts` | 1365 | onConversionDataSuccess | **Addressed** — `onInstallConversionData` renamed to `onConversionDataSuccess` throughout (impl, interface, tests, demos, docs) |
+| `index.ts` | 1366 | onConversionDataFail | **Addressed** — `onInstallConversionFailure` renamed to `onConversionDataFail` |
+| `index.ts` | 1367 | onDeepLinking | **Addressed** — `onDeepLink` renamed to `onDeepLinking` |
 
-**Read:** lines 1365–1367 are single-word comments with no elaboration — likely naming suggestions or "rename to X" pointers tied to whatever symbol sits at those lines; need to open the diff to see what they're attached to before we can act on them.
+**Read:** lines 1365–1367 turned out to be the bare native method names, pointing at the `AppsFlyerApi` interface members directly above — confirmed with the user this meant a full public-API rename to match native exactly, not just a comment/doc note. Since 7.0.0 hasn't shipped (no git tag yet), this lands as one rename within the same unreleased major rather than a second breaking change on top of it.
 
 ---
 

@@ -6,22 +6,16 @@ import appsFlyer, {
 import {Linking, Platform} from 'react-native';
 import {DEV_KEY, APP_ID} from '@env';
 
-// events
 export const AF_viewCart = 'af_view_cart';
 export const AF_addedToCart = 'af_added_to_cart';
 export const AF_removedFromCart = 'af_removed_from_cart';
 export const AF_checkout = 'af_check_out';
 export const AF_clickOnItem = 'af_click_on_item';
 
-// AppsFlyer initialization flow (7.0.0 RPC API — see MIGRATION.md).
-// timeToWaitForATTUserAuthorization has no RPC replacement yet (known gap, not a
-// silent regression — see MIGRATION.md § initSdk).
-export function AFInit() {
+export function AFInit(onConversionData, onDeepLink) {
   if (Platform.OS == 'ios') {
     appsFlyer.setCurrentDeviceLanguage('EN');
   }
-  //appsFlyer.setAppInviteOneLinkID('oW4R');
-
   appsFlyer.setIsDebug(true);
 
   appsFlyer.init(DEV_KEY, APP_ID).then(
@@ -42,16 +36,15 @@ export function AFInit() {
     },
     (error) => console.log('init SDK failed', error),
   );
+  
+  //Deeplink URL: https://rndemo.onelink.me/neai/by0p3obe
+  const unsubscribeConversion = appsFlyer.onConversionDataSuccess(onConversionData);
+  const unsubscribeDeepLink = appsFlyer.onDeepLinking(onDeepLink);
 
-  // startSdk() must fire from inside registerSessionReadyListener's callback — the native
-  // SDK does not auto-start (AppsFlyerLib.h contract, bridge-patterns.md §4). Registering
-  // this listener here is also required to happen synchronously, before init()'s promise
-  // settles, same as onInstallConversionData/onDeepLink in HomeScreen.js.
   appsFlyer.registerSessionReadyListener(() => {
-    appsFlyer.startSdk().then(
+    appsFlyer.start().then(
       (success) => {
         console.log('start SDK success', success);
-        // Demonstrate logAdRevenue once after start — not on every in-app event.
         AFLogAdRevenue();
       },
       (error) => {
@@ -59,20 +52,8 @@ export function AFInit() {
       },
     );
   });
-}
 
-// AppsFlyer Purchase Connector initialization flow
-export function PCInit() {
-  const purchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
-    logSubscriptions: true,
-    logInApps: true,
-    sandbox: true,
-  });
-  
-  AppsFlyerPurchaseConnector.create(
-    purchaseConnectorConfig,
-  );
-  AppsFlyerPurchaseConnector.startObservingTransactions();
+  return {unsubscribeConversion, unsubscribeDeepLink};
 }
 
 // Sends in-app events to AppsFlyer servers. name is the events name ('simple event') and the values are a JSON ({info: 'fff', size: 5})

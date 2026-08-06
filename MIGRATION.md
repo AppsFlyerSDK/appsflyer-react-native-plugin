@@ -15,10 +15,10 @@ critical/security fixes for 6 months from the 7.0.0 release.
 
 1. Enable New Architecture, bump to `^7.0.0`, reinstall native deps.
 2. Fix every call site in the table below.
-3. Replace `initSdk(...)` with the `init` + `startSdk` flow (see below) — the change nearly
+3. Replace `initSdk(...)` with the `init` + `start` flow (see below) — the change nearly
    every app needs.
 4. `tsc --noEmit` + tests — signature changes will surface as type errors.
-5. Smoke-test on device: install → conversion/deep-link callback → session-ready → `startSdk()` →
+5. Smoke-test on device: install → conversion/deep-link callback → session-ready → `start()` →
    `logEvent()`.
 
 ## `initSdk` → `init` + explicit startup
@@ -29,28 +29,69 @@ native. Replaced by:
 
 ```js
 appsFlyer.init('devKey', 'appId').then(onSuccess, onError);
-appsFlyer.setIsDebug(true);            // was: isDebug
-appsFlyer.onInstallConversionData(cb); // was: onInstallConversionDataListener
-appsFlyer.onDeepLink(cb);              // was: onDeepLinkListener
+appsFlyer.setIsDebug(true);                // was: isDebug
+appsFlyer.onConversionDataSuccess(cb);     // was: onInstallConversionDataListener
+appsFlyer.onDeepLinking(cb);               // was: onDeepLinkListener
 appsFlyer.registerSessionReadyListener(() => {
-  appsFlyer.startSdk().then(onSuccess, onError);
+  appsFlyer.start().then(onSuccess, onError);
 });
 ```
 
 Two rules, both easy to get wrong:
 
-- Register listeners **synchronously** — never inside `init().then(...)`. Native buffers
-  registrations until `init` completes; wait for the promise and you may miss the flush.
-- `startSdk()` only inside `registerSessionReadyListener`'s callback — never a bare call right
+- Register listeners **synchronously** — never inside `init().then(...)`. Registration itself
+  is init-order-independent, but dispatch still happens in call order; waiting on the promise
+  first risks missing an event that fires shortly after init.
+- `start()` only inside `registerSessionReadyListener`'s callback — never a bare call right
   after `init()`. Native never auto-starts. Need code to run strictly after start? Wrap it:
 
 ```js
 const startWhenReady = () => new Promise((res, rej) =>
-  appsFlyer.registerSessionReadyListener(() => appsFlyer.startSdk().then(res, rej))
+  appsFlyer.registerSessionReadyListener(() => appsFlyer.start().then(res, rej))
 );
 ```
 
 `timeToWaitForATTUserAuthorization` has no replacement — request ATT yourself before `init()`.
+
+## Callback params removed — every RPC method is Promise-only now
+
+6.x's optional `successC`/`errorC` params (or a single error-first `callback`) are gone from
+every method. Each one now only returns a Promise — awaiting it or calling `.then()` is the
+only way to observe the result:
+
+```js
+// 6.x
+appsFlyer.setCustomerUserId('uid', () => console.log('done'));
+appsFlyer.getAppsFlyerUID((error, uid) => { ... });
+
+// 7.0.0
+await appsFlyer.setCustomerUserId('uid');
+const uid = await appsFlyer.getAppsFlyerUID();
+```
+
+Affected: `setUserEmail`, `setAdditionalData`, `getAppsFlyerUID`, `getSDKVersion`,
+`updateServerUninstallToken`, `setCustomerUserId`, `stop`, `setCollectAndroidID`,
+`setAppInviteOneLinkID`, `generateInviteLink`, `setCurrencyCode`, `logLocation`,
+`sendPushNotificationData`, `setHost`, `addPushNotificationDeepLinkPath`,
+`setOneLinkCustomDomains`, `setResolveDeepLinkURLs`, `anonymizeUser`, `logEvent`.
+
+Any callback argument passed at these call sites is now just an unused extra parameter —
+it is silently ignored, not invoked. `tsc --noEmit` catches this if the call site is typed;
+plain JS call sites need a manual sweep.
+
+`sendPushNotificationData`'s 2nd positional argument is now `androidCampaignData` directly —
+the `errorC` callback that used to sit there is gone, not just made optional:
+
+```js
+// 6.x
+appsFlyer.sendPushNotificationData(payload, errorCb, androidCampaignData);
+// 7.0.0
+appsFlyer.sendPushNotificationData(payload, androidCampaignData);
+```
+
+`setUserEmails({emails, emailsCryptType}, successC?, errorC?)` — the deprecated multi-address
+shim — is removed entirely (it was already `@deprecated` pre-release, so it never shipped as
+a callable 7.0.0 API). Use `setUserEmail(email)`.
 
 ## Everything else, symbol by symbol
 
@@ -58,20 +99,21 @@ const startWhenReady = () => new Promise((res, rej) =>
 |---|---|
 | `initSdk(options)` | `init(devKey, appId)` — see above |
 | `InitSDKOptions` (TS) | removed, unneeded |
-| `setUserEmails({emails, emailsCryptType}, ...)` | `setUserEmail(email, successC?, errorC?)` — only first address sent, shim still works but warns |
+| `setUserEmails({emails, emailsCryptType}, ...)` | removed — use `setUserEmail(email)` (only a single address, no crypt type) |
 | `performOnDeepLinking()` (no-op) | `performOnDeepLinking(url, shouldTriggerSession?)` |
-| `sendPushNotificationData(payload, errorC)` (Android) | 3rd arg required: `{campaign?, pid?, isRetargeting?, additionalParameters?}` — iOS unaffected |
-| `generateInviteLink({deeplinkPath})` | drop `deeplinkPath` (ignored, no native counterpart); `customerID`/`baseDeeplink` unchanged |
+| `sendPushNotificationData(payload, errorC)` (Android) | `sendPushNotificationData(payload, androidCampaignData)` — `errorC` removed, 2nd arg is now `{campaign?, pid?, isRetargeting?, additionalParameters?}` directly; iOS unaffected |
+| `generateInviteLink({deeplinkPath})` | drop `deeplinkPath` (removed, no native counterpart); `customerID`/`baseDeeplink` unchanged |
+| `onInstallConversionData(cb)` / `onInstallConversionFailure(cb)` / `onDeepLink(cb)` | `onConversionDataSuccess(cb)` / `onConversionDataFail(cb)` / `onDeepLinking(cb)` — renamed to match native exactly |
 | `validateAndLogInAppPurchase(purchaseInfo, successC, errorC)` | `validateAndLogInAppPurchase(purchaseDetails, additionalParameters, callback?)` — name reused, `callback` is currently inert |
 | `setCollectIMEI` | removed, no replacement (IMEI is obsolete) |
 | `initInAppPurchaseValidatorListener` (Android) | removed, was dead code |
-| `onAppOpenAttribution` / `onAttributionFailure` / `performOnAppAttribution` | merged into `onDeepLink(callback)` |
+| `onAppOpenAttribution` / `onAttributionFailure` / `performOnAppAttribution` | merged into `onDeepLinking(callback)` |
 | `setSharingFilterForAllPartners` / `setSharingFilter` | `setSharingFilterForPartners(['all'])` / `setSharingFilterForPartners([...])` |
 | `AppsFlyerConsent.forGDPRUser(...)` / `.forNonGDPRUser()` | `new AppsFlyerConsent(isSubjectToGDPR, ...)` |
 | `AppsFlyerConsentType` (TS) | `AppsFlyerConsent` class |
 | `InAppPurchase` (TS, unused) | `AFPurchaseDetails` |
 | `AFInAppEventType.*` via `NativeModules.RNAppsFlyer.*` | `import { AFInAppEventType } from 'react-native-appsflyer'` |
-| `setHost(prefix, host, cb)` | same call site, wire shape changed internally only |
+| `setHost(prefix, host, cb)` | `setHost(hostPrefix, hostName)` — `cb` removed, await the returned Promise instead |
 | `logEvent(...)` resolve | means "accepted onto send queue", not "delivered to server" (was blocking on Android before) |
 
 ## Migrating with an LLM coding assistant
@@ -86,13 +128,16 @@ knowledge of the plugin.
 
 1. Confirm New Architecture is enabled (RN >= 0.76.0). If not, stop and say so.
 2. Find every symbol in MIGRATION.md's table and apply its documented replacement exactly.
-3. For initSdk(...) call sites: replace with init()+startSdk() per the "initSdk -> init"
+3. For initSdk(...) call sites: replace with init()+start() per the "initSdk -> init"
    section, keeping both ordering rules (listeners registered synchronously, not in
-   init().then(); startSdk() only inside registerSessionReadyListener's callback).
+   init().then(); start() only inside registerSessionReadyListener's callback).
 4. Don't touch PurchaseConnector / AppsFlyerPurchaseConnector call sites.
 5. If timeToWaitForATTUserAuthorization was used, add an explicit ATT request before
    init() instead of silently dropping the timing behavior.
-6. Run tsc --noEmit and tests; fix type errors from signature changes.
-7. Report every change made and anything found that MIGRATION.md doesn't cover, instead
+6. Every successC/errorC/callback argument in the "Callback params removed" section is now
+   an unused parameter, not invoked — replace each call site with await/.then() on the
+   returned Promise instead of relying on the callback firing.
+7. Run tsc --noEmit and tests; fix type errors from signature changes.
+8. Report every change made and anything found that MIGRATION.md doesn't cover, instead
    of guessing at it.
 ```

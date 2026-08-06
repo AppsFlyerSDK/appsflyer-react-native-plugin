@@ -11,8 +11,6 @@ import {
 } from 'react-native';
 import {Card, ListItem, Button, FAB, Badge} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import appsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
-
 import {
   PCInit,
   AFInit,
@@ -26,8 +24,6 @@ import {
 import Product from './Product.js';
 import WelcomeModal from './WelcomeModal.js';
 
-// Static product catalog — hoisted to module scope so it isn't rebuilt on every
-// render.
 const products = [
   {
     name: 'Water melon',
@@ -79,8 +75,6 @@ const getProductByName = productName => {
 const productKeyExtractor = item => item.name;
 
 const HomeScreen = ({navigation}) => {
-  let AFGCDListener = null;
-  let AFUDLListener = null;
   const [cartSize, setCartSize] = useState(0);
   const [itemsInCart, setItemsInCart] = useState([]);
   const [isFirstLaunch, setIsFirstLaunch] = useState(false);
@@ -159,100 +153,60 @@ const HomeScreen = ({navigation}) => {
     setItemsInCart([]);
   };
 
-  // AppsFlyer initialization!
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    AFGCDListener = appsFlyer.onInstallConversionData(res => {
-      const isFirstLaunch = res?.data?.is_first_launch;
-      console.log(">> onInstallConversionData: " , res);
-      if (isFirstLaunch && JSON.parse(isFirstLaunch) === true) {
-        setIsFirstLaunch(true);
-      } else {
-        console.log('Not first launch!');
-      }
-    });
+  const handleConversionData = useCallback(res => {
+    console.log(">> onConversionDataSuccess: " , res);
+    // Payload is flat (no `.data` wrapper) — verified against native source, see
+    // index.ts's ConversionData type comment.
+    const isFirstLaunch = res?.is_first_launch;
+    if (!(isFirstLaunch && JSON.parse(isFirstLaunch) === true)) {
+      console.log('Not first launch!');
+      return;
+    }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    AFUDLListener = appsFlyer.onDeepLink(res => {
-      console.log(">> onDeepLink: " , res);
-      if (res?.deepLinkStatus !== 'NOT_FOUND') {
-        const productName = res?.data?.af_productName;
-        const product = getProductByName(productName);
-        console.log(product);
-        if (product) {
-          navigation.navigate('Item', {
-            product: product,
-            addToCart: addProductToCart,
-            deepLinkValues: res,
-          });
-        }
+    // Deferred deep links (click happened before install) never reach onDeepLinking —
+    // the SDK resolves them server-side via GCD and delivers the match here instead,
+    // with is_first_launch=true. See known-issues-kb.md § Deferred deep link not working.
+    const productName = res?.af_productName;
+    const product = getProductByName(productName);
+    if (product) {
+      navigation.navigate('Item', {
+        product: product,
+        addToCart: addProductToCart,
+        deepLinkValues: res,
+      });
+    } else {
+      setIsFirstLaunch(true);
+    }
+  }, [navigation, addProductToCart]);
+
+  const handleDeepLink = useCallback(res => {
+    console.log(">> onDeepLinking: " , res);
+    if (res?.status === 'found') {
+      const productName = res?.deepLink?.af_productName;
+      const product = getProductByName(productName);
+      console.log(product);
+      if (product) {
+        navigation.navigate('Item', {
+          product: product,
+          addToCart: addProductToCart,
+          deepLinkValues: res,
+        });
       }
-    });
-    AFInit();
-    //PCInit();
+    }
+  }, [navigation, addProductToCart]);
+
+  useEffect(() => {
+    const {unsubscribeConversion, unsubscribeDeepLink} = AFInit(
+      handleConversionData,
+      handleDeepLink,
+    );
 
     return () => {
-      AFGCDListener();
-      AFUDLListener();
+      unsubscribeConversion();
+      unsubscribeDeepLink();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  /*
-  const handleValidationSuccess = (validationResult) => {
-    console.log('>> ValidationSuccess: ', validationResult);
-  };
-
-  const handleValidationFailure = (validationResult) => {
-    console.log('>> ValidationFailure: ', validationResult);
-  }
-
-  const handleSubscriptionValidationSuccess = (subscriptionValidationResult) => {
-    console.log('>> handleSubscriptionValidationSuccess: ', subscriptionValidationResult);
-  };
-
-  const handleSubscriptionValidationFailure = (subscriptionValidationResult) => {
-    console.log('>> handleSubscriptionValidationFailure: ', subscriptionValidationResult);
-  }
-
-  const handleOnReceivePurchaseRevenueValidationInfo = (validationInfo, error) => {
-    if (error) {
-      console.error("Error during purchase validation:", error);
-    } else {
-      console.log("Validation Info:", validationInfo);
-    }
-  }
-
-  
-  useEffect(() => {
-    let validationSuccessListener;
-    let validationFailureListener;
-    let subscriptionValidationSuccessListener;
-    let subscriptionValidationFailureListener;
-    let purchaseRevenueValidationListener;
-  
-    if (Platform.OS === 'android') {
-      validationSuccessListener = AppsFlyerPurchaseConnector.onInAppValidationResultSuccess(handleValidationSuccess);
-      validationFailureListener = AppsFlyerPurchaseConnector.onInAppValidationResultFailure(handleValidationFailure);
-      subscriptionValidationSuccessListener = AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess(handleSubscriptionValidationSuccess);
-      subscriptionValidationFailureListener = AppsFlyerPurchaseConnector.onSubscriptionValidationResultFailure(handleSubscriptionValidationFailure);
-    } else {
-      console.log('>> Creating purchaseRevenueValidationListener ');
-      purchaseRevenueValidationListener = AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo(handleOnReceivePurchaseRevenueValidationInfo);
-    }
-  
-    // Cleanup function
-    return () => {
-      if (Platform.OS === 'android') {
-        if (validationSuccessListener) validationSuccessListener.remove();
-        if (validationFailureListener) validationFailureListener.remove();
-        if (subscriptionValidationSuccessListener) subscriptionValidationSuccessListener.remove();
-        if (subscriptionValidationFailureListener) subscriptionValidationFailureListener.remove();
-      } else {
-        if (purchaseRevenueValidationListener) purchaseRevenueValidationListener.remove();
-      }
-    };
-  }, []);
-  */
 
   return (
     <View style={styles.container}>

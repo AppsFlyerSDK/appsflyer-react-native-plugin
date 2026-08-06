@@ -134,11 +134,11 @@ describe('Backward Compatibility Tests', () => {
       expect(appsFlyer.performOnAppAttribution).toBeUndefined();
     });
 
-    test('onDeepLink still delivers data previously routed through onAppOpenAttribution', () => {
+    test('onDeepLinking still delivers data previously routed through onAppOpenAttribution', () => {
       const { NativeEventEmitter } = require('react-native');
       const nativeEventEmitter = new NativeEventEmitter(NativeAppsFlyer);
       const callback = jest.fn();
-      const remove = appsFlyer.onDeepLink(callback);
+      const remove = appsFlyer.onDeepLinking(callback);
 
       const attributionData = { media_source: 'test', campaign: 'test_campaign' };
       nativeEventEmitter.emit(
