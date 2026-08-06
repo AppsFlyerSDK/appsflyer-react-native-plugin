@@ -14,19 +14,15 @@ More info about testing the SDK for marketers [here](https://support.appsflyer.c
 - [Testing for Android](#testing-for-android)
 
 First, you need to enable debug mode for full logs from the SDK.
-To enable it, set the initialization object with `isDebug` as `true`:
+To enable it, call `setIsDebug(true)` — a dedicated call, separate from `init` (see
+[RN_API.md — setIsDebug](RN_API.md#setisdebug)):
 
 ```javascript
-const option = {
-  isDebug: true,
-  appId: '78xXxXx35',
-  devKey: 'UsxXxXxXxed',
-  onInstallConversionDataListener: true,
-  timeToWaitForATTUserAuthorization: 10,
-  onDeepLinkListener: true,
-};
-
-appsFlyer.initSdk(option, null, null); // null can be functions for success or error handler
+appsFlyer.init('UsxXxXxXxed', '78xXxXx35').then(
+  (result) => console.log(result),
+  (error) => console.error(error)
+);
+appsFlyer.setIsDebug(true);
 ```
 
 ## Testing for iOS

@@ -104,14 +104,13 @@ After setting up all listeners and configurations, initialize and start the SDK:
 
 ```jsx
 // Initialize AppsFlyer (AFTER setting up listeners)
-appsFlyer.initSdk({
-  devKey: 'YOUR_DEV_KEY',
-  isDebug: true,
-  appId: 'YOUR_APP_ID', // iOS only
-});
+// `initSdk` was removed in 7.0.0 — use `init(devKey, appId)` instead (see MIGRATION.md).
+appsFlyer.init('YOUR_DEV_KEY', 'YOUR_APP_ID'); // appId is iOS only, harmlessly ignored on Android
 
-// Start AppsFlyer (AFTER init)
-appsFlyer.startSdk();
+// Start AppsFlyer from inside registerSessionReadyListener's callback (see bridge-patterns.md §4)
+appsFlyer.registerSessionReadyListener(() => {
+  appsFlyer.startSdk();
+});
 ```
 
 **Parameters:**
@@ -128,6 +127,13 @@ In your push notification provider callback (where you receive the notification 
 // Example with Firebase messaging
 import messaging from '@react-native-firebase/messaging';
 
+// iOS reads the raw payload; Android reads these explicit campaign fields
+const toAndroidCampaignData = (remoteMessage) => ({
+  campaign: remoteMessage.data?.af?.c,
+  pid: remoteMessage.data?.af?.pid,
+  isRetargeting: remoteMessage.data?.af?.is_retargeting === 'true',
+});
+
 // Background/Quit state messages
 messaging().setBackgroundMessageHandler(async (remoteMessage) => {
   console.log('Background message:', remoteMessage);
@@ -137,7 +143,8 @@ messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     remoteMessage.data, // The push notification payload
     (error) => {
       console.error('Error sending push data to AppsFlyer:', error);
-    }
+    },
+    toAndroidCampaignData(remoteMessage)
   );
 });
 
@@ -150,7 +157,8 @@ messaging().onMessage(async (remoteMessage) => {
     remoteMessage.data,
     (error) => {
       console.error('Error sending push data to AppsFlyer:', error);
-    }
+    },
+    toAndroidCampaignData(remoteMessage)
   );
 });
 
@@ -163,10 +171,19 @@ messaging().onNotificationOpenedApp((remoteMessage) => {
     remoteMessage.data,
     (error) => {
       console.error('Error sending push data to AppsFlyer:', error);
-    }
+    },
+    toAndroidCampaignData(remoteMessage)
   );
 })
 ```
+
+**Parameters for `sendPushNotificationData`:**
+
+- `pushPayload`: The raw push notification payload. iOS locates the `af` block in it.
+- `errorCallback`: Called with an error message when the payload has not been sent
+- `androidCampaignData`: `{campaign?, pid?, isRetargeting?, additionalParameters?}`. Android builds
+  an `AFPushData` from these fields and no longer reads the raw payload. Omitting this argument logs
+  a warning and reports an empty re-engagement on Android; iOS is unaffected.
 
 ## Method 2: JSON Method
 
@@ -229,13 +246,11 @@ appsFlyer.onDeepLink((data) => {
 });
 
 // 2. Initialize and start SDK
-appsFlyer.initSdk({
-  devKey: 'YOUR_DEV_KEY',
-  isDebug: true,
-  appId: 'YOUR_APP_ID',
+// `initSdk` was removed in 7.0.0 — use `init(devKey, appId)` instead (see MIGRATION.md).
+appsFlyer.init('YOUR_DEV_KEY', 'YOUR_APP_ID');
+appsFlyer.registerSessionReadyListener(() => {
+  appsFlyer.startSdk();
 });
-
-appsFlyer.startSdk();
 
 // 3. Handle push data the same way
 // The SDK will automatically detect the 'af' object in the payload
@@ -267,20 +282,25 @@ const AppsflyerPushIntegration = () => {
     );
 
     // 3. Initialize AppsFlyer SDK (AFTER listeners and config)
-    appsFlyer.initSdk({
-      devKey: 'YOUR_DEV_KEY',
-      isDebug: true,
-      appId: 'YOUR_APP_ID',
-    });
+    // `initSdk` was removed in 7.0.0 — use `init(devKey, appId)` instead (see MIGRATION.md).
+    appsFlyer.init('YOUR_DEV_KEY', 'YOUR_APP_ID');
 
-    // 4. Start AppsFlyer (AFTER init)
-    appsFlyer.startSdk();
+    // 4. Start AppsFlyer once the session is ready (see bridge-patterns.md §4)
+    appsFlyer.registerSessionReadyListener(() => {
+      appsFlyer.startSdk();
+    });
 
     // 5. Set up push notification handlers
     const handlePushData = (payload) => {
       appsFlyer.sendPushNotificationData(
         payload,
-        (error) => console.error('Push data error:', error)
+        (error) => console.error('Push data error:', error),
+        // Android requires explicit campaign fields; iOS reads the raw payload
+        {
+          campaign: payload?.af?.c,
+          pid: payload?.af?.pid,
+          isRetargeting: payload?.af?.is_retargeting === 'true',
+        }
       );
     };
 
@@ -359,7 +379,7 @@ Push Notification received af payload = {"c":"campaign_name", "is_retargeting":"
 
 - **Deep links not working**: Verify the key path in `addPushNotificationDeepLinkPath` matches your payload structure
 - **OneLink not detected**: Ensure the OneLink contains required parameters (pid, is_retargeting=true, c)
-- **Payload not processed**: Check that `addPushNotificationDeepLinkPath` is called before `initSdk`
+- **Payload not processed**: Check that `addPushNotificationDeepLinkPath` is called before `init`
 
 **JSON Method:**
 
@@ -370,7 +390,8 @@ Push Notification received af payload = {"c":"campaign_name", "is_retargeting":"
 **General Issues:**
 
 - **Android crashes**: Verify app activity is available when calling `sendPushNotificationData`
-- **Listeners not firing**: Ensure all listeners are set up before calling `initSdk` and `startSdk`
+- **Android re-engagement empty (iOS fine)**: Pass `androidCampaignData` to `sendPushNotificationData` — Android builds the re-engagement from those fields, not from the raw payload
+- **Listeners not firing**: Ensure all listeners are set up before calling `init` and `startSdk`
 - **Duplicate processing**: SDK prevents duplicate processing of the same payload in the same cold launch
 
 ## Resources

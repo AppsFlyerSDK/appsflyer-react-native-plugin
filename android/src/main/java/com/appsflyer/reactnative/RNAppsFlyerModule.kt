@@ -52,6 +52,13 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
         // no-op, see addListener
     }
 
+    // Shuts down this instance's dedicated thread pool so it doesn't leak past TurboModule
+    // teardown (bridge/context invalidation, multi-instance RN hosts).
+    override fun invalidate() {
+        super.invalidate()
+        rpcExecutor.shutdown()
+    }
+
     private fun remapMethodName(requestJson: String): String {
         return try {
             val request = JSONObject(requestJson)

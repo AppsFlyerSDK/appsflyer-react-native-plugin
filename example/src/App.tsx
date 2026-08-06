@@ -25,7 +25,8 @@ export default function App() {
 // call returns.
 function startWhenSessionReady() {
   return new Promise<void>((resolve, reject) => {
-    appsFlyer.registerSessionReadyListener(() => {
+    const remove = appsFlyer.registerSessionReadyListener(() => {
+      remove();
       afCallbackLog('onSessionReady', 'session ready — starting SDK');
       appsFlyer.startSdk().then(() => {
         afLog('startSDK', 'result: called');
@@ -181,9 +182,10 @@ async function runAutoFlow() {
   // stop(true) firing before conversion data arrives kills the in-flight request.
   await conversionDataReceived;
 
+  // stop()'s single callback receives BOTH outcomes — a hardcoded 'result: true' here previously masked an RPC hard-failure, so log the actual payload.
   await new Promise<void>(resolve => {
-    appsFlyer.stop(true, () => {
-      afLog('stop', 'result: true');
+    appsFlyer.stop(true, (result: any) => {
+      afLog('stop(true)', `result: ${JSON.stringify(result)}`);
       resolve();
     });
   });
@@ -200,8 +202,8 @@ async function runAutoFlow() {
   }
 
   await new Promise<void>(resolve => {
-    appsFlyer.stop(false, () => {
-      afLog('stop', 'result: false');
+    appsFlyer.stop(false, (result: any) => {
+      afLog('stop(false)', `result: ${JSON.stringify(result)}`);
       resolve();
     });
   });

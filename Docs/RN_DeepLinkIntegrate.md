@@ -67,27 +67,26 @@ In your app’s manifest add the following intent-filter to your relevant activi
 For more on URI Scheme check out the guide [here](https://dev.appsflyer.com/hc/docs/dl_android_init_setup#procedures-for-uri-scheme).
 
 ##  iOS Deeplink Setup
-In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
+In order to record retargeting and use the `onDeepLink`/UDL callback in iOS (`onAppOpenAttribution` was removed in 7.0.0 and merged into `onDeepLink` — see MIGRATION.md), the app needs to forward opened URLs / Universal Links to the SDK. The 7.0.0 TurboModule rewrite removed the native `AppsFlyerAttribution` proxy class — there is no longer any AppsFlyer-specific code to add to **AppDelegate**. Instead, forward from JavaScript, using React Native's own `Linking` module to receive the AppDelegate events (standard RN setup, via `RCTLinkingManager` — see the [React Native Linking docs](https://reactnative.dev/docs/linking)):
 
-```objectivec
-#import <RNAppsFlyer.h>
-// Deep linking
-// Open URI-scheme for iOS 9 and above
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary *) options {
-  [[AppsFlyerAttribution shared] handleOpenUrl:url options:options];
-    return YES;
-}
-// Open URI-scheme for iOS 8 and below
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
-  [[AppsFlyerAttribution shared] handleOpenUrl:url sourceApplication:sourceApplication annotation:annotation];
-  return YES;
-}
-// Open Universal Links
-- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nullable))restorationHandler {
-    [[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
-    return YES;
-}
+```javascript
+import { Linking } from 'react-native';
+import appsFlyer from 'react-native-appsflyer';
+
+// Universal Links / URI scheme opened while the app is already running.
+Linking.addEventListener('url', ({ url }) => {
+  appsFlyer.handleOpenURL(url);
+});
+
+// App launched cold via a Universal Link / URI scheme.
+Linking.getInitialURL().then(url => {
+  if (url) {
+    appsFlyer.handleOpenURL(url);
+  }
+});
 ```
+
+`appsFlyer.handleOpenURL(url, options?)` and `appsFlyer.continueUserActivity(url, activityType?)` are safe to call before `appsFlyer.init(...)` resolves — a cold start can fire before JS has finished initializing, and the native RPC layer buffers these calls until `init` succeeds rather than dropping them. `appsFlyer.handleOpenUrl(url, options?)` (lowercase `Url`) is the legacy pre-iOS 9 path — a distinct, case-sensitive RPC method from `handleOpenURL`, not an alias.
 
 ### Universal Links
 Universal Links link between an iOS mobile app and an associate website/domain, such as AppsFlyer’s OneLink domain (xxx.onelink.me). To do so, it is required to:
