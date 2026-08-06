@@ -7,9 +7,11 @@ const config = getDefaultConfig(__dirname);
 const pluginRoot = path.resolve(__dirname, '../../'); // `react-native-appsflyer`
 const localPackagePaths = [pluginRoot];
 
-// Escape a path into a blockList RegExp matching that dir and everything under it.
-const blockDir = dir =>
-  new RegExp(dir.replace(/[/\\]/g, '[/\\\\]') + '[/\\\\].*');
+// Escape a fixed local dir (never user input) into a blockList RegExp matching
+// it and everything under it. No nested quantifiers, so no ReDoS surface —
+// escapeRegExp + a single trailing `.*` can't backtrack catastrophically.
+const escapeRegExp = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const blockDir = dir => new RegExp(`^${escapeRegExp(dir)}[/\\\\].*`);
 
 config.resolver.nodeModulesPaths = [
   path.resolve(__dirname, 'node_modules'),
