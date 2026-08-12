@@ -13,7 +13,12 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:7.2.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10" // Kotlin plugin
+        // ponytail: no kotlin-gradle-plugin classpath here — this module is always compiled inside a
+        // consuming app's composite build (subprojects inherit the root's buildscript classpath). A
+        // second, independently-versioned Kotlin plugin here previously caused "compiled with an
+        // incompatible version of Kotlin" (kotlin.Pair/TypeAliasesKt): the app-wide Kotlin compiler
+        // was shared/loaded once at the root's version, but this module's own stdlib classpath
+        // resolved separately at whatever version this line pinned — a version skew, not a stale pin.
     }
 }
 
@@ -40,7 +45,7 @@ android {
 
     sourceSets {
         main {
-            java.srcDirs = ['src/main/java', 'src/main/kotlin'] // Add Kotlin source directory
+            java.srcDirs = ['src/main/java', 'src/main/kotlin', 'src/main/common'] // Add Kotlin + shared connector-variant source directories
             java.srcDirs += includeConnector ? ['src/main/includeConnector'] : ['src/main/excludeConnector']
         }
     }
@@ -73,7 +78,7 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10" // Add Kotlin standard library
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:${safeExtGet('kotlin_stdlib_version', '2.4.10')}"
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.2')}"
     if (includeConnector){
