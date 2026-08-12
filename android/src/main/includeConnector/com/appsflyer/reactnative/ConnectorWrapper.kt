@@ -28,8 +28,8 @@ class ConnectorWrapper(
     logSubs: Boolean,
     logInApps: Boolean,
     sandbox: Boolean,
-    subsListener: MappedValidationResultListener,
-    inAppListener: MappedValidationResultListener,
+    subsListener: PurchaseClient.ValidationResultListener<Map<String, Any>>,
+    inAppListener: PurchaseClient.ValidationResultListener<Map<String, Any>>,
 ) :
     PurchaseClient {
     private var subscriptionDataSource: Map<String, Any> = mapOf()
@@ -111,29 +111,17 @@ class ConnectorWrapper(
             "startTime" to startTime,
             "subscribeWithGoogleInfo" to subscribeWithGoogleInfo?.toJsonMap(),
             "subscriptionState" to subscriptionState,
-            "testPurchase" to testPurchase?.toJsonMap()
+            "testPurchase" to testPurchase?.let { emptyMap<String, Any?>() }
         )
     }
 
     private fun CanceledStateContext.toJsonMap(): Map<String, Any?> {
         return mapOf(
-            "developerInitiatedCancellation" to developerInitiatedCancellation?.toJsonMap(),
-            "replacementCancellation" to replacementCancellation?.toJsonMap(),
-            "systemInitiatedCancellation" to systemInitiatedCancellation?.toJsonMap(),
+            "developerInitiatedCancellation" to developerInitiatedCancellation?.let { emptyMap<String, Any?>() },
+            "replacementCancellation" to replacementCancellation?.let { emptyMap<String, Any?>() },
+            "systemInitiatedCancellation" to systemInitiatedCancellation?.let { emptyMap<String, Any?>() },
             "userInitiatedCancellation" to userInitiatedCancellation?.toJsonMap()
         )
-    }
-
-    private fun DeveloperInitiatedCancellation.toJsonMap(): Map<String, Any?> {
-        return mapOf()
-    }
-
-    private fun ReplacementCancellation.toJsonMap(): Map<String, Any?> {
-        return mapOf()
-    }
-
-    private fun SystemInitiatedCancellation.toJsonMap(): Map<String, Any?> {
-        return mapOf()
     }
 
     private fun UserInitiatedCancellation.toJsonMap(): Map<String, Any?> {
@@ -221,10 +209,6 @@ class ConnectorWrapper(
             "profileId" to profileId,
             "profileName" to profileName
         )
-    }
-
-    fun TestPurchase.toJsonMap(): Map<String, Any?> {
-        return mapOf()
     }
 
     private fun ProductPurchase.toJsonMap(): Map<String, Any?> {
