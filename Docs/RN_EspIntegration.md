@@ -52,7 +52,7 @@ Add associated domains to your `app.json`:
 
 ### Step 2: Configure AppDelegate for Deep Linking
 
-Forward opened URLs / Universal Links to the AppsFlyer SDK via `AppsFlyerAttribution` from `AppDelegate` (there is no JavaScript API for this — `AppsFlyerLib`/`AppsFlyerAttribution` are already available as transitive dependencies of this plugin, no extra `pod` entry needed). `AppsFlyerAttribution` buffers calls that arrive before `initSdk` has configured the native SDK (e.g. a cold-start Universal Link) and replays them once it has — see [Deep linking integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup). If your app also uses React Native's own `Linking` module for its own deep-link routing, call both `AppsFlyerAttribution.shared` and `RCTLinkingManager` from the same delegate methods:
+Forward opened URLs / Universal Links to the AppsFlyer SDK via `AppsFlyerAttribution` from `AppDelegate` (there is no JavaScript API for this — `AppsFlyerLib`/`AppsFlyerAttribution` are already available as transitive dependencies of this plugin, no extra `pod` entry needed). `AppsFlyerAttribution` buffers calls that arrive before `init()` has configured the native SDK (e.g. a cold-start Universal Link) and replays them once it has — see [Deep linking integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup). If your app also uses React Native's own `Linking` module for its own deep-link routing, call both `AppsFlyerAttribution.shared` and `RCTLinkingManager` from the same delegate methods:
 
 ```swift
 import AppsFlyerLib

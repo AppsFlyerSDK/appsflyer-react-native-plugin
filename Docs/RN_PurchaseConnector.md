@@ -116,7 +116,7 @@ Remember to set `sandbox` to `false` before releasing your app to production. If
 Start the SDK instance to observe transactions. </br>
 
 **⚠️ Please Note**
-> This should be called right after calling the `appsFlyer.start()` [start](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/blob/master/Docs/RN_API.md#start).
+> This should be called right after `appsFlyer.start()` fires inside `registerSessionReadyListener` — see [start](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/blob/master/Docs/RN_API.md#start). `start()` must not be called standalone; it only resolves correctly once the session-ready callback has fired.
 >  Calling `startObservingTransactions` activates a listener that automatically observes new billing transactions. This includes new and existing subscriptions and new in app purchases.
 >  The best practice is to activate the listener as early as possible.
 ```javascript
@@ -126,8 +126,12 @@ Start the SDK instance to observe transactions. </br>
         StoreKitVersion,
         } from 'react-native-appsflyer';
 
-        appsFlyer.start();
-        
+        appsFlyer.init(devKey, appId).then(...);
+
+        appsFlyer.registerSessionReadyListener(() => {
+          appsFlyer.start();
+        });
+
         // StoreKit1 example (default behavior)
         const purchaseConnectorConfig: PurchaseConnectorConfig = AppsFlyerPurchaseConnectorConfig.setConfig({
           logSubscriptions: true,
