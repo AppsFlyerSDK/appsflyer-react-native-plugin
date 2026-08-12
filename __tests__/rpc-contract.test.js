@@ -95,9 +95,12 @@ describe('RPC event channel pass-through fidelity', () => {
 		emit();
 		emit();
 
+		// js-core-plugin's registerDeepLinkListener always normalizes this channel's payload as a
+		// deep-link result, defaulting a missing `status` to 'NOT_FOUND' -- see compatibility.test.js.
+		const normalized = { ...payload, status: 'NOT_FOUND' };
 		expect(callback).toHaveBeenCalledTimes(2);
-		expect(callback).toHaveBeenNthCalledWith(1, payload);
-		expect(callback).toHaveBeenNthCalledWith(2, payload);
+		expect(callback).toHaveBeenNthCalledWith(1, normalized);
+		expect(callback).toHaveBeenNthCalledWith(2, normalized);
 	});
 });
 

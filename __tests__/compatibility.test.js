@@ -128,7 +128,10 @@ describe('Backward Compatibility Tests', () => {
         })
       );
 
-      expect(callback).toHaveBeenCalledWith(attributionData);
+      // @appsflyer-sdk/js-core-plugin's registerDeepLinkListener normalizes every payload on this
+      // channel as a deep-link result and defaults a missing `status` to 'NOT_FOUND' (dist/appsflyer-sdk.js
+      // normalizeDeepLinkStatus) -- it can't distinguish this legacy attribution-only shape from a real one.
+      expect(callback).toHaveBeenCalledWith({ ...attributionData, status: 'NOT_FOUND' });
     });
   });
 

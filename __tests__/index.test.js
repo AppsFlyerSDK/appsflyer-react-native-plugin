@@ -653,18 +653,20 @@ describe('Test native event emitter', () => {
 		expect(successCallback).toHaveBeenCalledWith(nativeEventObject);
 	});
 
+	// js-core-plugin's registerDeepLinkListener always normalizes this channel's payload as a
+	// deep-link result, defaulting a missing `status` to 'NOT_FOUND' -- see compatibility.test.js.
 	test('registerDeepLinkListener Happy Flow (iOS native event name)', async () => {
 		const onDeepLinking = jest.fn();
 		await appsFlyer.registerDeepLinkListener({ onDeepLinking });
 		emitRpcEvent('onDeepLinkReceived', nativeEventObject);
-		expect(onDeepLinking).toHaveBeenCalledWith(nativeEventObject);
+		expect(onDeepLinking).toHaveBeenCalledWith({ ...nativeEventObject, status: 'NOT_FOUND' });
 	});
 
 	test('registerDeepLinkListener Happy Flow (Android native event name)', async () => {
 		const onDeepLinking = jest.fn();
 		await appsFlyer.registerDeepLinkListener({ onDeepLinking });
 		emitRpcEvent('onDeepLinking', nativeEventObject);
-		expect(onDeepLinking).toHaveBeenCalledWith(nativeEventObject);
+		expect(onDeepLinking).toHaveBeenCalledWith({ ...nativeEventObject, status: 'NOT_FOUND' });
 	});
 
 	test('onAppOpenAttribution / onAttributionFailure were removed and merged into registerDeepLinkListener', () => {
