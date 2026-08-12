@@ -1,10 +1,10 @@
-import appsFlyer, {
+import AppsFlyer, {
   AppsFlyerPurchaseConnector,
   AppsFlyerPurchaseConnectorConfig,
   MEDIATION_NETWORK,
 } from 'react-native-appsflyer';
 import {Linking, Platform} from 'react-native';
-import {DEV_KEY, APP_ID} from '@env';
+import {DEV_KEY, APP_ID, ONELINK_ID} from '@env';
 
 export const AF_viewCart = 'af_view_cart';
 export const AF_addedToCart = 'af_added_to_cart';
@@ -14,54 +14,53 @@ export const AF_clickOnItem = 'af_click_on_item';
 
 export async function AFInit(onConversionData, onDeepLink) {
   if (Platform.OS == 'ios') {
-    appsFlyer.setCurrentDeviceLanguage('EN');
+    AppsFlyer.setCurrentDeviceLanguage({language: 'EN'});
   }
-  appsFlyer.enableDebug(true);
+  AppsFlyer.enableDebug({enabled: true});
 
   try {
-    const success = await appsFlyer.init(DEV_KEY, APP_ID);
-    console.log('init SDK success', success);
+    await AppsFlyer.init({devKey: DEV_KEY, appId: APP_ID});
+    console.log('init SDK success');
+    const url = await Linking.getInitialURL();
+    console.log("AFINIT: Deeplink url" , url)
 
-    // Android: MainActivity.onNewIntent only forwards warm-start VIEW intents to 
-    // performDeepLinking — the native SDK doesn't inspect the launch Intent until 
-    // init() has actually completed, so a cold-start deep link's Intent is present 
-    // at Activity onCreate but must be re-delivered here (once JS/native init has 
-    // resolved) via getInitialURL, or it's silently dropped.
-    if (Platform.OS === 'android') {
-      const url = await Linking.getInitialURL();
-      if (url) {
-        appsFlyer.performDeepLinking(url, true);
-      }
+    if (Platform.OS === 'android' && url) {
+      AppsFlyer.performDeepLinking({url, shouldTriggerSession: true});
     }
   } catch (error) {
     console.log('init SDK failed', error);
+    return; // devKey/appleAppID never got set natively -- registerSessionReadyListener would assert-crash
   }
+  AppsFlyer.setAppInviteOneLink({oneLinkId:"neai"});
 
   //Deeplink URL: https://rndemo.onelink.me/neai/by0p3obe
-  const unsubscribeConversion = appsFlyer.registerConversionListener(
-    onConversionData,
-    (error) => console.log('conversion data error:', error),
-  );
-  const unsubscribeDeepLink = appsFlyer.registerDeepLinkListener(onDeepLink);
+  AppsFlyer.registerConversionListener({
+    onConversionDataSuccess: onConversionData,
+    onConversionDataFail: (error) => console.log('conversion data error:', error),
+  });
+  AppsFlyer.registerDeepLinkListener({onDeepLinking: onDeepLink});
 
-  appsFlyer.registerSessionReadyListener(() => {
-    appsFlyer.start().then(
+  AppsFlyer.registerSessionReadyListener(() => {
+    AppsFlyer.start().then(
       (success) => {
-        console.log('start SDK success', success);
+        console.log('start SDK success');
         AFLogAdRevenue();
       },
       (error) => {
-        console.log('start SDK failed', error);
+        console.log('start SDK failed:', error);
       },
     );
   });
+}
 
-  return {unsubscribeConversion, unsubscribeDeepLink};
+export function AFCleanup() {
+  //AppsFlyer.unregisterConversionListener();
+  //AppsFlyer.unregisterDeeplinkListener();
 }
 
 // Sends in-app events to AppsFlyer servers. name is the events name ('simple event') and the values are a JSON ({info: 'fff', size: 5})
 export function AFLogEvent(name, values) {
-  appsFlyer.logEvent(name, values).then(
+  AppsFlyer.logEvent({eventName: name, eventValues: values}).then(
     (res) => console.log(res),
     (err) => console.log(err),
   );
@@ -79,5 +78,5 @@ function AFLogAdRevenue() {
     },
   };
 
-  appsFlyer.logAdRevenue(adRevenueData);
+  AppsFlyer.logAdRevenue(adRevenueData);
 }
