@@ -27,11 +27,16 @@ hidden: false
 
 ### Implementation:
 
-___Important___  The code implementation for `registerDeepLinkListener` must be made **prior to the initialization** code of the SDK.
+___Important___  Call `registerDeepLinkListener` **synchronously, immediately after `init()`** — as a separate statement right after the `init()` call, not before it and not inside `init().then()`. Registering before `init()` runs is worse than just too early: on iOS it fires the SDK's one-shot deferred-deep-link resolution immediately against an unconfigured host, permanently breaking deferred deep linking for that app process (see the known-issues KB).
 
 Example:
 
 ```javascript
+appsFlyer.init('K2***********99', '41*****44').then(
+  (result) => console.log(result),
+  (error) => console.error(error)
+);
+
 const onDeepLinkCanceller = appsFlyer.registerDeepLinkListener(res => {
   if (res?.status !== 'notFound') {
         const DLValue = res?.deepLink.deep_link_value;
@@ -43,10 +48,6 @@ const onDeepLinkCanceller = appsFlyer.registerDeepLinkListener(res => {
       }
 })
 
-appsFlyer.init('K2***********99', '41*****44').then(
-  (result) => console.log(result),
-  (error) => console.error(error)
-);
 appsFlyer.enableDebug(false);
 ```
 

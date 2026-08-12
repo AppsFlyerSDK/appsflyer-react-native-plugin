@@ -991,28 +991,28 @@ appsFlyer.enableTCFDataCollection(true);
 
 ---
 ### setConsentData
-`setConsentData(consentObject): void`
+`setConsentData(consentObject): Promise<void>`
 
 When GDPR applies to the user and your app does not use a CMP compatible with TCF v2.2/2.3, use this API to provide the consent data directly to the SDK.
 
-Use the `AppsFlyerConsent` constructor:
+Pass a plain object — there is no `AppsFlyerConsent` constructor class in this plugin's current version:
 
 ```javascript
-import appsFlyer, {AppsFlyerConsent} from 'react-native-appsflyer';
+import appsFlyer from 'react-native-appsflyer';
 
 // Full consent for GDPR user
-const consent1 = new AppsFlyerConsent(true, true, true, true);
+const consent1 = { isUserSubjectToGDPR: true, hasConsentForDataUsage: true, hasConsentForAdsPersonalization: true, hasConsentForAdStorage: true };
 
 // No consent for GDPR user
-const consent2 = new AppsFlyerConsent(true, false, false, false);
+const consent2 = { isUserSubjectToGDPR: true, hasConsentForDataUsage: false, hasConsentForAdsPersonalization: false, hasConsentForAdStorage: false };
 
 // Non-GDPR user
-const consent3 = new AppsFlyerConsent(false);
+const consent3 = { isUserSubjectToGDPR: false };
 
 appsFlyer.setConsentData(consent1);
 ```
 
-**Constructor parameters:**
+**Object parameters:**
 | parameter       | type     | description                      |
 | ----------      |----------|------------------                |
 | isUserSubjectToGDPR  | boolean  | Whether GDPR applies to the user (required)       |
@@ -1020,7 +1020,7 @@ appsFlyer.setConsentData(consent1);
 | hasConsentForAdsPersonalization  | boolean  | Consent for ads personalization (optional)       |
 | hasConsentForAdStorage  | boolean  | Consent for ad storage (optional)       |
 
-If `isUserSubjectToGDPR` is omitted, it defaults to `false`.
+`isUserSubjectToGDPR` is required — there is no client-side default. Omitting it rejects on iOS (its native parser requires the field) or falls back to Android's own native default; TypeScript's `SetConsentDataParams` type requires it either way, so real callers can't omit it silently.
 
 ### logAdRevenue
 `logAdRevenue(data): void`

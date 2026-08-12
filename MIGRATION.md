@@ -101,7 +101,7 @@ net-new; rows with no 7.0.0 name were removed outright.
 | `onAppOpenAttribution` / `onAttributionFailure` / `performOnAppAttribution` | `registerDeepLinkListener(callback)` | Merged | All three folded into one deep-link callback |
 | `addPushNotificationDeepLinkPath(path, cb?)` | `addPushNotificationDeepLinkPath(path)` | Callback → Promise | |
 | `anonymizeUser(shouldAnonymize, cb?)` | `anonymizeUser(shouldAnonymize)` | Callback → Promise | |
-| `AppsFlyerConsentType` (TS) | `AppsFlyerConsent` (class) | Type renamed | `.forGDPRUser(...)`/`.forNonGDPRUser()` → `new AppsFlyerConsent(isSubjectToGDPR, ...)` |
+| `AppsFlyerConsentType` (TS) / `AppsFlyerConsent` (class) | `SetConsentDataParams` (plain object) | Class removed, not renamed | `.forGDPRUser(...)`/`.forNonGDPRUser()`/`new AppsFlyerConsent(...)` → `setConsentData({ isUserSubjectToGDPR, hasConsentForDataUsage?, hasConsentForAdsPersonalization?, hasConsentForAdStorage? })` |
 | `AFAdRevenueData` (TS) | — | Type removed | `logAdRevenue`'s call signature is unchanged — see [notes](#afadrevenuedata-type-removed) |
 | `AFInAppEventType.*` via `NativeModules.RNAppsFlyer.*` | `import { AFInAppEventType } from 'react-native-appsflyer'` | Import path changed | |
 | `disableAdvertisingIdentifier(isDisable)` | `setDisableAdvertisingIdentifiers(disable)` | Renamed | |
