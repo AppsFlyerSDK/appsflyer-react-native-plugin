@@ -335,10 +335,10 @@ jobs:
         run: |
           echo "Updating PLUGIN_VERSION constants to: $VERSION"
 
-          # Android - RNAppsFlyerConstants.java
-          sed -i.bak "s/PLUGIN_VERSION = \"[^\"]*\"/PLUGIN_VERSION = \"${VERSION}\"/" android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java
-          rm -f android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java.bak
-          echo "Android:" && grep "PLUGIN_VERSION" android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java
+          # Android - RNAppsFlyerConstants.kt
+          sed -i.bak "s/PLUGIN_VERSION = \"[^\"]*\"/PLUGIN_VERSION = \"${VERSION}\"/" android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.kt
+          rm -f android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.kt.bak
+          echo "Android:" && grep "PLUGIN_VERSION" android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.kt
 
           # iOS - RNAppsFlyer.h
           sed -i.bak "s/kAppsFlyerPluginVersion[[:space:]]*= @\"[^\"]*\"/kAppsFlyerPluginVersion      = @\"${VERSION}\"/" ios/RNAppsFlyer.h
@@ -381,7 +381,7 @@ jobs:
           if [[ -n $(git status -s) ]]; then
             git add -f package.json react-native-appsflyer.podspec README.md CHANGELOG.md \
               ios/RNAppsFlyer.h \
-              android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java \
+              android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.kt \
               android/build.gradle
             git commit -m "chore: prepare RC ${VERSION} (iOS ${IOS_VER}, Android ${AND_VER}, Bridge ${BRIDGE_VER})"
             git push --set-upstream origin "$REL_BRANCH"

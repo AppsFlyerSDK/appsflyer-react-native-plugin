@@ -5,7 +5,7 @@ paths:
 
 # Native Android bridge rules
 
-Scope: `android/` directory — `RNAppsFlyerModule.kt`, `RNAppsFlyerPackage.kt`, `RNAppsFlyerConstants.java`, `RNUtil.java`.
+Scope: `android/` directory — `RNAppsFlyerModule.kt`, `RNAppsFlyerPackage.kt`, `RNAppsFlyerConstants.kt`, `RNUtil.java`.
 
 ## 1. Module structure
 
@@ -31,7 +31,7 @@ Any RPC call that can block natively (Android's `awaitResponse` model — up to 
 
 ## 5. Constants
 
-`PLUGIN_VERSION` in `RNAppsFlyerConstants.java` — must stay in sync with the other 3 version locations on every release (see `release-versioning.md`).
+`PLUGIN_VERSION` in `RNAppsFlyerConstants.kt` — must stay in sync with the other 3 version locations on every release (see `release-versioning.md`).
 
 `AFInAppEventType` constants are now a plain JS frozen object in `index.js` — they are **no longer exported** from `getConstants()`. Do not re-add them to `getConstants()`.
 
