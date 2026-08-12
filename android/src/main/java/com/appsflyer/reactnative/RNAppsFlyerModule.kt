@@ -66,7 +66,20 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
 
     override fun executeRpc(requestJson: String, promise: Promise) {
         rpcExecutor.execute {
-            promise.resolve(dispatchToNative(requestJson))
+            promise.resolve(safeDispatchToNative(requestJson))
+        }
+    }
+
+    // An uncaught exception here would run on rpcExecutor's background thread — Android's
+    // default uncaught-exception handler terminates the process regardless of which thread
+    // threw, and the JS promise would never resolve either way. AppsFlyerRpcHandler.execute()
+    // is a vendored dependency we don't control, so any unexpected Exception (not just the
+    // JSONException/RpcResponse.Error path it already returns) must still resolve the promise.
+    private fun safeDispatchToNative(requestJson: String): String {
+        return try {
+            dispatchToNative(requestJson)
+        } catch (e: Exception) {
+            normalizeError(code = 500, message = e.message ?: "Unexpected native RPC failure")
         }
     }
 
@@ -119,6 +132,16 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
                 normalized.put("error", error)
             }
         }
+        return normalized.toString()
+    }
+
+    private fun normalizeError(code: Int, message: String): String {
+        val error = JSONObject()
+        error.put("code", code)
+        error.put("message", message)
+        val normalized = JSONObject()
+        normalized.put("success", false)
+        normalized.put("error", error)
         return normalized.toString()
     }
 
