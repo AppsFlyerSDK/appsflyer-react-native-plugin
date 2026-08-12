@@ -12,13 +12,20 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
-        // ponytail: no kotlin-gradle-plugin classpath here — this module is always compiled inside a
-        // consuming app's composite build (subprojects inherit the root's buildscript classpath). A
-        // second, independently-versioned Kotlin plugin here previously caused "compiled with an
-        // incompatible version of Kotlin" (kotlin.Pair/TypeAliasesKt): the app-wide Kotlin compiler
-        // was shared/loaded once at the root's version, but this module's own stdlib classpath
-        // resolved separately at whatever version this line pinned — a version skew, not a stale pin.
+        classpath 'com.android.tools.build:gradle:9.2.1'
+    }
+
+    // ponytail: AGP 9.2.1 still drags in these three CVE-flagged transitive versions
+    // unchanged (nothing else in the buildscript classpath forces a newer one) — force
+    // patched versions directly instead of chasing a Gradle-wrapper-wide AGP major bump.
+    configurations.classpath {
+        resolutionStrategy {
+            force 'org.bouncycastle:bcprov-jdk18on:1.81.1'
+            force 'org.bouncycastle:bcpkix-jdk18on:1.81.1'
+            force 'org.bouncycastle:bcutil-jdk18on:1.81.1'
+            force 'org.jdom:jdom2:2.0.6.1'
+            force 'org.bitbucket.b_c:jose4j:0.9.6'
+        }
     }
 }
 
