@@ -30,7 +30,8 @@
     "brace-expansion@1.x": "1.1.12",
     "brace-expansion@2.x": "2.0.2",
     "brace-expansion@5.x": "5.0.9",
-    "fast-uri": "^3.1.5"
+    "fast-uri": "^3.1.5",
+    "uuid": "^14.0.0"
   },
   "private": true
 }
