@@ -4,6 +4,7 @@ import React_RCTAppDelegate
 import ReactAppDependencyProvider
 import AppTrackingTransparency
 import AppsFlyerLib
+import react_native_appsflyer
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,6 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
+    AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
+
     let delegate = ReactNativeDelegate()
     let factory = RCTReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()
@@ -30,7 +33,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       in: window,
       launchOptions: launchOptions
     )
-    AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
     return true
   }
 
@@ -44,9 +46,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
-    restorationHandler: @escaping ([Any]?) -> Void
+    restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
   ) -> Bool {
-    AppsFlyerLib.shared().continue(userActivity, restorationHandler: restorationHandler)
+    AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: nil)
     return true
   }
 
@@ -55,7 +57,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
-    AppsFlyerLib.shared().handleOpen(url, options: options)
+    AppsFlyerAttribution.shared.handleOpen(url, options: options)
     return true
   }
 }

@@ -67,7 +67,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
     NSLog("[AF_QA][DEEPLINK_NATIVE] openURL received: %@", url.absoluteString)
-    AppsFlyerLib.shared().handleOpen(url, options: options)
+    AppsFlyerAttribution.shared.handleOpen(url, options: options)
     return true
   }
 
@@ -77,7 +77,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     restorationHandler: @escaping ([Any]?) -> Void
   ) -> Bool {
     NSLog("[AF_QA][DEEPLINK_NATIVE] continueUserActivity: %@", userActivity.webpageURL?.absoluteString ?? "nil")
-    _ = AppsFlyerLib.shared().continue(userActivity, restorationHandler: restorationHandler)
+    AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: restorationHandler)
     return true
   }
 }
