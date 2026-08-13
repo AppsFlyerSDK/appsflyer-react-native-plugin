@@ -18,7 +18,7 @@ Verify all release checkpoints. Report as a pass/fail checklist.
    - `package.json` version
    - `react-native-appsflyer.podspec` s.version
    - `ios/RNAppsFlyer.h` kAppsFlyerPluginVersion
-   - `android/.../RNAppsFlyerConstants.java` PLUGIN_VERSION
+   - `android/.../RNAppsFlyerConstants.kt` PLUGIN_VERSION
 
 2. **CHANGELOG** — `CHANGELOG.md` has an entry for the current version at the top.
 

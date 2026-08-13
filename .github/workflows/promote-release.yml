@@ -143,11 +143,14 @@ jobs:
             echo "iOS:" && grep "kAppsFlyerPluginVersion" "$IOS_FILE"
           fi
 
-          # 3. android/.../RNAppsFlyerConstants.java — PLUGIN_VERSION
-          ANDROID_FILE="android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java"
+          # 3. android/.../RNAppsFlyerConstants.kt — PLUGIN_VERSION
+          ANDROID_FILE="android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.kt"
           if [ -f "$ANDROID_FILE" ]; then
             sed -i "s/PLUGIN_VERSION = \"[^\"]*\"/PLUGIN_VERSION = \"$VERSION\"/" "$ANDROID_FILE"
             echo "Android:" && grep "PLUGIN_VERSION" "$ANDROID_FILE"
+          else
+            echo "::error::Android plugin version file not found: $ANDROID_FILE" >&2
+            exit 1
           fi
 
       - name: Commit and push version changes
@@ -162,7 +165,7 @@ jobs:
 
           if [[ -n $(git status -s) ]]; then
             git add package.json react-native-appsflyer.podspec ios/RNAppsFlyer.h \
-              android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java
+              android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.kt
             git commit -m "chore: prepare production release $VERSION (from $CURRENT_VERSION)"
             git push
             echo "Pushed version update to release branch"
@@ -210,7 +213,7 @@ jobs:
               body: `## Ready for Production Release\n\n` +
                 `The release branch has been updated:\n` +
                 `- **Version:** \`${version}\` (removed -rc suffix)\n` +
-                `- **All version files updated** (package.json, RNAppsFlyer.h, RNAppsFlyerConstants.java)\n\n` +
+                `- **All version files updated** (package.json, RNAppsFlyer.h, RNAppsFlyerConstants.kt)\n\n` +
                 `### Next Steps\n` +
                 `1. **Review the changes** in this PR\n` +
                 `2. **Merge this PR** when ready\n` +

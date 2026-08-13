@@ -5,7 +5,7 @@ paths:
 
 # Native iOS bridge rules
 
-Scope: `ios/` directory — `RNAppsFlyer.mm`, `RNAppsFlyer.h`, `RNAppsFlyerImpl.swift`, `RNAppsFlyer-Bridging-Header.h`, `PCAppsFlyer.h/.m` (purchase connector — legacy, out of scope).
+Scope: `ios/` directory — `RNAppsFlyer.mm`, `RNAppsFlyer.h`, `RNAppsFlyerImpl.swift`, `AppsFlyerAttribution.swift`, `RNAppsFlyer-Bridging-Header.h`, `PCAppsFlyer.h/.m` (purchase connector — legacy, out of scope).
 
 ## 1. Module structure
 
@@ -30,6 +30,18 @@ To add a new SDK capability: expose it in the native `AppsFlyerRPCBridge` handle
 ## 4. Listener registration — no buffering
 
 `RNAppsFlyerImpl.swift` dispatches every RPC (including `init` and listener registration) immediately, in submission order — there is no listener-registration buffer. One existed (an `initCompleted`/`pendingRegistrations` gate modeled on the Cordova prior-art fix, commit `9ee0552`) on the assumption that native silently drops early registrations; removed 2026-08 after confirming against the vendored `AppsFlyerRPC` source (`AFRPCCoreHandler.swift`, `AFRPCListenerHandler.swift`) that registration is init-order-independent by design — each just assigns a delegate/callback on the persistent SDK singleton, and the `AppsFlyerRPC` README documents this as intended parity with the native SDK. Do not re-add a buffer here without first confirming an actual native regression (and filing it upstream) — see `bridge-patterns.md` §4 and PR #693's review discussion.
+
+## 4a. `AppsFlyerAttribution` — AppDelegate-level buffer (different problem than §4)
+
+`AppsFlyerAttribution.swift` buffers `continueUserActivity`/`handleOpen(url:options:)` calls made from the **host app's AppDelegate** (cold-start Universal Link / custom-scheme open) until `RNAppsFlyerImpl`'s `start` RPC has succeeded. This does not contradict §4: §4 is about JS→native RPC submission order inside this bridge (confirmed init-order-independent); this is about the OS calling into the AppDelegate before RN's JS thread has even run `initSdk` — a real ordering gap, since `AppsFlyerLib.shared().continueUserActivity`/`handleOpenUrl` called with no devKey/appId configured risks the same unconfigured-host failure mode documented for `registerDeepLinkListener` in `known-issues-kb.md`, and even once devKey/appId are set, calling it before the deep-link delegate is registered resolves the click with nobody listening.
+
+`RNAppsFlyerImpl.executeRpc` flips `AppsFlyerAttribution.shared.bridgeReady = true` once the **`start`** RPC resolves successfully — not `init`/`initialize`, and not `registerDeeplinkListener` either (an earlier version of this fix, both caught 2026-08-10 via a real cold-start test). Gating on `init` flips the buffer open before `registerDeepLinkListener()` — called by JS only after `initSdk()`'s promise resolves (see `demos/appsflyer-react-native-app/components/AppsFlyer.js`'s `AFInit` and `known-issues-kb.md`) — has set `AppsFlyerLib`'s deep-link delegate, so the buffered click resolves with nobody listening and `onDeepLinking` is silently dropped. `start` is dispatched even later in the standard init sequence (`init → registerConversionListener → registerDeepLinkListener → registerSessionReadyListener(() => start())`), so it's a safe superset gate — mirrors AppsFlyer's own Capacitor plugin, whose `reportBridgeReady()` runs right before `startSDK()` once devKey/appId/delegates are all configured.
+
+Note also: by the time a request reaches `RNAppsFlyerImpl.executeRpc`, `requestJson`'s `method` field is already the platform's *resolved* wire name — `@appsflyer-sdk/js-core-plugin`'s `rpc-resolver` does this in JS before the call ever reaches native (confirmed in `__tests__/rpc-wire-contract.test.js`'s header comment) — e.g. `"initialize"`, `"registerDeeplinkListener"` (lowercase `l`), never the canonical `"init"`/`"registerDeepLinkListener"`. `"start"` happens to be unchanged on both platforms, so no such gotcha there, but any *other* method-name comparison added to this file must match against the resolved name. `canonicalToIOSMethod` in `RNAppsFlyerImpl.swift` is dead code left over from before that migration.
+
+Also note: by the time a request reaches `RNAppsFlyerImpl.executeRpc`, `requestJson`'s `method` field is already the platform's *resolved* wire name (`@appsflyer-sdk/js-core-plugin`'s `rpc-resolver` does this in JS before the call ever reaches native — confirmed in `__tests__/rpc-wire-contract.test.js`'s header comment) — e.g. `"initialize"`, `"registerDeeplinkListener"` (lowercase `l`), never the canonical `"init"`/`"registerDeepLinkListener"`. `canonicalToIOSMethod` in `RNAppsFlyerImpl.swift` is dead code left over from before that migration; any new method-name comparison in this file must match against the *resolved* name, not the canonical one.
+
+App-side AppDelegates (and the Expo config plugin's injected template, `expo/withAppsFlyerIos.js`) must route through `AppsFlyerAttribution.shared`, not `AppsFlyerLib.shared()` directly, for these two calls only — `handleLaunchOptions` has no such ordering dependency and stays a direct `AppsFlyerLib.shared()` call.
 
 ## 5. IDFA / strict mode
 

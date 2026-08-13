@@ -4,13 +4,13 @@ const fs = require('fs');
 const path = require('path');
 
 function modifyObjcAppDelegate(appDelegate) {
-  const RNAPPSFLYER_IMPORT = `#import <AppsFlyerLib/AppsFlyerLib.h>\n`;
+  const RNAPPSFLYER_IMPORT = `#import <AppsFlyerLib/AppsFlyerLib.h>\n#import <react_native_appsflyer/react_native_appsflyer-Swift.h>\n`;
   const RNAPPSFLYER_DID_FINISH_LAUNCHING_IDENTIFIER = `- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions`;
   const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER = `- (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {`;
   const RNAPPSFLYER_OPENURL_IDENTIFIER = `- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {`;
   const RNAPPSFLYER_DID_FINISH_LAUNCHING_CODE = `[[AppsFlyerLib shared] handleLaunchOptions:launchOptions];\n`;
-  const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE = `[[AppsFlyerLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];\n`;
-  const RNAPPSFLYER_OPENURL_CODE = `[[AppsFlyerLib shared] handleOpenUrl:url options:options];\n`;
+  const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE = `[[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];\n`;
+  const RNAPPSFLYER_OPENURL_CODE = `[[AppsFlyerAttribution shared] handleOpen:url options:options];\n`;
 
   if (!appDelegate.includes(RNAPPSFLYER_IMPORT)) {
     appDelegate = RNAPPSFLYER_IMPORT + appDelegate;
@@ -38,6 +38,7 @@ function modifyObjcAppDelegate(appDelegate) {
 
 function modifySwiftAppDelegate(appDelegateContents) {
   const SWIFT_IMPORT = 'import AppsFlyerLib';
+  const SWIFT_BRIDGE_IMPORT = 'import react_native_appsflyer';
 
   const SWIFT_DID_FINISH_LAUNCHING_IDENTIFIER = `  public override func application(
     _ application: UIApplication,
@@ -50,7 +51,7 @@ function modifySwiftAppDelegate(appDelegateContents) {
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {`;
-  const RNAPPSFLYER_SWIFT_OPENURL_CODE = 'AppsFlyerLib.shared().handleOpen(url, options: options)';
+  const RNAPPSFLYER_SWIFT_OPENURL_CODE = 'AppsFlyerAttribution.shared.handleOpen(url, options: options)';
 
   const SWIFT_CONTINUE_USER_ACTIVITY_IDENTIFIER = `  public override func application(
     _ application: UIApplication,
@@ -60,10 +61,13 @@ function modifySwiftAppDelegate(appDelegateContents) {
   // AppsFlyer's restorationHandler is `([Any]?) -> Void`, not `([UIUserActivityRestoring]?) -> Void` —
   // passing ours directly is a type mismatch Swift reports as "ambiguous". AppsFlyer only needs
   // userActivity to extract the OneLink URL, so pass nil; the real restorationHandler goes to RCTLinkingManager below.
-  const RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE = 'AppsFlyerLib.shared().continue(userActivity, restorationHandler: nil)';
+  const RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE = 'AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: nil)';
 
   if (!appDelegateContents.includes(SWIFT_IMPORT)) {
     appDelegateContents = `${SWIFT_IMPORT}\n${appDelegateContents}`;
+  }
+  if (!appDelegateContents.includes(SWIFT_BRIDGE_IMPORT)) {
+    appDelegateContents = `${SWIFT_BRIDGE_IMPORT}\n${appDelegateContents}`;
   }
 
   if (appDelegateContents.includes(SWIFT_DID_FINISH_LAUNCHING_IDENTIFIER) && !appDelegateContents.includes(RNAPPSFLYER_SWIFT_DID_FINISH_LAUNCHING_CODE)) {
@@ -89,17 +93,18 @@ function modifySwiftAppDelegate(appDelegateContents) {
 Automatic Swift AppDelegate modification failed.
 Please add AppsFlyer integration manually:
 
-1. Add this import:
+1. Add these imports:
   import AppsFlyerLib
+  import react_native_appsflyer
 
 2. Add this to your didFinishLaunchingWithOptions method:
   AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
 
 3. Add this to your openURL method:
-  AppsFlyerLib.shared().handleOpen(url, options: options)
+  AppsFlyerAttribution.shared.handleOpen(url, options: options)
 
 4. Add this to your continueUserActivity method:
-  AppsFlyerLib.shared().continue(userActivity, restorationHandler: nil)
+  AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: nil)
 
 Supported format: Expo SDK default template
 `

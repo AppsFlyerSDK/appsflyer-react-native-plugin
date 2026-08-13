@@ -18,7 +18,7 @@ Bump the plugin version to `$ARGUMENTS` across all 4 files that must stay in syn
 1. `package.json` — `"version": "X.Y.Z"`
 2. `react-native-appsflyer.podspec` — `s.version = 'X.Y.Z'`
 3. `ios/RNAppsFlyer.h` — `kAppsFlyerPluginVersion = @"X.Y.Z"`
-4. `android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java` — `PLUGIN_VERSION = "X.Y.Z"`
+4. `android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.kt` — `PLUGIN_VERSION = "X.Y.Z"`
 
 ### Steps
 

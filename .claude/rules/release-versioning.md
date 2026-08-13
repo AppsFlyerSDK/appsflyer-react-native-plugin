@@ -16,7 +16,7 @@ Scope: version bumps, CHANGELOG.md, release branches, native SDK alignment.
 | `package.json` | `"version"` | `"6.17.9"` |
 | `react-native-appsflyer.podspec` | `s.version` | `'6.17.9'` |
 | `ios/RNAppsFlyer.h` | `kAppsFlyerPluginVersion` | `@"6.17.9"` |
-| `android/…/RNAppsFlyerConstants.java` | `PLUGIN_VERSION` | `"6.17.9"` |
+| `android/…/RNAppsFlyerConstants.kt` | `PLUGIN_VERSION` | `"6.17.9"` |
 
 Missing any one of these causes version mismatch bugs. Historical commits that were solely version constant syncs: `45a0cfeb`, `20c80b46`, `0b19d154`.
 

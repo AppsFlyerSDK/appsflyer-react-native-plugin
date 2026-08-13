@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {
   PCInit,
   AFInit,
+  AFCleanup,
   AFLogEvent,
   AF_clickOnItem,
   AF_addedToCart,
@@ -23,6 +24,7 @@ import {
 } from './AppsFlyer.js';
 import Product from './Product.js';
 import WelcomeModal from './WelcomeModal.js';
+import ResultModal from './ResultModal.js';
 
 const products = [
   {
@@ -78,6 +80,7 @@ const HomeScreen = ({navigation}) => {
   const [cartSize, setCartSize] = useState(0);
   const [itemsInCart, setItemsInCart] = useState([]);
   const [isFirstLaunch, setIsFirstLaunch] = useState(false);
+  const [callbackResult, setCallbackResult] = useState(null);
 
   const goToProductScreen = useCallback(
     (product, addToCart) => {
@@ -162,6 +165,7 @@ const HomeScreen = ({navigation}) => {
       console.log('Not first launch!');
       return;
     }
+    setCallbackResult(res);
 
     // Deferred deep links (click happened before install) never reach registerDeepLinkListener —
     // the SDK resolves them server-side via GCD and delivers the match here instead,
@@ -181,7 +185,7 @@ const HomeScreen = ({navigation}) => {
 
   const handleDeepLink = useCallback(res => {
     console.log(">> registerDeepLinkListener: " , res);
-    if (res?.status === 'found') {
+    if (res?.status === 'FOUND') {
       const productName = res?.deepLink?.af_productName;
       const product = getProductByName(productName);
       console.log(product);
@@ -191,19 +195,17 @@ const HomeScreen = ({navigation}) => {
           addToCart: addProductToCart,
           deepLinkValues: res,
         });
+        return;
       }
     }
+    setCallbackResult(res);
   }, [navigation, addProductToCart]);
 
   useEffect(() => {
-    const {unsubscribeConversion, unsubscribeDeepLink} = AFInit(
-      handleConversionData,
-      handleDeepLink,
-    );
+    AFInit(handleConversionData, handleDeepLink);
 
     return () => {
-      unsubscribeConversion();
-      unsubscribeDeepLink();
+      AFCleanup();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -213,6 +215,10 @@ const HomeScreen = ({navigation}) => {
       <WelcomeModal
         isFirstLaunch={isFirstLaunch}
         dismissOverlay={() => setIsFirstLaunch(false)}
+      />
+      <ResultModal
+        result={callbackResult}
+        onDismiss={() => setCallbackResult(null)}
       />
       <FlatList
         data={products}

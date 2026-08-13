@@ -81,10 +81,10 @@ function rpcMethodCalls(nativeAppsFlyer, methodName) {
 }
 
 describe('RPC event channel pass-through fidelity', () => {
-	test('firing the same native event twice in immediate succession invokes the JS listener exactly twice', () => {
+	test('firing the same native event twice in immediate succession invokes the JS listener exactly twice', async () => {
 		const { appsFlyer, nativeEventEmitter } = freshModule();
 		const callback = jest.fn();
-		const remove = appsFlyer.registerDeepLinkListener(callback);
+		await appsFlyer.registerDeepLinkListener({ onDeepLinking: callback });
 
 		const payload = { campaign: 'test_campaign', deep_link_value: 'abc', media_source: 'test', link: 'https://x' };
 		const emit = () =>
@@ -95,52 +95,55 @@ describe('RPC event channel pass-through fidelity', () => {
 		emit();
 		emit();
 
+		// js-core-plugin's registerDeepLinkListener always normalizes this channel's payload as a
+		// deep-link result, defaulting a missing `status` to 'NOT_FOUND' -- see compatibility.test.js.
+		const normalized = { ...payload, status: 'NOT_FOUND' };
 		expect(callback).toHaveBeenCalledTimes(2);
-		expect(callback).toHaveBeenNthCalledWith(1, payload);
-		expect(callback).toHaveBeenNthCalledWith(2, payload);
-
-		remove();
+		expect(callback).toHaveBeenNthCalledWith(1, normalized);
+		expect(callback).toHaveBeenNthCalledWith(2, normalized);
 	});
 });
 
-describe('Listener registration triggers the matching register*Listener RPC once', () => {
-	test('registerConversionListener RPC fires exactly once, shared across two registerConversionListener attaches', () => {
+// Unlike the old hand-rolled index.ts (which used a onceRegistrar to dedupe the RPC dispatch
+// across repeated register*Listener attaches), @appsflyer-sdk/js-core-plugin's registerConversionListener/
+// registerDeepLinkListener dispatch their RPC unconditionally on every call — only the native
+// event-channel *subscription* (ensureEventsSubscribed) is guarded once per SDK instance. There is
+// no per-listener remove() function returned anymore either; unregister*Listener() is the only
+// teardown path. Flagged as a real behavior change from the old repo, not fixed here (test-only pass).
+describe('Listener registration RPC dispatch', () => {
+	test('registerConversionListener dispatches its RPC on every attach (no dedup, unlike the old onceRegistrar)', async () => {
 		const { appsFlyer, nativeAppsFlyer } = freshModule();
 
-		const removeA = appsFlyer.registerConversionListener(jest.fn(), jest.fn());
+		await appsFlyer.registerConversionListener({ onConversionDataSuccess: jest.fn(), onConversionDataFail: jest.fn() });
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerConversionListener')).toHaveLength(1);
 
-		// same native registration backs both — must not re-dispatch
-		const removeB = appsFlyer.registerConversionListener(jest.fn(), jest.fn());
-		expect(rpcMethodCalls(nativeAppsFlyer, 'registerConversionListener')).toHaveLength(1);
-
-		removeA();
-		removeB();
+		await appsFlyer.registerConversionListener({ onConversionDataSuccess: jest.fn(), onConversionDataFail: jest.fn() });
+		expect(rpcMethodCalls(nativeAppsFlyer, 'registerConversionListener')).toHaveLength(2);
 	});
 
-	test('first registerDeepLinkListener attach calls executeRpc with the canonical registerDeeplinkListener method name, only once', () => {
+	test('registerDeepLinkListener calls executeRpc with the real iOS wire method name ("registerDeeplinkListener") on every attach', async () => {
 		const { appsFlyer, nativeAppsFlyer } = freshModule();
 
-		const removeA = appsFlyer.registerDeepLinkListener(jest.fn());
+		await appsFlyer.registerDeepLinkListener({ onDeepLinking: jest.fn() });
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerDeeplinkListener')).toHaveLength(1);
 
-		const removeB = appsFlyer.registerDeepLinkListener(jest.fn());
-		expect(rpcMethodCalls(nativeAppsFlyer, 'registerDeeplinkListener')).toHaveLength(1);
-
-		removeA();
-		removeB();
+		await appsFlyer.registerDeepLinkListener({ onDeepLinking: jest.fn() });
+		expect(rpcMethodCalls(nativeAppsFlyer, 'registerDeeplinkListener')).toHaveLength(2);
 	});
 });
 
 describe('isSessionReady (net-new)', () => {
 	// Regression guard for finding #5: isSessionReady is a pure read-only status query — it must
 	// not register the session-ready listener as a side effect (that's registerSessionReadyListener's job).
+	// @appsflyer-sdk/js-core-plugin does no getter-response unwrapping (the old repo's unwrapKeyed
+	// handled iOS's {isSessionReady: true} keyed-dict shape vs. Android's bare boolean) --
+	// isSessionReady() now resolves whatever native sends back, as-is.
 	test('resolves a boolean without triggering registerSessionReadyListener', async () => {
 		const { appsFlyer, nativeAppsFlyer } = freshModule();
 		nativeAppsFlyer.executeRpc.mockImplementation((requestJson) => {
 			const { method } = JSON.parse(requestJson);
 			if (method === 'isSessionReady') {
-				return Promise.resolve(JSON.stringify({ success: true, data: { isSessionReady: true } }));
+				return Promise.resolve(JSON.stringify({ success: true, data: true }));
 			}
 			return Promise.resolve(JSON.stringify({ success: true, data: null }));
 		});
@@ -165,8 +168,13 @@ describe('isSessionReady (net-new)', () => {
 	});
 });
 
-describe('callRpc — FR-007 unsupported-method normalization', () => {
-	test('Android 422 "Unknown or missing method" is normalized to 404 to match iOS', async () => {
+// Per Docs/plans/js-core-rpc-integration.md's Decisions Log, the old repo's iOS 422 -> 404
+// "unknown method" remap (unwrapRpcResponse) is deliberately NOT carried into RNTransport --
+// @appsflyer-sdk/js-core-plugin's raw AppsFlyerError passes through unmodified. A 422 stays a 422
+// regardless of message content now; this is an accepted, documented breaking behavior change,
+// not a regression to fix here.
+describe('error normalization — the iOS 422->404 remap was deliberately dropped', () => {
+	test('an "Unknown or missing method" 422 is no longer remapped to 404', async () => {
 		const { appsFlyer, nativeAppsFlyer } = freshModule();
 		nativeAppsFlyer.executeRpc.mockResolvedValue(
 			JSON.stringify({
@@ -175,15 +183,13 @@ describe('callRpc — FR-007 unsupported-method normalization', () => {
 			})
 		);
 
-		// Normalization lives in callRpc and is method-agnostic — exercised here via any
-		// promise-returning typed wrapper rather than the (removed) generic executeRpc.
-		await expect(appsFlyer.setInstallId('install-1')).rejects.toEqual({
-			code: 404,
+		await expect(appsFlyer.setInstallId({ installId: 'install-1' })).rejects.toEqual({
+			code: 422,
 			message: 'Unknown or missing method: nonExistentMethod',
 		});
 	});
 
-	test('a genuine 422 (malformed params, not unknown method) is NOT normalized to 404', async () => {
+	test('a genuine 422 (malformed params) passes through unchanged, same as before', async () => {
 		const { appsFlyer, nativeAppsFlyer } = freshModule();
 		nativeAppsFlyer.executeRpc.mockResolvedValue(
 			JSON.stringify({
@@ -192,7 +198,7 @@ describe('callRpc — FR-007 unsupported-method normalization', () => {
 			})
 		);
 
-		await expect(appsFlyer.setInstallId('install-1')).rejects.toEqual({
+		await expect(appsFlyer.setInstallId({ installId: 'install-1' })).rejects.toEqual({
 			code: 422,
 			message: 'Invalid parameter: devKey is required',
 		});

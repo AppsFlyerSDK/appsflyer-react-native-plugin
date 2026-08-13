@@ -356,11 +356,17 @@ ios_collect_logs() {
   # Strategy 1: Read the app's af_qa_logs.txt from the simulator filesystem.
   # This file is the source of truth for [AF_QA] markers because the IOSink
   # in af_qa_logger.dart guarantees every line is appended.
-  local sim_data_dir
-  sim_data_dir="$HOME/Library/Developer/CoreSimulator/Devices/${IOS_UDID}/data"
-  if [[ -d "$sim_data_dir" ]]; then
+  #
+  # Resolve via `simctl get_app_container`, not a bare `find` over
+  # Containers/Data/Application: every fresh install gets a new container
+  # UUID, orphaned containers from past runs pile up on disk, and `find |
+  # head -1` can return one of those instead of the current install —
+  # silently validating against a stale, frozen log.
+  local qa_container
+  qa_container=$(xcrun simctl get_app_container "$IOS_UDID" "$PACKAGE_NAME" data 2>/dev/null || true)
+  if [[ -n "$qa_container" && -d "$qa_container" ]]; then
     local qa_log
-    qa_log=$(find "$sim_data_dir/Containers/Data/Application" -name "af_qa_logs.txt" -maxdepth 4 2>/dev/null | head -1)
+    qa_log=$(find "$qa_container" -name "af_qa_logs.txt" -maxdepth 4 2>/dev/null | head -1)
     if [[ -n "$qa_log" && -f "$qa_log" ]]; then
       log_debug "Found iOS QA log file: $qa_log"
       cat "$qa_log" >> "$log_file"
@@ -447,15 +453,18 @@ platform_peek_qa_log() {
     return 0
   fi
   ios_ensure_udid
-  local sim_data_dir
-  sim_data_dir="$HOME/Library/Developer/CoreSimulator/Devices/${IOS_UDID}/data"
-  [[ -d "$sim_data_dir" ]] || return 0
-  local qa_log
-  qa_log=$(find "$sim_data_dir/Containers/Data/Application" \
-    -name "af_qa_logs.txt" -maxdepth 4 2>/dev/null | head -1)
-  if [[ -n "$qa_log" && -f "$qa_log" ]]; then
-    cat "$qa_log" 2>/dev/null || true
-    return 0
+  # Same container-resolution fix as ios_collect_logs Strategy 1 above: pin
+  # to the currently-installed app's data container instead of `find`-ing
+  # across every container on disk, which can return a stale one.
+  local qa_container
+  qa_container=$(xcrun simctl get_app_container "$IOS_UDID" "$PACKAGE_NAME" data 2>/dev/null || true)
+  if [[ -n "$qa_container" && -d "$qa_container" ]]; then
+    local qa_log
+    qa_log=$(find "$qa_container" -name "af_qa_logs.txt" -maxdepth 4 2>/dev/null | head -1)
+    if [[ -n "$qa_log" && -f "$qa_log" ]]; then
+      cat "$qa_log" 2>/dev/null || true
+      return 0
+    fi
   fi
   local peek_predicate="messageType == default || messageType == info || messageType == debug"
   if [[ -n "$IOS_LAST_PID" ]]; then
@@ -551,9 +560,19 @@ build_app() {
     return 1
   fi
   log_step "Building app"
-  log_info "Running: $BUILD_CMD"
+  # build_cmd (from the test plan) embeds $IOS_SIMULATOR_UDID inside a
+  # single-quoted xcodebuild destination string. Single quotes suppress
+  # variable expansion structurally — exporting the var before eval doesn't
+  # help, since eval re-parses the whole string as new shell syntax. Replace
+  # the literal placeholder text instead, same as the {{UDID}} substitution
+  # pre_actions already does below.
+  local resolved_build_cmd="$BUILD_CMD"
+  if [[ "$PLATFORM" == "ios" ]]; then
+    resolved_build_cmd="${resolved_build_cmd//\$IOS_SIMULATOR_UDID/$IOS_UDID}"
+  fi
+  log_info "Running: $resolved_build_cmd"
   if ! $DRY_RUN; then
-    (eval "$BUILD_CMD")
+    (eval "$resolved_build_cmd")
   fi
 }
 
@@ -959,7 +978,10 @@ main() {
   local run_end
   run_end=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   local start_epoch end_epoch duration_sec
-  start_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$RUN_START" +%s 2>/dev/null || date -d "$RUN_START" +%s 2>/dev/null || echo "0")
+  # RUN_START is UTC (built with `date -u`); -u here is required on macOS's
+  # `date -j -f`, which otherwise parses the "Z"-suffixed string as local
+  # time and skews duration_sec by the local UTC offset.
+  start_epoch=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$RUN_START" +%s 2>/dev/null || date -u -d "$RUN_START" +%s 2>/dev/null || echo "0")
   end_epoch=$(date +%s)
   duration_sec=$(( end_epoch - start_epoch ))
 

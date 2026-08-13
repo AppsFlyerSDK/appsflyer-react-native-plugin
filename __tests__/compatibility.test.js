@@ -1,11 +1,11 @@
 /**
  * Backward Compatibility Tests
- * 
+ *
  * These tests verify that changes in this branch don't break existing client code patterns.
  * Focus: Runtime compatibility and type safety.
  */
 
-import appsFlyer, { AppsFlyerConsent, StoreKitVersion, AFInAppEventType } from '../index';
+import appsFlyer, { StoreKitVersion, AFInAppEventType } from '../index';
 
 const NativeAppsFlyer = require('../src/NativeAppsFlyer').default;
 
@@ -15,46 +15,29 @@ describe('Backward Compatibility Tests', () => {
   });
 
   describe('setConsentData - Runtime Compatibility', () => {
-    test('setConsentData accepts AppsFlyerConsentType-like plain object at runtime', () => {
-      // Simulate old code using plain object (AppsFlyerConsentType shape)
+    test('setConsentData accepts a plain SetConsentDataParams object at runtime', () => {
       const consent = {
         isUserSubjectToGDPR: true,
         hasConsentForDataUsage: true,
-        hasConsentForAdsPersonalization: false
+        hasConsentForAdsPersonalization: false,
       };
-      
-      // Should not throw - native code accepts ReadableMap/NSDictionary
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
-      expect(require('../src/NativeAppsFlyer').default.executeRpc).toHaveBeenCalled();
-    });
-
-    test('setConsentData accepts AppsFlyerConsent class instance', () => {
-      // New code using AppsFlyerConsent class
-      const consent = new AppsFlyerConsent(true, true, false, true);
 
       expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
-      expect(require('../src/NativeAppsFlyer').default.executeRpc).toHaveBeenCalled();
+      expect(NativeAppsFlyer.executeRpc).toHaveBeenCalled();
     });
 
     test('setConsentData accepts minimal consent object (non-GDPR)', () => {
-      // Minimal object for non-GDPR user
       const consent = {
-        isUserSubjectToGDPR: false
+        isUserSubjectToGDPR: false,
       };
-      
+
       expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
     });
 
-    test('setConsentData accepts AppsFlyerConsent with all optional fields', () => {
-      const consent = new AppsFlyerConsent(
-        true,  // isUserSubjectToGDPR
-        true,  // hasConsentForDataUsage
-        false, // hasConsentForAdsPersonalization
-        true   // hasConsentForAdStorage
-      );
-      
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
-    });
+    // The `AppsFlyerConsent` convenience constructor class (for building the same plain object)
+    // is no longer exported after the @appsflyer-sdk/js-core-plugin migration -- callers build the plain
+    // object directly instead (see above). Flagged for the index.ts owner as a real, unflagged
+    // public-API removal, same as noted in index.test.js; not re-added here.
   });
 
   describe('StoreKitVersion - Runtime Access', () => {
@@ -70,9 +53,9 @@ describe('Backward Compatibility Tests', () => {
         logSubscriptions: true,
         logInApps: true,
         sandbox: false,
-        storeKitVersion: StoreKitVersion.SK1
+        storeKitVersion: StoreKitVersion.SK1,
       };
-      
+
       expect(config.storeKitVersion).toBe('SK1');
       expect(config.storeKitVersion).toBe(StoreKitVersion.SK1);
     });
@@ -85,31 +68,23 @@ describe('Backward Compatibility Tests', () => {
     });
   });
 
-  describe('Callback Behavior - Android CallbackGuard (Transparent)', () => {
-    test('Callbacks still work with logEvent', () => {
-      const successCallback = jest.fn();
-      const errorCallback = jest.fn();
-
-      appsFlyer.logEvent('af_purchase', { af_revenue: 1 }, successCallback, errorCallback);
-
-      // Every executeRpc call resolves its own Promise per call (never a stored/shared
-      // Callback), which structurally can't double-invoke the way the pre-7.0.0 bridge did.
-      expect(require('../src/NativeAppsFlyer').default.executeRpc).toHaveBeenCalled();
-    });
-
-    test('Callbacks still work with logEvent', () => {
-      const successCallback = jest.fn();
-      const errorCallback = jest.fn();
-
-      appsFlyer.logEvent('test_event', {}, successCallback, errorCallback);
-
-      expect(require('../src/NativeAppsFlyer').default.executeRpc).toHaveBeenCalled();
+  // The old (name, values, successCallback, errorCallback) callback-style logEvent signature no
+  // longer exists at all -- @appsflyer-sdk/js-core-plugin's logEvent takes a single LogEventParams
+  // object and returns a Promise, full stop. This isn't "callbacks still transparently work" (the
+  // pre-7.0.0 CallbackGuard concern this describe block used to guard) -- the calling convention
+  // itself is gone. Converted to the real new call shape below; the removed convention isn't
+  // re-tested since there's nothing left to assert about it.
+  describe('logEvent (Promise-only, no callback-style overload)', () => {
+    test('logEvent dispatches the RPC and resolves', async () => {
+      NativeAppsFlyer.executeRpc.mockResolvedValueOnce(JSON.stringify({ success: true, data: null }));
+      await appsFlyer.logEvent({ eventName: 'af_purchase', eventValues: { af_revenue: 1 } });
+      expect(NativeAppsFlyer.executeRpc).toHaveBeenCalled();
     });
   });
 
-  describe('7.0.0 breaking changes (MIGRATION.md)', () => {
+  describe('7.0.0+ breaking changes (MIGRATION.md) and their @appsflyer-sdk/js-core-plugin equivalents', () => {
     test('setHost sends {hostPrefixName, hostName} — param reorder/rename', () => {
-      appsFlyer.setHost('mycompany', 'onelink.me', jest.fn());
+      appsFlyer.setHost({ hostPrefixName: 'mycompany', hostName: 'onelink.me' });
       expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
         JSON.stringify({
           method: 'setHost',
@@ -118,8 +93,10 @@ describe('Backward Compatibility Tests', () => {
       );
     });
 
-    test('validateAndLogInAppPurchase legacy (purchaseInfo, successC, errorC) signature is gone — new AFPurchaseDetails signature dispatches the RPC instead', () => {
-      appsFlyer.validateAndLogInAppPurchase({ productId: 'sku', transactionId: 'txn', purchaseType: 'subscription' });
+    test('validateAndLogInAppPurchase legacy (purchaseInfo, successC, errorC) signature is gone — the {purchase} params-object signature dispatches the RPC instead', () => {
+      appsFlyer.validateAndLogInAppPurchase({
+        purchase: { productId: 'sku', transactionId: 'txn', purchaseType: 'subscription' },
+      });
       const [requestJson] = NativeAppsFlyer.executeRpc.mock.calls[0];
       expect(JSON.parse(requestJson).method).toBe('validateAndLogInAppPurchase');
     });
@@ -134,11 +111,11 @@ describe('Backward Compatibility Tests', () => {
       expect(appsFlyer.performOnAppAttribution).toBeUndefined();
     });
 
-    test('registerDeepLinkListener still delivers data previously routed through onAppOpenAttribution', () => {
+    test('registerDeepLinkListener still delivers data previously routed through onAppOpenAttribution', async () => {
       const { NativeEventEmitter } = require('react-native');
       const nativeEventEmitter = new NativeEventEmitter(NativeAppsFlyer);
       const callback = jest.fn();
-      const remove = appsFlyer.registerDeepLinkListener(callback);
+      await appsFlyer.registerDeepLinkListener({ onDeepLinking: callback });
 
       const attributionData = { media_source: 'test', campaign: 'test_campaign' };
       nativeEventEmitter.emit(
@@ -151,8 +128,10 @@ describe('Backward Compatibility Tests', () => {
         })
       );
 
-      expect(callback).toHaveBeenCalledWith(attributionData);
-      remove();
+      // @appsflyer-sdk/js-core-plugin's registerDeepLinkListener normalizes every payload on this
+      // channel as a deep-link result and defaults a missing `status` to 'NOT_FOUND' (dist/appsflyer-sdk.js
+      // normalizeDeepLinkStatus) -- it can't distinguish this legacy attribution-only shape from a real one.
+      expect(callback).toHaveBeenCalledWith({ ...attributionData, status: 'NOT_FOUND' });
     });
   });
 
@@ -178,4 +157,3 @@ describe('Backward Compatibility Tests', () => {
     });
   });
 });
-

@@ -12,10 +12,6 @@ import java.util.List;
 
 public class PCAppsFlyerPackage implements ReactPackage {
 
-    public PCAppsFlyerPackage() {
-    }
-
-
     public List<Class<? extends JavaScriptModule>> createJSModules() {
         return Collections.emptyList();
     }

@@ -56,7 +56,7 @@ How to Set Consent Data:
 1. Determine GDPR Applicability:
    - If GDPR applies, check whether consent data is already stored.
    - If not stored, show a consent dialog to obtain user consent.
-2. Create an AppsFlyerConsent object with the relevant parameters.
+2. Build a plain consent data object with the relevant parameters (see [Consent Data API](#consent-data-api) below).
 3. Pass the consent data to the SDK using appsFlyer.setConsentData(consentData) inside `registerSessionReadyListener`'s callback, before calling `start()`.
 4. Initialize the SDK with `appsFlyer.init(devKey, appId)` (see [Initialization Flow](RN_API.md#initialization-flow)).
 
@@ -64,9 +64,9 @@ How to Set Consent Data:
 
 ##### When GDPR Applies
 
-If GDPR applies to the user, create an AppsFlyerConsent object with the user’s preferences.
+If GDPR applies to the user, pass a plain object with the user's preferences.
 ```javascript
-import appsFlyer, { AppsFlyerConsent } from 'react-native-appsflyer';
+import appsFlyer from 'react-native-appsflyer';
 
 useEffect(() => {
     appsFlyer.init('UxXxXxXxXd', '41*****44').then(
@@ -77,7 +77,12 @@ useEffect(() => {
 
     appsFlyer.registerSessionReadyListener(() => {
         // User has given consent
-        const consentData = new AppsFlyerConsent(true, true, true, true);
+        const consentData = {
+            isUserSubjectToGDPR: true,
+            hasConsentForDataUsage: true,
+            hasConsentForAdsPersonalization: true,
+            hasConsentForAdStorage: true,
+        };
 
         // Send consent data to the SDK
         appsFlyer.setConsentData(consentData);
@@ -89,45 +94,46 @@ useEffect(() => {
 
 ##### When GDPR Does Not Apply
 
-If GDPR does not apply to the user, simply mark it as such in the AppsFlyerConsent object. Use the same initialization flow as above, but with a different consent constructor call:
+If GDPR does not apply to the user, set `isUserSubjectToGDPR: false` and omit the rest. Use the same initialization flow as above:
 
 ```javascript
 // GDPR does not apply to the user
-const consentData = new AppsFlyerConsent(false);
+const consentData = { isUserSubjectToGDPR: false };
 
 appsFlyer.setConsentData(consentData);
 appsFlyer.start();
 ```
 
-### Consent Object API
+### Consent Data API
+
+`setConsentData` takes a plain object — there is no `AppsFlyerConsent` constructor class in this
+plugin's current version.
 
 ```javascript
-//AppsFlyerConsent Constructor:
-
-new AppsFlyerConsent(
-    isUserSubjectToGDPR,          // Boolean (optional, defaults to false) - Whether GDPR applies to the user
-    hasConsentForDataUsage,       // Boolean (optional) - Consent for data usage
+appsFlyer.setConsentData({
+    isUserSubjectToGDPR,             // Boolean (required) - whether GDPR applies to the user; no client-side default
+    hasConsentForDataUsage,          // Boolean (optional) - Consent for data usage
     hasConsentForAdsPersonalization, // Boolean (optional) - Consent for ads personalization
-    hasConsentForAdStorage        // Boolean (optional) - Consent for ad storage
-);
+    hasConsentForAdStorage,          // Boolean (optional) - Consent for ad storage
+});
 
 //Example Cases:
 
 // Full consent for GDPR user
-const consent1 = new AppsFlyerConsent(true, true, true, true);
+appsFlyer.setConsentData({ isUserSubjectToGDPR: true, hasConsentForDataUsage: true, hasConsentForAdsPersonalization: true, hasConsentForAdStorage: true });
 
 // No consent for GDPR user
-const consent2 = new AppsFlyerConsent(true, false, false, false);
+appsFlyer.setConsentData({ isUserSubjectToGDPR: true, hasConsentForDataUsage: false, hasConsentForAdsPersonalization: false, hasConsentForAdStorage: false });
 
 // Non-GDPR user
-const consent3 = new AppsFlyerConsent(false);
+appsFlyer.setConsentData({ isUserSubjectToGDPR: false });
 
-// Partial consent (only GDPR flag, other parameters optional)
-const consent4 = new AppsFlyerConsent(true);
+// Partial consent (only GDPR flag required, other fields optional)
+appsFlyer.setConsentData({ isUserSubjectToGDPR: true });
 ```
 
 ### Removed API
 
-`AppsFlyerConsent.forGDPRUser(...)` and `AppsFlyerConsent.forNonGDPRUser()` (deprecated since
-6.16.2) have no equivalent on the `AppsFlyerConsent` class exported by this plugin — it exposes
-only the constructor shown above. Use `new AppsFlyerConsent(...)` instead.
+The `AppsFlyerConsent` constructor class (including its deprecated `forGDPRUser(...)`/
+`forNonGDPRUser()` static helpers) is **no longer exported by this plugin** — build and pass the
+plain object shown above directly to `setConsentData` instead.

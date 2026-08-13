@@ -61,7 +61,7 @@ Once triggered, the pipeline runs these stages in order:
 3. **Create release branch** -- creates `releases/X.Y.Z-rcN` from `base_branch` with version bumps in:
    - `package.json` (version field; `react-native-appsflyer.podspec` reads from this)
    - `android/build.gradle` (Android SDK fallback version)
-   - `android/.../RNAppsFlyerConstants.java` (PLUGIN_VERSION)
+   - `android/.../RNAppsFlyerConstants.kt` (PLUGIN_VERSION)
    - `ios/RNAppsFlyer.h` (kAppsFlyerPluginVersion)
    - `README.md` (SDK version badges)
    - `CHANGELOG.md` (new entry prepended)
@@ -165,7 +165,7 @@ These files contain version strings. The RC and promote workflows update them au
 | `package.json` | `"version"` | RC workflow |
 | `react-native-appsflyer.podspec` | `s.version` (reads from package.json) | Indirect |
 | `android/build.gradle` | `appsflyerVersion` fallback | RC workflow |
-| `android/.../RNAppsFlyerConstants.java` | `PLUGIN_VERSION` | RC workflow |
+| `android/.../RNAppsFlyerConstants.kt` | `PLUGIN_VERSION` | RC workflow |
 | `ios/RNAppsFlyer.h` | `kAppsFlyerPluginVersion` | RC workflow |
 | `README.md` | SDK version badges | RC workflow |
 | `CHANGELOG.md` | Release entry | RC workflow |

@@ -6,6 +6,16 @@ import { Money } from '../PurchaseConnector/models/money_model';
 import { OfferDetails } from '../PurchaseConnector/models/offer_details';
 import { AutoRenewingPlan } from '../PurchaseConnector/models/auto_renewing_plan';
 
+// index.ts now constructs RNTransport (and reads Platform.OS) eagerly at module load, to build
+// its module-level AppsFlyerSDK singleton -- this file's own NativeModules mock below replaces
+// the entire legacy bridge (including PlatformConstants' TurboModuleRegistry fallback), which
+// broke that eager Platform.OS read. Mock Platform directly so it resolves without depending on
+// the (deliberately minimal) NativeModules mock below.
+jest.mock('react-native/Libraries/Utilities/Platform', () => ({
+  OS: 'ios',
+  select: (spec: Record<string, unknown>) => spec.ios ?? spec.default,
+}));
+
 jest.mock('../node_modules/react-native/Libraries/BatchedBridge/NativeModules', () => ({
   PCAppsFlyer: {
     startObservingTransactions: jest.fn(),

@@ -29,21 +29,16 @@ static NSString *const connectorNotConfiguredMessage = @"Connector not configure
 
 PurchaseConnector *connector;
 
-// This RCT_EXPORT_MODULE macro exports the module to React Native.
 RCT_EXPORT_MODULE();
 
 RCT_EXPORT_METHOD(create:(NSDictionary *)config
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    NSLog(@"%@Attempting to configure PurchaseConnector.", TAG);
-
-    // Perform a check to ensure that we do not reconfigure an existing connector.
     if (connector != nil) {
         reject(connectorAlreadyConfiguredMessage, connectorAlreadyConfiguredMessage, nil);
         return;
     }
 
-    // Obtain a shared instance of PurchaseConnector
     connector = [PurchaseConnector shared];
     [connector setPurchaseRevenueDelegate: self];
     [connector setPurchaseRevenueDataSource: self];
@@ -55,13 +50,10 @@ RCT_EXPORT_METHOD(create:(NSDictionary *)config
 
     [connector setIsSandbox:sandbox];
 
-    // Set the StoreKitVersion (default to SK1 if not provided or invalid)
     if ([storeKitVersion isEqualToString:@"SK2"]) {
         [connector setStoreKitVersion:AFSDKStoreKitVersionSK2];
-        NSLog(@"%@Configure PurchaseConnector with StoreKit2 Version", TAG);
     } else {
         [connector setStoreKitVersion:AFSDKStoreKitVersionSK1];
-        NSLog(@"%@Configure PurchaseConnector with StoreKit1 Version", TAG);
     }
     
     if (logSubscriptions && logInApps) {
@@ -74,15 +66,12 @@ RCT_EXPORT_METHOD(create:(NSDictionary *)config
         [connector setAutoLogPurchaseRevenue:AFSDKAutoLogPurchaseRevenueOptionsInAppPurchases];
     }
 
-    NSLog(@"%@Purchase Connector is configured successfully.", TAG);
     resolve(nil);
 }
 
 RCT_EXPORT_METHOD(logConsumableTransaction:(NSString *)transactionId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    NSLog(@"Logging consumable transaction with ID: %@", transactionId);
-    
     if (connector == nil) {
         reject(connectorNotConfiguredMessage, connectorNotConfiguredMessage, nil);
         return;
@@ -93,7 +82,6 @@ RCT_EXPORT_METHOD(logConsumableTransaction:(NSString *)transactionId
         [fetcher fetchTransactionWithTransactionId:transactionId completion:^(AFSDKTransactionSK2 * _Nullable afTransaction) {
             if (afTransaction) {
                 [connector logConsumableTransaction:afTransaction];
-                NSLog(@"Logged transaction: %@", transactionId);
                 resolve(nil);
             } else {
                 NSError *error = [NSError errorWithDomain:@"PCAppsFlyer"
@@ -112,29 +100,24 @@ RCT_EXPORT_METHOD(logConsumableTransaction:(NSString *)transactionId
 
 RCT_EXPORT_METHOD(startObservingTransactions:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    NSLog(@"%@Starting to observe transactions.", TAG);
     if (connector == nil) {
         reject(connectorNotConfiguredMessage, connectorNotConfiguredMessage, nil);
     } else {
         [connector startObservingTransactions];
-        NSLog(@"%@Started observing transactions.", TAG);
         resolve(nil);
     }
 }
 
 RCT_EXPORT_METHOD(stopObservingTransactions:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    NSLog(@"%@Stopping the observation of transactions.", TAG);
     if (connector == nil) {
         reject(connectorNotConfiguredMessage, connectorNotConfiguredMessage, nil);
     } else {
         [connector stopObservingTransactions];
-        NSLog(@"%@Stopped observing transactions.", TAG);
         resolve(nil);
     }
 }
 
-// Method to set parameters from React Native
 RCT_EXPORT_METHOD(setPurchaseRevenueDataSource:(NSDictionary *)dataSource)
 {
     if (!dataSource) {
@@ -153,38 +136,30 @@ RCT_EXPORT_METHOD(setPurchaseRevenueDataSourceStoreKit2:(NSDictionary *)dataSour
     self.purchaseRevenueStoreKit2Params = dataSource;
 }
 
-// Delegate method for StoreKit1
 - (NSDictionary *)purchaseRevenueAdditionalParametersForProducts:(NSSet<SKProduct *> *)products 
                                                    transactions:(NSSet<SKPaymentTransaction *> *)transactions {
     return self.purchaseRevenueParams;
 }
 
-// Delegate method for StoreKit2
 - (NSDictionary<NSString *, id> *)purchaseRevenueAdditionalParametersStoreKit2ForProducts:(NSSet<AFSDKProductSK2 *> *)products 
                                                            transactions:(NSSet<AFSDKTransactionSK2 *> *)transactions {
     return self.purchaseRevenueStoreKit2Params;
 }
 
 - (void)didReceivePurchaseRevenueValidationInfo:(nullable NSDictionary *)validationInfo error:(nullable NSError *)error {
-    // Send the validation info and error back to React Native.
-    // Call this function from the main thread.
+    // Caller (PurchaseConnector) must invoke this delegate callback on the main thread.
     if (error){
-        [self sendEventWithName:@"onDidReceivePurchaseRevenueValidationInfo" body:@{@"validationInfo": validationInfo ?: [NSNull null], @"error": [self errorAsDictionary:error] ?: [NSNull null]}];
+        NSDictionary *errorDictionary = @{
+            @"localizedDescription": [error localizedDescription],
+            @"domain": [error domain],
+            @"code": @([error code])
+        };
+        [self sendEventWithName:@"onDidReceivePurchaseRevenueValidationInfo" body:@{@"validationInfo": validationInfo ?: [NSNull null], @"error": errorDictionary}];
     }else {
         [self sendEventWithName:@"onDidReceivePurchaseRevenueValidationInfo" body:@{@"validationInfo": validationInfo ?: [NSNull null]}];
     }
 }
 
-- (NSDictionary *)errorAsDictionary:(NSError *)error {
-    if (!error) return nil;
-    return @{
-        @"localizedDescription": [error localizedDescription],
-        @"domain": [error domain],
-        @"code": @([error code])
-    };
-}
-
-// Required by RCTEventEmitter:
 - (NSArray<NSString *> *)supportedEvents {
     return @[@"onDidReceivePurchaseRevenueValidationInfo"];
 }
@@ -192,8 +167,7 @@ RCT_EXPORT_METHOD(setPurchaseRevenueDataSourceStoreKit2:(NSDictionary *)dataSour
 @end
 
 #else
-// IMPORTANT: This stub implementation is necessary to prevent compilation errors and runtime crashes.
-// It ensures that the plugin functions properly even if the Purchase Connector is not actively utilized on the React Native side.
+// Stub so apps without PurchaseConnector linked still get a working no-op module instead of a missing-native-module crash.
 @implementation PCAppsFlyer
 @synthesize bridge = _bridge;
 
@@ -205,7 +179,6 @@ RCT_EXPORT_MODULE();
     resolve(nil);
 }
 
-// Fallback for methods
 RCT_EXPORT_METHOD(create:(NSDictionary *)config
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
@@ -222,7 +195,6 @@ RCT_EXPORT_METHOD(stopObservingTransactions:(RCTPromiseResolveBlock)resolve
     [self notifyConnectorDisabled:resolve];
 }
 
-// Required by RCTEventEmitter:
 - (NSArray<NSString *> *)supportedEvents {
     return @[@"onDidReceivePurchaseRevenueValidationInfo"];
 }

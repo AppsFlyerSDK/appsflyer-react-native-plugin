@@ -27,12 +27,19 @@ hidden: false
 
 ### Implementation:
 
-___Important___  The code implementation for `registerDeepLinkListener` must be made **prior to the initialization** code of the SDK.
+___Important___  `registerDeepLinkListener`'s required position relative to `init()` differs **by platform**:
+
+- **Android**: register **before** `init()`.
+- **iOS**: register **after** `init()` — as a separate synchronous statement right after the `init()` call, not inside `init().then()`. Registering before `init()` is worse than just too early: it fires the SDK's one-shot deferred-deep-link resolution immediately against an unconfigured host, permanently breaking deferred deep linking for that app process.
+
+See [RN_API.md — Initialization Flow](RN_API.md#initialization-flow) for the full rationale (known-issues KB has the native-source-level root cause for each platform).
 
 Example:
 
 ```javascript
-const onDeepLinkCanceller = appsFlyer.registerDeepLinkListener(res => {
+import { Platform } from 'react-native';
+
+const onDeepLink = (res) => {
   if (res?.status !== 'notFound') {
         const DLValue = res?.deepLink.deep_link_value;
         const mediaSrc = res?.deepLink.media_source;
@@ -41,16 +48,25 @@ const onDeepLinkCanceller = appsFlyer.registerDeepLinkListener(res => {
         
         console.log(JSON.stringify(res?.deepLink, null, 2));
       }
-})
+};
+
+if (Platform.OS === 'android') {
+  appsFlyer.registerDeepLinkListener(onDeepLink);
+}
 
 appsFlyer.init('K2***********99', '41*****44').then(
   (result) => console.log(result),
   (error) => console.error(error)
 );
+
+if (Platform.OS === 'ios') {
+  appsFlyer.registerDeepLinkListener(onDeepLink);
+}
+
 appsFlyer.enableDebug(false);
 ```
 
 **Note on Android:** On Android, the `deepLink` payload may be delivered as a JSON string (requiring `JSON.parse`) rather than an object, while iOS delivers it as an object. Ensure your code handles both cases, e.g., by checking the type before accessing fields.
 
-**Note:** `initSdk(options, success, error)` (with `isDebug`, `onInstallConversionDataListener`, `onDeepLinkListener` options) is **removed in 7.0.0** with no adapter. Use `init(devKey, appId)` + `enableDebug(enabled)` instead, and register `registerDeepLinkListener` synchronously — before `init()`'s promise settles, as shown above — rather than inside `init().then()`. See [RN_API.md](RN_API.md#initialization-flow) for the full recommended call order.
+**Note:** `initSdk(options, success, error)` (with `isDebug`, `onInstallConversionDataListener`, `onDeepLinkListener` options) is **removed in 7.0.0** with no adapter. Use `init(devKey, appId)` + `enableDebug(enabled)` instead, and register `registerDeepLinkListener` per the platform-specific order shown above. See [RN_API.md](RN_API.md#initialization-flow) for the full recommended call order.
 

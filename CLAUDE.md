@@ -18,8 +18,7 @@ Pull docs for: `react-native` (TurboModule / Codegen), `jest` (mock patterns), `
 
 ```
 src/NativeAppsFlyer.ts          ← TurboModule Codegen spec (single executeRpc entry point)
-index.js                        ← JS API surface — typed wrappers over callRpc / NativeEventEmitter
-index.d.ts                      ← Hand-maintained TypeScript declarations
+index.ts                        ← JS API surface AND type declarations in one file — re-exports @appsflyer-sdk/js-core-plugin's AppsFlyerSDK (built on RNTransport / NativeEventEmitter) plus two platform-specific overrides; package.json's "main"/"types" both point here directly (no build step, no separate index.js/index.d.ts)
 ios/RNAppsFlyer.mm              ← iOS TurboModule (NativeAppsFlyerSpec, delegates to Swift impl)
 ios/RNAppsFlyerImpl.swift       ← iOS RPC dispatch + event-channel wiring
 android/…/RNAppsFlyerModule.kt  ← Android TurboModule (NativeAppsFlyerSpec)
@@ -60,15 +59,15 @@ cd demos/demo/android && ./gradlew clean
 | `package.json` | `version` |
 | `react-native-appsflyer.podspec` | `s.version` |
 | `ios/RNAppsFlyer.h` | `kAppsFlyerPluginVersion` |
-| `android/…/RNAppsFlyerConstants.java` | `PLUGIN_VERSION` |
+| `android/…/RNAppsFlyerConstants.kt` | `PLUGIN_VERSION` |
 
 ## Critical constraints
 
 - `onDeepLinking` / conversion-data / `registerSessionReadyListener` registration must be called **synchronously, before `init`'s promise settles** — not because native buffers/gates these (it doesn't; registration is init-order-independent by design on both platforms), but because deferring into `init(...).then(...)` delays *dispatch*, which delays the one callback that's supposed to trigger `start()`. See `.claude/rules/bridge-patterns.md` §4.
 - `appId` is required on iOS (numeric Apple ID), unused on Android — pass it unconditionally to `init(devKey, appId)`; no `Platform.select()` needed. Confirmed against Android's own RPC source (`plugin_bridge`'s `InitRequest` data class has no `appId` field at all — the parser reads only `devKey` and silently ignores any extra JSON fields).
-- `index.js` is the published entry point with no transpilation — write ES module syntax compatible with Metro
-- `index.d.ts` is hand-maintained — verify against the `data-model.md` Method Catalog and test on both platforms when changing
-- Every native call goes through `callRpc` / `callRpcVoid` / `callRpcWithCallback` → `NativeAppsFlyer.executeRpc` — do **not** reach for `NativeModules` directly
+- `index.ts` is the published entry point (`package.json` `main`/`types`) with no transpilation step — write syntax compatible with Metro/Node directly; there is no separate `index.js`/`index.d.ts` pair
+- `index.ts` is hand-maintained end-to-end (implementation + the `AppsFlyerApi` interface that serves as the type-declaration surface) — verify against the `data-model.md` Method Catalog and test on both platforms when changing
+- Every native call goes through `callRpc` / `callRpcVoid` → `NativeAppsFlyer.executeRpc` — do **not** reach for `NativeModules` directly (there is no `callRpcWithCallback`; only these two wrappers exist)
 - Any blocking native RPC call (e.g. `start`, `logEvent`, purchase validation) must dispatch off the JS thread — TurboModule codegen defaults do not guarantee this; verify with the native implementation
 - Do **not** add a `CallbackGuard` (`WeakReference`) to the TurboModule — that pattern fixed an Old-Architecture bridge destruction bug that doesn't exist under TurboModules; Promises are held strongly by the bridge
 
@@ -86,7 +85,7 @@ Domain-specific rules live in `.claude/rules/`:
 | `native-ios.md` | iOS bridge: ObjC, CocoaPods, RCTEventEmitter |
 | `native-android.md` | Android bridge: Java module, Gradle, CallbackGuard |
 | `testing.md` | Jest patterns, mocks, coverage gaps |
-| `typescript-types.md` | index.d.ts conventions, public API surface |
+| `typescript-types.md` | type declaration conventions (in `index.ts`), public API surface |
 | `expo-config.md` | Expo config plugin (withAppsFlyer*) |
 | `known-issues-kb.md` | Issue-based KB with real GitHub issue references |
 | `release-versioning.md` | Versioning, CHANGELOG, native SDK alignment |

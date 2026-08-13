@@ -75,6 +75,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
+      - name: Install plugin dependencies
+        run: npm install
       - name: Install example app dependencies
         working-directory: example
         run: npm install
@@ -92,6 +94,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Install plugin dependencies
+        run: npm install
       - name: Install example app dependencies
         working-directory: example
         run: npm install

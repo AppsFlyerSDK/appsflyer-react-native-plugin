@@ -2,6 +2,7 @@ package com.appsflyer.reactnative;
 
 import android.util.Log;
 
+import com.appsflyer.api.PurchaseClient;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -10,15 +11,13 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 
-import org.json.JSONObject;
-
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
-import com.appsflyer.reactnative.MappedValidationResultListener;
 
 public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
@@ -62,16 +61,14 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
             boolean logInApps = config.getBoolean("logInApps");
             boolean sandbox = config.getBoolean("sandbox");
 
-            // Optional: Log that storeKitVersion is ignored on Android (for debugging purposes)
             if (config.hasKey("storeKitVersion")) {
                 String storeKitVersion = config.getString("storeKitVersion");
                 Log.d(TAG, "storeKitVersion (" + storeKitVersion + ") is ignored on Android.");
             }
 
-            MappedValidationResultListener arsListener = this.arsListener;
-            MappedValidationResultListener viapListener = this.viapListener;
+            PurchaseClient.ValidationResultListener<Map<String, Object>> arsListener = this.arsListener;
+            PurchaseClient.ValidationResultListener<Map<String, Object>> viapListener = this.viapListener;
 
-            // Instantiate the ConnectorWrapper with the config parameters.
             this.connectorWrapper = new ConnectorWrapper(
                     context,
                     logSubscriptions,
@@ -81,7 +78,6 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
                     viapListener
             );
 
-            // Set up the data sources if they were previously set
             if (subscriptionPurchaseParams != null) {
                 connectorWrapper.setSubscriptionPurchaseEventDataSource(subscriptionPurchaseParams);
             }
@@ -154,8 +150,8 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
         connectorWrapper.setInAppPurchaseEventDataSource(inAppPurchaseParams);
     }
 
-    // Initialization of the ARSListener
-    private final MappedValidationResultListener arsListener = new MappedValidationResultListener() {
+    // ARS = Auto-Renewing Subscription.
+    private final PurchaseClient.ValidationResultListener<Map<String, Object>> arsListener = new PurchaseClient.ValidationResultListener<Map<String, Object>>() {
         @Override
         public void onFailure(String result, Throwable error) {
             handleError(EVENT_SUBSCRIPTION_VALIDATION_FAILURE, result, error);
@@ -170,8 +166,8 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
         }
     };
 
-    // Initialization of the VIAPListener
-    private final MappedValidationResultListener viapListener = new MappedValidationResultListener() {
+    // VIAP = Validated In-App Purchase.
+    private final PurchaseClient.ValidationResultListener<Map<String, Object>> viapListener = new PurchaseClient.ValidationResultListener<Map<String, Object>>() {
         @Override
         public void onFailure(String result, Throwable error) {
             handleError(EVENT_IN_APP_PURCHASE_VALIDATION_FAILURE, result, error);
@@ -184,7 +180,6 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
         }
     };
 
-    //HELPER METHODS
     private void handleSuccess(String eventName, WritableMap response){
         sendEvent(eventName, response);
     }
@@ -197,8 +192,8 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     private void sendEvent(String eventName, Object params) {
-        ReactApplicationContext context = reactContext.get(); // Retrieve the context from WeakReference
-        if (context != null && context.hasActiveReactInstance()) { // Ensure context is not null and active
+        ReactApplicationContext context = reactContext.get();
+        if (context != null && context.hasActiveReactInstance()) {
             Log.d("ReactNativeJS", "Event: " + eventName + ", params: " + params.toString());
             context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                    .emit(eventName, params);
@@ -208,16 +203,14 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
     }
 
     private WritableMap errorToMap(Throwable error) {
-        JSONObject errorJson = new JSONObject(this.throwableToMap(error));
-        WritableMap errorMap = RNUtil.jsonToWritableMap(errorJson);
-        return errorMap;
+        return RNUtil.toWritableMap(this.throwableToMap(error));
     }
 
     private Map<String, Object> throwableToMap(Throwable throwable) {
         Map<String, Object> map = new HashMap<>();
         map.put("type", throwable.getClass().getSimpleName());
         map.put("message", throwable.getMessage());
-        map.put("stacktrace", String.join("\n", Arrays.stream(throwable.getStackTrace()).map(StackTraceElement::toString).toArray(String[]::new)));
+        map.put("stacktrace", Arrays.stream(throwable.getStackTrace()).map(StackTraceElement::toString).collect(Collectors.joining("\n")));
         map.put("cause", throwable.getCause() != null ? throwableToMap(throwable.getCause()) : null);
         return map;
     }

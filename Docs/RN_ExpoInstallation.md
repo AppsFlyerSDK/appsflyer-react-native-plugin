@@ -7,6 +7,9 @@ hidden: false
 ---
 
 ## Install AppsFlyer in an Expo managed project
+
+**Prerequisite:** react-native-appsflyer 7.0.0+ requires React Native ≥ 0.76 with the New Architecture (TurboModules) enabled — see [Installation](RN_Installation.md). On Expo, that means SDK 52+ with a development build (New Architecture is on by default from SDK 52).
+
 1. Install `expo-dev-client`. You can read more about expo development builds [here](https://docs.expo.dev/development/introduction/):
 ```
 expo install expo-dev-client

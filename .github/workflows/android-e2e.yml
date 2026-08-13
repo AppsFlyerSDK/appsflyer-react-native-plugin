@@ -76,6 +76,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install plugin dependencies
+        run: npm install
+
       - name: Install example app dependencies
         working-directory: example
         run: npm install

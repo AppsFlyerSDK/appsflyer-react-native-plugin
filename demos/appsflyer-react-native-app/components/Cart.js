@@ -1,7 +1,8 @@
 /* @flow weak */
 import React, {useCallback, useState} from 'react';
-import {View, Text, StyleSheet, FlatList, Pressable, Platform} from 'react-native';
+import {View, Text, StyleSheet, FlatList, Pressable, Platform, Share} from 'react-native';
 import {ListItem, Avatar, Button} from 'react-native-elements';
+import AppsFlyer from 'react-native-appsflyer';
 import Confetti from './Confetti';
 
 // Memoized row: re-renders only when its product or remove handler changes, so
@@ -91,6 +92,19 @@ const Cart = ({route, navigation}) => {
     checkout();
   };
 
+  const handleShare = async () => {
+    try {
+      const result = await AppsFlyer.generateInviteLink({channel: 'app_share'});
+      // iOS returns { url }, Android returns a plain string — see Docs/RN_UserInvite.md.
+      const link = typeof result === 'string' ? result : result?.url;
+      if (link) {
+        await Share.share({message: link});
+      }
+    } catch (error) {
+      console.log('generateInviteLink failed', error);
+    }
+  };
+
   if (productList.length === 0 && !summary) {
     return (
       <View style={styles.emptyContainer}>
@@ -157,6 +171,11 @@ const Cart = ({route, navigation}) => {
                 {`${summary.total} USD`}
               </Text>
             </View>
+            <Pressable
+              style={({pressed}) => [styles.shareBtn, pressed && styles.pressed]}
+              onPress={handleShare}>
+              <Text style={styles.shareBtnText}>Share & invite friends</Text>
+            </Pressable>
             <Pressable
               style={({pressed}) => [styles.doneBtn, pressed && styles.pressed]}
               onPress={() => navigation.goBack()}>
@@ -356,9 +375,23 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: 'green',
   },
-  doneBtn: {
+  shareBtn: {
     alignSelf: 'stretch',
     marginTop: 20,
+    borderWidth: 1.5,
+    borderColor: '#2089dc',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  shareBtnText: {
+    color: '#2089dc',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  doneBtn: {
+    alignSelf: 'stretch',
+    marginTop: 12,
     backgroundColor: '#52c41a',
     borderRadius: 14,
     paddingVertical: 14,
