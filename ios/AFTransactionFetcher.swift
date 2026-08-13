@@ -1,11 +1,3 @@
-//
-//  AFTransactionFetcher.swift
-//  RNAppsFlyer
-//
-//  Created by Amit Levy on 03/03/2025.
-//  Copyright © 2025 Facebook. All rights reserved.
-//
-
 import Foundation
 import StoreKit
 

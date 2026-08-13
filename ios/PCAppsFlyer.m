@@ -29,7 +29,6 @@ static NSString *const connectorNotConfiguredMessage = @"Connector not configure
 
 PurchaseConnector *connector;
 
-// This RCT_EXPORT_MODULE macro exports the module to React Native.
 RCT_EXPORT_MODULE();
 
 RCT_EXPORT_METHOD(create:(NSDictionary *)config
@@ -51,7 +50,6 @@ RCT_EXPORT_METHOD(create:(NSDictionary *)config
 
     [connector setIsSandbox:sandbox];
 
-    // Set the StoreKitVersion (default to SK1 if not provided or invalid)
     if ([storeKitVersion isEqualToString:@"SK2"]) {
         [connector setStoreKitVersion:AFSDKStoreKitVersionSK2];
     } else {
@@ -149,8 +147,7 @@ RCT_EXPORT_METHOD(setPurchaseRevenueDataSourceStoreKit2:(NSDictionary *)dataSour
 }
 
 - (void)didReceivePurchaseRevenueValidationInfo:(nullable NSDictionary *)validationInfo error:(nullable NSError *)error {
-    // Send the validation info and error back to React Native.
-    // Call this function from the main thread.
+    // Caller (PurchaseConnector) must invoke this delegate callback on the main thread.
     if (error){
         NSDictionary *errorDictionary = @{
             @"localizedDescription": [error localizedDescription],
@@ -170,8 +167,7 @@ RCT_EXPORT_METHOD(setPurchaseRevenueDataSourceStoreKit2:(NSDictionary *)dataSour
 @end
 
 #else
-// IMPORTANT: This stub implementation is necessary to prevent compilation errors and runtime crashes.
-// It ensures that the plugin functions properly even if the Purchase Connector is not actively utilized on the React Native side.
+// Stub so apps without PurchaseConnector linked still get a working no-op module instead of a missing-native-module crash.
 @implementation PCAppsFlyer
 @synthesize bridge = _bridge;
 
@@ -183,7 +179,6 @@ RCT_EXPORT_MODULE();
     resolve(nil);
 }
 
-// Fallback for methods
 RCT_EXPORT_METHOD(create:(NSDictionary *)config
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {

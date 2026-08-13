@@ -64,14 +64,32 @@ for full root-cause detail on each:
 - `registerSessionReadyListener` — `AppsFlyerLib.m`'s `registerSessionReadyListener:` asserts
   `devKey`/`appleAppID` are already set, and racing it against `init()`'s own unstructured Task
   can crash the app outright. Must be called only after `init()` has resolved.
-- `registerDeepLinkListener` — `AppsFlyerLib.m`'s `setDeepLinkDelegate:` fires a **one-shot**
-  (`dispatch_once`) deferred-deep-link resolution request immediately on assignment, using
-  whatever host config exists at that moment. Calling it before `init()` has configured the
-  host burns that one-shot attempt on a malformed URL, permanently (for the rest of that app
-  process's lifetime — not retried). Must also be called only after `init()` has resolved.
+- `registerDeepLinkListener` (**iOS only** — see below for Android) — `AppsFlyerLib.m`'s
+  `setDeepLinkDelegate:` fires a **one-shot** (`dispatch_once`) deferred-deep-link resolution
+  request immediately on assignment, using whatever host config exists at that moment. Calling
+  it before `init()` has configured the host burns that one-shot attempt on a malformed URL,
+  permanently (for the rest of that app process's lifetime — not retried). Must also be called
+  only after `init()` has resolved.
 
 `registerConversionListener` has no such exception (`setDelegate:` only assigns the ivar and
 logs a deprecation warning) and may still register before `init()` per the general rule above.
+
+**`registerDeepLinkListener` is platform-split — the two native SDKs are misaligned on when
+it's safe to attach the listener, so this is the one call whose position moves relative to
+`init()` by platform:**
+- **iOS**: register *after* `init()` — the one-shot DDL bug above.
+- **Android**: register *before* `init()`. `AFDeepLinkManager`'s `onDeepLinking()` /
+  `onDeepLinkingSuccess()` / `onDeepLinkingError()` guard on `if (listener != null)` with zero
+  buffering — a result delivered before the listener is attached is dropped permanently. In the
+  typical single-Activity RN launch this was previously masked by an incidental lifecycle-timing
+  gap (see `known-issues-kb.md`'s Android deep-link entry for the full analysis) that made
+  "register after `init()`" appear safe — but that's a timing accident, not a guarantee, and it
+  doesn't hold for apps with a trampoline/splash launcher Activity. Register before `init()` on
+  Android instead of relying on it. `index.ts`/samples do this via `Platform.OS === 'android'`.
+
+This is the only listener where call order differs by platform — `registerConversionListener`
+and `registerSessionReadyListener` both keep the single "synchronously, right after `init()`"
+rule on both platforms.
 
 There used to be a JS-repo-side buffer (`RpcInitGate.kt` on Android, an equivalent
 `initCompleted`/`pendingRegistrations` gate in `RNAppsFlyerImpl.swift`) that held these RPCs
@@ -94,7 +112,8 @@ delays the *dispatch*, and delayed dispatch of `registerSessionReadyListener` de
 callback that's supposed to trigger `start()` (see the recommended pattern below).
 `example/src/App.tsx` calls `init()` first and registers listeners as separate synchronous
 statements right after it, matching the reference `RPCTestApp`'s own call order (`initialize` →
-`isDebug` → listeners → ... → `start`).
+`isDebug` → listeners → ... → `start`) — except `registerDeepLinkListener`, which it calls
+before `init()` on Android per the platform split above, via `Platform.OS`.
 
 ### Recommended pattern for deterministic ordering after start()
 

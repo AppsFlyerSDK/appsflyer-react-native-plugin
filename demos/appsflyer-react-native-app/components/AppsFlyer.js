@@ -18,6 +18,10 @@ export async function AFInit(onConversionData, onDeepLink) {
   }
   AppsFlyer.enableDebug({enabled: true});
 
+  if (Platform.OS === 'android') {
+    AppsFlyer.registerDeepLinkListener({onDeepLinking: onDeepLink});
+  }
+
   try {
     await AppsFlyer.init({devKey: DEV_KEY, appId: APP_ID});
     console.log('init SDK success');
@@ -38,7 +42,10 @@ export async function AFInit(onConversionData, onDeepLink) {
     onConversionDataSuccess: onConversionData,
     onConversionDataFail: (error) => console.log('conversion data error:', error),
   });
-  AppsFlyer.registerDeepLinkListener({onDeepLinking: onDeepLink});
+
+  if (Platform.OS === 'ios') {
+    AppsFlyer.registerDeepLinkListener({onDeepLinking: onDeepLink});
+  }
 
   AppsFlyer.registerSessionReadyListener(() => {
     AppsFlyer.start().then(

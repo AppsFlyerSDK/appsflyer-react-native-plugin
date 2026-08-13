@@ -48,12 +48,6 @@ object RNUtil {
         return writableArray
     }
 
-    /**
-     * Converts Facebook's ReadableMap to a Kotlin Map<>
-     *
-     * @param readableMap The Readable Map to parse
-     * @return a Map<> to be used in memory
-     */
     @JvmStatic
     fun toMap(readableMap: ReadableMap?): Map<String, Any?>? {
         if (readableMap == null) {
@@ -74,13 +68,6 @@ object RNUtil {
         return result
     }
 
-    /**
-     * Attempts to pull the ReadableMap's attribute out as the proper type
-     *
-     * @param readableMap The Facebook ReadableMap to parse
-     * @param key         The map key to attempt to read from the readableMap
-     * @return the converted attribute from the map if available
-     */
     @JvmStatic
     fun toObject(readableMap: ReadableMap?, key: String): Any? {
         if (readableMap == null) {
@@ -97,12 +84,6 @@ object RNUtil {
         }
     }
 
-    /**
-     * Converts a ReadableArray into a Kotlin List<>
-     *
-     * @param readableArray the ReadableArray to parse
-     * @return a List<> if applicable
-     */
     @JvmStatic
     fun toList(readableArray: ReadableArray?): List<Any?>? {
         if (readableArray == null) {

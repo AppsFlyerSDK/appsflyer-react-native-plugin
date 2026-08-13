@@ -106,6 +106,9 @@ jobs:
           key: pods-${{ hashFiles('example/ios/Podfile', 'react-native-appsflyer.podspec') }}
           restore-keys: pods-
 
+      - name: Install plugin dependencies
+        run: npm install
+
       - name: Install example app dependencies
         working-directory: example
         run: npm install

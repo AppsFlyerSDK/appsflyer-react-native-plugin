@@ -33,15 +33,9 @@ public final class RNAppsFlyerImpl: NSObject {
         Task { @MainActor in
             AppsFlyerRPCBridge.shared.executeJson(remappedRequestJson) { responseJson in
                 let (normalized, succeeded) = Self.normalize(iosResponseJson: responseJson)
-                if requestedMethod == "start" && succeeded {
-                    // Explicit hop, not redundant with the enclosing Task's @MainActor: this
-                    // completion closure comes from AppsFlyerRPCBridge.executeJson, which forks
-                    // an unstructured, non-actor-isolated Task internally (see known-issues-kb.md's
-                    // registerSessionReadyListener TOCTOU entry) -- it is not guaranteed to run on
-                    // MainActor just because the call that started it was. AppsFlyerAttribution's
-                    // bridgeReady/pendingUrl/pendingUserActivity are also written from the
-                    // AppDelegate's main-thread continueUserActivity/handleOpen -- without this
-                    // hop, both writes race.
+                if requestedMethod == "initialize" && succeeded {
+                    // Explicit hop: executeJson's completion runs on an unstructured Task with no
+                    // actor isolation, not guaranteed to still be on MainActor here.
                     Task { @MainActor in
                         AppsFlyerAttribution.shared.bridgeReady = true
                     }

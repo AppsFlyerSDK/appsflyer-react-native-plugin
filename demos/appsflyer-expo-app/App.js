@@ -119,6 +119,10 @@ export default function App() {
 			addLog('========== Bootstrap Started ==========');
 			AppsFlyer.enableDebug({ enabled: true });
 
+			if (Platform.OS === 'android') {
+				AppsFlyer.registerDeepLinkListener({});
+			}
+
 			try {
 				await AppsFlyer.init({ devKey: DEV_KEY, appId: APP_ID });
 				addLog('✓ init OK');
@@ -128,12 +132,14 @@ export default function App() {
 			}
 
 			// Registered after init resolves, not synchronously right after the init() call —
-			// both registerSessionReadyListener and registerDeepLinkListener have documented native
-			// bugs that make them unsafe to call before init has actually configured the SDK
-			// (known-issues-kb.md). registerConversionListener has no such constraint but is kept
-			// alongside them for one readable bootstrap sequence.
+			// registerSessionReadyListener has a documented native bug that makes it unsafe to call
+			// before init has actually configured the SDK (known-issues-kb.md). registerConversionListener
+			// has no such constraint but is kept alongside it for one readable bootstrap sequence.
 			AppsFlyer.registerConversionListener({});
-			AppsFlyer.registerDeepLinkListener({});
+
+			if (Platform.OS === 'ios') {
+				AppsFlyer.registerDeepLinkListener({});
+			}
 
 			await startWhenSessionReady((reason) => addLog(`✓ Session ready (${reason})`));
 			if (!cancelled) setSessionReady(true);
