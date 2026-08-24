@@ -43,7 +43,7 @@ Pod::Spec.new do |s|
   # AppsFlyerPurchaseConnector
   if defined?($AppsFlyerPurchaseConnector) && ($AppsFlyerPurchaseConnector == true)
     Pod::UI.puts "#{s.name}: Including PurchaseConnector."
-    s.dependency 'PurchaseConnector', '7.0.1'
+    s.dependency 'PurchaseConnector', '7.0.2'
   end
 
   # AppsFlyerFramework (via AppsFlyerRPC)
