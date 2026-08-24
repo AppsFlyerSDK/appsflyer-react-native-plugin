@@ -256,9 +256,15 @@ android_collect_logs() {
 
   # Strategy 2: Always also append logcat output. AppsFlyer SDK native logs
   # (HTTP response codes, etc.) reach logcat regardless of the Dart-print
-  # routing, and the count_matches checks need them. Limit to the recent tail
-  # so CI does not spend a minute dumping the whole emulator buffer every phase.
-  adb logcat -d -t "$tail_lines" 2>&1 | grep -E "${LOG_TAG}|AppsFlyer|response code:|preparing data:" >> "$log_file" || true
+  # routing, and the count_matches checks need them. Filter first, then tail —
+  # `-t N` on the raw stream truncates the noisy emulator/system log BEFORE the
+  # grep runs, which on a long phase (420s cold-launch wait) can push early
+  # [AF_QA] lines out of the window entirely even though they're still in the
+  # ring buffer (confirmed: a plain unfiltered dump still had them). Tailing
+  # the already-filtered output keeps the "don't spend a minute dumping
+  # everything" intent without discarding real matches.
+  # Crash tags added so a mid-phase process death leaves a stack trace in the saved log, not just the runner's own inference.
+  adb logcat -d 2>&1 | grep -E "${LOG_TAG}|AppsFlyer|response code:|preparing data:|AndroidRuntime|FATAL EXCEPTION|ActivityManager|lowmemorykiller" | tail -n "$tail_lines" >> "$log_file" || true
 }
 
 android_background_app() {
@@ -343,6 +349,12 @@ ios_launch() {
 ios_get_pid() {
   xcrun simctl spawn "$IOS_UDID" launchctl list 2>/dev/null | \
     grep "$PACKAGE_NAME" | awk '{print $1}' | head -1
+}
+
+ios_is_alive() {
+  local pid
+  pid=$(ios_get_pid)
+  [[ -n "$pid" && "$pid" != "-" ]]
 }
 
 ios_collect_logs() {
@@ -441,6 +453,10 @@ platform_trigger_deeplink() {
   if [[ "$PLATFORM" == "android" ]]; then android_trigger_deeplink "$1"; else ios_trigger_deeplink "$1"; fi
 }
 
+platform_is_alive() {
+  if [[ "$PLATFORM" == "android" ]]; then android_is_alive; else ios_is_alive; fi
+}
+
 # Print the device-side af_qa_logs.txt to stdout (best effort, empty on miss).
 # Used by `wait_for_qa_marker` to poll mid-phase without reshuffling the full
 # log-collection pipeline.
@@ -497,6 +513,17 @@ wait_for_qa_marker() {
     if platform_peek_qa_log | grep -qF -- "$marker" 2>/dev/null; then
       log_info "Marker observed after ${elapsed}s"
       return 0
+    fi
+
+    # Give the process a moment to register with launchctl/pidof after
+    # `platform_launch` before trusting an is_alive check — otherwise a
+    # perfectly healthy just-launched app reads as "crashed" on the first
+    # poll. Once past the grace period, a dead process before the marker
+    # ever showed up means it crashed on launch — stop burning the full
+    # timeout waiting for a marker that will never appear.
+    if (( elapsed >= interval )) && ! platform_is_alive; then
+      log_fail "App process died after ${elapsed}s, before marker was observed — aborting wait early"
+      return 1
     fi
 
     remaining=$(( timeout_sec - elapsed ))
@@ -758,8 +785,13 @@ run_phase() {
     platform_launch
     # Poll the QA log for the auto-run-complete marker rather than always
     # sleeping the full ceiling. Use a slower interval here because each ADB
-    # `run-as cat` is costly on GitHub's emulator.
-    wait_for_qa_marker "[AF_QA][AUTO_APIS] --- Auto run complete ---" "$wait_sec" 10
+    # `run-as cat` is costly on GitHub's emulator. A non-zero return means the
+    # app crashed before the marker showed up — log collection and checks
+    # below still run so the crash logs/screenshot are captured for triage,
+    # but there's no point pretending the app is still there for pre-actions.
+    if ! wait_for_qa_marker "[AF_QA][AUTO_APIS] --- Auto run complete ---" "$wait_sec" 10; then
+      log_warn "Continuing to log collection to capture crash evidence"
+    fi
   fi
 
   # Pre-actions (deep link phases: background the app, etc.)
@@ -827,6 +859,12 @@ run_phase() {
       log_info "Waiting ${wait_trigger_sec}s for deep link to propagate..."
       sleep "$wait_trigger_sec"
     fi
+  fi
+
+  # Continuation phases skip the launch/deep-link wait above, so an event's HTTP round-trip may still be in flight here. ponytail: flat 5s, upgrade to a marker wait if a phase needs longer.
+  if [[ "$requires_fresh" != "true" && -z "$deep_link_url" ]]; then
+    log_info "Settling 5s for async HTTP responses before log collection..."
+    sleep 5
   fi
 
   # Collect logs
