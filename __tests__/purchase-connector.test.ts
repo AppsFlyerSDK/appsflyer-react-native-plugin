@@ -6,11 +6,7 @@ import { Money } from '../PurchaseConnector/models/money_model';
 import { OfferDetails } from '../PurchaseConnector/models/offer_details';
 import { AutoRenewingPlan } from '../PurchaseConnector/models/auto_renewing_plan';
 
-// index.ts now constructs RNTransport (and reads Platform.OS) eagerly at module load, to build
-// its module-level AppsFlyerSDK singleton -- this file's own NativeModules mock below replaces
-// the entire legacy bridge (including PlatformConstants' TurboModuleRegistry fallback), which
-// broke that eager Platform.OS read. Mock Platform directly so it resolves without depending on
-// the (deliberately minimal) NativeModules mock below.
+// index.ts reads Platform.OS eagerly at module load; the NativeModules mock below is too minimal to satisfy that, so Platform is mocked directly.
 jest.mock('react-native/Libraries/Utilities/Platform', () => ({
   OS: 'ios',
   select: (spec: Record<string, unknown>) => spec.ios ?? spec.default,
@@ -29,10 +25,7 @@ jest.mock('../node_modules/react-native/Libraries/BatchedBridge/NativeModules', 
   },
 }));
 
-// Mock NativeEventEmitter. RN's NativeEventEmitter.js is an ES `export default class` —
-// the mock factory must return the same { __esModule, default } interop shape, or
-// react-native's own barrel re-export (`export {default as NativeEventEmitter} from ...`)
-// resolves to undefined and `new NativeEventEmitter(...)` throws "is not a constructor".
+// Mock must match RN's { __esModule, default } interop shape or the barrel re-export resolves to undefined and `new NativeEventEmitter()` throws.
 jest.mock('react-native/Libraries/EventEmitter/NativeEventEmitter', () => ({
   __esModule: true,
   default: jest.fn().mockImplementation(() => ({
@@ -430,7 +423,7 @@ describe('PurchaseConnector Interface', () => {
         logSubscriptions: true,
         logInApps: true,
         sandbox: false,
-        storeKitVersion: 'SK1' // Default value
+        storeKitVersion: 'SK1'
       });
     });
   });

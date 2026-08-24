@@ -1,5 +1,4 @@
 import appsFlyer, { AFPurchaseType, MEDIATION_NETWORK } from '../index';
-import { Platform } from 'react-native';
 import NativeAppsFlyer from '../src/NativeAppsFlyer';
 
 function mockRpcResponse(data = {}) {
@@ -10,9 +9,7 @@ function mockRpcError(message, code = 500) {
 	return JSON.stringify({ success: false, error: { code, message } });
 }
 
-// Parses the last (or nth) executeRpc call's request JSON. Preferred over string-equality
-// (`toHaveBeenCalledWith(JSON.stringify(...))`) per testing.md's own documented pattern --
-// object equality doesn't depend on the resolver's key insertion order.
+// Compares parsed JSON, not raw strings, so key-insertion order doesn't cause flakiness (see testing.md).
 function payloadAt(index, mock = NativeAppsFlyer.executeRpc) {
 	const [requestJson] = mock.mock.calls[index];
 	return JSON.parse(requestJson);
@@ -21,11 +18,8 @@ function lastPayload(mock = NativeAppsFlyer.executeRpc) {
 	return payloadAt(mock.mock.calls.length - 1, mock);
 }
 
-// Re-requires index.ts (and its NativeAppsFlyer mock) fresh with Platform.OS pinned, for methods
-// whose real wire method name/params genuinely diverge per platform (see
-// node_modules/@appsflyer-sdk/js-core-plugin/dist/generated/rpc-map.js) -- RNTransport.platform is
-// captured once at construction, so the module-level `appsFlyer` singleton (imported above,
-// under this Jest environment's default 'ios' haste platform) only ever exercises iOS's mapping.
+// Re-requires index.ts fresh with Platform.OS pinned, since RNTransport.platform is captured once at
+// construction and the module-level `appsFlyer` singleton (imported above) only ever exercises iOS.
 function freshAppsFlyerForPlatform(platform) {
 	jest.resetModules();
 	const { Platform: FreshPlatform } = require('react-native');
@@ -64,8 +58,7 @@ describe("Test appsFlyer API's", () => {
 		expect(payloadAt(1)).toEqual({ method: 'initialize', params: { devKey: 'xxxx', appId: '777' } });
 	});
 
-	// The old hand-rolled index.ts rejected client-side if `appId` wasn't a string. @appsflyer-sdk/js-core-plugin
-	// does no such runtime validation (it trusts TypeScript's InitParams typing) -- removed, not a gap.
+	// Old hand-rolled index.ts rejected non-string appId client-side; js-core-plugin trusts InitParams typing instead (removed, not a gap).
 
 	test('it calls appsFlyer.init and rejects on a native RPC failure', async () => {
 		NativeAppsFlyer.executeRpc
@@ -109,9 +102,7 @@ describe("Test appsFlyer API's", () => {
 		expect(lastPayload()).toEqual({ method: 'logLocation', params: { longitude: 12, latitude: 12 } });
 	});
 
-	// The old hand-rolled index.ts rejected empty-string/non-numeric coordinates client-side before
-	// dispatching. @appsflyer-sdk/js-core-plugin's logLocation forwards whatever the caller passes (it
-	// trusts LogLocationParams's `number` typing) -- there is no equivalent runtime guard anymore.
+	// Old hand-rolled index.ts rejected invalid coordinates client-side; js-core-plugin forwards them as-is (removed, not a gap).
 
 	test('it calls appsFlyer.setUserEmail', () => {
 		appsFlyer.setUserEmail({ email: 'a@b.com' });
@@ -144,8 +135,7 @@ describe("Test appsFlyer API's", () => {
 			await expect(appsFlyer.isSessionReady()).resolves.toBe(false);
 		});
 
-		// Regression guard: isSessionReady is a pure read-only status query — it must not fire
-		// registerSessionReadyListener as a side effect (that RPC is only for actual listener attach).
+		// Regression guard: isSessionReady must not fire registerSessionReadyListener as a side effect.
 		test('isSessionReady does not register the session-ready listener as a side effect', async () => {
 			await appsFlyer.isSessionReady();
 			const dispatchedMethods = NativeAppsFlyer.executeRpc.mock.calls.map(
@@ -154,9 +144,7 @@ describe("Test appsFlyer API's", () => {
 			expect(dispatchedMethods).not.toContain('registerSessionReadyListener');
 		});
 
-		// setUserEmail's core signature is `Promise<void>` -- unlike the old hand-rolled callRpc
-		// (which resolved with whatever `data` native returned), it never propagates the RPC's
-		// resolved value, so it always resolves undefined regardless of what native sends back.
+		// setUserEmail's core signature is Promise<void> — always resolves undefined regardless of native's response, unlike the old callRpc.
 		test('a void RPC resolves undefined regardless of native\'s resolved data', async () => {
 			NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse(null));
 			await expect(appsFlyer.setUserEmail({ email: 'a@b.com' })).resolves.toBeUndefined();
@@ -192,9 +180,7 @@ describe("Test appsFlyer API's", () => {
 		expect(lastPayload()).toEqual({ method: 'setPartnerData', params: { partnerId: 'xxx', data: null } });
 	});
 
-	// The old hand-rolled index.ts silently no-op'd for a non-string partnerId or non-object data
-	// (typeof guards). @appsflyer-sdk/js-core-plugin has no such client-side guard -- removed, not a gap;
-	// TypeScript's SetPartnerDataParams is the enforcement point for real callers.
+	// Old hand-rolled index.ts silently no-op'd invalid partnerId/data; js-core-plugin has no such guard (removed, not a gap).
 
 	test('it calls appsFlyer.setSharingFilterForPartners', () => {
 		appsFlyer.setSharingFilterForPartners({ partners: [] });
@@ -217,10 +203,7 @@ describe("Test appsFlyer API's", () => {
 		expect(lastPayload()).toEqual({ method: 'stop', params: { shouldStop: false } });
 	});
 
-	// sendPushNotificationData (Android's flat campaign/pid/isRetargeting shape) and
-	// handlePushNotification (iOS's raw pushPayload) are now two separate schema methods,
-	// each supported on exactly one platform (see rpc-map.js) -- the old repo unified them into
-	// one method that shipped both shapes in a single merged request; that merge is gone.
+	// sendPushNotificationData (Android) and handlePushNotification (iOS) are now separate per-platform methods, no longer merged into one request.
 	test('sendPushNotificationData is Android-only, sending the flat campaign fields', () => {
 		const { appsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
 		androidAppsFlyer.sendPushNotificationData({ campaign: 'c1', pid: 'firebase', isRetargeting: true });
@@ -280,9 +263,9 @@ describe("Test appsFlyer API's", () => {
 		});
 	});
 
-	test('it calls appsFlyer.performDeepLinking() on iOS — real wire method is "performOnAppAttributionWithURL", shouldTriggerSession dropped', () => {
+	test('it calls appsFlyer.performDeepLinking() on iOS — wire method renamed to match Android in AppsFlyerRPC 7.0.13, shouldTriggerSession dropped', () => {
 		appsFlyer.performDeepLinking({ url: '' });
-		expect(lastPayload()).toEqual({ method: 'performOnAppAttributionWithURL', params: { url: '' } });
+		expect(lastPayload()).toEqual({ method: 'performDeepLinking', params: { url: '' } });
 	});
 
 	test('it calls appsFlyer.setDisableIDFVCollection — iOS-only', () => {
@@ -302,55 +285,42 @@ describe("Test appsFlyer API's", () => {
 		expect(lastPayload()).toEqual({ method: 'logAdRevenue', params: adRevenueData });
 	});
 
-	// Android's RPC layer requires an exact mediationNetwork string match (no normalization);
-	// iOS lowercases and strips underscores before matching. A few MEDIATION_NETWORK constants
-	// don't survive Android's exact match as-is — logAdRevenue must resolve them per-platform.
-	// This override reads Platform.OS live on every call (unlike RNTransport.platform, which is
-	// captured once at construction) — so toggling Platform.OS against the same shared `appsFlyer`
-	// singleton still works here, unlike the platform-divergent RPC-dispatch cases above.
+	// Android matches case-insensitively against the enum name; iOS normalizes case/underscores — both handled by js-core-plugin's rpc-resolver.ts.
 	describe('logAdRevenue mediationNetwork per-platform resolution', () => {
-		const originalOS = Platform.OS;
-
-		afterEach(() => {
-			Platform.OS = originalOS;
-		});
-
-		function paramsSentFor(mediationNetwork) {
-			appsFlyer.logAdRevenue({
+		// Needs a fresh instance per platform since RNTransport.platform is captured once at construction.
+		function paramsSentFor(platform, mediationNetwork) {
+			const { appsFlyer: platformAppsFlyer, NativeAppsFlyer: platformNative } = freshAppsFlyerForPlatform(platform);
+			platformAppsFlyer.logAdRevenue({
 				monetizationNetwork: 'test_network',
 				mediationNetwork,
 				currencyIso4217Code: 'USD',
 				revenue: 1,
 			});
-			return lastPayload().params;
+			return lastPayload(platformNative.executeRpc).params;
 		}
 
-		test('Android: APPLOVIN_MAX/GOOGLE_ADMOB/TOPON_PTE are rewritten to Android\'s exact spelling', () => {
-			Platform.OS = 'android';
-			expect(paramsSentFor(MEDIATION_NETWORK.APPLOVIN_MAX).mediationNetwork).toBe('applovinmax');
-			expect(paramsSentFor(MEDIATION_NETWORK.GOOGLE_ADMOB).mediationNetwork).toBe('googleadmob');
-			expect(paramsSentFor(MEDIATION_NETWORK.TOPON_PTE).mediationNetwork).toBe('toponpte');
+		test('Android: values pass through unchanged (af-android-sdk matches case-insensitively against the enum name, e.g. "applovin_max" == APPLOVIN_MAX)', () => {
+			expect(paramsSentFor('android', MEDIATION_NETWORK.APPLOVIN_MAX).mediationNetwork).toBe('applovin_max');
+			expect(paramsSentFor('android', MEDIATION_NETWORK.GOOGLE_ADMOB).mediationNetwork).toBe('google_admob');
+			expect(paramsSentFor('android', MEDIATION_NETWORK.TOPON_PTE).mediationNetwork).toBe('topon_pte');
 		});
 
-		test('Android: CUSTOM_MEDIATION/DIRECT_MONETIZATION_NETWORK resolve to Android\'s camelCase spelling', () => {
-			Platform.OS = 'android';
-			expect(paramsSentFor(MEDIATION_NETWORK.CUSTOM_MEDIATION).mediationNetwork).toBe('customMediation');
-			expect(paramsSentFor(MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK).mediationNetwork).toBe(
-				'directMonetizationNetwork'
+		test('Android: CUSTOM_MEDIATION/DIRECT_MONETIZATION_NETWORK also pass through unchanged, same enum-name match', () => {
+			expect(paramsSentFor('android', MEDIATION_NETWORK.CUSTOM_MEDIATION).mediationNetwork).toBe('custom_mediation');
+			expect(paramsSentFor('android', MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK).mediationNetwork).toBe(
+				'direct_monetization_network'
 			);
 		});
 
 		test('iOS: APPLOVIN_MAX/GOOGLE_ADMOB/TOPON_PTE pass through unchanged (iOS normalizes case/underscores itself)', () => {
-			Platform.OS = 'ios';
-			expect(paramsSentFor(MEDIATION_NETWORK.APPLOVIN_MAX).mediationNetwork).toBe('applovin_max');
-			expect(paramsSentFor(MEDIATION_NETWORK.GOOGLE_ADMOB).mediationNetwork).toBe('google_admob');
-			expect(paramsSentFor(MEDIATION_NETWORK.TOPON_PTE).mediationNetwork).toBe('topon_pte');
+			expect(paramsSentFor('ios', MEDIATION_NETWORK.APPLOVIN_MAX).mediationNetwork).toBe('applovin_max');
+			expect(paramsSentFor('ios', MEDIATION_NETWORK.GOOGLE_ADMOB).mediationNetwork).toBe('google_admob');
+			expect(paramsSentFor('ios', MEDIATION_NETWORK.TOPON_PTE).mediationNetwork).toBe('topon_pte');
 		});
 
-		test('iOS: CUSTOM_MEDIATION/DIRECT_MONETIZATION_NETWORK resolve to iOS\'s normalizer-safe spelling', () => {
-			Platform.OS = 'ios';
-			expect(paramsSentFor(MEDIATION_NETWORK.CUSTOM_MEDIATION).mediationNetwork).toBe('custom');
-			expect(paramsSentFor(MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK).mediationNetwork).toBe(
+		test("iOS: CUSTOM_MEDIATION/DIRECT_MONETIZATION_NETWORK resolve to iOS's normalizer-safe spelling", () => {
+			expect(paramsSentFor('ios', MEDIATION_NETWORK.CUSTOM_MEDIATION).mediationNetwork).toBe('custom');
+			expect(paramsSentFor('ios', MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK).mediationNetwork).toBe(
 				'directmonetization'
 			);
 		});
@@ -471,12 +441,7 @@ describe("Test appsFlyer API's", () => {
 	});
 
 	test('it calls appsFlyer.validateAndLogInAppPurchase on iOS — nests purchase.* under product/transaction', () => {
-		// NOTE: the schema's publicApi.purchase.purchaseType enum is ['oneTimePurchase', 'subscription']
-		// (camelCase) on BOTH platforms -- androidPurchaseType is the only place snake_case appears,
-		// applied by the resolver, not something a caller should pass in directly. This repo's own
-		// exported `AFPurchaseType.ONE_TIME_PURCHASE` constant still equals the OLD snake_case value
-		// ('one_time_purchase'), which is stale against this new public contract -- flagged for the
-		// index.ts owner, not fixed here (out of scope for this test-only pass).
+		// NOTE: AFPurchaseType.ONE_TIME_PURCHASE is stale snake_case vs the new camelCase schema enum — flagged for index.ts owner, not fixed here.
 		appsFlyer.validateAndLogInAppPurchase({
 			purchase: { purchaseType: 'oneTimePurchase', productId: 'test_product_456', transactionId: 'test_transaction_456' },
 		});
@@ -489,9 +454,7 @@ describe("Test appsFlyer API's", () => {
 		});
 	});
 
-	// Wire value, not key: Android's "one_time_purchase" vs iOS's "oneTimePurchase" spelling.
-	// Uses the schema's real publicApi value ('oneTimePurchase') rather than the stale
-	// AFPurchaseType.ONE_TIME_PURCHASE constant -- see the note above.
+	// Uses the schema's real value ('oneTimePurchase'), not the stale AFPurchaseType constant — see the note above.
 	test('validateAndLogInAppPurchase maps purchaseType per platform (Android: snake_case)', () => {
 		const { appsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
 		androidAppsFlyer.validateAndLogInAppPurchase({
@@ -567,23 +530,13 @@ describe("Test appsFlyer API's", () => {
 		expect(lastPayload()).toEqual({ method: 'setConsentData', params: consentData });
 	});
 
-	// The old hand-rolled index.ts defaulted isUserSubjectToGDPR to false when omitted (iOS's parser
-	// requires it, no default). @appsflyer-sdk/js-core-plugin's setConsentData forwards params as given --
-	// no such default is applied anymore. Reject-at-native (iOS) or accept-with-Android-default is
-	// now native's own behavior, not this plugin's; TypeScript's SetConsentDataParams still requires
-	// the field, so real callers can't omit it silently.
+	// Old hand-rolled index.ts defaulted isUserSubjectToGDPR to false when omitted; js-core-plugin forwards params as-is now (no default).
 
-	// `AppsFlyerConsent` (a convenience constructor class for building the setConsentData payload)
-	// is no longer exported from index.ts after the @appsflyer-sdk/js-core-plugin migration -- callers now
-	// build the plain SetConsentDataParams object directly (see the setConsentData test above).
-	// Flagged for the index.ts owner as a real, unflagged public-API removal; not re-added here
-	// (out of scope for this test-only pass) -- these two tests are deleted, not converted.
+	// AppsFlyerConsent convenience class is no longer exported after the js-core-plugin migration — an unflagged public-API removal, out of scope for this test-only pass; these two tests are deleted, not converted.
 });
 
 describe('Test native event emitter', () => {
-	// freshModule() resets module state (Platform.OS defaults back to 'ios' each time, matching this
-	// Jest environment's haste default) -- listener-registration state lives inside
-	// @appsflyer-sdk/js-core-plugin's AppsFlyerSDK instance, which is itself a module-level singleton in index.ts.
+	// Resets module state since listener-registration state lives in js-core-plugin's module-level AppsFlyerSDK singleton.
 	function freshModule() {
 		jest.resetModules();
 		const { NativeEventEmitter: FreshNativeEventEmitter } = require('react-native');
@@ -623,9 +576,7 @@ describe('Test native event emitter', () => {
 		expect(onFail).toHaveBeenCalledWith({ error: 'DevKey is incorrect' });
 	});
 
-	// unregisterConversionListener has no rpc.ios entry at all (verified against native source --
-	// AFRPCTypedRequests.swift/AFRPCParser.swift register no such method) -- it rejects on the
-	// default (iOS) singleton instead of silently sending a doomed RPC.
+	// unregisterConversionListener has no rpc.ios entry (verified against native source) — rejects instead of sending a doomed RPC.
 	test('unregisterConversionListener rejects on iOS — no rpc.ios entry exists for it', async () => {
 		await appsFlyer.registerConversionListener({ onConversionDataSuccess: jest.fn(), onConversionDataFail: jest.fn() });
 		await expect(appsFlyer.unregisterConversionListener()).rejects.toThrow(/not supported on ios/);
@@ -646,15 +597,11 @@ describe('Test native event emitter', () => {
 
 		androidEmitter.emit('RNAppsFlyer_rpcEvent', JSON.stringify({ event: 'onConversionDataSuccess', data: nativeEventObject }));
 
-		// unregisterConversionListener only tears down the transport's native subscription (a no-op
-		// in this in-memory event emitter); the JS ListenerRegistry callback itself is not cleared --
-		// see @appsflyer-sdk/js-core-plugin's AppsFlyerSDK for this behavior. Still fires because the fake
-		// event emitter delivers regardless.
+		// unregisterConversionListener only tears down the native subscription, not the JS callback (see js-core-plugin's AppsFlyerSDK) — still fires here since the fake emitter delivers regardless.
 		expect(successCallback).toHaveBeenCalledWith(nativeEventObject);
 	});
 
-	// js-core-plugin's registerDeepLinkListener always normalizes this channel's payload as a
-	// deep-link result, defaulting a missing `status` to 'NOT_FOUND' -- see compatibility.test.js.
+	// js-core-plugin's registerDeepLinkListener always defaults a missing `status` to 'NOT_FOUND' — see compatibility.test.js.
 	test('registerDeepLinkListener Happy Flow (iOS native event name)', async () => {
 		const onDeepLinking = jest.fn();
 		await appsFlyer.registerDeepLinkListener({ onDeepLinking });
@@ -674,8 +621,6 @@ describe('Test native event emitter', () => {
 		expect(appsFlyer.onAttributionFailure).toBeUndefined();
 	});
 });
-
-// --- net-new RPC-only method wrappers ---
 
 describe('net-new RPC-only method wrappers (one per domain block)', () => {
 	afterEach(() => {

@@ -1,18 +1,4 @@
-/**
- * Wire-contract test: asserts every dispatched RPC request against the params the native RPC
- * layers actually read (fixtures generated from native source by scripts/generate-*-rpc-contract.js,
- * committed so CI needs no native checkout). index.test.js only asserts the plugin against
- * itself; this catches both a missing required param (hard error, mainly iOS) and an extra
- * param native never reads (silent default via Android's opt* accessors).
- *
- * Unlike the pre-migration version of this file, there is no method-name alias table anymore --
- * @appsflyer-sdk/js-core-plugin's rpc-resolver.ts already resolves each call to the real wire method
- * name (e.g. "initialize", not "init") before it ever reaches NativeAppsFlyer.executeRpc, so the
- * `method` field on every captured request IS the name to look up directly in the fixture.
- * There is also no "capture once, reuse for both platforms" step anymore -- RNTransport.platform
- * is fixed per SDK instance at construction, so each platform under test gets its own fresh
- * module instance and its own dispatched requests.
- */
+// Asserts every dispatched RPC request against the params native actually reads (fixtures generated from native source by scripts/generate-*-rpc-contract.js, committed so CI needs no native checkout) — catches both a missing required param and an extra param native silently drops. `method` on each captured request is already the resolved wire name (js-core-plugin's rpc-resolver.ts), so it's looked up directly in the fixture; each platform under test gets its own fresh module instance since RNTransport.platform is fixed at construction.
 
 const iosContract = require('./fixtures/ios-rpc-contract.json');
 const androidContract = require('./fixtures/android-rpc-contract.json');
@@ -31,9 +17,7 @@ function freshAppsFlyerForPlatform(platform) {
 	};
 }
 
-// `platforms` reflects intent (this repo's own @platform JSDoc markers, cross-checked against
-// node_modules/@appsflyer-sdk/js-core-plugin/dist/generated/rpc-map.js) -- a method missing where it
-// claims support is a defect this test should surface.
+// `platforms` reflects intent (this repo's @platform JSDoc markers, cross-checked against rpc-map.js) — a method missing where it claims support is a defect this test should surface.
 const CALL_SITES = [
 	{ api: 'init', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.init({ devKey: 'devkey', appId: '123456789' }) },
 	{ api: 'enableDebug', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.enableDebug({ enabled: true }) },
@@ -58,8 +42,7 @@ const CALL_SITES = [
 	{
 		api: 'updateServerUninstallToken',
 		platforms: BOTH,
-		// iOS reads deviceToken (via registerUninstall); Android reads token — the resolver picks
-		// the right key per platform now, no more sending both.
+		// iOS reads deviceToken (via registerUninstall); Android reads token — the resolver picks the right key per platform now.
 		invoke: (appsFlyer) => appsFlyer.updateServerUninstallToken({ token: 'token-abc' }),
 	},
 	{ api: 'setCustomerUserId', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setCustomerUserId({ customerId: 'uid-1' }) },
@@ -94,9 +77,7 @@ const CALL_SITES = [
 	{
 		api: 'validateAndLogInAppPurchase',
 		platforms: BOTH,
-		// Android reads the flat purchaseToken/productId/purchaseType trio; iOS reads nested
-		// product/transaction with transactionId instead of purchaseToken — genuinely different
-		// shapes per platform now (no more sending a merged both-platform payload).
+		// Android reads flat purchaseToken/productId/purchaseType; iOS reads transactionId instead of purchaseToken — genuinely different shapes per platform.
 		invoke: (appsFlyer, platform) =>
 			appsFlyer.validateAndLogInAppPurchase({
 				purchase:
@@ -158,8 +139,7 @@ const CALL_SITES = [
 	{ api: 'clearUserPii', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.clearUserPii() },
 	{
 		api: 'sendPushNotificationData',
-		// Android-only now — iOS's equivalent is the separate handlePushNotification call site below
-		// (see rpc-map.js: sendPushNotificationData.ios is null).
+		// Android-only — iOS's equivalent is the separate handlePushNotification call site below (rpc-map.js: sendPushNotificationData.ios is null).
 		platforms: [ANDROID],
 		invoke: (appsFlyer) => appsFlyer.sendPushNotificationData({ campaign: 'c1', pid: 'firebase', isRetargeting: true }),
 	},
@@ -176,8 +156,7 @@ const CALL_SITES = [
 	},
 	{
 		api: 'unregisterConversionListener',
-		// iOS has no unregisterConversionListener RPC at all (rpc-map.js: ios is null; confirmed
-		// against AFRPCTypedRequests.swift/AFRPCParser.swift registering no such method).
+		// iOS has no unregisterConversionListener RPC at all (rpc-map.js: ios is null; confirmed against native source registering no such method).
 		platforms: [ANDROID],
 		invoke: (appsFlyer) => appsFlyer.unregisterConversionListener(),
 	},
@@ -229,11 +208,7 @@ const CALL_SITES = [
 	},
 	{ api: 'handleOpenURL', platforms: [IOS], invoke: (appsFlyer) => appsFlyer.handleOpenURL({ url: 'app://x' }) },
 	{ api: 'handleOpenUrl', platforms: [IOS], invoke: (appsFlyer) => appsFlyer.handleOpenUrl({ url: 'app://x' }) },
-	// NOTE: core's schema marks `launchOptions` optional (HandleLaunchOptionsParams.launchOptions?),
-	// but iOS's real native parser (AFRPCHandleLaunchOptionsRequest, per the fixture) requires it --
-	// a genuine schema/native mismatch this wire-contract test exists to catch. Passing an object
-	// here reflects what a caller must actually do; the schema itself is out of scope to fix in
-	// this test-only pass (flagged as a finding, not silently worked around).
+	// Schema marks `launchOptions` optional, but iOS's native parser requires it — a genuine schema/native mismatch this test exists to catch (not fixed here).
 	{ api: 'handleLaunchOptions', platforms: [IOS], invoke: (appsFlyer) => appsFlyer.handleLaunchOptions({ launchOptions: {} }) },
 
 	// Android-only surface
@@ -263,8 +238,7 @@ const CALL_SITES = [
 	{ api: 'logSession', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.logSession() },
 	{ api: 'onPause', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.onPause() },
 
-	// Both platforms, but a genuinely different wire method + params per platform
-	// (Android keeps shouldTriggerSession; iOS's performOnAppAttributionWithURL doesn't take it).
+	// Same wire method both platforms (iOS renamed to match Android in AppsFlyerRPC 7.0.13), but Android keeps shouldTriggerSession while iOS doesn't take it.
 	{
 		api: 'performDeepLinking',
 		platforms: BOTH,
@@ -324,7 +298,7 @@ describe('RPC wire contract', () => {
 					}
 				}
 
-				// Top-level only — nested paths are validated through their parent key.
+				// Top-level only — nested paths validated through their parent key.
 				const topLevelKnown = new Set(known.map((key) => key.split('.')[0]));
 				for (const key of Object.keys(params)) {
 					if (!topLevelKnown.has(key)) {
@@ -341,23 +315,15 @@ describe('RPC wire contract', () => {
 		});
 	});
 
-	// The pre-migration static source-scan coverage guard (grepping index.ts for callRpc/
-	// callRpcVoid/onceRegistrar call sites) no longer applies -- RPC dispatch now lives entirely
-	// inside @appsflyer-sdk/js-core-plugin's compiled AppsFlyerSDK, not in this repo's own source text.
-	// Re-establishing an equivalent coverage check (e.g. diffing CALL_SITES against
-	// node_modules/@appsflyer-sdk/js-core-plugin/dist/generated/methods.js's RpcMethodName union) is a
-	// real gap worth tracking as a follow-up, not fixed in this test-only pass.
+	// Coverage gap: no automated check that CALL_SITES stays in sync with js-core-plugin's RpcMethodName union — follow-up, not fixed here.
 
-	// Regression guard for finding #6: an 18-digit Facebook ID must reach native at full precision.
-	// Number(fbLoginId) would round "100003456789012345" to ...012350 before serialization, and
-	// JSON.parse-ing the wire text back into a JS Number for inspection would silently reintroduce
-	// the same rounding — so this asserts on the raw wire *text*, not a re-parsed object.
+	// Regression guard for finding #6: Number(fbLoginId) would round an 18-digit Facebook ID; asserts on raw wire text since re-parsing would reintroduce it.
 	test('setUserFbLoginId does not lose precision on an 18-digit ID', () => {
 		const { appsFlyer, NativeAppsFlyer: nativeAppsFlyer } = freshAppsFlyerForPlatform('ios');
 		nativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
 		const eighteenDigitId = '100003456789012345';
 		appsFlyer.setUserFbLoginId({ fbLoginId: eighteenDigitId });
 		const [requestJson] = nativeAppsFlyer.executeRpc.mock.calls[0];
-		expect(requestJson).toBe(`{"method":"setUserFbLoginId","params":{"fbLoginId":${eighteenDigitId}}}`);
+		expect(requestJson).toBe(`{"method":"setUserFbLoginId","params":{"fbLoginId":"${eighteenDigitId}"}}`);
 	});
 });

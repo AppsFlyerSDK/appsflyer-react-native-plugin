@@ -1,16 +1,4 @@
-/**
- * Linting Tests
- *
- * Tests to ensure code quality and linting rules are followed.
- * These tests verify that the codebase adheres to ESLint rules.
- *
- * Shells out to the eslint CLI (same binary as `npm run lint`) instead of using ESLint's
- * Node API: ESLint v9+'s flat-config loader always loads eslint.config.* via a native
- * dynamic import() (see node_modules/eslint/lib/config/config-loader.js), which Jest's
- * CommonJS runtime rejects with "A dynamic import callback was invoked without
- * --experimental-vm-modules". Running eslint as a child process avoids Jest's module
- * loader entirely and exercises the exact same config resolution `npm run lint` uses.
- */
+// Shells out to the eslint CLI instead of its Node API: ESLint v9's flat-config loader uses a native dynamic import() that Jest's CommonJS runtime rejects.
 
 const { execFileSync } = require('child_process');
 const path = require('path');
@@ -18,9 +6,7 @@ const fs = require('fs');
 
 const ESLINT_BIN = path.join(__dirname, '..', 'node_modules', '.bin', 'eslint');
 
-// Runs eslint over the given paths and returns the parsed --format json report.
-// eslint exits non-zero when it finds errors, so the JSON must be read from the caught
-// error's stdout in that case rather than from a successful execFileSync return.
+// eslint exits non-zero on errors, so the JSON report must be read from the caught error's stdout.
 function runEslint(patterns) {
   try {
     const stdout = execFileSync(ESLINT_BIN, [...patterns, '--format', 'json'], {
@@ -91,22 +77,6 @@ describe('Linting Tests', () => {
   });
 
   describe('Code Quality Rules', () => {
-    test('No console.log statements in production code', () => {
-      const indexTsPath = path.join(__dirname, '..', 'index.ts');
-      const content = fs.readFileSync(indexTsPath, 'utf8');
-
-      // Allow console.warn and console.error, but check for console.log
-      const consoleLogMatches = content.match(/console\.log\(/g);
-
-      // console.log is allowed in this codebase (see eslint.config.cjs: no-console: 'off')
-      // But we can still check for excessive usage
-      // Note: This is informational only, not a failure
-      const logCount = consoleLogMatches ? consoleLogMatches.length : 0;
-
-      // This test passes but we track console.log usage
-      expect(logCount).toBeGreaterThanOrEqual(0);
-    });
-
     test('No unused variables in test files', () => {
       const testFiles = ['index.test.js', 'compatibility.test.js']
         .map(f => path.join('__tests__', f))

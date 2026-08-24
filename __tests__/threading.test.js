@@ -1,8 +1,6 @@
 import NativeAppsFlyer from '../src/NativeAppsFlyer';
 
-// start() routes through the native RPC bounded timeout (iOS 10s / Android 5s) — it must
-// settle as a distinguishable failure, not hang. A timeout resolves { success: false, error },
-// it does not reject (transport rejections are only for calls that never reach native).
+// start()'s native RPC timeout (iOS 10s / Android 5s) must resolve { success: false, error }, not hang or reject.
 
 function buildRequestJson(method, params = {}) {
 	return JSON.stringify({ method, params });
@@ -16,7 +14,6 @@ test('start() settles with a distinguishable timeout failure instead of hanging 
 	NativeAppsFlyer.executeRpc.mockImplementation(
 		() =>
 			new Promise((resolve) => {
-				// simulates the native bounded timeout resolving as SDK-level failure
 				setTimeout(() => {
 					resolve(
 						JSON.stringify({

@@ -1,9 +1,4 @@
-/**
- * Regression guard (FR-009) for scripts/bump-native-deps.sh: copies the REAL podspec/build.gradle
- * into a temp dir and runs the script against the copies, so a future restructure of either file
- * that breaks the script's sed patterns fails CI instead of silently no-op'ing a real release —
- * the exact bug this feature fixes (see specs/003-release-workflow-rpc-bump/research.md).
- */
+// Regression guard (FR-009): runs scripts/bump-native-deps.sh against real podspec/build.gradle copies so a future restructure that breaks its sed patterns fails CI instead of silently no-op'ing a release.
 
 const fs = require('fs');
 const os = require('os');
@@ -42,7 +37,7 @@ describe('scripts/bump-native-deps.sh', () => {
 		return copies;
 	}
 
-	test('bumps AppsFlyerRPC, AppsFlyerRPC/Strict, af-android-sdk, and af-android-plugin-bridge together, leaving purchase-connector untouched', () => {
+	test('bumps AppsFlyerRPC, AppsFlyerRPC/Strict, af-android-sdk, and af-android-plugin-bridge independently, leaving purchase-connector untouched', () => {
 		const { podspec, buildGradle } = trackedTempCopies();
 		const purchaseConnectorBefore = fs
 			.readFileSync(buildGradle, 'utf8')
@@ -52,7 +47,7 @@ describe('scripts/bump-native-deps.sh', () => {
 			'--podspec', podspec,
 			'--build-gradle', buildGradle,
 			'--ios-sdk-version', '9.9.9',
-			'--android-sdk-version', '9.9.9',
+			'--android-sdk-version', '8.8.8',
 			'--android-plugin-bridge-version', '9.9.9',
 		]);
 
@@ -61,9 +56,10 @@ describe('scripts/bump-native-deps.sh', () => {
 
 		expect(podspecAfter).toMatch(/s\.dependency 'AppsFlyerRPC', '9\.9\.9'/);
 		expect(podspecAfter).toMatch(/s\.dependency 'AppsFlyerRPC\/Strict', '9\.9\.9'/);
-		// af-android-sdk and af-android-plugin-bridge share one version via the BOM now —
-		// both flags bump the same line, so this is one assertion, not two.
-		expect(buildGradleAfter).toMatch(/platform\('com\.appsflyer:af-android-sdk-bom:9\.9\.9'\)/);
+		// af-android-plugin-bridge is pinned outside the BOM (see build.gradle's own comment) —
+		// different values here must land on two different lines, not collide on one.
+		expect(buildGradleAfter).toMatch(/platform\('com\.appsflyer:af-android-sdk-bom:8\.8\.8'\)/);
+		expect(buildGradleAfter).toMatch(/com\.appsflyer:af-android-plugin-bridge:9\.9\.9'/);
 		expect(buildGradleAfter).toContain(purchaseConnectorBefore);
 	});
 
