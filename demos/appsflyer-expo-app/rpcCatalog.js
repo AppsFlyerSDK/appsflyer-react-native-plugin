@@ -18,7 +18,10 @@ export const RPC_CATALOG = [
 	{ name: 'setAppInviteOneLink', group: 'Config', platform: 'both', run: () => AppsFlyer.setAppInviteOneLink({ oneLinkId: 'test_onelink_id' }) },
 	{ name: 'anonymizeUser', group: 'Config', platform: 'both', run: () => AppsFlyer.anonymizeUser({ shouldAnonymize: false }) },
 	{ name: 'setDisableCollectASA', group: 'Config', platform: 'ios', run: () => AppsFlyer.setDisableCollectASA({ disable: false }) },
+	{ name: 'setDisableAppleAdsAttribution', group: 'Config', platform: 'ios', run: () => AppsFlyer.setDisableAppleAdsAttribution({ disable: false }) },
 	{ name: 'setUseReceiptValidationSandbox', group: 'Config', platform: 'ios', run: () => AppsFlyer.setUseReceiptValidationSandbox({ sandbox: true }) },
+	{ name: 'setUseUninstallSandbox', group: 'Config', platform: 'ios', run: () => AppsFlyer.setUseUninstallSandbox({ sandbox: true }) },
+	{ name: 'setShouldCollectDeviceName', group: 'Config', platform: 'ios', run: () => AppsFlyer.setShouldCollectDeviceName({ collect: true }) },
 	{ name: 'setDisableIDFVCollection', group: 'Config', platform: 'ios', run: () => AppsFlyer.setDisableIDFVCollection({ disable: false }) },
 	{ name: 'setDisableNetworkData', group: 'Config', platform: 'android', run: () => AppsFlyer.setDisableNetworkData({ isDisable: false }) },
 
@@ -31,8 +34,7 @@ export const RPC_CATALOG = [
 	{ name: 'setSharingFilterForPartners', group: 'Config', platform: 'both', run: () => AppsFlyer.setSharingFilterForPartners({ partners: ['partner1'] }) },
 	{ name: 'setPartnerData', group: 'Config', platform: 'both', run: () => AppsFlyer.setPartnerData({ partnerId: 'test_partner', data: { key: 'value' } }) },
 
-	// Consent — AppsFlyerConsent convenience class no longer exists post js-core-migration;
-	// build the plain SetConsentDataParams object directly (matches example/src/App.tsx).
+	// AppsFlyerConsent convenience class no longer exists post js-core-migration — build the plain SetConsentDataParams object directly (matches example/src/App.tsx).
 	{ name: 'setConsentData', group: 'Consent', platform: 'both', run: () => AppsFlyer.setConsentData({ isUserSubjectToGDPR: true, hasConsentForDataUsage: true, hasConsentForAdsPersonalization: true, hasConsentForAdStorage: true }) },
 	{ name: 'enableTCFDataCollection', group: 'Consent', platform: 'both', run: () => AppsFlyer.enableTCFDataCollection({ shouldCollect: true }) },
 
@@ -54,18 +56,15 @@ export const RPC_CATALOG = [
 	{ name: 'setFacebookDeferredAppLink', group: 'DeepLink', platform: 'ios', run: () => AppsFlyer.setFacebookDeferredAppLink({ url: 'https://example.com/deferred' }) },
 	{ name: 'performDeepLinking', group: 'DeepLink', platform: 'android', run: () => AppsFlyer.performDeepLinking({ url: 'https://example.com/open', shouldTriggerSession: false }) },
 
-	// Push — android-only per @appsflyer-sdk/js-core-plugin's rpc-map (ios: null); the .d.ts
-	// surface doesn't encode that, easy to miss. SendPushNotificationDataParams has no raw
-	// push-payload field, only campaign/pid/isRetargeting.
+	// sendPushNotificationData is android-only, handlePushNotification is ios-only, per rpc-map.js — the .d.ts surface doesn't encode the split.
 	{ name: 'sendPushNotificationData', group: 'Push', platform: 'android', run: () => AppsFlyer.sendPushNotificationData({ campaign: 'test_campaign', pid: 'test_pid', isRetargeting: false }) },
+	{ name: 'handlePushNotification', group: 'Push', platform: 'ios', run: () => AppsFlyer.handlePushNotification({ pushPayload: { campaign: 'test_campaign' } }) },
 	{ name: 'updateServerUninstallToken', group: 'Push', platform: 'both', run: () => AppsFlyer.updateServerUninstallToken({ token: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef' }) },
 
 	// Location
 	{ name: 'logLocation', group: 'Location', platform: 'both', run: () => AppsFlyer.logLocation({ latitude: 37.7749, longitude: -122.4194 }) },
 
-	// Purchases — params.purchase is a platform-specific oneOf (iOS: transactionId, Android:
-	// purchaseToken) per appsflyer-sdk.d.ts; a shared 'both' entry sending one shape 422s on the
-	// other platform ("purchaseToken cannot be empty").
+	// params.purchase is a platform-specific oneOf (iOS: transactionId, Android: purchaseToken) — a shared 'both' entry 422s on the other platform.
 	{ name: 'validateAndLogInAppPurchase', group: 'Purchase', platform: 'ios', run: () => AppsFlyer.validateAndLogInAppPurchase({ purchase: { productId: 'com.test.product', transactionId: 'TX456', purchaseType: 'subscription' } }) },
 	{ name: 'validateAndLogInAppPurchase', group: 'Purchase', platform: 'android', run: () => AppsFlyer.validateAndLogInAppPurchase({ purchase: { productId: 'com.test.product', purchaseToken: 'test-purchase-token', purchaseType: 'subscription' } }) },
 
@@ -99,11 +98,11 @@ export const RPC_CATALOG = [
 	// Lifecycle
 	{ name: 'stop', group: 'Lifecycle', platform: 'both', run: () => AppsFlyer.stop({ shouldStop: false }) },
 
-	// start() is also called automatically once from App.js's bootstrap (registerSessionReadyListener's
-	// callback, per the SDK 7 contract) — by the time Run All can be pressed, session is already ready,
-	// so this entry is just RPC coverage, not the app's real startup path.
+	// start() already ran automatically from App.js's bootstrap by the time Run All is pressable — this entry is just RPC coverage, not the real startup path.
 	{ name: 'start', group: 'Start', platform: 'both', run: () => AppsFlyer.start() },
 	{ name: 'unregisterSessionReadyListener', group: 'Listener', platform: 'both', run: () => AppsFlyer.unregisterSessionReadyListener() },
+	{ name: 'unregisterConversionListener', group: 'Listener', platform: 'android', run: () => AppsFlyer.unregisterConversionListener() },
+	{ name: 'unregisterDeeplinkListener', group: 'Listener', platform: 'android', run: () => AppsFlyer.unregisterDeeplinkListener() },
 
 	{ name: 'logEvent', group: 'Event', platform: 'both', run: () => AppsFlyer.logEvent({ eventName: 'test_event', eventValues: { key: 'value' }, awaitResponse: true }) },
 

@@ -1,6 +1,6 @@
 // @ts-nocheck — QA test app; runtime correctness verified against index.d.ts signatures
 import React, {useEffect} from 'react';
-import {View, Text, StyleSheet, Platform} from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 import AppsFlyer from 'react-native-appsflyer';
 import {afLog, afCallbackLog, afLifecycleLog} from './AfQaLogger';
 import Config from 'react-native-config';
@@ -66,16 +66,13 @@ async function runAutoFlow() {
     },
   };
 
-  if (Platform.OS === 'android') {
-    AppsFlyer.registerDeepLinkListener(deepLinkListener);
-  }
+  // registerDeepLinkListener must be registered before init
+  AppsFlyer.registerDeepLinkListener(deepLinkListener);
 
-  try {
-    const result = await AppsFlyer.init({devKey, appId});
-    afLog('init', `result: ${JSON.stringify(result)}`);
-  } catch (error) {
-    afLog('init', `error: ${JSON.stringify(error)}`);
-  }
+  AppsFlyer.init({devKey, appId}).then(
+    result => afLog('init', `result: ${JSON.stringify(result)}`),
+    error => afLog('init', `error: ${JSON.stringify(error)}`),
+  );
 
   AppsFlyer.enableDebug({enabled: true});
 
@@ -86,10 +83,6 @@ async function runAutoFlow() {
     },
     onConversionDataFail: error => afCallbackLog('registerConversionListener', `error: ${error}`),
   });
-
-  if (Platform.OS === 'ios') {
-    AppsFlyer.registerDeepLinkListener(deepLinkListener);
-  }
 
   // 2. Pre-start APIs — void/fire-and-forget in 7.0.0 (MIGRATION.md: callback params removed),
   // and each now takes a single params object per @appsflyer-sdk/js-core-plugin's generated Rpc types.
