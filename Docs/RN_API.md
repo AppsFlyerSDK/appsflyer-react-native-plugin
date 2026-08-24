@@ -110,30 +110,26 @@ The list of available methods for this plugin is described below.
 
 Recommended call order for a 7.0.0 (RPC) integration:
 
-1. **Android only:** `registerDeepLinkListener` — call this *before* `init()`. See "Why the order matters" below.
+1. `registerDeepLinkListener` — call this *before* `init()`, on **both** platforms. See "Why the order matters" below.
 2. `init(devKey, appId)`
 3. `enableDebug(true)` — not order-critical relative to `init`; call it as early as possible (even before `init`) to get full debug logs from the start of the session
 4. `registerConversionListener` — **synchronously**, in the same call stack as `init`, not inside `init()`'s `.then()`
-5. **iOS only:** `registerDeepLinkListener` — call this *after* `init()`, as a synchronous statement right after it, not inside `init()`'s `.then()`. (On Android it was already registered in step 1.)
-6. `setCustomerUserId(...)` — if you need the CUID associated with the install event
-7. `registerSessionReadyListener(...)` — **synchronously**, same rule as step 4
-8. Inside the `registerSessionReadyListener` callback: collect consent data (`setConsentData`) / ATT authorization status if your app requires it, then call `start()`
+5. `setCustomerUserId(...)` — if you need the CUID associated with the install event
+6. `registerSessionReadyListener(...)` — **synchronously**, same rule as step 4
+7. Inside the `registerSessionReadyListener` callback: collect consent data (`setConsentData`) / ATT authorization status if your app requires it, then call `start()`
 
-`registerDeepLinkListener`'s position is the one exception to "always register right after `init()`" — the two native SDKs disagree on when it's safe to attach the listener, so the call must move to either side of `init()` depending on platform. Every other listener keeps the simple "synchronously, right after `init()`" rule.
+`registerDeepLinkListener` is the one listener that goes *before* `init()` instead of after — every other listener follows the simple "synchronously, right after `init()`" rule.
 
 *Example:*
 
 ```javascript
-import { Platform } from 'react-native';
 import appsFlyer from 'react-native-appsflyer';
 
 const onDeepLink = (res) => {
   // ...
 };
 
-if (Platform.OS === 'android') {
-  appsFlyer.registerDeepLinkListener(onDeepLink);
-}
+appsFlyer.registerDeepLinkListener(onDeepLink);
 
 appsFlyer.init('K2***********99', '41*****44').then(
   (res) => console.log('init', res),
@@ -146,10 +142,6 @@ appsFlyer.registerConversionListener((res) => {
 }, (error) => {
   // ...
 });
-
-if (Platform.OS === 'ios') {
-  appsFlyer.registerDeepLinkListener(onDeepLink);
-}
 
 // appsFlyer.setCustomerUserId('some_user_id'); // if needed, before start
 
@@ -164,11 +156,9 @@ appsFlyer.registerSessionReadyListener(() => {
 ```
 
 **Why the order matters:**
-- `init` must be issued first (except for `registerDeepLinkListener` on Android — see below). `enableDebug` and the listener registrations all go over the same native RPC channel in call order — issuing them right after `init` guarantees the native side processes `init` first, even though `init()`'s own JS Promise resolves later, asynchronously.
+- `init` must be issued first, except for `registerDeepLinkListener` — see below. `enableDebug` and the listener registrations all go over the same native RPC channel in call order — issuing them right after `init` guarantees the native side processes `init` first, even though `init()`'s own JS Promise resolves later, asynchronously.
 - `registerConversionListener` and `registerSessionReadyListener` must be registered before `init()`'s promise settles. Registration itself is init-order-independent for these two, but dispatch still happens in call order — registering inside `init().then()` delays dispatch and risks missing an event that fires shortly after init.
-- `registerDeepLinkListener` is the one listener where the two native SDKs are misaligned, so the call moves to a different side of `init()` per platform:
-  - **iOS**: the native SDK fires a one-shot deferred-deep-link resolution request the instant the listener is attached, using whatever host config exists at that moment. Attaching it before `init()` has configured the host burns that one attempt on a malformed URL — permanently, for the rest of the app process's lifetime (it never retries). Always register it *after* `init()`, same as every other listener.
-  - **Android**: the native SDK does not buffer a deep-link result delivered before a listener is attached — any result that arrives first is dropped, permanently, with no retry. Registering *before* `init()` closes that window entirely, rather than relying on incidental RN lifecycle timing to make "after `init()`" safe (see the known-issues KB for the timing analysis this replaces).
+- `registerDeepLinkListener` goes *before* `init()` on both platforms: Android's native SDK does not buffer a deep-link result delivered before a listener is attached — any result that arrives first is dropped, permanently, with no retry — so registering first closes that window. iOS used to have the opposite constraint (a one-shot deferred-deep-link trigger that fired immediately on attach and permanently burned itself against an unconfigured host if called too early), but that was fixed upstream in the native SDK; both platforms are now safe to register before `init()`, so there's no more platform split for this call.
 - `start()` must be called from inside the `registerSessionReadyListener` callback, never chained off `init().then()` — see [start](#start).
 - These calls are ordered by *dispatch*, not by *completion*: it's the call order on the native RPC channel that matters, not whether `init()`'s promise has resolved yet.
 
@@ -240,11 +230,7 @@ appsFlyer.enableDebug(true);
 ### logEvent
 `logEvent(eventName, eventValues, awaitResponse?) : Promise<string>`
 
-In-App Events provide insight on what is happening in your app. It is recommended to take the time and define the events you want to measure to allow you to measure ROI (Return on Investment) and LTV (Lifetime Value).
-
-Recording in-app events is performed by calling logEvent with event name and value parameters. See In-App Events documentation for more details.
-
-**Note:** An In-App Event name must be no longer than 45 characters. Events names with more than 45 characters do not appear in the dashboard, but only in the raw Data, Pull and Push APIs.
+Records an in-app event — see [In-App Events](RN_InAppEvents.md) for concepts and event naming rules (45-character limit).
 
 | parameter     | type    | description                                                    |
 | ------------  |---------|------------------------------------------------------------    |
@@ -334,8 +320,7 @@ appsFlyer.stop(true);
 ### setAppInviteOneLink
 `setAppInviteOneLink(oneLinkId)`
 
-Set the OneLink ID that should be used for User-Invite-API.<br/>
-The link that is generated for the user invite will use this OneLink ID as the base link ID.
+Sets the OneLink ID used as the base link ID for User Invite — see [User Invite](RN_UserInvite.md) for call-order requirements and full usage.
 
 | parameter   | type     | description               |
 | ----------  |----------|------------------         |
@@ -1208,11 +1193,11 @@ const onDeepLink = appsFlyer.registerDeepLinkListener(res => {
   }
 });
 
+appsFlyer.init('UsxXxXxed', '75xXxXxXxXx11');
+
 appsFlyer.registerSessionReadyListener(() => {
   appsFlyer.start(); // <--- Here we send launch, only once the session is ready
 });
-
-appsFlyer.init('UsxXxXxed', '75xXxXxXxXx11');
 
 if (Platform.OS == 'android') {
   appsFlyer.performDeepLinking(deepLinkUrl);
@@ -1630,7 +1615,7 @@ if (Platform.OS == 'ios') {
 
 Accessing AppsFlyer Attribution / Conversion Data from the SDK (Deferred Deeplinking).<br/>
 
-The code implementation for the conversion listener must be made prior to the initialization code of the SDK.
+Registration is init-order-independent — call it synchronously right after `init()`, not inside `init().then()`, so dispatch isn't delayed. See [Initialization Flow](#initialization-flow) for the full recommended call order.
 
 Both callbacks are **required** — native's own conversion listener interface requires both
 together on each platform (Android's `AppsFlyerConversionListener` has no default

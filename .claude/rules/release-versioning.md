@@ -9,16 +9,15 @@ paths:
 
 Scope: version bumps, CHANGELOG.md, release branches, native SDK alignment.
 
-## 1. Version surface — 4 files must stay in sync
+## 1. Version surface — 3 literals must stay in sync (podspec is derived, not a 4th literal)
 
 | File | Field | Example |
 |------|-------|---------|
 | `package.json` | `"version"` | `"6.17.9"` |
-| `react-native-appsflyer.podspec` | `s.version` | `'6.17.9'` |
 | `ios/RNAppsFlyer.h` | `kAppsFlyerPluginVersion` | `@"6.17.9"` |
 | `android/…/RNAppsFlyerConstants.kt` | `PLUGIN_VERSION` | `"6.17.9"` |
 
-Missing any one of these causes version mismatch bugs. Historical commits that were solely version constant syncs: `45a0cfeb`, `20c80b46`, `0b19d154`.
+`react-native-appsflyer.podspec` reads `s.version = pkg["version"]` from `package.json` at pod-install time — it is **not** a separate hardcoded literal (an earlier version of this doc, and the `version-bump` skill, listed it as a 4th file to edit; that's stale — editing it directly does nothing, since `pkg["version"]` overwrites it on next read). Missing either of the 2 real literals above (besides `package.json`) causes version mismatch bugs. Historical commits that were solely version constant syncs: `45a0cfeb`, `20c80b46`, `0b19d154`.
 
 ## 2. Version scheme
 
@@ -36,11 +35,10 @@ Plugin version mirrors native SDK major.minor, with its own patch:
 
 ## 4. Deprecation pattern
 
-```js
-// In index.js — runtime warning
+```ts
+// In index.ts — runtime warning + type annotation live in the same file now
 console.warn('validateAndLogInAppPurchase is deprecated. Use AppsFlyerPurchaseConnector instead.');
 
-// In index.d.ts — type annotation
 /** @deprecated Use AppsFlyerPurchaseConnector instead */
 export function validateAndLogInAppPurchase(...): void;
 ```
@@ -73,7 +71,7 @@ Rules:
 
 ## 7. Tag convention
 
-Pre-6.x: tags use `v` prefix (`v1.2.0` through `v5.4.40`). The 6.x series has no tags — releases tracked via branches and CHANGELOG.
+All tags use the `v` prefix (`v1.2.0` through the current 6.x/7.x production tags, e.g. `v6.18.0`) — the "6.x has no tags" claim here was stale. `release.yml` tags every production release (`v$VERSION`) and every RC (`v$VERSION-rcN`, prefix added on the RC path so it matches production).
 
 ## 8. Native SDK dependency update
 
@@ -86,12 +84,9 @@ When updating the native SDK version:
 
 ## 9. Release checklist
 
-1. All 4 version constants updated and matching
+1. All 3 version constants updated and matching
 2. CHANGELOG.md updated with new entry at top
 3. `npm test` passes
 4. `npx tsc --noEmit` passes
 5. Manual test on iOS simulator and Android emulator
 6. Demo app builds and runs on both platforms
-
-**7.0.x additional gate (RELEASE BLOCKER — must not ship with vendored binaries)**:
-7. Dependency Consumption Phase A→B swap complete: vendored `ios/Frameworks/AppsFlyerRPC.xcframework` and `android/libs/*.aar` binaries replaced with real published coordinates (`s.dependency 'AppsFlyerRPC', '<version>'` in podspec; `implementation 'com.appsflyer:<artifact>:<version>'` in build.gradle). Confirm CocoaPods trunk publish and Maven coordinate are live before tagging the release. See `plan.md` §Dependency Consumption Model for the exact swap diff.

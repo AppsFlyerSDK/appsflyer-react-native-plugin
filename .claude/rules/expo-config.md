@@ -37,9 +37,7 @@ version.
 
 ## 3. Manifest merge duplication
 
-`withAppsFlyerAndroid.js` appends `tools:replace` entries to `AndroidManifest.xml`. Running `expo prebuild` multiple times (without `--clean`) causes **duplicate entries** that break the Android build (#672).
-
-Fix pattern: always check if the entry exists before appending. Use idempotent modifications.
+`withAppsFlyerAndroid.js` appends `tools:replace` entries to `AndroidManifest.xml` — not idempotent, so repeated `expo prebuild` (without `--clean`) duplicates entries and breaks the Android build (#672, full write-up in `known-issues-kb.md`). When touching this file: always check if the entry exists before appending.
 
 ## 4. Expo Go incompatibility
 

@@ -9,9 +9,9 @@ Scope: `android/` directory — `RNAppsFlyerModule.kt`, `RNAppsFlyerPackage.kt`,
 
 ## 1. Module structure
 
-- `RNAppsFlyerModule.kt` — TurboModule; extends `NativeAppsFlyerSpec` (Codegen-generated); implements `executeRpc(requestJson)` which delegates into `AppsFlyerRpcHandler`. `executeRpc` dispatches every RPC (including `init` and listener registration) immediately, in submission order, on a single-thread executor — no listener-registration buffer. (One existed — `RpcInitGate.kt` — removed 2026-08 after confirming against the native RPC source that registration is init-order-independent by design; see `bridge-patterns.md` §4.)
+- `RNAppsFlyerModule.kt` — TurboModule; extends `NativeAppsFlyerSpec` (Codegen-generated); implements `executeRpc(requestJson)` which delegates into `AppsFlyerRpcHandler`. `executeRpc` dispatches every RPC (including `init` and listener registration) immediately, in submission order, on a single-thread executor — no listener-registration buffer. (One existed — `RpcInitGate.kt` — removed 2026-08; see `known-issues-kb.md`'s "listener-registration buffer removed" entry and `bridge-patterns.md` §4.)
 - `RNAppsFlyerPackage.kt` — package registration (replaces old `RNAppsFlyerPackage.java`)
-- `android/libs/` — vendored Phase A binaries: `plugin_bridge.aar` + `af-android-sdk.aar`; declared via `flatDir` + `implementation(name: ...)` in `build.gradle`; replaced by Maven in Phase B
+- `af-android-plugin-bridge` / `af-android-sdk` — real Maven dependencies (`android/build.gradle`), not vendored
 
 The module no longer extends `ReactContextBaseJavaModule` or uses `@ReactMethod`.
 
@@ -33,7 +33,7 @@ Any RPC call that can block natively (Android's `awaitResponse` model — up to 
 
 `PLUGIN_VERSION` in `RNAppsFlyerConstants.kt` — must stay in sync with the other 3 version locations on every release (see `release-versioning.md`).
 
-`AFInAppEventType` constants are now a plain JS frozen object in `index.js` — they are **no longer exported** from `getConstants()`. Do not re-add them to `getConstants()`.
+`AFInAppEventType` constants are now a plain JS frozen object in `index.ts` — they are **no longer exported** from `getConstants()`. Do not re-add them to `getConstants()`.
 
 ## 6. NativeEventEmitter stubs
 
@@ -41,7 +41,7 @@ Any RPC call that can block natively (Android's `awaitResponse` model — up to 
 
 ## 7. Event emission
 
-Events are emitted via `reactApplicationContext.emitDeviceEvent("RNAppsFlyer_rpcEvent", payload)` (or equivalent TurboModule event emission API). Payload is a serialized JSON string. One shared event name for all event types — `index.js` demuxes on `envelope.event`.
+Events are emitted via `reactApplicationContext.emitDeviceEvent("RNAppsFlyer_rpcEvent", payload)` (or equivalent TurboModule event emission API). Payload is a serialized JSON string. One shared event name for all event types — `@appsflyer-sdk/js-core-plugin` demuxes on `envelope.event` (see `bridge-patterns.md` §3).
 
 ## 8. RNUtil
 
@@ -49,13 +49,10 @@ Events are emitted via `reactApplicationContext.emitDeviceEvent("RNAppsFlyer_rpc
 
 ## 9. Build setup
 
-`android/build.gradle` uses a `flatDir` repository for the vendored `.aar` files (Phase A). `namespace` is declared for AGP 8.0+ compatibility. `minSdkVersion` defaults to 21 — verify `plugin_bridge`'s own `minSdkVersion` is ≤21 before release (T069).
+`android/build.gradle` pins `af-android-plugin-bridge:7.0.12` explicitly (the `af-android-sdk-bom:7.0.1` platform doesn't carry this version yet). `namespace` is declared for AGP 8.0+ compatibility. `minSdkVersion` defaults to 21 — verify `plugin_bridge`'s own `minSdkVersion` is ≤21 before release (T069).
+
+**`AppsFlyerRpcHandler`'s constructor takes `contextProvider: () -> Context`, not `context: Context`** (renamed in the `af-android-plugin-bridge:7.0.12` bug-fix bundle, DELIVERY-128454; a named-arg call using the old `context =` name fails to compile, verified by decompiling the pinned AAR). `RNAppsFlyerModule.kt` passes `contextProvider = { reactApplicationContext.currentActivity ?: reactApplicationContext }`, not just `{ reactApplicationContext }` — `contextProvider()` is invoked fresh on every call (not cached), so this lets `init()` backfill the missed `onActivityResumed` transition instead of stalling session-ready; see `known-issues-kb.md`'s Android session-ready entry.
 
 ## 10. Common Android build failures
 
-| Symptom | Root cause | Fix |
-|---------|-----------|-----|
-| `Namespace not specified` (#583, #561) | AGP 8+ | Confirm `namespace` is in `build.gradle` |
-| `Multiple entries: android:allowBackup=REPLACE` (#627) | Manifest merge conflict | Add `tools:replace` in app's main manifest |
-| `.aar not found` | Vendored binary missing from `android/libs/` | Verify both `plugin_bridge.aar` and `af-android-sdk.aar` are present |
-| `ConcurrentModificationException` (#447) | Thread safety in native SDK | Upgrade native SDK |
+Namespace/manifest-merge/thread-safety issues (#583, #561, #627, #447) are documented in `known-issues-kb.md`'s "Android build failures" and "Runtime crashes" sections — don't duplicate them here.

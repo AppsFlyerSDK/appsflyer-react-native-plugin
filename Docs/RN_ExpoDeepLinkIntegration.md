@@ -8,7 +8,7 @@ hidden: false
 
 ## Getting started
 
-**Prerequisite:** react-native-appsflyer 7.0.0+ requires React Native ≥ 0.76 with the New Architecture (TurboModules) enabled — see [Installation](RN_Installation.md). On Expo, that means SDK 52+ with a development build (New Architecture is on by default from SDK 52).
+**Prerequisite:** see [Expo Installation](RN_ExpoInstallation.md) for the React Native / Expo SDK version requirements.
 
 See [Deep Linking Integration](RN_DeepLinkIntegrate.md) for concepts — this doc covers Expo-specific wiring only.
 
@@ -17,9 +17,11 @@ See [Deep Linking Integration](RN_DeepLinkIntegrate.md) for concepts — this do
 1. **App.json configuration:** Configure intent filters, URI scheme, and associated domains as described in [Expo's guide](https://docs.expo.dev/guides/linking/#universal-links-on-ios). See the Full app.json example below.
 
 2. **iOS AppDelegate wiring:** The Expo config plugin automatically injects the required AppsFlyer deep-link handlers into your app's AppDelegate at `expo prebuild` time. For both ObjC and Swift templates, it adds:
-   - `AppsFlyerLib.shared().handleOpen(url:options:)` into `openURL`
-   - `AppsFlyerLib.shared().continue(userActivity:restorationHandler:)` into `continueUserActivity` (forwarding the real `restorationHandler`)
+   - `AppsFlyerAttribution.shared.handleOpen(url:options:)` into `openURL`
+   - `AppsFlyerAttribution.shared.continueUserActivity(userActivity:restorationHandler:)` into `continueUserActivity` (forwarding the real `restorationHandler`)
    - `AppsFlyerLib.shared().handleLaunchOptions(launchOptions)` into `didFinishLaunchingWithOptions`
+
+   `openURL`/`continueUserActivity` route through `AppsFlyerAttribution.shared`, not `AppsFlyerLib.shared()` directly — see [Deep Linking Integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup) for why (buffers calls that arrive before `init()` has configured the native SDK).
    
    See [Expo Installation](RN_ExpoInstallation.md) for full details.
 

@@ -12,8 +12,8 @@ To do so, please follow [this article](https://support.appsflyer.com/hc/en-us/ar
 
 ### <a id="plugin-build-for"> This plugin is built for
 
-- Android AppsFlyer SDK (`af-android-sdk`) **v7.0.1**
-- iOS AppsFlyer SDK (`AppsFlyerRPC`) **v7.0.12**
+- Android AppsFlyer SDK (`af-android-sdk`) **v7.0.1** via `af-android-plugin-bridge` **v7.0.12**
+- iOS AppsFlyer SDK **v7.0.2** via `AppsFlyerRPC` **v7.0.13**
 - Requires React Native **>=0.76.0 with the New Architecture (TurboModules) enabled** — apps not yet on the New Architecture must stay on the `6.x` line of this plugin. See [MIGRATION.md](MIGRATION.md).
 
 ## <a id="release-updates"> Release Updates
