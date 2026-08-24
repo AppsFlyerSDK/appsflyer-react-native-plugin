@@ -7,15 +7,10 @@ public final class RNAppsFlyerImpl: NSObject {
 
     private let eventEmitter: (String) -> Void
 
-    private static let canonicalToIOSMethod: [String: String] = [
-        "init": "initialize",
-        "sendPushNotificationData": "handlePushNotification",
-        "updateServerUninstallToken": "registerUninstall",
-    ]
-
     @objc public init(eventEmitter: @escaping (String) -> Void) {
         self.eventEmitter = eventEmitter
         super.init()
+        // AppsFlyerRPCBridge is @MainActor-isolated (AppsFlyerRPC-Swift.h) -- hop required, not optional.
         Task { @MainActor in
             AppsFlyerRPCBridge.shared.setEventHandler { [weak self] jsonEvent in
                 self?.eventEmitter(jsonEvent)
@@ -29,13 +24,12 @@ public final class RNAppsFlyerImpl: NSObject {
         reject: @escaping RCTPromiseRejectBlock
     ) {
         let requestedMethod = Self.canonicalMethod(ofRequestJson: requestJson)
-        let remappedRequestJson = Self.remapMethodName(inRequestJson: requestJson, canonicalMethod: requestedMethod)
+        // executeRpc runs on RN's background method queue, not main, so this hop is required; bridge's internal stream keeps enqueue order regardless (AppsFlyerRPCBridgeOrderingTests.swift).
         Task { @MainActor in
-            AppsFlyerRPCBridge.shared.executeJson(remappedRequestJson) { responseJson in
+            AppsFlyerRPCBridge.shared.executeJson(requestJson) { responseJson in
                 let (normalized, succeeded) = Self.normalize(iosResponseJson: responseJson)
                 if requestedMethod == "initialize" && succeeded {
-                    // Explicit hop: executeJson's completion runs on an unstructured Task with no
-                    // actor isolation, not guaranteed to still be on MainActor here.
+                    // Completion fires on RPCQueue's background queue, not MainActor -- hence this separate hop.
                     Task { @MainActor in
                         AppsFlyerAttribution.shared.bridgeReady = true
                     }
@@ -53,26 +47,6 @@ public final class RNAppsFlyerImpl: NSObject {
             return nil
         }
         return request["method"] as? String
-    }
-
-    /// Rewrites `method` to the platform's real RPC name; falls back to original JSON on parse failure.
-    private static func remapMethodName(inRequestJson requestJson: String, canonicalMethod: String?) -> String {
-        guard
-            let canonicalMethod,
-            let iosMethod = canonicalToIOSMethod[canonicalMethod],
-            let data = requestJson.data(using: .utf8),
-            var request = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else {
-            return requestJson
-        }
-        request["method"] = iosMethod
-        guard
-            let remappedData = try? JSONSerialization.data(withJSONObject: request),
-            let remappedJson = String(data: remappedData, encoding: .utf8)
-        else {
-            return requestJson
-        }
-        return remappedJson
     }
 
     /// Normalizes iOS's AFRPCResponse into the shared { success, data|error } shape.
@@ -99,8 +73,7 @@ public final class RNAppsFlyerImpl: NSObject {
             return (encodeNormalizedError(code: 500, message: message), false)
         }
 
-        // `result` is a status envelope ({success, message, data?}) — unwrap to the bare `data`
-        // (NSNull if absent) so iOS resolves the same shape as Android instead of the whole envelope.
+        // Unwrap the {success, message, data?} envelope to bare `data` so iOS matches Android's resolved shape.
         return (encodeJSONOrFallback(["success": true, "data": result["data"] ?? NSNull()]), true)
     }
 

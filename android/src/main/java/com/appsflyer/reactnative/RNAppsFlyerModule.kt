@@ -11,27 +11,21 @@ import java.util.concurrent.Executors
 private const val RPC_EVENT_NAME = "RNAppsFlyer_rpcEvent"
 private const val DEEP_LINK_EVENT_NAME = "onDeepLinking"
 
-// registerDeeplinkListener has no native counterpart — native side calls it subscribeForDeepLink.
-private const val CANONICAL_DEEP_LINK_METHOD = "registerDeeplinkListener"
 private const val ANDROID_DEEP_LINK_METHOD = "subscribeForDeepLink"
 
-// Android emits SHOUTING_CASE status ("FOUND"/"NOT_FOUND"/"ERROR"); normalized here to the
-// lowerCamelCase vocabulary iOS uses and UnifiedDeepLinkData (index.ts) expects. `error` has
-// no matching iOS enum, so it's just lowercased.
+// Normalizes Android's SHOUTING_CASE status to iOS's lowerCamelCase vocabulary (index.ts's UnifiedDeepLinkData); `error` has no iOS match, so it's just lowercased.
 private val ANDROID_TO_CANONICAL_DEEP_LINK_STATUS: Map<String, String> = mapOf(
     "FOUND" to "found",
     "NOT_FOUND" to "notFound",
     "ERROR" to "failure",
 )
 
-// Only these 6 methods touch AppsFlyerRpcHandler's 3 unsynchronized listener fields (verified
-// against vendored source) — every other RPC is a stateless passthrough, safe on the pool lane.
-// Both deep-link name variants are listed: routing runs before remapMethodName remaps it.
+// Methods touching AppsFlyerRpcHandler's 3 unsynchronized listener fields — routed to the FIFO lane, not the pool; see known-issues-kb.md's registerConversionListener entry for the init race this fixes.
 private val LISTENER_LIFECYCLE_METHODS: Set<String> = setOf(
+    "init",
     "registerConversionListener", "unregisterConversionListener",
     "registerSessionReadyListener", "unregisterSessionReadyListener",
-    CANONICAL_DEEP_LINK_METHOD, ANDROID_DEEP_LINK_METHOD,
-    "unregisterDeeplinkListener", "unsubscribeForDeepLink",
+    ANDROID_DEEP_LINK_METHOD, "unsubscribeForDeepLink",
 )
 
 // Shared by every JSON helper below — best-effort parse, `default` instead of throwing.
@@ -43,8 +37,7 @@ private inline fun <T> parseJsonOrDefault(json: String, default: T, block: (JSON
     }
 }
 
-// Top-level + `internal` (not class members) so these two are unit-testable without standing up
-// a full ReactApplicationContext.
+// Top-level `internal` (not class members) so these are unit-testable without a full ReactApplicationContext.
 internal fun isListenerLifecycleCall(requestJson: String): Boolean = parseJsonOrDefault(requestJson, false) { request ->
     request.optString("method") in LISTENER_LIFECYCLE_METHODS
 }
@@ -64,15 +57,15 @@ internal fun normalizeDeepLinkEvent(eventJson: String): String = parseJsonOrDefa
 /** TurboModule bridge — all SDK capabilities dispatched via executeRpc → AppsFlyerRpcHandler. */
 class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyerSpec(reactContext) {
 
-    // FIFO — the 6 LISTENER_LIFECYCLE_METHODS calls need strict ordering, not just eventual execution.
+    // FIFO — the 7 LISTENER_LIFECYCLE_METHODS calls need strict ordering, not just eventual execution.
     private val listenerExecutor = Executors.newSingleThreadExecutor()
 
-    // Everything else: stateless passthroughs, safe concurrently. Keeps a slow call (start/logEvent,
-    // 5-10s per native-android.md §3) from head-of-line-blocking a fast one queued behind it.
+    // Stateless passthroughs run concurrently here so a slow call (start/logEvent, 5-10s per native-android.md §3) doesn't head-of-line-block a fast one.
     private val rpcExecutor = Executors.newFixedThreadPool(4)
 
     private val rpcHandler = AppsFlyerRpcHandler(
-        context = reactApplicationContext,
+        // currentActivity is usually already resumed by init() time, letting native backfill onActivityResumed instead of stalling session-ready (known-issues-kb.md).
+        contextProvider = { reactApplicationContext.currentActivity ?: reactApplicationContext },
         pluginNotifier = { rawEventJson ->
             reactApplicationContext
                 .getJSModule(RCTDeviceEventEmitter::class.java)
@@ -87,9 +80,7 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
         }
     }
 
-    // An uncaught exception here crashes the whole process (Android's default handler doesn't
-    // care which thread threw) instead of just failing this promise — AppsFlyerRpcHandler is
-    // vendored and can throw beyond its own RpcResponse.Error path.
+    // Catches vendored AppsFlyerRpcHandler exceptions here so they fail the promise instead of crashing the process.
     private fun safeDispatchToNative(requestJson: String): String {
         return try {
             dispatchToNative(requestJson)
@@ -100,8 +91,7 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
 
     // Must run on listenerExecutor or rpcExecutor — AppsFlyerRpcHandler.execute() can block the calling thread.
     private fun dispatchToNative(requestJson: String): String {
-        val remappedRequestJson = remapMethodName(requestJson)
-        val response = rpcHandler.execute(remappedRequestJson)
+        val response = rpcHandler.execute(requestJson)
         return normalize(response)
     }
 
@@ -118,13 +108,6 @@ class RNAppsFlyerModule(reactContext: ReactApplicationContext) : NativeAppsFlyer
         super.invalidate()
         listenerExecutor.shutdown()
         rpcExecutor.shutdown()
-    }
-
-    private fun remapMethodName(requestJson: String): String = parseJsonOrDefault(requestJson, requestJson) { request ->
-        val canonicalMethod = request.optString("method").takeIf { it.isNotEmpty() } ?: return@parseJsonOrDefault requestJson
-        if (canonicalMethod != CANONICAL_DEEP_LINK_METHOD) return@parseJsonOrDefault requestJson
-        request.put("method", ANDROID_DEEP_LINK_METHOD)
-        request.toString()
     }
 
     // Must match the { success, data|error } envelope iOS's bridge also emits — keep in sync.

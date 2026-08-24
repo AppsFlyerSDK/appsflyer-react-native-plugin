@@ -1,19 +1,7 @@
 import Foundation
 import AppsFlyerLib
 
-/// Buffers AppDelegate-level deep-link callbacks that can arrive before `RNAppsFlyerImpl` has
-/// finished registering `AppsFlyerLib`'s deep-link delegate (e.g. a cold-start Universal Link,
-/// which iOS delivers to the AppDelegate before RN's JS thread has even run `initSdk`, let alone
-/// the `registerDeepLinkListener()` call that follows it). Calling into `AppsFlyerLib` before
-/// that point either hits an unconfigured devKey/appId (same failure mode documented for
-/// `registerDeepLinkListener` in `.claude/rules/known-issues-kb.md`) or -- if devKey/appId happen
-/// to be set but the delegate isn't yet -- silently resolves the click with nobody listening,
-/// dropping the `onDeepLinking` callback. See `RNAppsFlyerImpl.executeRpc` for what flips
-/// `bridgeReady`.
-///
-/// Mirrors AppsFlyer's own Capacitor plugin (`AppsFlyerAttribution.swift`) -- `bridgeReady` is
-/// flipped by a direct call from `RNAppsFlyerImpl` rather than NotificationCenter, since both
-/// live in the same Swift module here (no ObjC/Swift translation-unit boundary to cross).
+/// Buffers AppDelegate-level deep-link calls (cold-start Universal Link, delivered before RN's JS thread runs `initSdk`) until `RNAppsFlyerImpl` flips `bridgeReady` -- see `native-ios.md` §4a.
 @objc(AppsFlyerAttribution)
 public final class AppsFlyerAttribution: NSObject {
 
@@ -49,8 +37,7 @@ public final class AppsFlyerAttribution: NSObject {
         AppsFlyerLib.shared().handleOpen(url, options: options)
     }
 
-    // url+options takes priority over a buffered userActivity, matching AppsFlyerLib's own
-    // handleOpenUrl/continueUserActivity precedence when both could describe the same open.
+    // url+options takes priority over a buffered userActivity, matching AppsFlyerLib's own precedence.
     private func flushPending() {
         if let url = pendingUrl {
             AppsFlyerLib.shared().handleOpen(url, options: pendingOptions)

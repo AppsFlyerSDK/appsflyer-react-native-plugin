@@ -23,11 +23,11 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void addListener(String eventName) {
-        // Keep: Required for RN built in Event Emitter Calls.
+        // required by NativeEventEmitter
     }
 
     @ReactMethod
     public void removeListeners(Integer count) {
-        // Keep: Required for RN built in Event Emitter Calls.
+        // required by NativeEventEmitter
     }
 }

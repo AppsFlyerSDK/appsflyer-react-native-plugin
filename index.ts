@@ -1,7 +1,6 @@
-import { NativeEventEmitter, NativeModules, Platform } from "react-native";
-import { AppsFlyerSDK, LogAdRevenueParams } from "@appsflyer-sdk/js-core-plugin";
+import { NativeEventEmitter, NativeModules } from "react-native";
+import { AppsFlyerSDK } from "@appsflyer-sdk/js-core-plugin";
 import { RNTransport } from "./src/rn-transport";
-import NativeAppsFlyer from "./src/NativeAppsFlyer";
 import {
   AppsFlyerConstants,
   InAppPurchaseValidationResult,
@@ -13,12 +12,10 @@ import {
   OnReceivePurchaseRevenueValidationInfo,
 } from "./PurchaseConnector";
 
-// Re-exports all RPC domain types (ConversionData, *Params, AppsFlyerError, ...) --
-// @appsflyer-sdk/js-core-plugin owns these shapes now, not this repo (Docs/plans/js-core-rpc-integration.md).
+// Re-exports all RPC domain types (ConversionData, *Params, AppsFlyerError, ...) — owned by @appsflyer-sdk/js-core-plugin now, not this repo.
 export * from "@appsflyer-sdk/js-core-plugin";
 
-// 7.0.0+ has no legacy-bridge fallback — fail fast on Old Architecture instead of a
-// confusing native crash later. Skipped under Jest (no RN globals in a plain Node env).
+// 7.0.0+ has no legacy-bridge fallback — fail fast on Old Architecture instead of a confusing native crash later; skipped under Jest (no RN globals).
 if (typeof jest === "undefined") {
   const isNewArchitectureEnabled =
     (globalThis as any).RN$Bridgeless === true ||
@@ -44,8 +41,7 @@ export interface PurchaseRevenueDataSourceBase {
   additionalParameters?: { [key: string]: any };
 }
 
-// Structurally identical to the StoreKit2 variant below; both stay exported (public API),
-// backed by one shared shape.
+// Structurally identical to the StoreKit2 variant below; both stay exported (public API) backed by one shared shape.
 export type PurchaseRevenueDataSource = PurchaseRevenueDataSourceBase;
 export type PurchaseRevenueDataSourceStoreKit2 = PurchaseRevenueDataSourceBase;
 
@@ -86,8 +82,7 @@ export interface PurchaseConnector {
   setInAppPurchaseEventDataSource: (dataSource: InAppPurchaseEventDataSource) => void;
 }
 
-// Purchase Connector native bridge objects -- unrelated to core, untouched by this migration
-// (PurchaseConnector/ is explicitly out of scope; see CLAUDE.md).
+// Purchase Connector native bridge objects — unrelated to core, untouched by this migration (out of scope; see CLAUDE.md).
 const { PCAppsFlyer } = NativeModules;
 const AppsFlyerPurchaseConnector = {} as PurchaseConnector;
 const purchaseConnectorEventEmitter = new NativeEventEmitter(PCAppsFlyer);
@@ -270,7 +265,7 @@ AppsFlyerPurchaseConnector.create = (config: PurchaseConnectorConfig) => {
 
 export { AppsFlyerPurchaseConnector };
 
-// --- Core SDK: everything below delegates to @appsflyer-sdk/js-core-plugin -----------------
+// Core SDK: everything below delegates to @appsflyer-sdk/js-core-plugin
 
 export const MEDIATION_NETWORK = Object.freeze({
   IRONSOURCE: "ironsource",
@@ -289,26 +284,6 @@ export const MEDIATION_NETWORK = Object.freeze({
   DIRECT_MONETIZATION_NETWORK: "direct_monetization_network",
 });
 
-export type MediationNetworkValue = (typeof MEDIATION_NETWORK)[keyof typeof MEDIATION_NETWORK];
-
-const MEDIATION_NETWORK_OVERRIDES: Partial<Record<MediationNetworkValue, { android?: string; ios?: string }>> = {
-  [MEDIATION_NETWORK.APPLOVIN_MAX]: { android: "applovinmax" },
-  [MEDIATION_NETWORK.GOOGLE_ADMOB]: { android: "googleadmob" },
-  [MEDIATION_NETWORK.TOPON_PTE]: { android: "toponpte" },
-  [MEDIATION_NETWORK.CUSTOM_MEDIATION]: { android: "customMediation", ios: "custom" },
-  [MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK]: {
-    android: "directMonetizationNetwork",
-    ios: "directmonetization",
-  },
-};
-
-// Mediation-network *value* spelling differs per platform (not method/param names, so
-// outside plugin-core's rpc-resolver.ts) -- matches this repo's pre-migration behavior.
-function resolveMediationNetworkWireValue(mediationNetwork: string): string {
-  const override = MEDIATION_NETWORK_OVERRIDES[mediationNetwork as MediationNetworkValue];
-  return (override && override[Platform.OS as "android" | "ios"]) || mediationNetwork;
-}
-
 // Reported via setPluginInfo; distinguishing Expo from bare RN predates this migration.
 const PLUGIN_NAME = NativeModules.ExponentConstants != null ? "expo" : "react_native";
 
@@ -317,67 +292,16 @@ const sdk = new AppsFlyerSDK(new RNTransport(), {
   pluginVersion: require("./package.json").version,
 });
 
-/**
- * plugin-core is deliberately platform-agnostic (no Platform.OS), so the one
- * per-platform mediation-network resolution (e.g. APPLOVIN_MAX -> "applovinmax" on
- * Android) stays here in a thin wrapper instead of in the shared package.
- */
-const originalLogAdRevenue = sdk.logAdRevenue.bind(sdk);
-sdk.logAdRevenue = (options: LogAdRevenueParams) =>
-  originalLogAdRevenue({
-    ...options,
-    mediationNetwork: resolveMediationNetworkWireValue(options?.mediationNetwork),
-  });
-
-/**
- * Facebook login IDs are 15-18 digits, past JS's 53-bit safe-integer range --
- * plugin-core's default Number + JSON.stringify path silently rounds them
- * (e.g. "100003456789012345" -> 100003456789012350). Bypass it: splice the
- * validated digit string into the request body directly so native gets the exact value.
- */
-sdk.setUserFbLoginId = (params: { fbLoginId: string | number }): Promise<void> => {
-  const digits = String(params?.fbLoginId).trim();
-  if (!/^-?\d+$/.test(digits)) {
-    return Promise.reject(new TypeError("setUserFbLoginId: fbLoginId must be an integer"));
-  }
-  return NativeAppsFlyer.executeRpc(
-    `{"method":"setUserFbLoginId","params":{"fbLoginId":${digits}}}`
-  ).then((responseJson: string) => {
-    const response = JSON.parse(responseJson);
-    if (!response.success) {
-      return Promise.reject(response.error);
-    }
-    return response.data;
-  });
-};
-
-/**
- * Override above widens fbLoginId to `string | number`, past plugin-core's declared
- * `number`-only signature -- Omit + intersect so the exported type matches reality.
- */
-type AppsFlyerSDKWithFbLoginIdOverride = Omit<AppsFlyerSDK, "setUserFbLoginId"> & {
-  setUserFbLoginId(params: { fbLoginId: string | number }): Promise<void>;
-};
-
-/**
- * Public SDK instance -- method implementations live in @appsflyer-sdk/js-core-plugin; this repo
- * only supplies the transport and the two overrides above. Named export matches other
- * plugin-core-based plugins (Capacitor, Cordova); default export kept for existing
- * `import appsFlyer from 'react-native-appsflyer'` call sites.
- */
-export const AppsFlyer = sdk as AppsFlyerSDKWithFbLoginIdOverride;
+// Public SDK instance — this repo only supplies the transport now; named export matches other plugin-core plugins, default export kept for existing call sites.
+export const AppsFlyer = sdk;
 export default AppsFlyer;
 
-// Export AFPurchaseType enum for the validateAndLogInAppPurchase API
 export const AFPurchaseType = {
   SUBSCRIPTION: "subscription",
   ONE_TIME_PURCHASE: "one_time_purchase",
 } as const;
 
-export type AFPurchaseTypeValue = (typeof AFPurchaseType)[keyof typeof AFPurchaseType];
-
-// Pre-7.0.0 these came from the legacy native module's getConstants(); TurboModule has no
-// equivalent, so they're plain JS constants now, verified against the native AFInAppEventType.
+// Pre-7.0.0 these came from the legacy native module's getConstants(); TurboModule has no equivalent, so they're plain JS constants now.
 export const AFInAppEventType = Object.freeze({
   ACHIEVEMENT_UNLOCKED: "af_achievement_unlocked",
   ADD_PAYMENT_INFO: "af_add_payment_info",
