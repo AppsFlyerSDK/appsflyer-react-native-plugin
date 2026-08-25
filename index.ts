@@ -1,4 +1,4 @@
-import { NativeEventEmitter, NativeModules } from "react-native";
+import { EmitterSubscription, NativeEventEmitter, NativeModules } from "react-native";
 import { AppsFlyerSDK } from "@appsflyer-sdk/js-core-plugin";
 import { RNTransport } from "./src/rn-transport";
 import {
@@ -63,7 +63,7 @@ export interface PurchaseConnector {
 
   OnReceivePurchaseRevenueValidationInfo(
     callback: OnReceivePurchaseRevenueValidationInfo
-  ): void;
+  ): EmitterSubscription;
 
   setPurchaseRevenueDataSource: (dataSource: PurchaseRevenueDataSource) => void;
   setPurchaseRevenueDataSourceStoreKit2: (dataSource: PurchaseRevenueDataSourceStoreKit2) => void;
@@ -71,12 +71,12 @@ export interface PurchaseConnector {
   // Android methods
   onSubscriptionValidationResultSuccess(
     callback: OnResponse<SubscriptionValidationResult>
-  ): () => void;
-  onSubscriptionValidationResultFailure(callback: OnFailure): () => void;
+  ): EmitterSubscription;
+  onSubscriptionValidationResultFailure(callback: OnFailure): EmitterSubscription;
   onInAppValidationResultSuccess(
     callback: OnResponse<InAppPurchaseValidationResult>
-  ): () => void;
-  onInAppValidationResultFailure(callback: OnFailure): () => void;
+  ): EmitterSubscription;
+  onInAppValidationResultFailure(callback: OnFailure): EmitterSubscription;
 
   setSubscriptionPurchaseEventDataSource: (dataSource: SubscriptionPurchaseEventDataSource) => void;
   setInAppPurchaseEventDataSource: (dataSource: InAppPurchaseEventDataSource) => void;
@@ -100,22 +100,22 @@ AppsFlyerPurchaseConnector.stopObservingTransactions = () => {
   PCAppsFlyer.stopObservingTransactions();
 };
 
-// Shared by the 4 Android listener setters below: guard callback type, subscribe, parse, return remove().
+// Shared by the 4 Android listener setters below: guard callback type, subscribe, parse.
+// Returns the EmitterSubscription itself (not a wrapper) so callers can call .remove() on it,
+// matching the RN NativeEventEmitter convention documented in RN_PurchaseConnector.md.
 function addValidationListener<TParsed>(
   eventName: string,
   parse: (result: any) => TParsed,
   callback: (parsed: TParsed) => void,
   parseErrorMessage: string
-): () => void {
-  const listener = purchaseConnectorEventEmitter.addListener(eventName, (result: any) => {
+): EmitterSubscription {
+  return purchaseConnectorEventEmitter.addListener(eventName, (result: any) => {
     try {
       callback(parse(result));
     } catch (error) {
       console.error(parseErrorMessage, error);
     }
   });
-
-  return () => listener.remove();
 }
 
 // Purchase Connector Android methods
@@ -207,23 +207,18 @@ AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo = (callback) =
     throw new Error("The callback must be a function");
   }
 
-  const revenueValidationListener = purchaseConnectorEventEmitter.addListener(
+  return addValidationListener(
     AppsFlyerConstants.DID_RECEIVE_PURCHASE_REVENUE_VALIDATION_INFO,
+    (info: any) => info,
     (info: any) => {
-      try {
-        if (info.error) {
-          callback(undefined, info.error);
-        } else {
-          const validationInfo = JSON.stringify(info);
-          callback(validationInfo as any, undefined);
-        }
-      } catch (error) {
-        console.error("Failed to handle iOS validation result:", error);
+      if (info.error) {
+        callback(undefined, info.error);
+      } else {
+        callback(JSON.stringify(info) as any, undefined);
       }
-    }
+    },
+    "Failed to handle iOS validation result:"
   );
-
-  return () => revenueValidationListener.remove();
 };
 
 AppsFlyerPurchaseConnector.setPurchaseRevenueDataSource = (dataSource) => {
