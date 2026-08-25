@@ -21,13 +21,6 @@ export function AFInit(onConversionData, onDeepLink) {
     (error) => console.log('init SDK failed', error),
   );
 
-  Linking.getInitialURL().then((url) => {
-    console.log("AFINIT: Deeplink url" , url)
-    if (Platform.OS === 'android' && url) {
-      AppsFlyer.performDeepLinking({url, shouldTriggerSession: true});
-    }
-  });
-
   AppsFlyer.setAppInviteOneLink({oneLinkId:"neai"});
   if(Platform.OS == "ios"){
     AppsFlyer.setCurrentDeviceLanguage({language: 'EN'});
