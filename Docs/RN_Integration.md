@@ -26,22 +26,22 @@ longer options on the init call — call [`enableDebug`](RN_API.md#enabledebug),
 explicit [`start()`](RN_API.md#start) (SDK7 never auto-starts).
 
 ```javascript
-import appsFlyer from 'react-native-appsflyer';
+import AppsFlyer from 'react-native-appsflyer';
 
 const onDeepLink = (res) => { /* ... */ };
 
 // registerDeepLinkListener is the one exception to "always after init()" — register it
 // before init(), on both platforms. See RN_API.md — Initialization Flow.
-appsFlyer.registerDeepLinkListener(onDeepLink);
+AppsFlyer.registerDeepLinkListener(onDeepLink);
 
-appsFlyer.init('K2***********99', '41*****44');
-appsFlyer.enableDebug(true);
+AppsFlyer.init('K2***********99', '41*****44');
+AppsFlyer.enableDebug(true);
 
 // Register remaining listeners synchronously, before init's promise settles
-appsFlyer.registerConversionListener((res) => { /* ... */ }, (error) => { /* ... */ });
+AppsFlyer.registerConversionListener((res) => { /* ... */ }, (error) => { /* ... */ });
 
-appsFlyer.registerSessionReadyListener(() => {
-  appsFlyer.start().then(
+AppsFlyer.registerSessionReadyListener(() => {
+  AppsFlyer.start().then(
     () => console.log('SDK started'),
     (err) => console.error('start failed', err)
   );

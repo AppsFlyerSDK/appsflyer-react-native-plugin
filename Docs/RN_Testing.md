@@ -13,11 +13,11 @@ To enable it, call `enableDebug(true)` — a dedicated call, separate from `init
 [RN_API.md — enableDebug](RN_API.md#enabledebug)):
 
 ```javascript
-appsFlyer.init('UsxXxXxXxed', '78xXxXx35').then(
+AppsFlyer.init('UsxXxXxXxed', '78xXxXx35').then(
   (result) => console.log(result),
   (error) => console.error(error)
 );
-appsFlyer.enableDebug(true);
+AppsFlyer.enableDebug(true);
 ```
 
 ## Testing for iOS

@@ -33,7 +33,7 @@ All JS tests mock `src/NativeAppsFlyer.executeRpc` and assert against the serial
 ```js
 // Example pattern
 NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
-await appsFlyer.setCustomerUserId('uid-123');
+await AppsFlyer.setCustomerUserId('uid-123');
 const [requestJson] = NativeAppsFlyer.executeRpc.mock.calls[0];
 expect(JSON.parse(requestJson)).toEqual({ method: 'setCustomerUserId', params: { customerId: 'uid-123' } });
 ```

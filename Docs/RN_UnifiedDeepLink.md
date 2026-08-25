@@ -45,14 +45,14 @@ const onDeepLink = (res) => {
       }
 };
 
-appsFlyer.registerDeepLinkListener(onDeepLink);
+AppsFlyer.registerDeepLinkListener(onDeepLink);
 
-appsFlyer.init('K2***********99', '41*****44').then(
+AppsFlyer.init('K2***********99', '41*****44').then(
   (result) => console.log(result),
   (error) => console.error(error)
 );
 
-appsFlyer.enableDebug(false);
+AppsFlyer.enableDebug(false);
 ```
 
 **Note on Android:** On Android, the `deepLink` payload may be delivered as a JSON string (requiring `JSON.parse`) rather than an object, while iOS delivers it as an object. Ensure your code handles both cases, e.g., by checking the type before accessing fields.

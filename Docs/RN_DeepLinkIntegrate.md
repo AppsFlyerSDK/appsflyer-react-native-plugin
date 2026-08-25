@@ -36,14 +36,14 @@ public class MainActivity extends ReactActivity {
  }
 ```
 
-**Cold-start deep links**: The native SDK inspects the launch Intent only after `init()` completes. For cold-start deep links (app not running when link is clicked), re-deliver them via `Linking.getInitialURL()` and `appsFlyer.performDeepLinking()` inside `init().then()`:
+**Cold-start deep links**: The native SDK inspects the launch Intent only after `init()` completes. For cold-start deep links (app not running when link is clicked), re-deliver them via `Linking.getInitialURL()` and `AppsFlyer.performDeepLinking()` inside `init().then()`:
 
 ```javascript
-appsFlyer.init(devKey, appId)
+AppsFlyer.init(devKey, appId)
   .then(async () => {
     const url = await Linking.getInitialURL();
     if (url) {
-      await appsFlyer.performDeepLinking(url, true);
+      await AppsFlyer.performDeepLinking(url, true);
     }
   });
 ```

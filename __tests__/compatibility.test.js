@@ -1,6 +1,6 @@
 // Verifies changes in this branch don't break existing client code patterns (runtime compatibility and type safety).
 
-import appsFlyer, { StoreKitVersion, AFInAppEventType } from '../index';
+import AppsFlyer, { StoreKitVersion, AFInAppEventType } from '../index';
 
 const NativeAppsFlyer = require('../src/NativeAppsFlyer').default;
 
@@ -17,7 +17,7 @@ describe('Backward Compatibility Tests', () => {
         hasConsentForAdsPersonalization: false,
       };
 
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
+      expect(() => AppsFlyer.setConsentData(consent)).not.toThrow();
       expect(NativeAppsFlyer.executeRpc).toHaveBeenCalled();
     });
 
@@ -26,7 +26,7 @@ describe('Backward Compatibility Tests', () => {
         isUserSubjectToGDPR: false,
       };
 
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
+      expect(() => AppsFlyer.setConsentData(consent)).not.toThrow();
     });
 
     // AppsFlyerConsent convenience constructor is no longer exported after the js-core-plugin migration; callers build the plain object directly (see above).
@@ -64,14 +64,14 @@ describe('Backward Compatibility Tests', () => {
   describe('logEvent (Promise-only, no callback-style overload)', () => {
     test('logEvent dispatches the RPC and resolves', async () => {
       NativeAppsFlyer.executeRpc.mockResolvedValueOnce(JSON.stringify({ success: true, data: null }));
-      await appsFlyer.logEvent({ eventName: 'af_purchase', eventValues: { af_revenue: 1 } });
+      await AppsFlyer.logEvent({ eventName: 'af_purchase', eventValues: { af_revenue: 1 } });
       expect(NativeAppsFlyer.executeRpc).toHaveBeenCalled();
     });
   });
 
-  describe('7.0.0+ breaking changes (MIGRATION.md) and their @appsflyer-sdk/js-core-plugin equivalents', () => {
+  describe('7.0.0+ breaking changes (MIGRATION.md) and their @AppsFlyer-sdk/js-core-plugin equivalents', () => {
     test('setHost sends {hostPrefixName, hostName} — param reorder/rename', () => {
-      appsFlyer.setHost({ hostPrefixName: 'mycompany', hostName: 'onelink.me' });
+      AppsFlyer.setHost({ hostPrefixName: 'mycompany', hostName: 'onelink.me' });
       expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
         JSON.stringify({
           method: 'setHost',
@@ -81,7 +81,7 @@ describe('Backward Compatibility Tests', () => {
     });
 
     test('validateAndLogInAppPurchase legacy (purchaseInfo, successC, errorC) signature is gone — the {purchase} params-object signature dispatches the RPC instead', () => {
-      appsFlyer.validateAndLogInAppPurchase({
+      AppsFlyer.validateAndLogInAppPurchase({
         purchase: { productId: 'sku', transactionId: 'txn', purchaseType: 'subscription' },
       });
       const [requestJson] = NativeAppsFlyer.executeRpc.mock.calls[0];
@@ -89,20 +89,20 @@ describe('Backward Compatibility Tests', () => {
     });
 
     test('setCollectIMEI is removed', () => {
-      expect(appsFlyer.setCollectIMEI).toBeUndefined();
+      expect(AppsFlyer.setCollectIMEI).toBeUndefined();
     });
 
     test('onAppOpenAttribution / onAttributionFailure / performOnAppAttribution are removed', () => {
-      expect(appsFlyer.onAppOpenAttribution).toBeUndefined();
-      expect(appsFlyer.onAttributionFailure).toBeUndefined();
-      expect(appsFlyer.performOnAppAttribution).toBeUndefined();
+      expect(AppsFlyer.onAppOpenAttribution).toBeUndefined();
+      expect(AppsFlyer.onAttributionFailure).toBeUndefined();
+      expect(AppsFlyer.performOnAppAttribution).toBeUndefined();
     });
 
     test('registerDeepLinkListener still delivers data previously routed through onAppOpenAttribution', async () => {
       const { NativeEventEmitter } = require('react-native');
       const nativeEventEmitter = new NativeEventEmitter(NativeAppsFlyer);
       const callback = jest.fn();
-      await appsFlyer.registerDeepLinkListener({ onDeepLinking: callback });
+      await AppsFlyer.registerDeepLinkListener({ onDeepLinking: callback });
 
       const attributionData = { media_source: 'test', campaign: 'test_campaign' };
       nativeEventEmitter.emit(
@@ -135,7 +135,7 @@ describe('Backward Compatibility Tests', () => {
 
   describe('Type Exports - ESLint Compatibility', () => {
     test('All expected exports are available', () => {
-      expect(appsFlyer).toBeDefined();
+      expect(AppsFlyer).toBeDefined();
       expect(StoreKitVersion).toBeDefined();
       // AppsFlyerPurchaseConnector may be unavailable if Purchase Connector is disabled; this only verifies exports exist.
     });

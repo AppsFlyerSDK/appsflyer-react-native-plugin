@@ -9,14 +9,14 @@ paths:
 
 Scope: `index.ts`, `src/NativeAppsFlyer.ts`, `src/rn-transport.ts`. All native calls go through the single TurboModule entry point `NativeAppsFlyer.executeRpc(requestJson)` — there are no bespoke per-feature native methods.
 
-Since the js-core migration, method dispatch (`callRpc`/`callRpcVoid`-style logic), per-platform wire method-name/param resolution, and event demuxing all live inside the `@appsflyer-sdk/js-core-plugin` npm package, not in this repo. `callRpc`/`callRpcVoid`/`callRpcWithCallback` no longer exist here. This repo's only remaining framework-specific glue is `src/rn-transport.ts`'s `RNTransport`, which implements `@appsflyer-sdk/js-core-plugin`'s `RpcTransport` interface:
+Since the js-core migration, method dispatch (`callRpc`/`callRpcVoid`-style logic), per-platform wire method-name/param resolution, and event demuxing all live inside the `@AppsFlyer-sdk/js-core-plugin` npm package, not in this repo. `callRpc`/`callRpcVoid`/`callRpcWithCallback` no longer exist here. This repo's only remaining framework-specific glue is `src/rn-transport.ts`'s `RNTransport`, which implements `@AppsFlyer-sdk/js-core-plugin`'s `RpcTransport` interface:
 
 | `RpcTransport` member | Implementation |
 |---|---|
 | `call<T>(method, params)` | Serializes to `executeRpc`'s request JSON, parses the response, resolves with `data` or rejects with `error` |
 | `subscribe(listener)` | Wraps `NativeEventEmitter` on the shared `RNAppsFlyer_rpcEvent` event name |
 
-`index.ts` constructs `AppsFlyerSDK` with an `RNTransport` instance and re-exports it (`export const AppsFlyer = sdk`) plus everything from `@appsflyer-sdk/js-core-plugin` (`export * from "@appsflyer-sdk/js-core-plugin"`). It supplies only the transport now — the mediation-network wire-value resolution moved into plugin-core's `rpc-resolver.ts` as of `@appsflyer-sdk/js-core-plugin` ^7.0.13. The `setUserFbLoginId` big-integer *splice* override that used to live here was deleted in the same pass (`d8b15740`) — turned out unnecessary: plugin-core's `setUserFbLoginId` is a plain pass-through (`node_modules/@appsflyer-sdk/js-core-plugin/dist/appsflyer-sdk.js`), and `RNTransport.call`'s plain `JSON.stringify` already preserves a `string` `fbLoginId` byte-for-byte (Facebook login IDs run 15-18 digits, past JS's 53-bit safe-integer range), regression-tested in `__tests__/rpc-wire-contract.test.js`'s 18-digit-ID test. A `number` input past that range has already lost precision the moment the caller's own code wrote the literal — before it reaches this SDK at all, on either the JS or native side — so there's nothing left to fix here; callers who need exact precision should pass a string, which is the documented and tested-safe path.
+`index.ts` constructs `AppsFlyerSDK` with an `RNTransport` instance and re-exports it (`export const AppsFlyer = sdk`) plus everything from `@AppsFlyer-sdk/js-core-plugin` (`export * from "@AppsFlyer-sdk/js-core-plugin"`). It supplies only the transport now — the mediation-network wire-value resolution moved into plugin-core's `rpc-resolver.ts` as of `@AppsFlyer-sdk/js-core-plugin` ^7.0.13. The `setUserFbLoginId` big-integer *splice* override that used to live here was deleted in the same pass (`d8b15740`) — turned out unnecessary: plugin-core's `setUserFbLoginId` is a plain pass-through (`node_modules/@AppsFlyer-sdk/js-core-plugin/dist/AppsFlyer-sdk.js`), and `RNTransport.call`'s plain `JSON.stringify` already preserves a `string` `fbLoginId` byte-for-byte (Facebook login IDs run 15-18 digits, past JS's 53-bit safe-integer range), regression-tested in `__tests__/rpc-wire-contract.test.js`'s 18-digit-ID test. A `number` input past that range has already lost precision the moment the caller's own code wrote the literal — before it reaches this SDK at all, on either the JS or native side — so there's nothing left to fix here; callers who need exact precision should pass a string, which is the documented and tested-safe path.
 
 ## 2. RPC request/response shape
 
@@ -32,7 +32,7 @@ Every response resolves (never rejects for native-side outcomes) as:
 { "success": false, "error": { "code": <number>, "message": "<string>" } }
 ```
 
-`RNTransport.call` (the `RpcTransport.call` implementation) unwraps this: resolves with `data` on success, rejects with `error` on failure. `@appsflyer-sdk/js-core-plugin`'s `AppsFlyerSDK` methods call `RNTransport.call` internally — this repo no longer calls it directly except from `index.ts`'s two per-platform overrides.
+`RNTransport.call` (the `RpcTransport.call` implementation) unwraps this: resolves with `data` on success, rejects with `error` on failure. `@AppsFlyer-sdk/js-core-plugin`'s `AppsFlyerSDK` methods call `RNTransport.call` internally — this repo no longer calls it directly except from `index.ts`'s two per-platform overrides.
 
 Android's `error.code` is a real, distinct number per failure class as of `af-android-plugin-bridge` 7.0.12 (DELIVERY-128454) — an unknown/unsupported method name now returns `{ code: 404, ... }` (`RpcErrorCodes.METHOD_NOT_FOUND`) instead of the previous unstructured parse exception; malformed params still return `RpcErrorCodes.INVALID_PARAMETERS`. iOS error codes are not yet cross-checked against this same numbering — don't assume parity across platforms without verifying.
 
@@ -40,7 +40,7 @@ The TurboModule Promise rejects (transport failure) only if the call never reach
 
 ## 3. Event channel contract
 
-Async native events (conversion data, deep link, session ready) arrive via `NativeEventEmitter` on a **single shared event name** (`RNAppsFlyer_rpcEvent` on both platforms). `RNTransport.subscribe` forwards the raw envelope to `@appsflyer-sdk/js-core-plugin`, which now owns the demuxing (this repo no longer parses `envelope.event` itself):
+Async native events (conversion data, deep link, session ready) arrive via `NativeEventEmitter` on a **single shared event name** (`RNAppsFlyer_rpcEvent` on both platforms). `RNTransport.subscribe` forwards the raw envelope to `@AppsFlyer-sdk/js-core-plugin`, which now owns the demuxing (this repo no longer parses `envelope.event` itself):
 - `onConversionDataSuccess` / `onConversionDataFail`
 - `onDeepLinkReceived` (iOS) / `onDeepLinking` (Android) — same concept, different native name; normalized to one JS-facing shape
 - `onSessionReady` — both platforms emit this once `registerSessionReadyListener` has been registered and the native SDK signals readiness (confirmed against `AppsFlyerRPC`'s own source, `AFRPCCoreHandler.swift`'s `sessionReadyEmitter`). `isSessionReady` is a separate one-off Promise query for the current state, not a replacement for the event.
@@ -98,8 +98,8 @@ registration + `start()` in a `Promise`:
 ```js
 function startWhenSessionReady() {
   return new Promise((resolve, reject) => {
-    appsFlyer.registerSessionReadyListener(() => {
-      appsFlyer.start().then(resolve, reject);
+    AppsFlyer.registerSessionReadyListener(() => {
+      AppsFlyer.start().then(resolve, reject);
     });
   });
 }
@@ -123,7 +123,7 @@ remaining open failure mode on this call).
 
 ## 6. Named exports
 
-Current named exports from `index.ts`: `AFInAppEventType`, `AFPurchaseType`, `MEDIATION_NETWORK`, `StoreKitVersion`, `AppsFlyerPurchaseConnector`, `AppsFlyerPurchaseConnectorConfig`, plus everything `@appsflyer-sdk/js-core-plugin` exports (via `export * from "@appsflyer-sdk/js-core-plugin"`) — including `AppsFlyerConsent`, which now lives in that package, not this repo.
+Current named exports from `index.ts`: `AFInAppEventType`, `AFPurchaseType`, `MEDIATION_NETWORK`, `StoreKitVersion`, `AppsFlyerPurchaseConnector`, `AppsFlyerPurchaseConnectorConfig`, plus everything `@AppsFlyer-sdk/js-core-plugin` exports (via `export * from "@AppsFlyer-sdk/js-core-plugin"`) — including `AppsFlyerConsent`, which now lives in that package, not this repo.
 
 `AFInAppEventType` is a plain JS frozen object (23 constants) — it was previously served by `NativeModules.RNAppsFlyer.getConstants()`. Adding a new named export requires a version bump.
 

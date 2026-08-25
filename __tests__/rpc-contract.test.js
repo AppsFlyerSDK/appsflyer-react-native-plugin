@@ -62,10 +62,10 @@ describe('executeRpc — transport-only failure', () => {
 function freshModule() {
 	jest.resetModules();
 	const { NativeEventEmitter } = require('react-native');
-	const appsFlyer = require('../index').default;
+	const AppsFlyer = require('../index').default;
 	const freshNativeAppsFlyer = require('../src/NativeAppsFlyer').default;
 	return {
-		appsFlyer,
+		AppsFlyer,
 		nativeAppsFlyer: freshNativeAppsFlyer,
 		nativeEventEmitter: new NativeEventEmitter(freshNativeAppsFlyer),
 	};
@@ -79,9 +79,9 @@ function rpcMethodCalls(nativeAppsFlyer, methodName) {
 
 describe('RPC event channel pass-through fidelity', () => {
 	test('firing the same native event twice in immediate succession invokes the JS listener exactly twice', async () => {
-		const { appsFlyer, nativeEventEmitter } = freshModule();
+		const { AppsFlyer, nativeEventEmitter } = freshModule();
 		const callback = jest.fn();
-		await appsFlyer.registerDeepLinkListener({ onDeepLinking: callback });
+		await AppsFlyer.registerDeepLinkListener({ onDeepLinking: callback });
 
 		const payload = { campaign: 'test_campaign', deep_link_value: 'abc', media_source: 'test', link: 'https://x' };
 		const emit = () =>
@@ -103,22 +103,22 @@ describe('RPC event channel pass-through fidelity', () => {
 // js-core-plugin dispatches register*Listener RPCs unconditionally on every attach (no dedup, unlike the old onceRegistrar); unregister*Listener() is the only teardown path.
 describe('Listener registration RPC dispatch', () => {
 	test('registerConversionListener dispatches its RPC on every attach (no dedup, unlike the old onceRegistrar)', async () => {
-		const { appsFlyer, nativeAppsFlyer } = freshModule();
+		const { AppsFlyer, nativeAppsFlyer } = freshModule();
 
-		await appsFlyer.registerConversionListener({ onConversionDataSuccess: jest.fn(), onConversionDataFail: jest.fn() });
+		await AppsFlyer.registerConversionListener({ onConversionDataSuccess: jest.fn(), onConversionDataFail: jest.fn() });
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerConversionListener')).toHaveLength(1);
 
-		await appsFlyer.registerConversionListener({ onConversionDataSuccess: jest.fn(), onConversionDataFail: jest.fn() });
+		await AppsFlyer.registerConversionListener({ onConversionDataSuccess: jest.fn(), onConversionDataFail: jest.fn() });
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerConversionListener')).toHaveLength(2);
 	});
 
 	test('registerDeepLinkListener calls executeRpc with the real iOS wire method name ("registerDeeplinkListener") on every attach', async () => {
-		const { appsFlyer, nativeAppsFlyer } = freshModule();
+		const { AppsFlyer, nativeAppsFlyer } = freshModule();
 
-		await appsFlyer.registerDeepLinkListener({ onDeepLinking: jest.fn() });
+		await AppsFlyer.registerDeepLinkListener({ onDeepLinking: jest.fn() });
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerDeeplinkListener')).toHaveLength(1);
 
-		await appsFlyer.registerDeepLinkListener({ onDeepLinking: jest.fn() });
+		await AppsFlyer.registerDeepLinkListener({ onDeepLinking: jest.fn() });
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerDeeplinkListener')).toHaveLength(2);
 	});
 });
@@ -126,7 +126,7 @@ describe('Listener registration RPC dispatch', () => {
 describe('isSessionReady (net-new)', () => {
 	// Regression guard for finding #5: isSessionReady is a pure read-only status query and must not register the session-ready listener as a side effect.
 	test('resolves a boolean without triggering registerSessionReadyListener', async () => {
-		const { appsFlyer, nativeAppsFlyer } = freshModule();
+		const { AppsFlyer, nativeAppsFlyer } = freshModule();
 		nativeAppsFlyer.executeRpc.mockImplementation((requestJson) => {
 			const { method } = JSON.parse(requestJson);
 			if (method === 'isSessionReady') {
@@ -135,14 +135,14 @@ describe('isSessionReady (net-new)', () => {
 			return Promise.resolve(JSON.stringify({ success: true, data: null }));
 		});
 
-		expect(await appsFlyer.isSessionReady()).toBe(true);
-		await appsFlyer.isSessionReady();
+		expect(await AppsFlyer.isSessionReady()).toBe(true);
+		await AppsFlyer.isSessionReady();
 
 		expect(rpcMethodCalls(nativeAppsFlyer, 'registerSessionReadyListener')).toHaveLength(0);
 	});
 
 	test('rejects with the normalized {code,message} error when the RPC call fails', async () => {
-		const { appsFlyer, nativeAppsFlyer } = freshModule();
+		const { AppsFlyer, nativeAppsFlyer } = freshModule();
 		nativeAppsFlyer.executeRpc.mockImplementation((requestJson) => {
 			const { method } = JSON.parse(requestJson);
 			if (method === 'isSessionReady') {
@@ -151,14 +151,14 @@ describe('isSessionReady (net-new)', () => {
 			return Promise.resolve(JSON.stringify({ success: true, data: null }));
 		});
 
-		await expect(appsFlyer.isSessionReady()).rejects.toEqual({ code: 500, message: 'boom' });
+		await expect(AppsFlyer.isSessionReady()).rejects.toEqual({ code: 500, message: 'boom' });
 	});
 });
 
 // Per Docs/plans/js-core-rpc-integration.md's Decisions Log, the old iOS 422->404 "unknown method" remap is deliberately not carried into RNTransport; a 422 now stays a 422.
 describe('error normalization — the iOS 422->404 remap was deliberately dropped', () => {
 	test('an "Unknown or missing method" 422 is no longer remapped to 404', async () => {
-		const { appsFlyer, nativeAppsFlyer } = freshModule();
+		const { AppsFlyer, nativeAppsFlyer } = freshModule();
 		nativeAppsFlyer.executeRpc.mockResolvedValue(
 			JSON.stringify({
 				success: false,
@@ -166,14 +166,14 @@ describe('error normalization — the iOS 422->404 remap was deliberately droppe
 			})
 		);
 
-		await expect(appsFlyer.setInstallId({ installId: 'install-1' })).rejects.toEqual({
+		await expect(AppsFlyer.setInstallId({ installId: 'install-1' })).rejects.toEqual({
 			code: 422,
 			message: 'Unknown or missing method: nonExistentMethod',
 		});
 	});
 
 	test('a genuine 422 (malformed params) passes through unchanged, same as before', async () => {
-		const { appsFlyer, nativeAppsFlyer } = freshModule();
+		const { AppsFlyer, nativeAppsFlyer } = freshModule();
 		nativeAppsFlyer.executeRpc.mockResolvedValue(
 			JSON.stringify({
 				success: false,
@@ -181,7 +181,7 @@ describe('error normalization — the iOS 422->404 remap was deliberately droppe
 			})
 		);
 
-		await expect(appsFlyer.setInstallId({ installId: 'install-1' })).rejects.toEqual({
+		await expect(AppsFlyer.setInstallId({ installId: 'install-1' })).rejects.toEqual({
 			code: 422,
 			message: 'Invalid parameter: devKey is required',
 		});

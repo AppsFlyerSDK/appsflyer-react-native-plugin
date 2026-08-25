@@ -50,15 +50,15 @@ critical/security fixes for 6 months from the first 7.0.x release.
 native. Replaced by:
 
 ```js
-appsFlyer.registerDeepLinkListener({ onDeepLinking: cb });     // was: onDeepLinkListener — before init()
-appsFlyer.init({ devKey: 'devKey', appId: 'appId' }).then(onSuccess, onError);
-appsFlyer.enableDebug({ enabled: true });                      // was: isDebug
-appsFlyer.registerConversionListener({                        // was: onInstallConversionDataListener
+AppsFlyer.registerDeepLinkListener({ onDeepLinking: cb });     // was: onDeepLinkListener — before init()
+AppsFlyer.init({ devKey: 'devKey', appId: 'appId' }).then(onSuccess, onError);
+AppsFlyer.enableDebug({ enabled: true });                      // was: isDebug
+AppsFlyer.registerConversionListener({                        // was: onInstallConversionDataListener
   onConversionDataSuccess: cb,
   onConversionDataFail: onFail,
 });
-appsFlyer.registerSessionReadyListener(() => {                // the one exception — plain callback
-  appsFlyer.start().then(onSuccess, onError);
+AppsFlyer.registerSessionReadyListener(() => {                // the one exception — plain callback
+  AppsFlyer.start().then(onSuccess, onError);
 });
 ```
 
@@ -73,7 +73,7 @@ Three rules:
 
 ```js
 const startWhenReady = () => new Promise((res, rej) =>
-  appsFlyer.registerSessionReadyListener(() => appsFlyer.start().then(res, rej))
+  AppsFlyer.registerSessionReadyListener(() => AppsFlyer.start().then(res, rej))
 );
 ```
 
@@ -84,12 +84,12 @@ any leftover callback argument is silently ignored, not invoked:
 
 ```js
 // 6.x
-appsFlyer.setCustomerUserId('uid', () => console.log('done'));
-appsFlyer.getAppsFlyerUID((error, uid) => { ... });
+AppsFlyer.setCustomerUserId('uid', () => console.log('done'));
+AppsFlyer.getAppsFlyerUID((error, uid) => { ... });
 
 // 7.0.x
-await appsFlyer.setCustomerUserId({ customerId: 'uid' });
-const uid = await appsFlyer.getAppsFlyerUID(); // no params at all — one of the few zero-arg calls
+await AppsFlyer.setCustomerUserId({ customerId: 'uid' });
+const uid = await AppsFlyer.getAppsFlyerUID(); // no params at all — one of the few zero-arg calls
 ```
 
 `tsc --noEmit` catches this if the call site is typed; plain JS call sites need a manual sweep.
@@ -160,20 +160,20 @@ placeholder.
 
 ```js
 // Before
-appsFlyer.onInstallConversionData(onSuccess);
-appsFlyer.onInstallConversionFailure(onFailure);
-appsFlyer.onDeepLink(onDeepLink);
+AppsFlyer.onInstallConversionData(onSuccess);
+AppsFlyer.onInstallConversionFailure(onFailure);
+AppsFlyer.onDeepLink(onDeepLink);
 
 // After — one callbacks object each, not positional arguments
-appsFlyer.registerConversionListener({
+AppsFlyer.registerConversionListener({
   onConversionDataSuccess: onSuccess,
   onConversionDataFail: onFailure,
 });
-appsFlyer.registerDeepLinkListener({ onDeepLinking: onDeepLink });
+AppsFlyer.registerDeepLinkListener({ onDeepLinking: onDeepLink });
 
 // full teardown (e.g. componentWillUnmount) — Android only, both reject on iOS:
-appsFlyer.unregisterConversionListener();
-appsFlyer.unregisterDeeplinkListener();
+AppsFlyer.unregisterConversionListener();
+AppsFlyer.unregisterDeeplinkListener();
 ```
 
 `onFailure` now receives the failure message as a plain `string`, not a `ConversionData`-shaped
@@ -186,14 +186,14 @@ The single `AFPurchaseDetails` type conflated Android's `purchaseToken` and iOS'
 
 ```ts
 // Before
-appsFlyer.validateAndLogInAppPurchase({ productId, transactionId, purchaseType }, successC, errorC);
+AppsFlyer.validateAndLogInAppPurchase({ productId, transactionId, purchaseType }, successC, errorC);
 
 // After — iOS
-appsFlyer.validateAndLogInAppPurchase({
+AppsFlyer.validateAndLogInAppPurchase({
   purchase: { productId, transactionId, purchaseType }, // AFPurchaseDetailsIOS
 });
 // After — Android
-appsFlyer.validateAndLogInAppPurchase({
+AppsFlyer.validateAndLogInAppPurchase({
   purchase: { productId, purchaseToken, purchaseType }, // AFPurchaseDetailsAndroid
   additionalParameters, // sits alongside `purchase`, not inside it
 });
@@ -208,10 +208,10 @@ native counterpart in 6.x either (silent no-op) and is dropped outright:
 
 ```js
 // Before
-appsFlyer.generateInviteLink({ channel, referrerCustomerId, baseDeepLink }, successC, errorC);
+AppsFlyer.generateInviteLink({ channel, referrerCustomerId, baseDeepLink }, successC, errorC);
 
 // After
-const link = await appsFlyer.generateInviteLink({
+const link = await AppsFlyer.generateInviteLink({
   parameters: { channel, referrerCustomerId, baseDeepLink },
 });
 ```
@@ -224,12 +224,12 @@ directly (not another shape of the same method):
 
 ```js
 // 6.x
-appsFlyer.sendPushNotificationData(payload, errorCb, androidCampaignData);
+AppsFlyer.sendPushNotificationData(payload, errorCb, androidCampaignData);
 
 // 7.0.x — Android
-appsFlyer.sendPushNotificationData({ campaign, pid, isRetargeting, additionalParameters });
+AppsFlyer.sendPushNotificationData({ campaign, pid, isRetargeting, additionalParameters });
 // 7.0.x — iOS: different call entirely
-appsFlyer.handlePushNotification({ pushPayload });
+AppsFlyer.handlePushNotification({ pushPayload });
 ```
 
 ### iOS: hand-integrated AppDelegate now goes through `AppsFlyerAttribution`
