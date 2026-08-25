@@ -48,7 +48,7 @@ The link that is generated for the user invite will use this OneLink ID as the b
 ```javascript
 
 // set the template ID before you generate a link. Without it UserInvite won't work.
-AppsFlyer.setAppInviteOneLink('scVs');
+AppsFlyer.setAppInviteOneLink({ oneLinkId: 'scVs' });
 
 // generate the user invite link
 AppsFlyer.generateInviteLink({
@@ -87,8 +87,11 @@ Log a user invite event to track when invites are sent.
 *Example:*
 
 ```javascript
-AppsFlyer.logInvite('gmail', {
-  invitation_id: 'inv_123',
-  recipient_count: 5,
+AppsFlyer.logInvite({
+  channel: 'gmail',
+  eventParameters: {
+    invitation_id: 'inv_123',
+    recipient_count: 5,
+  },
 });
 ```

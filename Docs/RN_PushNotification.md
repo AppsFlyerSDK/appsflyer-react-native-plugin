@@ -102,8 +102,8 @@ After setting up all listeners and configurations, initialize and start the SDK:
 
 ```jsx
 // Initialize AppsFlyer (AFTER setting up listeners)
-// `initSdk` was removed in 7.0.0 — use `init(devKey, appId)` instead (see MIGRATION.md).
-AppsFlyer.init('YOUR_DEV_KEY', 'YOUR_APP_ID'); // appId is iOS only, harmlessly ignored on Android
+// `initSdk` was removed in 7.0.0 — use `init({devKey, appId})` instead (see MIGRATION.md).
+AppsFlyer.init({ devKey: 'YOUR_DEV_KEY', appId: 'YOUR_APP_ID' }); // appId is iOS only, harmlessly ignored on Android
 
 // Start AppsFlyer from inside registerSessionReadyListener's callback (see bridge-patterns.md §4)
 AppsFlyer.registerSessionReadyListener(() => {
@@ -130,42 +130,28 @@ const toAndroidCampaignData = (remoteMessage) => ({
 messaging().setBackgroundMessageHandler(async (remoteMessage) => {
   console.log('Background message:', remoteMessage);
 
-  // Send push payload to AppsFlyer
-  AppsFlyer.sendPushNotificationData(
-    remoteMessage.data, // The push notification payload
-    toAndroidCampaignData(remoteMessage)
-  );
+  AppsFlyer.sendPushNotificationData(toAndroidCampaignData(remoteMessage));
 });
 
 // Foreground messages
 messaging().onMessage(async (remoteMessage) => {
   console.log('Foreground message:', remoteMessage);
 
-  // Send push payload to AppsFlyer
-  AppsFlyer.sendPushNotificationData(
-    remoteMessage.data,
-    toAndroidCampaignData(remoteMessage)
-  );
+  AppsFlyer.sendPushNotificationData(toAndroidCampaignData(remoteMessage));
 });
 
 // Handle notification opened from background/quit state
 messaging().onNotificationOpenedApp((remoteMessage) => {
   console.log('Notification opened:', remoteMessage);
 
-  // Send push payload to AppsFlyer
-  AppsFlyer.sendPushNotificationData(
-    remoteMessage.data,
-    toAndroidCampaignData(remoteMessage)
-  );
+  AppsFlyer.sendPushNotificationData(toAndroidCampaignData(remoteMessage));
 })
 ```
 
-**Parameters for `sendPushNotificationData`:**
+**Parameters for `sendPushNotificationData({campaign, pid, isRetargeting?, additionalParameters?})`:**
 
-- `pushPayload`: The raw push notification payload. iOS locates the `af` block in it.
-- `androidCampaignData` (optional): `{campaign?, pid?, isRetargeting?, additionalParameters?}`. Android builds
-  an `AFPushData` from these fields and no longer reads the raw payload. Omitting this argument logs
-  a warning and reports an empty re-engagement on Android; iOS is unaffected. Returns `void` (fire-and-forget).
+Android-only — builds an `AFPushData` from these fields; there is no raw-payload argument. Omitting the object
+logs a warning and reports an empty re-engagement. Returns `void` (fire-and-forget).
 
 ## Method 2: JSON Method
 
@@ -244,8 +230,8 @@ const AppsflyerPushIntegration = () => {
       .catch((error) => console.error('Push path error:', error));
 
     // 3. Initialize AppsFlyer SDK (AFTER listeners and config)
-    // `initSdk` was removed in 7.0.0 — use `init(devKey, appId)` instead (see MIGRATION.md).
-    AppsFlyer.init('YOUR_DEV_KEY', 'YOUR_APP_ID');
+    // `initSdk` was removed in 7.0.0 — use `init({devKey, appId})` instead (see MIGRATION.md).
+    AppsFlyer.init({ devKey: 'YOUR_DEV_KEY', appId: 'YOUR_APP_ID' });
 
     // 4. Start AppsFlyer once the session is ready (see bridge-patterns.md §4)
     AppsFlyer.registerSessionReadyListener(() => {
@@ -254,15 +240,12 @@ const AppsflyerPushIntegration = () => {
 
     // 5. Set up push notification handlers
     const handlePushData = (payload) => {
-      // Android requires explicit campaign fields; iOS reads the raw payload
-      AppsFlyer.sendPushNotificationData(
-        payload,
-        {
-          campaign: payload?.af?.c,
-          pid: payload?.af?.pid,
-          isRetargeting: payload?.af?.is_retargeting === 'true',
-        }
-      );
+      // Android-only; iOS reads the raw payload through its own path
+      AppsFlyer.sendPushNotificationData({
+        campaign: payload?.af?.c,
+        pid: payload?.af?.pid,
+        isRetargeting: payload?.af?.is_retargeting === 'true',
+      });
     };
 
     // Background messages

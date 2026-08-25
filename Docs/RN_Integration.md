@@ -34,8 +34,8 @@ const onDeepLink = (res) => { /* ... */ };
 // before init(), on both platforms. See RN_API.md — Initialization Flow.
 AppsFlyer.registerDeepLinkListener({ onDeepLinking: onDeepLink });
 
-AppsFlyer.init('K2***********99', '41*****44');
-AppsFlyer.enableDebug(true);
+AppsFlyer.init({ devKey: 'K2***********99', appId: '41*****44' });
+AppsFlyer.enableDebug({ enabled: true });
 
 // Register remaining listeners synchronously, before init's promise settles
 AppsFlyer.registerConversionListener({

@@ -9,15 +9,15 @@ hidden: false
 ## Testing
 
 First, you need to enable debug mode for full logs from the SDK.
-To enable it, call `enableDebug(true)` — a dedicated call, separate from `init` (see
+To enable it, call `enableDebug({ enabled: true })` — a dedicated call, separate from `init` (see
 [RN_API.md — enableDebug](RN_API.md#enabledebug)):
 
 ```javascript
-AppsFlyer.init('UsxXxXxXxed', '78xXxXx35').then(
+AppsFlyer.init({ devKey: 'UsxXxXxXxed', appId: '78xXxXx35' }).then(
   (result) => console.log(result),
   (error) => console.error(error)
 );
-AppsFlyer.enableDebug(true);
+AppsFlyer.enableDebug({ enabled: true });
 ```
 
 ## Testing for iOS

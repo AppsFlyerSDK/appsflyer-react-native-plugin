@@ -18,7 +18,7 @@ Through a dedicated SDK API: Developers can pass Google's required consent data 
 ### Use CMP to collect consent data
 A CMP compatible with TCF v2.2/2.3 collects DMA consent data and stores it in NSUserDefaults (iOS) and SharedPreferences (Android). To enable the SDK to access this data and include it with every event, follow these steps:
 
-1. Call `AppsFlyer.enableTCFDataCollection(true)`
+1. Call `AppsFlyer.enableTCFDataCollection({ shouldCollect: true })`
 2. `init(devKey, appId)` and register listeners as usual (see [Initialization Flow](RN_API.md#initialization-flow)).
 3. Use the CMP to decide if you need the consent dialog in the current session to acquire the consent data. If you need the consent dialog move to step 4; otherwise move to step 5
 4. Get confirmation from the CMP that the user has made their consent decision and the data is available in NSUserDefaults/SharedPreferences
@@ -26,13 +26,13 @@ A CMP compatible with TCF v2.2/2.3 collects DMA consent data and stores it in NS
 ```javascript
 useEffect(() => {
   // TCF data collection
-  AppsFlyer.enableTCFDataCollection(true);
+  AppsFlyer.enableTCFDataCollection({ shouldCollect: true });
 
-  AppsFlyer.init('UxXxXxXxXd', '41*****44').then(
+  AppsFlyer.init({ devKey: 'UxXxXxXxXd', appId: '41*****44' }).then(
     (res) => console.log(res),
     (err) => console.log(err)
   );
-  AppsFlyer.enableDebug(true);
+  AppsFlyer.enableDebug({ enabled: true });
 
   AppsFlyer.registerSessionReadyListener(() => {
     // CMP Pseudocode
@@ -58,7 +58,7 @@ How to Set Consent Data:
    - If not stored, show a consent dialog to obtain user consent.
 2. Build a plain consent data object with the relevant parameters (see [Consent Data API](#consent-data-api) below).
 3. Pass the consent data to the SDK using AppsFlyer.setConsentData(consentData) inside `registerSessionReadyListener`'s callback, before calling `start()`.
-4. Initialize the SDK with `AppsFlyer.init(devKey, appId)` (see [Initialization Flow](RN_API.md#initialization-flow)).
+4. Initialize the SDK with `AppsFlyer.init({ devKey, appId })` (see [Initialization Flow](RN_API.md#initialization-flow)).
 
 #### Setting Consent Data for Users
 
@@ -69,11 +69,11 @@ If GDPR applies to the user, pass a plain object with the user's preferences.
 import AppsFlyer from 'react-native-appsflyer';
 
 useEffect(() => {
-    AppsFlyer.init('UxXxXxXxXd', '41*****44').then(
+    AppsFlyer.init({ devKey: 'UxXxXxXxXd', appId: '41*****44' }).then(
         res => console.log(res),
         err => console.log(err)
     );
-    AppsFlyer.enableDebug(true);
+    AppsFlyer.enableDebug({ enabled: true });
 
     AppsFlyer.registerSessionReadyListener(() => {
         // User has given consent

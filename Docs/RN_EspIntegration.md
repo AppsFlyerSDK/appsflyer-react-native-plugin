@@ -358,12 +358,12 @@ const initializeAppsFlyer = () => {
   AppsFlyer.registerDeepLinkListener({ onDeepLinking: handleEspDeepLink });
 
   // 2. Initialize SDK
-  // `initSdk` was removed in 7.0.0 — use `init(devKey, appId)` instead (see MIGRATION.md).
+  // `initSdk` was removed in 7.0.0 — use `init({devKey, appId})` instead (see MIGRATION.md).
   const devKey = Platform.OS === 'ios' 
     ? "YOUR_IOS_DEV_KEY"
     : "YOUR_ANDROID_DEV_KEY";
 
-  AppsFlyer.init(devKey, "YOUR_IOS_APP_ID").then(
+  AppsFlyer.init({ devKey, appId: "YOUR_IOS_APP_ID" }).then(
     () => {
       console.log("AppsFlyer SDK initialized successfully!");
     },

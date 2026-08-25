@@ -117,8 +117,8 @@ The list of available methods for this plugin is described below.
 Recommended call order for a 7.0.0 (RPC) integration:
 
 1. `registerDeepLinkListener` — call this *before* `init()`, on **both** platforms. See "Why the order matters" below.
-2. `init(devKey, appId)`
-3. `enableDebug(true)` — not order-critical relative to `init`; call it as early as possible (even before `init`) to get full debug logs from the start of the session
+2. `init({devKey, appId})`
+3. `enableDebug({enabled: true})` — not order-critical relative to `init`; call it as early as possible (even before `init`) to get full debug logs from the start of the session
 4. `registerConversionListener` — **synchronously**, in the same call stack as `init`, not inside `init()`'s `.then()`
 5. `setCustomerUserId(...)` — if you need the CUID associated with the install event
 6. `registerSessionReadyListener(...)` — **synchronously**, same rule as step 4

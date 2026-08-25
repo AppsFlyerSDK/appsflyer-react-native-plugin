@@ -126,7 +126,7 @@ Start the SDK instance to observe transactions. </br>
         StoreKitVersion,
         } from 'react-native-appsflyer';
 
-        AppsFlyer.init(devKey, appId).then(...);
+        AppsFlyer.init({ devKey, appId }).then(...);
 
         AppsFlyer.registerSessionReadyListener(() => {
           AppsFlyer.start();

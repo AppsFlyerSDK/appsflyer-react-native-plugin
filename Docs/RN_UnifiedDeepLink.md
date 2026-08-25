@@ -47,15 +47,15 @@ const onDeepLink = (res) => {
 
 AppsFlyer.registerDeepLinkListener({ onDeepLinking: onDeepLink });
 
-AppsFlyer.init('K2***********99', '41*****44').then(
+AppsFlyer.init({ devKey: 'K2***********99', appId: '41*****44' }).then(
   (result) => console.log(result),
   (error) => console.error(error)
 );
 
-AppsFlyer.enableDebug(false);
+AppsFlyer.enableDebug({ enabled: false });
 ```
 
 **Note on Android:** On Android, the `deepLink` payload may be delivered as a JSON string (requiring `JSON.parse`) rather than an object, while iOS delivers it as an object. Ensure your code handles both cases, e.g., by checking the type before accessing fields.
 
-**Note:** `initSdk(options, success, error)` (with `isDebug`, `onInstallConversionDataListener`, `onDeepLinkListener` options) is **removed in 7.0.0** with no adapter. Use `init(devKey, appId)` + `enableDebug(enabled)` instead, and register `registerDeepLinkListener` before `init()` as shown above. See [RN_API.md](RN_API.md#initialization-flow) for the full recommended call order.
+**Note:** `initSdk(options, success, error)` (with `isDebug`, `onInstallConversionDataListener`, `onDeepLinkListener` options) is **removed in 7.0.0** with no adapter. Use `init({devKey, appId})` + `enableDebug({enabled})` instead, and register `registerDeepLinkListener` before `init()` as shown above. See [RN_API.md](RN_API.md#initialization-flow) for the full recommended call order.
 
