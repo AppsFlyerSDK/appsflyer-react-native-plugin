@@ -72,7 +72,7 @@ public class AppDelegate: ExpoAppDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-    AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
+    AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)
     //...
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

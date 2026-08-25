@@ -84,7 +84,6 @@ For URI Scheme setup, see the [guide](https://dev.appsflyer.com/hc/docs/dl_andro
 In order to record retargeting and use the `registerDeepLinkListener`/UDL callback in iOS (`onAppOpenAttribution` was removed in 7.0.0 and merged into `onDeepLink`, which was later renamed to `registerDeepLinkListener` — see MIGRATION.md), the app needs to forward opened URLs / Universal Links / cold-start launch options to the native SDK. This is done entirely in your app's native **AppDelegate** — there is no JavaScript API for this (`handleOpenURL`/`handleOpenUrl`/`continueUserActivity`/`handleLaunchOptions` are not exposed by this plugin's JS surface):
 
 ```swift
-import AppsFlyerLib
 import react_native_appsflyer
 
 // Open Universal Links
@@ -108,15 +107,13 @@ func application(
 
 func application(_ application: UIApplication,
                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-  AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
+  AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)
   // ... rest of your launch setup ...
   return true
 }
 ```
 
-`AppsFlyerLib` is already available as a transitive dependency of this plugin (via the vendored `AppsFlyerRPC` pod) — no extra `pod` entry is needed to `import AppsFlyerLib` in your own AppDelegate.
-
-Route `continueUserActivity`/`handleOpen` through `AppsFlyerAttribution.shared` (exported by `react_native_appsflyer`), not `AppsFlyerLib.shared()` directly. A cold-start Universal Link reaches these AppDelegate callbacks before RN's JS thread has run `init()`, i.e. before `AppsFlyerLib` has a devKey/appId — calling it directly at that point can misfire the same way an early `registerDeepLinkListener` call does (see `known-issues-kb.md`). `AppsFlyerAttribution` buffers the call and replays it once `init()`'s native `init` RPC completes.
+Route all three calls through `AppsFlyerAttribution.shared` (exported by `react_native_appsflyer`), not `AppsFlyerLib.shared()` directly — one import covers all three AppDelegate hooks. `continueUserActivity`/`handleOpen` also buffer: a cold-start Universal Link reaches these AppDelegate callbacks before RN's JS thread has run `init()`, i.e. before `AppsFlyerLib` has a devKey/appId — calling it directly at that point can misfire the same way an early `registerDeepLinkListener` call does (see `known-issues-kb.md`). `AppsFlyerAttribution` buffers those two calls and replays them once `start()`'s native RPC succeeds; `handleLaunchOptions` has no such hazard and always forwards immediately.
 
 **Expo apps**: the `openURL`/`continueUserActivity` and `handleLaunchOptions` forwarding above is auto-injected into your generated AppDelegate by this plugin's config plugin at `expo prebuild` time (see [Expo Deep Link Integration](/Docs/RN_ExpoDeepLinkIntegration.md)) — you don't need to add it by hand for either ObjC or Swift AppDelegate templates.
 

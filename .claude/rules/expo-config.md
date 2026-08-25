@@ -25,9 +25,10 @@ These are Expo Config Plugins — they run at `expo prebuild` time to modify nat
 Starting with Expo SDK 52 / RN 0.76, the default AppDelegate is **Swift** (not Objective-C).
 `withAppsFlyerIos.js`'s `modifySwiftAppDelegate` handles this case explicitly (string-matches the
 Expo SDK default Swift template for `didFinishLaunchingWithOptions`/`openURL`/`continueUserActivity`
-and injects `handleLaunchOptions`/`handleOpen`/`continue` calls) — verified against the real
-`expo prebuild` output in `demos/appsflyer-expo-app`. `modifyObjcAppDelegate` handles the legacy
-ObjC template the same way.
+and injects `handleLaunchOptions`/`handleOpen`/`continueUserActivity` calls, all via
+`AppsFlyerAttribution.shared` — one `import react_native_appsflyer`, no `AppsFlyerLib` import needed)
+— verified against the real `expo prebuild` output in `demos/appsflyer-expo-app`. `modifyObjcAppDelegate`
+handles the legacy ObjC template the same way.
 
 Both matchers are exact-string-match against one specific template shape. If Expo or RN changes
 the default AppDelegate boilerplate again, the matcher silently misses (falls through to

@@ -19,9 +19,9 @@ See [Deep Linking Integration](RN_DeepLinkIntegrate.md) for concepts — this do
 2. **iOS AppDelegate wiring:** The Expo config plugin automatically injects the required AppsFlyer deep-link handlers into your app's AppDelegate at `expo prebuild` time. For both ObjC and Swift templates, it adds:
    - `AppsFlyerAttribution.shared.handleOpen(url:options:)` into `openURL`
    - `AppsFlyerAttribution.shared.continueUserActivity(userActivity:restorationHandler:)` into `continueUserActivity` (forwarding the real `restorationHandler`)
-   - `AppsFlyerLib.shared().handleLaunchOptions(launchOptions)` into `didFinishLaunchingWithOptions`
+   - `AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)` into `didFinishLaunchingWithOptions`
 
-   `openURL`/`continueUserActivity` route through `AppsFlyerAttribution.shared`, not `AppsFlyerLib.shared()` directly — see [Deep Linking Integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup) for why (buffers calls that arrive before `init()` has configured the native SDK).
+   All three route through `AppsFlyerAttribution.shared`, not `AppsFlyerLib.shared()` directly — one import (`react_native_appsflyer`) covers the whole AppDelegate. See [Deep Linking Integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup) for why `openURL`/`continueUserActivity` buffer (calls that arrive before `start()` has succeeded natively); `handleLaunchOptions` has no such hazard and forwards immediately.
    
    See [Expo Installation](RN_ExpoInstallation.md) for full details.
 

@@ -39,7 +39,7 @@ To add a new SDK capability: expose it in the native `AppsFlyerRPCBridge` handle
 
 Note also: by the time a request reaches `RNAppsFlyerImpl.executeRpc`, `requestJson`'s `method` field is already the platform's *resolved* wire name — `@appsflyer-sdk/js-core-plugin`'s `rpc-resolver` does this in JS before the call ever reaches native (confirmed in `__tests__/rpc-wire-contract.test.js`'s header comment) — e.g. `"initialize"`, `"registerDeeplinkListener"` (lowercase `l`), never the canonical `"init"`/`"registerDeepLinkListener"`. `"start"` happens to be unchanged on both platforms, so no such gotcha there, but any *other* method-name comparison added to this file must match against the resolved name. `canonicalToIOSMethod` in `RNAppsFlyerImpl.swift` is dead code left over from before that migration.
 
-App-side AppDelegates (and the Expo config plugin's injected template, `expo/withAppsFlyerIos.js`) must route through `AppsFlyerAttribution.shared`, not `AppsFlyerLib.shared()` directly, for these two calls only — `handleLaunchOptions` has no such ordering dependency and stays a direct `AppsFlyerLib.shared()` call.
+App-side AppDelegates (and the Expo config plugin's injected template, `expo/withAppsFlyerIos.js`) must route through `AppsFlyerAttribution.shared`, not `AppsFlyerLib.shared()` directly, for all three AppDelegate calls (`continueUserActivity`, `handleOpen`, and `handleLaunchOptions`) — one import (`react_native_appsflyer`) covers the whole AppDelegate. `handleLaunchOptions` has no ordering dependency, so `AppsFlyerAttribution.handleLaunchOptions` is a plain unbuffered pass-through to `AppsFlyerLib.shared()`, unlike the other two.
 
 ## 5. IDFA / strict mode
 

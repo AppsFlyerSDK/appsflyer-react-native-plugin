@@ -4,11 +4,11 @@ const fs = require('fs');
 const path = require('path');
 
 function modifyObjcAppDelegate(appDelegate) {
-  const RNAPPSFLYER_IMPORT = `#import <AppsFlyerLib/AppsFlyerLib.h>\n#import <react_native_appsflyer/react_native_appsflyer-Swift.h>\n`;
+  const RNAPPSFLYER_IMPORT = `#import <react_native_appsflyer/react_native_appsflyer-Swift.h>\n`;
   const RNAPPSFLYER_DID_FINISH_LAUNCHING_IDENTIFIER = `- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions`;
   const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER = `- (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {`;
   const RNAPPSFLYER_OPENURL_IDENTIFIER = `- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {`;
-  const RNAPPSFLYER_DID_FINISH_LAUNCHING_CODE = `[[AppsFlyerLib shared] handleLaunchOptions:launchOptions];\n`;
+  const RNAPPSFLYER_DID_FINISH_LAUNCHING_CODE = `[[AppsFlyerAttribution shared] handleLaunchOptions:launchOptions];\n`;
   const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE = `[[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];\n`;
   const RNAPPSFLYER_OPENURL_CODE = `[[AppsFlyerAttribution shared] handleOpen:url options:options];\n`;
 
@@ -37,14 +37,13 @@ function modifyObjcAppDelegate(appDelegate) {
 }
 
 function modifySwiftAppDelegate(appDelegateContents) {
-  const SWIFT_IMPORT = 'import AppsFlyerLib';
   const SWIFT_BRIDGE_IMPORT = 'import react_native_appsflyer';
 
   const SWIFT_DID_FINISH_LAUNCHING_IDENTIFIER = `  public override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {`;
-  const RNAPPSFLYER_SWIFT_DID_FINISH_LAUNCHING_CODE = 'AppsFlyerLib.shared().handleLaunchOptions(launchOptions)';
+  const RNAPPSFLYER_SWIFT_DID_FINISH_LAUNCHING_CODE = 'AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)';
 
   const SWIFT_OPENURL_IDENTIFIER = `  public override func application(
     _ app: UIApplication,
@@ -63,9 +62,6 @@ function modifySwiftAppDelegate(appDelegateContents) {
   // userActivity to extract the OneLink URL, so pass nil; the real restorationHandler goes to RCTLinkingManager below.
   const RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE = 'AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: nil)';
 
-  if (!appDelegateContents.includes(SWIFT_IMPORT)) {
-    appDelegateContents = `${SWIFT_IMPORT}\n${appDelegateContents}`;
-  }
   if (!appDelegateContents.includes(SWIFT_BRIDGE_IMPORT)) {
     appDelegateContents = `${SWIFT_BRIDGE_IMPORT}\n${appDelegateContents}`;
   }
@@ -93,12 +89,11 @@ function modifySwiftAppDelegate(appDelegateContents) {
 Automatic Swift AppDelegate modification failed.
 Please add AppsFlyer integration manually:
 
-1. Add these imports:
-  import AppsFlyerLib
+1. Add this import:
   import react_native_appsflyer
 
 2. Add this to your didFinishLaunchingWithOptions method:
-  AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
+  AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)
 
 3. Add this to your openURL method:
   AppsFlyerAttribution.shared.handleOpen(url, options: options)

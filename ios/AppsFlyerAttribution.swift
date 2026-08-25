@@ -1,7 +1,7 @@
 import Foundation
 import AppsFlyerLib
 
-/// Buffers AppDelegate-level deep-link calls (cold-start Universal Link, delivered before RN's JS thread runs `initSdk`) until `RNAppsFlyerImpl` flips `bridgeReady` -- see `native-ios.md` §4a.
+/// AppDelegate-facing facade for all three AppsFlyer lifecycle forwards (one import for callers); `continueUserActivity`/`handleOpen` buffer until `RNAppsFlyerImpl` flips `bridgeReady`, `handleLaunchOptions` has no such hazard and always forwards immediately -- see `native-ios.md` §4a.
 @objc(AppsFlyerAttribution)
 public final class AppsFlyerAttribution: NSObject {
 
@@ -35,6 +35,10 @@ public final class AppsFlyerAttribution: NSObject {
             return
         }
         AppsFlyerLib.shared().handleOpen(url, options: options)
+    }
+
+    @objc public func handleLaunchOptions(_ launchOptions: [AnyHashable: Any]?) {
+        AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
     }
 
     // url+options takes priority over a buffered userActivity, matching AppsFlyerLib's own precedence.
