@@ -188,9 +188,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ -z "$VERSION" || -z "$IOS_VER" || -z "$AND_VER" || -z "$BRIDGE_VER" ]]; then
-            echo "Missing required inputs"; exit 1
-          fi
+          for pair in "rn_version:$VERSION" "ios_sdk_version:$IOS_VER" "android_sdk_version:$AND_VER" "android_plugin_bridge_version:$BRIDGE_VER"; do
+            if [[ -z "${pair#*:}" ]]; then
+              echo "Missing required input: ${pair%%:*}"; exit 1
+            fi
+          done
 
           # RN version format: X.Y.Z-rcN (no +build)
           if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+$ ]]; then

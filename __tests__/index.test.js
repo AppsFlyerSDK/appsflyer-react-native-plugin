@@ -441,9 +441,8 @@ describe("Test AppsFlyer API's", () => {
 	});
 
 	test('it calls AppsFlyer.validateAndLogInAppPurchase on iOS — nests purchase.* under product/transaction', () => {
-		// NOTE: AFPurchaseType.ONE_TIME_PURCHASE is stale snake_case vs the new camelCase schema enum — flagged for index.ts owner, not fixed here.
 		AppsFlyer.validateAndLogInAppPurchase({
-			purchase: { purchaseType: 'oneTimePurchase', productId: 'test_product_456', transactionId: 'test_transaction_456' },
+			purchase: { purchaseType: AFPurchaseType.ONE_TIME_PURCHASE, productId: 'test_product_456', transactionId: 'test_transaction_456' },
 		});
 		expect(lastPayload()).toEqual({
 			method: 'validateAndLogInAppPurchase',
@@ -454,7 +453,6 @@ describe("Test AppsFlyer API's", () => {
 		});
 	});
 
-	// Uses the schema's real value ('oneTimePurchase'), not the stale AFPurchaseType constant — see the note above.
 	test('validateAndLogInAppPurchase maps purchaseType per platform (Android: snake_case)', () => {
 		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
 		androidAppsFlyer.validateAndLogInAppPurchase({
@@ -479,7 +477,7 @@ describe("Test AppsFlyer API's", () => {
 
 	test('AFPurchaseType enum values are correct', () => {
 		expect(AFPurchaseType.SUBSCRIPTION).toBe('subscription');
-		expect(AFPurchaseType.ONE_TIME_PURCHASE).toBe('one_time_purchase');
+		expect(AFPurchaseType.ONE_TIME_PURCHASE).toBe('oneTimePurchase');
 	});
 
 	test('MEDIATION_NETWORK enum values are correct', () => {

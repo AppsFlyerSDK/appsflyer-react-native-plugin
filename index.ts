@@ -207,17 +207,19 @@ AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo = (callback) =
     throw new Error("The callback must be a function");
   }
 
-  return addValidationListener(
+  return purchaseConnectorEventEmitter.addListener(
     AppsFlyerConstants.DID_RECEIVE_PURCHASE_REVENUE_VALIDATION_INFO,
-    (info: any) => info,
     (info: any) => {
-      if (info.error) {
-        callback(undefined, info.error);
-      } else {
-        callback(JSON.stringify(info) as any, undefined);
+      try {
+        if (info.error) {
+          callback(undefined, info.error);
+        } else {
+          callback(JSON.stringify(info) as any, undefined);
+        }
+      } catch (error) {
+        console.error("Failed to handle iOS validation result:", error);
       }
-    },
-    "Failed to handle iOS validation result:"
+    }
   );
 };
 
@@ -293,7 +295,7 @@ export default AppsFlyer;
 
 export const AFPurchaseType = {
   SUBSCRIPTION: "subscription",
-  ONE_TIME_PURCHASE: "one_time_purchase",
+  ONE_TIME_PURCHASE: "oneTimePurchase",
 } as const;
 
 // Pre-7.0.0 these came from the legacy native module's getConstants(); TurboModule has no equivalent, so they're plain JS constants now.

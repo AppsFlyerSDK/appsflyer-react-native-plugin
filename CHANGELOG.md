@@ -13,6 +13,7 @@ Upgrading from 6.18.0? See [MIGRATION.md](MIGRATION.md) for the full before/afte
 - React Native >> `ConversionData.data.is_first_launch` is now a real boolean, not the string `"true"`/`"false"`
 - React Native >> Fix `stop(false)` never resuming the SDK on Android — the `shouldStop` flag wasn't sent and Android's RPC parser defaults the missing key to `true`, so a stopped SDK stayed stopped
 - React Native >> Fix `logAdRevenue`'s `mediationNetwork` silently failing on Android for several `MEDIATION_NETWORK` constants (`APPLOVIN_MAX`, `GOOGLE_ADMOB`, `TOPON_PTE`, `CUSTOM_MEDIATION`, `DIRECT_MONETIZATION_NETWORK`) — Android's RPC layer requires an exact string match with no normalization, while iOS lowercases and strips underscores before matching. The constant is now resolved to each platform's actual required wire value before dispatch — no change to the public `MEDIATION_NETWORK` values themselves
+- React Native >> Fix `AFPurchaseType.ONE_TIME_PURCHASE` exporting the wrong-layer value (`"one_time_purchase"`, Android's wire format) instead of the shared plugin-core `publicApi` contract (`"oneTimePurchase"`) — broke `validateAndLogInAppPurchase` for one-time purchases on iOS, which expects camelCase and applies no normalization; Android was unaffected since its own transform already converts camelCase to snake_case at dispatch
 - React Native >> Strict mode (`$RNAppsFlyerStrictMode=true`) now pulls `AppsFlyerRPC/Strict`
 
 ### Breaking changes
