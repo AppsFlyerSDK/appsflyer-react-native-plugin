@@ -355,7 +355,7 @@ const initializeAppsFlyer = () => {
   console.log('Initializing AppsFlyer with ESP support...');
 
   // 1. Set up deep link listener — must be registered before init()
-  AppsFlyer.registerDeepLinkListener(handleEspDeepLink);
+  AppsFlyer.registerDeepLinkListener({ onDeepLinking: handleEspDeepLink });
 
   // 2. Initialize SDK
   // `initSdk` was removed in 7.0.0 — use `init(devKey, appId)` instead (see MIGRATION.md).
@@ -376,14 +376,14 @@ const initializeAppsFlyer = () => {
   configureESPDomains();
 
   // 4. Set up conversion data listener — after init(), synchronously
-  AppsFlyer.registerConversionListener(
-    (res) => {
+  AppsFlyer.registerConversionListener({
+    onConversionDataSuccess: (res) => {
       console.log('Conversion Data:', res);
     },
-    (error) => {
+    onConversionDataFail: (error) => {
       console.error('Conversion Data Error:', error);
-    }
-  );
+    },
+  });
 
   // 5. Start the SDK once the session is ready — the SDK never auto-starts (see RN_API.md#start)
   AppsFlyer.registerSessionReadyListener(() => {

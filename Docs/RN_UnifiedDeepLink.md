@@ -45,7 +45,7 @@ const onDeepLink = (res) => {
       }
 };
 
-AppsFlyer.registerDeepLinkListener(onDeepLink);
+AppsFlyer.registerDeepLinkListener({ onDeepLinking: onDeepLink });
 
 AppsFlyer.init('K2***********99', '41*****44').then(
   (result) => console.log(result),

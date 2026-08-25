@@ -69,13 +69,14 @@ Or with nested structure:
 import AppsFlyer from 'react-native-appsflyer';
 
 // 1. Handle conversions and attribution (BEFORE init)
-AppsFlyer.registerConversionListener((data) => {
-  console.log('Install conversion data:', data);
+AppsFlyer.registerConversionListener({
+  onConversionDataSuccess: (data) => console.log('Install conversion data:', data),
+  onConversionDataFail: (error) => console.error('Conversion data error:', error),
 });
 
 // 2. Handle deep links (BEFORE init)
-AppsFlyer.registerDeepLinkListener((data) => {
-  console.log('Deep link data:', data);
+AppsFlyer.registerDeepLinkListener({
+  onDeepLinking: (data) => console.log('Deep link data:', data),
 });
 
 // 3. Configure push notification deep link path (BEFORE init)
@@ -228,12 +229,13 @@ import messaging from '@react-native-firebase/messaging';
 const AppsflyerPushIntegration = () => {
   useEffect(() => {
     // 1. Set up attribution and deep link handlers (BEFORE init)
-    AppsFlyer.registerConversionListener((data) => {
-      console.log('Conversion data:', data);
+    AppsFlyer.registerConversionListener({
+      onConversionDataSuccess: (data) => console.log('Conversion data:', data),
+      onConversionDataFail: (error) => console.error('Conversion data error:', error),
     });
 
-    AppsFlyer.registerDeepLinkListener((data) => {
-      console.log('Deep link:', data);
+    AppsFlyer.registerDeepLinkListener({
+      onDeepLinking: (data) => console.log('Deep link:', data),
     });
 
     // 2. Configure push notification deep link path (BEFORE init)
