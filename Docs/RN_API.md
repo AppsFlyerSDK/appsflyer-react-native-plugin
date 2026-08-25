@@ -626,18 +626,18 @@ appsFlyer.setUserLastName({ lastName: 'Doe' });
 ### setUserFbLoginId
 `setUserFbLoginId(params) : Promise<void>`
 
-Set the user's Facebook login ID. The ID is sent as a JSON number — iOS parses it with `requireInt64` and rejects a JSON string, so a numeric string is coerced for you.
+Set the user's Facebook login ID. Facebook login IDs run 15-18 digits, past JavaScript's 53-bit safe-integer range — a `number` that large has already lost precision by the time it reaches this call. Pass a numeric **string** instead; native parses it directly with full 64-bit precision.
 
 | parameter       | type              | description                |
 | ----------      |-------------------|------------------          |
-| fbLoginId       | string \| number  | numeric Facebook login ID  |
+| fbLoginId       | string \| number  | numeric Facebook login ID — use a string for IDs at or near 2^53 |
 
 
 *Example:*
 
 ```javascript
-appsFlyer.setUserFbLoginId({ fbLoginId: 1234567890 });
-appsFlyer.setUserFbLoginId({ fbLoginId: '1234567890' }); // coerced to a number
+appsFlyer.setUserFbLoginId({ fbLoginId: '1234567890' }); // safe for any length
+appsFlyer.setUserFbLoginId({ fbLoginId: 1234567890 });   // fine only for short IDs well under 2^53
 ```
 
 ---
