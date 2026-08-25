@@ -89,7 +89,7 @@ dependencies {
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.2')}"
     if (includeConnector){
-        implementation 'com.appsflyer:purchase-connector:2.2.0'
+        implementation 'com.appsflyer:purchase-connector:2.3.0'
     }
     implementation platform('com.appsflyer:af-android-sdk-bom:7.0.1')
     implementation 'com.appsflyer:af-android-sdk'
