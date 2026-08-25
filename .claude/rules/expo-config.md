@@ -5,11 +5,9 @@ paths:
 
 # Expo config plugin rules
 
-Scope: `expo/` directory — `withAppsFlyer.js`, `withAppsFlyerIos.js`, `withAppsFlyerAndroid.js`.
+Scope: `expo/withAppsFlyer.js`, `withAppsFlyerIos.js`, `withAppsFlyerAndroid.js`. These run at `expo prebuild` time to modify native project files; the host app must have New Architecture enabled (not enforced by the plugin itself).
 
-**7.0.x context**: The core `RNAppsFlyer` module is now a TurboModule. The Expo config plugin's job (modifying AppDelegate / AndroidManifest at prebuild time) is unchanged, but the **New Architecture must be enabled** in the host app — the plugin itself doesn't enforce this at prebuild time. Validation of the config plugin against a New-Architecture-only baseline is an open task (T064).
-
-## 1. Config plugin structure
+## Structure
 
 ```
 expo/
@@ -18,50 +16,32 @@ expo/
 └── withAppsFlyerAndroid.js   ← Modifies AndroidManifest.xml
 ```
 
-These are Expo Config Plugins — they run at `expo prebuild` time to modify native project files.
+## Swift AppDelegate support
 
-## 2. Swift AppDelegate support
+`withAppsFlyerIos.js`'s `modifySwiftAppDelegate` string-matches Expo's default Swift AppDelegate template (`didFinishLaunchingWithOptions`/`openURL`/`continueUserActivity`) and injects `handleLaunchOptions`/`handleOpen`/`continueUserActivity` calls via `AppsFlyerAttribution.shared` (one `import react_native_appsflyer`, no `AppsFlyerLib` import needed). `modifyObjcAppDelegate` handles the legacy ObjC template the same way.
 
-Starting with Expo SDK 52 / RN 0.76, the default AppDelegate is **Swift** (not Objective-C).
-`withAppsFlyerIos.js`'s `modifySwiftAppDelegate` handles this case explicitly (string-matches the
-Expo SDK default Swift template for `didFinishLaunchingWithOptions`/`openURL`/`continueUserActivity`
-and injects `handleLaunchOptions`/`handleOpen`/`continue` calls) — verified against the real
-`expo prebuild` output in `demos/appsflyer-expo-app`. `modifyObjcAppDelegate` handles the legacy
-ObjC template the same way.
+Both matchers are exact-string-match against one template shape — if Expo/RN changes the default AppDelegate boilerplate, the matcher silently misses (falls through to `WarningAggregator.addWarningIOS`, not a build failure) instead of adapting. Re-verify the matched strings against a fresh `expo prebuild` output whenever bumping the supported Expo SDK version.
 
-Both matchers are exact-string-match against one specific template shape. If Expo or RN changes
-the default AppDelegate boilerplate again, the matcher silently misses (falls through to
-`WarningAggregator.addWarningIOS`, not a build failure) rather than adapting — re-verify the
-identifier strings against a fresh `expo prebuild` output whenever bumping the supported Expo SDK
-version.
+## Manifest merge is not idempotent
 
-## 3. Manifest merge duplication
+`withAppsFlyerAndroid.js` appends `tools:replace` entries to `AndroidManifest.xml` without checking for existing entries — repeated `expo prebuild` (without `--clean`) duplicates them and breaks the Android build. Always check if the entry exists before appending.
 
-`withAppsFlyerAndroid.js` appends `tools:replace` entries to `AndroidManifest.xml`. Running `expo prebuild` multiple times (without `--clean`) causes **duplicate entries** that break the Android build (#672).
+## Expo Go incompatibility
 
-Fix pattern: always check if the entry exists before appending. Use idempotent modifications.
+Requires native modules unavailable in Expo Go — only works in development builds (`eas build --profile development`) or bare workflow.
 
-## 4. Expo Go incompatibility
+## No test coverage
 
-The plugin requires native modules unavailable in Expo Go. Only works in development builds (`eas build --profile development`) or bare workflow. This is documented but users miss it repeatedly (#542).
+Zero test coverage on the config plugins. Manual test with `expo prebuild --clean` on both platforms after any change.
 
-## 5. No test coverage
+## Peer dependency
 
-The Expo config plugins have **zero test coverage**. When modifying these files, manual testing with `expo prebuild --clean` on both platforms is required. Consider adding unit tests that mock the Expo config plugin API.
+`expo` is an optional peer dependency — guard all Expo-specific imports/config so the plugin works without Expo installed.
 
-## 6. Peer dependency
-
-`expo` is declared as an optional peer dependency. The plugin must work without Expo installed — guard all Expo-specific imports and config.
-
-## 7. Testing changes
+## Testing changes
 
 ```bash
-# Clean prebuild (recommended)
 cd demos/demo && npx expo prebuild --clean
-
-# Verify Android manifest
 cat android/app/src/main/AndroidManifest.xml | grep -A5 "appsflyer"
-
-# Verify iOS AppDelegate
-cat ios/demo/AppDelegate.m  # or AppDelegate.swift for Expo 52+
+cat ios/demo/AppDelegate.swift  # or AppDelegate.m pre-Expo-52
 ```

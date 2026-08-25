@@ -1,186 +1,118 @@
 # Known issues knowledge base
 
-Issue-based KB derived from real GitHub issues. Reference when debugging user reports, reviewing PRs, or adding new features.
+Issue-based KB derived from real GitHub issues. Reference when debugging user reports, reviewing PRs, or adding new features. Resolved issues are kept only where the root cause explains a non-obvious current constraint — otherwise they're cut once fixed.
 
-## Deep linking (62 issues — #1 category)
+## Bridge architecture: no listener-registration buffer
+
+Both native bridges used to hold `init`/listener-registration RPCs in a JS-side queue until `init` resolved, on the assumption native silently drops early registrations. That assumption was wrong: registration just assigns a delegate/callback on the persistent native SDK singleton, confirmed against native RPC source on both platforms — it's init-order-independent by design. The buffer was removed on both platforms.
+
+**Do not re-add a buffer/gate on either platform** without first confirming an actual native regression. `bridge-patterns.md`, `native-ios.md`, and `native-android.md` all point here instead of re-explaining this.
+
+**Real exception** (native-side effect, not a buffering problem): Android `registerDeepLinkListener`'s pre-init requirement, below.
+
+## Deep linking
 
 ### Listener not firing
-**Issues:** #650, #647, #630, #305, #292
-**Root cause:** `onDeepLink` registered after `initSdk`, or native AppDelegate/MainActivity setup missing.
-**Fix:** Register listeners before `initSdk`. Verify `continueUserActivity`/`openURL` in AppDelegate, intent filters in AndroidManifest.
-**Test:** Killed state → open deep link → verify callback fires within 5s.
+**Root cause:** `onDeepLink`/`registerDeepLinkListener` registered after `init`, or native AppDelegate/MainActivity setup missing.
+**Fix:** Register listeners before `init`. Verify `continueUserActivity`/`openURL` in AppDelegate, intent filters in AndroidManifest.
 
 ### Deferred deep link not working
-**Issues:** #650 (Android), #305 (iOS)
-**Root cause:** Conversion data round-trip is slow or fails. No "completed with no result" callback.
-**Fix:** Use `onInstallConversionData` as fallback. Check `is_first_launch` flag.
+**Root cause:** Conversion data round-trip is slow or fails; no "completed with no result" callback.
+**Fix:** Use `onInstallConversionData` as fallback. Check `is_first_launch`.
 
 ### Inconsistent payload shape
-**Issues:** #292, #242
 **Root cause:** Android returns stringified JSON where iOS returns an object in some versions.
-**Fix:** Always `JSON.parse` if typeof is string. Type definitions should reflect the union.
+**Fix:** Always `JSON.parse` if `typeof` is string. Type definitions should reflect the union.
 
-### Android `registerDeepLinkListener`-after-`init()` is safe in this plugin despite official "register before init" guidance — but only because of a lifecycle-timing gap, not because the native call is truly order-insensitive
-**Issues:** discovered while explaining the RN Android deep-link flow (2026-08-13), verified against the vendored native SDK source (`/Users/Amit.Levy/appsflyer-android-sdk/`)
-**Root cause (three layers, all confirmed against source):**
-1. `AppsFlyerLibCore.init()` (`AppsFlyerLibCore.java:513`) never touches `AFDeepLinkManager`/its `listener` field — only `setConversionDataListener(...)` is called, so unlike the conversion-listener `handleInit` bug above, there's no init-time wipe risk for deep links either order.
-2. But `AFDeepLinkManager.onDeepLinking()`/`onDeepLinkingSuccess()`/`onDeepLinkingError()` (`AFDeepLinkManager.java:239-267`) all guard on `if (listener != null)` with **zero buffering** — a result that arrives while `listener` is still null is dropped permanently. The Android team's "register before init" advice is a real constraint, not just conservative folklore.
-3. The thing that actually runs that check, `AFDeepLinkManager.unifiedDeepLinking(...)`, is called only from `AppsflyerAndroidLifecycleListener.onBecameForeground()` / `.onActivityCreatedWithDeeplink()` (`AppsflyerAndroidLifecycleListener.kt:19,29`) — **never from `init()` directly**. `onBecameForeground` is gated by the same `AndroidLifecycleManagerImpl.registerLifecycleListener()` mechanism already documented in the session-ready entry below: it only backfills a missed `onActivityResumed` transition when the init-time context is literally an `Activity`. `RNAppsFlyerModule.kt` passes `reactApplicationContext`, never an `Activity`, so the backfill never applies.
-**Impact:** For a normal single-Activity RN app, JS (where `init()`/`registerDeepLinkListener()` run) starts only after the host Activity's first `onResume` — the resume the backfill would have needed to replay. Because the backfill can't apply, `onBecameForeground` (and therefore the `listener != null` check) doesn't fire until a **second** real resume (background→foreground, or a second Activity). `init()` and `subscribeForDeepLink()` dispatch from JS within the same tick, so the listener is essentially always attached long before that second resume can happen — that margin, not any order-independence in the native call itself, is what makes "register after init" work in practice here.
-**Not fixable/not broken from this repo:** this is emergent from a lifecycle gap already tracked (session-ready entry below), not a separate bug.
-**Caveat — narrower but real edge case:** `onActivityCreatedWithDeeplink` (for "trampoline activities that finish before onResume") is a separate, earlier trigger not covered by this margin. If a host app's launcher Activity finishes in `onCreate` before ever reaching `onResume`, the race the Android team warns about would actually apply. Not the standard RN launch pattern, but worth checking if a deep-link report ever comes from an app with a trampoline/splash launcher Activity.
-**Decision (2026-08-13):** stopped relying on this timing margin. Docs (`RN_API.md`, `RN_UnifiedDeepLink.md`, `RN_Integration.md`) and the three sample apps (`example`, `demos/appsflyer-expo-app`, `demos/appsflyer-react-native-app`) now register `registerDeepLinkListener` *before* `init()` on Android via `Platform.OS === 'android'`, matching the Android team's official guidance instead of depending on the RN launch-order accident above — this also covers the trampoline-Activity caveat, which the margin never did. iOS is unaffected and keeps registering after `init()` per the entry below. See `bridge-patterns.md` §4 for the platform-split rule.
+### Android `registerDeepLinkListener` must be called before `init()` — still true, no native buffering
+**Root cause:** `AFDeepLinkManager`'s `onDeepLinking()`/`onDeepLinkingSuccess()`/`onDeepLinkingError()` guard on `if (listener != null)` with zero buffering — a result arriving while `listener` is still null is dropped permanently. Real constraint, not folklore.
+**Fix:** Register before `init()`, both platforms (canonical order in `bridge-patterns.md`).
 
-### iOS deferred deep link permanently fails to resolve if `registerDeepLinkListener` is called before `init()` — one-shot DDL request built with an unconfigured host
-**Issues:** discovered live in `demos/appsflyer-react-native-app` (2026-08-09) — native log `[com.appsflyer.serial] [DDL] URL: https://(null)dlsdk.(null)/v1.0/ios/id?sdk_version=7.0&af_sig=...`
-**Root cause:** verified against the vendored native SDK source (`/Users/Amit.Levy/XCodeProjects/appsflyer.sdk.ios/AppsFlyerLib/`). `AppsFlyerLib`'s `-init` (run once, at singleton construction) sets `_route = [[AFSDKRouter alloc] init]` — the trivial no-arg initializer, which leaves `_host`/`_hostPrefix` unset (nil). `_route` is only replaced with a properly configured instance (`initWithHost:hostPrefix:` or `initWithAppleId:`) inside the native method that processes `init(devKey, appId)`, once `_appleAppID`/`_appsFlyerDevKey` are actually set (`AppsFlyerLib.m` ~line 379). Separately, `setDeepLinkDelegate:` — which is what `registerDeepLinkListener`'s underlying RPC call (`subscribeForDeepLink` / `registerDeeplinkListener`) triggers on the native SDK — kicks off deferred-deep-link (DDL) resolution via a `dispatch_once` block ("Resolve DeepLink just right after set delegate", `AppsFlyerLib.m` ~line 3185), calling `__resolveDeeplinkWithObject:` immediately and unconditionally, with **no gate on `init()` having run first**. If `registerDeepLinkListener` is registered before `init()` completes, this one-shot DDL request fires immediately using the still-unconfigured `_route` (nil host, nil hostPrefix), producing a malformed URL (`https://(null)dlsdk.(null)/v1.0/ios/id?...`, confirmed via `AFSDKRouter.m`'s `DDLURL:`/`getRelevantPrefix:`) that cannot resolve to a real host. Because the trigger is a `dispatch_once`, **this is not a retryable race** — once burned on a malformed request, no later, correctly-configured attempt happens for the rest of that app process's lifetime; only relaunching the app gets another chance.
-**This contradicts `bridge-patterns.md` §4's general claim** that listener registration is "init-order-independent by design" — that claim holds for `registerConversionListener` (confirmed: `setDelegate:`, the conversion-data delegate setter, only assigns `_delegate` and logs a deprecation warning, with zero eager network trigger) but does **not** hold for `registerDeepLinkListener`, which is now a second documented exception alongside `registerSessionReadyListener`'s TOCTOU crash (see above).
-**Not fixable from this repo's JS layer beyond correct call ordering**: the one-shot trigger and the router's default nil-host state are both inside the vendored `AppsFlyerLib` binary.
-**Fix:** call `registerDeepLinkListener` only after `init()` has resolved (or at minimum after native has received `devKey`/`appId`), never before or concurrently with it — mirroring the same constraint `registerSessionReadyListener` already has, for a different underlying native reason. `demos/appsflyer-react-native-app`'s `AppsFlyer.js` already does this (`registerDeepLinkListener` is called after `await appsFlyer.init(...)` resolves, inside `AFInit`). `registerConversionListener` has no such constraint and may still register before `init()` per `bridge-patterns.md` §4.
-**Long-term fix:** file with the AppsFlyer SDK team — `setDeepLinkDelegate:`'s one-shot DDL trigger should either wait for `init()`/`start()` to have configured the host first, or be made retryable instead of a single `dispatch_once` shot.
+### `registerDeepLinkListener` fabricates `status: 'NOT_FOUND'` on payloads with no status field
+**Root cause:** `@appsflyer-sdk/js-core-plugin`'s `normalizeDeepLinkStatus` defaults any unrecognized/missing status to `'NOT_FOUND'`, including legacy `onAppOpenAttribution`-merged payloads that never had a status field.
+**Not fixable from this repo** — real npm dependency, no interception point. Tests assert the dependency's actual behavior (`{...payload, status: 'NOT_FOUND'}`) rather than raw pass-through.
+**Long-term fix:** needs to ship upstream in js-core-plugin.
 
-### `registerDeepLinkListener` fabricates `status: 'NOT_FOUND'` on payloads that never had a status field (js-core-plugin dependency)
-**Issues:** discovered via `npm test` failures on `dev/js-core-migration` (2026-08-12): `compatibility.test.js`, `rpc-contract.test.js`, `index.test.js` all failing with an unexpected extra `status: "NOT_FOUND"` key.
-**Root cause:** verified against the compiled dependency (`node_modules/@appsflyer-sdk/js-core-plugin/dist/appsflyer-sdk.js`, `normalizeDeepLinkStatus`/`normalizeDeepLinkData`, ~lines 47-91). `registerDeepLinkListener` unconditionally runs every payload on the merged `onDeepLinkReceived`/`onDeepLinking` channel through `normalizeDeepLinkStatus`, whose `default` branch returns `'NOT_FOUND'` for any status that isn't `found`/`notfound`/`not_found`/`failure`/`error` — including `undefined` (no status field at all). This channel also carries legacy `onAppOpenAttribution`-merged data (per this repo's own compat test) that was never a deep-link resolution and never had a `status` field, so those payloads get a fabricated `status: 'NOT_FOUND'` stamped on regardless.
-**Not fixable from this repo:** `@appsflyer-sdk/js-core-plugin` is a real npm dependency (`node_modules/`), not vendored source — there's no checkout to patch, and `index.ts` calls its `registerDeepLinkListener` directly, which wraps our callback internally with `normalizeDeepLinkData` before we ever see the raw event, so there's no interception point to strip the fabricated field back out.
-**Fix (this repo):** updated the three affected tests to assert the dependency's actual behavior (`{...payload, status: 'NOT_FOUND'}`) instead of raw pass-through, with a comment pointing back to this entry.
-**Long-term fix:** file with the js-core-plugin owners — `normalizeDeepLinkStatus`'s missing-field case should leave `status` unset (or the caller should skip normalization entirely for attribution-only payloads) instead of collapsing "no status field" into the same branch as "unrecognized status string".
+### Android deferred deep link delivers `status: 'FOUND'` with an always-empty `deepLink: {}`
+**Root cause:** native sends `deepLink.clickEvent.toString()` as real JSON, but js-core-plugin's `normalizeDeepLinkPayload` parses it assuming Java's `Map.toString()` format (`key=value` pairs). JSON has no `=`, so every field fails to parse and the function returns `{}` unconditionally.
+**Why direct/warm-start opens look fine:** apps typically read the Intent URL directly via `Linking` on those paths, never touching this field — fresh install has no Intent URL to fall back on, so it's fully exposed.
+**Not fixable from this repo** — real npm dependency. **Long-term fix:** js-core-plugin needs a `JSON.parse()` branch for the actual `af-android-plugin-bridge` 7.0.12+ wire format.
 
-## iOS build failures (22 issues)
+## iOS build failures
 
 ### Header not found
-**Issues:** #633 (`AppsFlyerConsent.h`), #602 (`AppsFlyerAdRevenueData.h`), #646 (`react_native_appsflyer-Swift.h`)
-**Root cause:** Podspec pins native SDK version; cached pods have stale headers.
-**Fix:** `pod deintegrate && pod install --repo-update`. Match plugin version to compatible native SDK.
+**Root cause:** either stale cached pod headers after a version bump, or mixed Swift/ObjC without the bridging header wired up.
+**Fix:** `pod deintegrate && pod install --repo-update` for stale headers; verify `RNAppsFlyer-Bridging-Header.h` is set in Xcode build settings for the bridging-header case.
 
-### Symbol collision
-**Issues:** #497, #541 (redefinition of `SUCCESS`)
-**Root cause:** Native SDK enum name collides with other libraries.
-**Fix:** Upgrade to plugin version where enum was namespaced.
-
-## Android build failures (13 issues)
+## Android build failures
 
 ### Namespace not specified
-**Issues:** #583, #561
-**Root cause:** AGP 8.0+ requires `namespace` in build.gradle. Plugin pre-6.15.1 lacks it.
-**Fix:** Upgrade plugin to 6.15.1+.
+**Root cause:** AGP 8.0+ requires `namespace` in `build.gradle`.
+**Fix:** upgrade plugin to 6.15.1+.
 
 ### AndroidManifest merge conflicts
-**Issues:** #627, #631
-**Root cause:** Plugin manifest declares `tools:replace` that conflicts with other libraries.
-**Fix:** Add explicit `tools:replace` in app's main AndroidManifest.xml.
+**Root cause:** plugin manifest declares `tools:replace` that conflicts with other libraries.
+**Fix:** add explicit `tools:replace` in the app's main AndroidManifest.xml.
 
-## Native module null / not found (13 issues)
+## Native module null / not found
 
 ### RNAppsFlyer is null
-**Issues:** #587, #401, #174, #333
-**Root cause:** Autolinking not triggered after install, or New Architecture enabled with old plugin version.
-**Fix:** Run `pod install` (iOS) / Gradle sync (Android). For New Architecture: upgrade to 6.15.1+. Restart Metro: `npx react-native start --reset-cache`.
+**Root cause:** autolinking not triggered after install, or New Architecture enabled with an old plugin version.
+**Fix:** `pod install` (iOS) / Gradle sync (Android); upgrade to 6.15.1+ for New Architecture; restart Metro with `--reset-cache`.
 
-## Expo compatibility (18 issues)
-
-### Swift AppDelegate not supported
-**Issues:** #638, #620
-**Root cause:** Config plugin only modified ObjC AppDelegate. Expo 52+ defaults to Swift.
-**Fix:** `withAppsFlyerIos.js`'s `modifySwiftAppDelegate` now handles the Swift template directly (verified against real `expo prebuild` output). Also fixed as part of the same pass: the plugin never injected `AppsFlyerLib.shared().handleLaunchOptions(launchOptions)` into `didFinishLaunchingWithOptions` (needed for cold-start deep link/attribution resolution) on either ObjC or Swift, and the Swift `continue(userActivity, restorationHandler:)` injection hardcoded `nil` instead of forwarding the real `restorationHandler` closure — both now match the manually-integrated reference pattern in `demos/appsflyer-react-native-app`'s `AppDelegate.swift`.
+## Expo compatibility
 
 ### Duplicate manifest entries
-**Issues:** #672
-**Root cause:** `withAppsFlyerAndroid.js` not idempotent.
-**Fix:** Use `expo prebuild --clean` (not just `expo prebuild`).
+**Root cause:** `withAppsFlyerAndroid.js` is not idempotent.
+**Fix:** use `expo prebuild --clean`, not plain `expo prebuild`.
 
-## Runtime crashes (18 issues)
+## Runtime crashes
 
 ### Double callback invocation
-**Issues:** #601
-**Root cause:** Native bridge calls JS callback more than once.
-**Fix:** `CallbackGuard` added in 6.17.8 (Android). Every new callback method must use it.
+**Root cause:** native bridge calls the JS callback more than once.
+**Fix:** `CallbackGuard` on Android — every new callback method must use it (legacy bridge only, see `native-android.md`).
 
 ### ConcurrentModificationException
-**Issues:** #447
-**Root cause:** Thread safety issue in native Android SDK.
-**Fix:** Upgrade native SDK to patched version.
+**Root cause:** thread-safety issue in the native Android SDK.
+**Fix:** upgrade native SDK to a patched version.
 
-### App hangs indefinitely on iOS during automated RPC runs (registerSessionReadyListener thread-safety stall)
-**Issues:** discovered in E2E testing (2026-07-28), `demos/appsflyer-expo-app`
-**Root cause:** `AppsFlyerLib.registerSessionReadyListener:` (inside the vendored `AppsFlyerRPC`/`AppsFlyerLib` native SDK, `AFRPCCoreHandler.handle`) reads `UIApplication.applicationState` from a background Swift-concurrency executor, not `@MainActor`. Main Thread Checker logs "UI API called on a background thread" at that call site, and in a specific timing window this stalls indefinitely — the app's "Run All Methods" button spins forever with no error, no timeout, no crash. Backgrounding then foregrounding the app unsticks it, because that forces UIKit's run loop to process whatever was pending. This is **not** a bug in this plugin's JS or Swift bridge code — `RNAppsFlyerImpl.swift` already correctly hops registration calls through `Task { @MainActor in ... }` (see `native-ios.md` §3); the unsafe read happens one layer deeper, inside the compiled `AppsFlyerLib` dependency itself, so it can't be patched in this repo.
-**Fix (test app only, not a plugin-code fix):** `demos/appsflyer-expo-app/rpcCatalog.js`'s `start` catalog entry used to re-register `registerSessionReadyListener` (production pattern per `bridge-patterns.md` §4), which re-triggers the buggy native call every run. Since the session is already ready by that point in the catalog, `start` now checks `isSessionReady()` first and calls `appsFlyer.start()` directly, only falling back to registering if genuinely not ready — and `unregisterSessionReadyListener`'s catalog entry was moved to run *after* `start` instead of before it, so `index.js`'s internal registration guard (`ensureSessionReadyListenerRegistered`) is still marked "already requested" and doesn't re-fire the native call.
-**Long-term fix:** file with AppsFlyer SDK team against `AppsFlyerLib`/`AppsFlyerRPC` — `registerSessionReadyListener:`'s implementation should read `UIApplication.applicationState` on the main thread (or avoid reading it from a background executor at all).
-**Follow-up (2026-08-02a):** the `start` catalog guard only prevents *re-registration*; it can't prevent the stall on the catalog's very first, legitimate `registerSessionReadyListener` call (needed once per normal usage), which can still wedge the native RPC executor and hang every subsequent `await` in `runAll` (e.g. `isSessionReady`, then everything after it) with no error. A first pass added an 8s timeout (`withTimeout`) around each button-triggered call so a wedge fails fast instead of hanging forever — but once the executor is actually wedged, every remaining queued call times out too, so a run just became "everything fails after 8s each" instead of "hangs forever". That timeout was extended to bail out of the whole run (marking the rest `skipped`) on the first timeout, rather than paying `RPC_TIMEOUT_MS` per remaining method.
-**Follow-up (2026-08-02b) — structural fix:** the real fix is to stop racing button-triggered RPCs against the registration at all. `demos/appsflyer-expo-app/App.js` now runs `init`/`setIsDebug`/`onInstallConversionData`/`onInstallConversionFailure`/`onDeepLink`/`registerSessionReadyListener` once automatically on mount, via a `useEffect`, mirroring `example/src/App.tsx`'s `runAutoFlow` order exactly — `init()` fired but NOT awaited, listener registrations as synchronous statements right after (bridge-patterns.md §4; an earlier draft of this fix `await`ed `init()` before registering listeners, which is the exact too-late `.then()` anti-pattern that rule warns about, and silently broke the callback — see follow-up 2026-08-02c). The registerSessionReadyListener callback sets `sessionReady` state; the "Run All Methods" button (`RPC_CATALOG`, everything else) stays disabled with a "Waiting for session…" label until it fires, then shows "Session ready". `start` is simplified to a direct `appsFlyer.start()` call with no isSessionReady-check-then-register fallback, since by the time Run All is enabled the session is already known ready.
-**Follow-up (2026-08-02c) — the stall still reproduces at bootstrap, confirmed:** even with correct registration ordering, `registerSessionReadyListener`'s native call can still stall and never invoke its callback — reproduced live, confirmed fixed by backgrounding then foregrounding the app (matches this entry's original root-cause description exactly). This is unavoidable: `registerSessionReadyListener` must fire once, unconditionally, at real app launch — there's no button-triggered path to defer it to. `App.js` now shows a hint ("Stuck? ... background the app, then reopen it") if `sessionReady` hasn't fired within 6s, so the demo doesn't look silently broken. This is UX-only; the native race itself remains unpatched and unpatchable from this repo.
+### Android session-ready can stall if `init()` runs before the host Activity's first `onResume`
+**Root cause:** `AndroidLifecycleManagerImpl` only replays a missed `onActivityResumed` transition when the context passed to `init()` is literally an `Activity`. `RNAppsFlyerModule.kt` supplies `{ reactApplicationContext.currentActivity ?: reactApplicationContext }` (lazy, fresh per call) to cover the normal case, but if `init()` dispatches before any Activity has resumed, this falls back to `reactApplicationContext` and the stall can still occur.
+**Not expected on RN's normal launch path; no contract test yet for this fallback.**
 
-### `registerSessionReadyListener` can crash on real (non-automated) app launch: `devKey`/`appleAppID` TOCTOU race (AppsFlyerRPCBridge unstructured Task)
-**Issues:** discovered live in `demos/appsflyer-react-native-app` (2026-08-05), `AppsFlyerExample` — `*** Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason: 'devKey and appleAppID must be set before calling registerSessionReadyListener:'`
-**Root cause:** verified against the vendored `AppsFlyerRPC` source checkout (`/Users/Amit.Levy/XCodeProjects/appsflyer.sdk.ios/AppsFlyerRPC/`). This is a TOCTOU race, not a plugin-code bug: `RNAppsFlyerImpl.swift`'s `dispatchToNative` correctly submits `init` then `registerSessionReadyListener` in order, each via `Task { @MainActor in AppsFlyerRPCBridge.shared.executeJson(...) }` — those two outer Tasks do start in FIFO order on MainActor, exactly as the code comment there claims. But `AppsFlyerRPCBridge.executeJson(_:completion:)` (`Bridge/AppsFlyerRPCBridge.swift:56-59`) immediately forks each call into its own **unstructured** `Task { await rpcClient.execute(...) }` with no actor isolation and no queue serializing it against any other in-flight RPC. So the *set* (`sdk.initialize(devKey:appId:)`, `AFRPCCoreHandler.swift:61`, from the `init` RPC) and the *check-then-use* (`AppsFlyerLib.registerSessionReadyListener:`'s own assertion + `sdk.registerSessionReadyListener` call, `AFRPCCoreHandler.swift:140`, from the second RPC) run as two independent racing Tasks on the concurrent thread pool — whichever wins the scheduler determines whether the assertion sees devKey/appleAppID as already set. `AFRPCRequestHandler` (the coordinator both calls funnel through) is a plain `NSObject`, not an actor, and has no lock serializing request *processing* (only `AFRPCHandlerStateActor` gates event *emission*) — so there is nothing anywhere in the vendored RPC layer preventing this. Same failure class as the off-actor `applicationState` read documented below (native concurrency bug inside the vendored `AppsFlyerRPC`/`AppsFlyerLib` dependency), but this one crashes the app outright on ordinary launch — it doesn't need the automated E2E "Run All Methods" pattern to trigger, and it's timing-dependent so it won't repro every launch.
-**Not fixable from this repo:** the race is entirely inside the vendored `AppsFlyerRPC` framework's RPC dispatch (`AppsFlyerRPCBridge.executeJson`), not in `RNAppsFlyerImpl.swift`. Our bridge already does the correct thing per `native-ios.md` §4 (synchronous, in-order dispatch, no buffering) — there's no way to serialize RPC *processing* order from the calling side once each `executeJson` call has forked its own detached Task.
-**Fix:** none available in this plugin. File with the AppsFlyer SDK team: `AppsFlyerRPCBridge.executeJson` needs to serialize RPC execution (e.g. an actor-isolated queue, or awaiting the previous in-flight `Task` before starting the next) instead of spawning unordered, unstructured `Task {}` per call.
-
-### Android session-ready can silently stall if `init()` runs after the host Activity's first `onResume` (RNAppsFlyerModule Application-context timing)
-**Issues:** flagged in PR #693 review (pazlavi): "need to verify if the Android SDK will work correctly if we initialized with the Application context after the Activity's `onResume` passes"
-**Root cause:** verified against the vendored native SDK source (`/Users/Amit.Levy/appsflyer-android-sdk/`). `RNAppsFlyerModule.kt` passes `reactApplicationContext` (a `ContextWrapper`, never literally an `Activity`) into `AppsFlyerRpcHandler`, which forwards it unchanged to `appsFlyerLib.init(devKey, null, context)`. `AndroidUtils.getApplicationInstance()` (`internal/util/AndroidUtils.java:202-216`) safely resolves this down to the real `Application` — no crash risk, the unsafe cast path is try/caught. But `AndroidLifecycleManagerImpl.registerLifecycleListener()` (`internal/android_lifecycle/AndroidLifecycleManagerImpl.kt:23-43`) only manually replays a missed `onActivityResumed` transition when the *init-time context itself* is literally an `Activity` (`if (context is Activity) { activityLifecycleCallbacks?.onActivityResumed(context) }`). Since `reactApplicationContext` is never an `Activity`, this backfill can never apply to our TurboModule's init call. Android's own `registerActivityLifecycleCallbacks` never retroactively fires for an already-resumed Activity (a platform limitation, not an AppsFlyer bug) — so if `init()` runs after the host Activity's first `onResume` (plausible as the *default* path for a single-Activity RN app, since JS only starts running after `ReactActivity`'s first resume), `onBecameForeground` — which drives `SessionReadyManager`'s foreground evaluation, i.e. everything `registerSessionReadyListener`/`start()` depend on — won't fire until the *next* real `onResume` (backgrounding + re-foregrounding, or a second Activity resuming). For a typical single-Activity app that can mean never, until the user manually does that. Only documented native-side guidance is a soft javadoc recommendation ("should be called inside your Application class's onCreate", `AppsFlyerLib.java:266-268`) — nothing enforces it or warns about this specific consequence.
-**Not fixable from this repo:** `af-android-plugin-bridge` is a compiled Maven dependency now (`android/build.gradle`), not vendored source — `AppsFlyerRpcHandler`'s `context` field is fixed at construction and never re-resolved per RPC call, so there's no way to retroactively hand it a fresher `currentActivity` at the moment `init()` actually dispatches, even though `reactApplicationContext.currentActivity` would very likely be non-null by then. Same failure class as the iOS session-ready stall above (native lifecycle/threading gap the plugin can't patch), just triggered by Android's lifecycle-callback registration gap instead of iOS's off-thread `applicationState` read.
-**Fix:** none available in this plugin. File with the AppsFlyer Android SDK team: either (a) accept an `Activity`/context supplier that can be re-resolved lazily at first-foreground-check time instead of frozen at `init()`, or (b) have `AndroidLifecycleManagerImpl` fall back to checking the actual current lifecycle state (e.g. via `ProcessLifecycleOwner`) instead of only replaying a backfill when the init-time context happens to be an `Activity`.
-
-## Event tracking / logEvent (13 issues)
+## Event tracking / logEvent
 
 ### 404 on logEvent
-**Issues:** #491, #390
-**Root cause:** Wrong `appId` on Android (should be package name or omitted, not iOS App Store ID).
-**Fix:** Use `Platform.select()` for `appId`. On Android: omit or use package name.
+**Root cause:** wrong `appId` on Android (should be package name or omitted, not the iOS App Store ID).
+**Fix:** `Platform.select()` for `appId`; omit or use package name on Android.
 
 ### "no devKey" error
-**Issues:** #645
-**Root cause:** `logEvent` called before `initSdk` completes.
-**Fix:** Await `initSdk` resolution before calling `logEvent`.
+**Root cause:** `logEvent` called before `init` completes.
+**Fix:** await `init` resolution before calling `logEvent`.
 
-### logEvent callback never fires on Android (CallbackGuard WeakReference)
-**Issues:** discovered in E2E testing (2026-05-12)
-**Root cause:** `CallbackGuard` (added in 6.17.8) wraps `Callback` in `WeakReference<Callback>`. All other methods invoke callbacks synchronously before the `@ReactMethod` returns, so the strong reference on the call stack keeps them alive. `logEvent` is the only method where the callback fires asynchronously — `AppsFlyerRequestListener.onSuccess()` runs on a background thread ~2s later after the HTTP round-trip. By then, GC has collected the weakly-referenced `Callback`.
-**Symptoms:** Native SDK sends events successfully (200 OK in logcat), but JS success/error callbacks are silently swallowed. No error logged.
-**Fix:** Use the Promise-based API (`logEvent(name, values)` without callbacks → returns Promise) which uses `Promise` instead of `Callback`. `Promise` is held strongly by the bridge and is not affected.
-**Long-term fix:** `CallbackGuard` should use a strong reference for async callbacks, or `logEvent` should keep a strong reference alongside the `WeakReference`.
+### logEvent callback never fires on Android (legacy `CallbackGuard`)
+**Root cause:** `CallbackGuard` wraps `Callback` in a `WeakReference`. Every other method invokes its callback synchronously (keeping it alive via the call stack), but `logEvent`'s callback fires ~2s later on a background thread after GC has already collected it.
+**Fix:** use the Promise-based `logEvent` API — Promises are held strongly by the bridge and unaffected.
 
-## Privacy / ATT / compliance (20 issues)
+## Privacy / ATT / compliance
 
 ### ITMS-91064 App Store rejection
-**Issues:** #673
-**Root cause:** `static_framework = true` places PrivacyInfo.xcprivacy where Apple's tooling doesn't scan.
-**Fix:** Use dynamic linking (`static_framework = false`).
+**Root cause:** `static_framework = true` places `PrivacyInfo.xcprivacy` where Apple's tooling doesn't scan it.
+**Fix:** use dynamic linking (`static_framework = false`).
 
 ### ATT popup not showing
-**Issues:** #328, #619
-**Root cause:** `waitForATTUserAuthorization` must be set before `start()`. User must be prompted first.
-**Fix:** Call `requestTrackingAuthorization` before `initSdk`, set timeout value.
+**Root cause:** ATT authorization must be requested and resolved before `start()`.
+**Fix:** call `requestTrackingAuthorization` before `init`, with a timeout.
 
 ### Android AD_ID permission
-**Issues:** #593, #562
 **Root cause:** Google Play requires explicit `AD_ID` permission declaration.
-**Fix:** Add `<uses-permission android:name="com.google.android.gms.permission.AD_ID"/>` to app manifest.
+**Fix:** add `<uses-permission android:name="com.google.android.gms.permission.AD_ID"/>` to the app manifest.
 
-## TypeScript types (11 issues)
+## RN version compatibility
 
-### Types don't match runtime
-**Issues:** #670, #575, #475, #194
-**Root cause:** `index.d.ts` is hand-maintained and drifts from actual native output.
-**Fix:** Verify types against native output on both platforms. Use `patch-package` as user workaround.
-
-## RN version compatibility (13 issues)
-
-### podspecPath / config.js invalid
-**Issues:** #458, #421, #403, #395
-**Root cause:** RN 0.68+ changed `react-native.config.js` schema.
-**Fix:** Upgrade plugin to version matching RN version.
-
-### NativeEventEmitter warning
-**Issues:** #335
-**Root cause:** RN 0.65+ requires `addListener`/`removeListeners` on native modules.
-**Fix:** Upgrade to plugin version with stub methods.
-
-### Event callbacks silent with local path dependency (file:..)
-**Issues:** SO#79083213, discovered during E2E 2026-05-12
-**Root cause:** When the plugin is referenced via `"file:.."` in `package.json` (local development), both the plugin root and the example app get their own `node_modules/react-native`. The plugin's `index.js` creates a `NativeEventEmitter` from its copy, while the app runtime uses the example's copy — two separate event bus instances. All event callbacks (`onDeepLink`, `onInstallConversionData`, `onAppOpenAttribution`) silently fail because listeners register on bus A while native emits on bus B.
-**Fix:** In the example/demo app's `metro.config.js`, add `extraNodeModules` to force all `react-native` imports to resolve from the example's `node_modules`, and `blockList` to prevent Metro from resolving the parent's copy:
+### Event callbacks silent with local path dependency (`file:..`)
+**Root cause:** with a `"file:.."` dependency, the plugin and the app get separate `node_modules/react-native` copies — `src/rn-transport.ts` builds its `NativeEventEmitter` from one copy while the app runtime uses the other, so listeners register on one event bus while native emits on the other.
+**Fix:** in the app's `metro.config.js`, force `react-native`/`react` to resolve from the app's own `node_modules` via `extraNodeModules`, and `blockList` the plugin's copies:
 ```js
 extraNodeModules: {
   'react-native': path.resolve(__dirname, 'node_modules/react-native'),
@@ -191,4 +123,4 @@ blockList: [
   new RegExp(path.resolve(pluginRoot, 'node_modules/react').replace(/[/\\]/g, '[/\\\\]') + '[/\\\\].*'),
 ],
 ```
-**Note:** This only affects local development. npm consumers have a single `react-native` instance and are unaffected.
+Only affects local development — npm consumers have a single `react-native` instance.

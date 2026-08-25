@@ -1,41 +1,41 @@
-## 7.0.1
+## 7.0.2
  Release date: *TBD*
 
-- React Native >> Rewrite native bridge as a New-Architecture-only TurboModule, routing every native call through each platform's RPC layer (`AppsFlyerRPCBridge` on iOS, `AppsFlyerRpcHandler` on Android)
-- React Native >> Remove legacy vendored native SDK headers/sources under `ios/` left over from the pre-RPC bridge (`AppsFlyerLib.h` and related deep-link/consent/ad-revenue/cross-promotion/share-invite headers, unused `AppsFlyerAttribution` class) — none were referenced by the TurboModule bridge or `PurchaseConnector`
-- React Native >> Consolidate `index.js`/`index.d.ts` into a single typed `index.ts` entry point (`package.json`'s `main`/`types` now both point at it) — every plugin API is a native TypeScript function backed by `Promise`, not a hand-maintained `.d.ts` layered over untyped JS. `AFParseJSONException` now extends `Error`
-- React Native >> Consolidate duplicated string-coercion logic in `index.ts` setters into a single helper; align `init`/`logEvent`/`logAdRevenue` with the rest of the file's direct-arrow-assignment convention
-- React Native >> Add `setUserPhone(countryCode, phoneNumber)` and `setUserFbLoginId(fbLoginId)` — hashed-PII setters with no 6.x equivalent. `setUserPhone` takes two separate params because native never read a single combined phone string; `setUserFbLoginId` accepts `string | number` and is sent as a JSON number (iOS parses it with `requireInt64` and rejects a JSON string)
-- React Native >> iOS AppDelegate lifecycle forwarding (`handleOpenURL`/`handleOpenUrl`/`continueUserActivity`/`handleLaunchOptions`) is native-only — call `AppsFlyerLib.shared()` directly from your app's `AppDelegate` (see `Docs/RN_DeepLinkIntegrate.md#ios-deeplink-setup`). Not exposed as a JS API; the Expo config plugin already auto-injects the `openURL`/`continueUserActivity` calls at `expo prebuild` time
+Upgrading from 6.18.0? See [MIGRATION.md](MIGRATION.md) for the full before/after guide.
+
+- React Native >> Native bridge rewritten as a New-Architecture-only TurboModule (RN ≥0.76 required)
+- React Native >> Every method now takes a single params object — no more positional arguments
+- React Native >> iOS native SDK 7.0.2 (`AppsFlyerRPC` 7.0.13); Android `af-android-sdk` 7.0.1 + `af-android-plugin-bridge` 7.0.12
+- React Native >> `PurchaseConnector` native deps bumped (iOS pod → 7.0.2, Android → 2.3.0)
+- React Native >> Added hashed-PII setters `setUserPhone`, `setUserFirstName`, `setUserLastName`, `setUserFbLoginId`, and `clearUserPii` — no 6.x equivalent
+- React Native >> Added `registerSessionReadyListener` — required before calling `start()`
+- React Native >> iOS AppDelegate lifecycle calls (`handleOpenURL`/`handleOpenUrl`/`continueUserActivity`/`handleLaunchOptions`) now go through `AppsFlyerAttribution.shared` instead of `AppsFlyerLib.shared()` — only affects hand-integrated AppDelegates, not the Expo config plugin
+- React Native >> `ConversionData.data.is_first_launch` is now a real boolean, not the string `"true"`/`"false"`
 - React Native >> Fix `stop(false)` never resuming the SDK on Android — the `shouldStop` flag wasn't sent and Android's RPC parser defaults the missing key to `true`, so a stopped SDK stayed stopped
-- React Native >> Fix `ConversionData.data.is_first_launch` type — both native SDKs send a JSON boolean, not the string `"true"`/`"false"` the types previously declared (#690)
-- React Native >> Fix `logAdRevenue`'s `mediationNetwork` silently failing on Android for several `MEDIATION_NETWORK` constants (`APPLOVIN_MAX`, `GOOGLE_ADMOB`, `TOPON_PTE`, `CUSTOM_MEDIATION`, `DIRECT_MONETIZATION_NETWORK`) — Android's RPC layer requires an exact string match with no normalization, while iOS lowercases and strips underscores before matching; `CUSTOM_MEDIATION`/`DIRECT_MONETIZATION_NETWORK` had no single spelling that satisfied both platforms' validators at all. `logAdRevenue` now resolves the public constant to each platform's actual required wire value before dispatch (same pattern as the existing iOS/Android `purchaseType` mapping) — no change to the public `MEDIATION_NETWORK` values themselves
-- React Native >> Bump `AppsFlyerRPC` to 7.0.12; strict mode (`$RNAppsFlyerStrictMode=true`) now pulls `AppsFlyerRPC/Strict` (no-IDFA build) instead of the plain `AppsFlyerRPC` pod. Also drops the podspec's unused `AppsFlyerFramework/Strict` dependency — no source file imports it
-- React Native >> Replace sed-based native dependency version bumps in the release workflow with `scripts/bump-native-deps.sh`, which verifies each substitution actually landed before continuing; add a required `android_plugin_bridge_version` workflow_dispatch input
-- React Native >> Rewrite `MIGRATION.md`: checklist, symbol-by-symbol table, and an LLM-assistant migration prompt — docs only, no API changes
+- React Native >> Fix `logAdRevenue`'s `mediationNetwork` silently failing on Android for several `MEDIATION_NETWORK` constants (`APPLOVIN_MAX`, `GOOGLE_ADMOB`, `TOPON_PTE`, `CUSTOM_MEDIATION`, `DIRECT_MONETIZATION_NETWORK`) — Android's RPC layer requires an exact string match with no normalization, while iOS lowercases and strips underscores before matching. The constant is now resolved to each platform's actual required wire value before dispatch — no change to the public `MEDIATION_NETWORK` values themselves
+- React Native >> Fix `AFPurchaseType.ONE_TIME_PURCHASE` exporting the wrong-layer value (`"one_time_purchase"`, Android's wire format) instead of the shared plugin-core `publicApi` contract (`"oneTimePurchase"`) — broke `validateAndLogInAppPurchase` for one-time purchases on iOS, which expects camelCase and applies no normalization; Android was unaffected since its own transform already converts camelCase to snake_case at dispatch
+- React Native >> Strict mode (`$RNAppsFlyerStrictMode=true`) now pulls `AppsFlyerRPC/Strict`
 
 ### Breaking changes
 
 See [MIGRATION.md](MIGRATION.md) for full before/after examples for each item below.
 
-- **New Architecture required** — React Native >=0.76.0 with New Architecture enabled. Apps not yet on New Architecture must stay on 6.x (critical/security fixes for 6 months from release).
-- **`validateAndLogInAppPurchase(purchaseInfo, successC, errorC)` removed** — the legacy 3-positional-argument purchase validation signature is removed with no adapter. The `validateAndLogInAppPurchase` name is reused for the new `AFPurchaseDetails`-based API (previously shipped under the name `validateAndLogInAppPurchaseV2` in earlier 7.0.0 pre-releases; renamed back once the legacy signature was gone). Its `callback` argument is currently inert — no native event delivers a validation result yet, so this only dispatches the RPC. Use it, or `AppsFlyerPurchaseConnector`.
-- **`setCollectIMEI` removed** — Android IMEI collection has no RPC equivalent; IMEI is unavailable on modern Android anyway.
-- **`initInAppPurchaseValidatorListener` removed** — was unreachable dead code in the Android module; no JS call site ever invoked it.
-- **`onAppOpenAttribution` / `onAttributionFailure` / `performOnAppAttribution` removed** — merged into `registerDeepLinkListener` on both platforms, matching iOS SDK post-SDK7 unified model.
-- **`AFInAppEventType.*` constants moved** — no longer exposed via `NativeModules.RNAppsFlyer.getConstants()`; import from the package directly: `import { AFInAppEventType } from 'react-native-appsflyer'`.
-- **`setSharingFilterForAllPartners` / `setSharingFilter` removed** — deprecated since 6.4.0. Use `setSharingFilterForPartners`.
-- **`AppsFlyerConsent` class removed entirely** (including its `.forGDPRUser`/`.forNonGDPRUser` statics, deprecated since 6.16.2) — `setConsentData` now takes a plain `{isUserSubjectToGDPR, hasConsentForDataUsage?, hasConsentForAdsPersonalization?, hasConsentForAdStorage?}` object directly. `isUserSubjectToGDPR` is required with no client-side default (the old constructor defaulted it to `false`).
-- **`AppsFlyerConsentType` (TS interface) removed** — deprecated since 6.16.2. Use the `SetConsentDataParams` type for typing.
-- **`InAppPurchase` (TS interface) removed** — unused dead type from the pre-V2 purchase-validation API; use `AFPurchaseDetails`.
-- **`initSdk(options)` replaced by `init(devKey, appId)`** — Promise-only, positional, matches the native RPC call's real shape. `appId` is required unconditionally (numeric Apple ID on iOS; ignored but still passed on Android). `isDebug`/`onInstallConversionDataListener`/`onDeepLinkListener`/`timeToWaitForATTUserAuthorization`/`manualStart` removed from the old options object; use `enableDebug()`, `registerConversionListener()`/`registerDeepLinkListener()` (already register natively), and always-explicit `start()` instead. `InitSDKOptions` TS interface removed. `timeToWaitForATTUserAuthorization` has no current replacement.
-- **`registerSessionReadyListener` added** — both native RPC layers already emitted a real `onSessionReady` event; the JS event demux had no bucket wired for it, so the event was silently dropped. Now a public listener method matching `registerDeepLinkListener`'s pattern.
-- **`setUserEmails` removed, replaced by `setUserEmail({email})`** — SDK7's RPC layer exposes only a single-address, Promise-only `setUserEmail`; neither the old `emails` array nor `emailsCryptType` has a native counterpart on either platform, so `AF_EMAIL_CRYPT_TYPE` is now meaningless for this call. `setUserEmails` was already `@deprecated` pre-release and is removed outright, not shimmed.
-- **`performOnDeepLinking()` renamed to `performDeepLinking({url, shouldTriggerSession?})`** — native reads `{url, shouldTriggerSession}`; the old no-arg form resolved the empty string, i.e. it was a silent no-op. Android-only; `shouldTriggerSession` defaults to `false`.
-- **`sendPushNotificationData` gained a third `androidCampaignData` argument** — the platforms diverged in SDK7: iOS still takes the raw notification payload and locates the `af` block itself, while Android dropped raw-payload support and builds an `AFPushData` from explicit `{campaign?, pid?, isRetargeting?, additionalParameters?}` fields. Omitting the argument logs a warning and reports an empty re-engagement on Android only; iOS is unaffected. Additive for iOS-only apps, required for correct Android behaviour.
-- **`generateInviteLink`'s `deeplinkPath` removed** — no native counterpart on either platform; never shipped, so removed outright rather than deprecated. `customerID` and `baseDeeplink` still work: the plugin translates them to the native key names internally (iOS `referrerCustomerId`, Android `customerId`, both `baseDeepLink`).
-- **`onInstallConversionData`/`onInstallConversionFailure`/`onDeepLink` replaced by `registerConversionListener`/`registerDeepLinkListener` + `unregisterConversionListener`/`unregisterForDeepLink`** — see [API alignment fixes](MIGRATION.md#api-alignment-fixes-same-701-release-line) in MIGRATION.md. Never shipped under the old names, so this lands within 7.0.0, not a second breaking change on top of it.
-- **`logEvent` no longer waits for server delivery** — previously sent `awaitResponse: true` on Android, blocking the native RPC thread until the event's HTTP request to AppsFlyer's server completed (or timed out), which could also delay other queued RPC calls (e.g. `registerSessionReadyListener`/`start()`) behind it. The resolved/rejected Promise (or success/error callback) now reflects only that the SDK accepted the event onto its internal queue, not that it reached the server.
+- **Every method takes one params object** — e.g. `init(devKey, appId)` → `init({devKey, appId})`.
+- **`initSdk(options)` removed** — replaced by `init({devKey, appId})` + explicit `start()`. `isDebug`/`onInstallConversionDataListener`/`onDeepLinkListener`/`manualStart` options removed; use `enableDebug()`, `registerConversionListener()`/`registerDeepLinkListener()`, and `start()` instead. `timeToWaitForATTUserAuthorization` has no replacement — request ATT yourself before `init()`.
+- **`onInstallConversionData`/`onInstallConversionFailure`/`onDeepLink` removed** — use `registerConversionListener()`/`registerDeepLinkListener()` + `unregisterConversionListener()`/`unregisterDeeplinkListener()`.
+- **`onAppOpenAttribution`/`onAttributionFailure`/`performOnAppAttribution` removed** — merged into `registerDeepLinkListener`.
+- **`validateAndLogInAppPurchase(purchaseInfo, successC, errorC)` removed** — new signature is `validateAndLogInAppPurchase({purchase, additionalParameters?})`, no callback argument. `AFPurchaseDetails` split into `AFPurchaseDetailsAndroid`/`AFPurchaseDetailsIOS`.
+- **`generateInviteLink`'s `deeplinkPath` removed** — was already a no-op. Every other field now nests under a `parameters` object.
+- **`sendPushNotificationData` is now Android-only** — on iOS use `handlePushNotification({pushPayload})` instead.
+- **`setUserEmails` removed** — use `setUserEmail({email})` (single address only).
+- **`setSharingFilterForAllPartners`/`setSharingFilter` removed** — use `setSharingFilterForPartners`.
+- **`AppsFlyerConsent` class removed** — use `setConsentData({isUserSubjectToGDPR, hasConsentForDataUsage?, hasConsentForAdsPersonalization?, hasConsentForAdStorage?})`.
+- **`PurchaseConnector`'s 5 listener methods (Android: `onSubscriptionValidationResultSuccess`/`Failure`, `onInAppValidationResultSuccess`/`Failure`; iOS: `OnReceivePurchaseRevenueValidationInfo`) now return an `EmitterSubscription`** instead of a bare unsubscribe function — call `.remove()` on the returned value, not `unsubscribe()`.
+- **`setCollectIMEI`/`initInAppPurchaseValidatorListener` removed** — no replacement.
+- **`performOnDeepLinking()` renamed to `performDeepLinking({url, shouldTriggerSession?})`** — Android-only.
+- **`logEvent` no longer waits for server delivery** — a resolved Promise now means "accepted onto the send queue", not "delivered to server".
+- **`AFInAppEventType.*`** now imported directly: `import { AFInAppEventType } from 'react-native-appsflyer'` — no longer via `NativeModules.RNAppsFlyer.getConstants()`.
+- **Removed TS types**: `InitSDKOptions`, `AFAdRevenueData`, `AppsFlyerConsentType`, `InAppPurchase` (use `AFPurchaseDetails`).
 
 ## 6.18.0-rc3
  Release date: *2026-05-18*

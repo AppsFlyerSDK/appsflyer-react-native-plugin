@@ -12,40 +12,26 @@ export const AF_removedFromCart = 'af_removed_from_cart';
 export const AF_checkout = 'af_check_out';
 export const AF_clickOnItem = 'af_click_on_item';
 
-export async function AFInit(onConversionData, onDeepLink) {
-  if (Platform.OS == 'ios') {
+export function AFInit(onConversionData, onDeepLink) {
+
+  AppsFlyer.registerDeepLinkListener({onDeepLinking: onDeepLink});
+
+  AppsFlyer.init({devKey: DEV_KEY, appId: APP_ID}).then(
+    () => console.log('init SDK success'),
+    (error) => console.log('init SDK failed', error),
+  );
+
+  AppsFlyer.setAppInviteOneLink({oneLinkId:"neai"});
+  if(Platform.OS == "ios"){
     AppsFlyer.setCurrentDeviceLanguage({language: 'EN'});
   }
   AppsFlyer.enableDebug({enabled: true});
-
-  if (Platform.OS === 'android') {
-    AppsFlyer.registerDeepLinkListener({onDeepLinking: onDeepLink});
-  }
-
-  try {
-    await AppsFlyer.init({devKey: DEV_KEY, appId: APP_ID});
-    console.log('init SDK success');
-    const url = await Linking.getInitialURL();
-    console.log("AFINIT: Deeplink url" , url)
-
-    if (Platform.OS === 'android' && url) {
-      AppsFlyer.performDeepLinking({url, shouldTriggerSession: true});
-    }
-  } catch (error) {
-    console.log('init SDK failed', error);
-    return; // devKey/appleAppID never got set natively -- registerSessionReadyListener would assert-crash
-  }
-  AppsFlyer.setAppInviteOneLink({oneLinkId:"neai"});
 
   //Deeplink URL: https://rndemo.onelink.me/neai/by0p3obe
   AppsFlyer.registerConversionListener({
     onConversionDataSuccess: onConversionData,
     onConversionDataFail: (error) => console.log('conversion data error:', error),
   });
-
-  if (Platform.OS === 'ios') {
-    AppsFlyer.registerDeepLinkListener({onDeepLinking: onDeepLink});
-  }
 
   AppsFlyer.registerSessionReadyListener(() => {
     AppsFlyer.start().then(

@@ -105,9 +105,6 @@ object RNUtil {
         return result
     }
 
-    /**
-     * ReadableMap/ReadableArray only expose doubles for numbers; disambiguate
-     * whole-valued doubles back to Int so JSON round-trips stay int-typed.
-     */
+    // ReadableMap/ReadableArray only expose doubles for numbers; disambiguate whole-valued doubles back to Int so JSON round-trips stay int-typed.
     private fun numberFromDouble(value: Double): Any = if (value == value.toInt().toDouble()) value.toInt() else value
 }

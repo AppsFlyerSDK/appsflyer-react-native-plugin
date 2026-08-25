@@ -80,7 +80,7 @@ To properly set up the configuration object, you must specify certain parameters
 Here's an example usage:
 
 ```javascript
-import appsFlyer, {
+import AppsFlyer, {
   AppsFlyerPurchaseConnector,
   AppsFlyerPurchaseConnectorConfig,
   StoreKitVersion,
@@ -116,20 +116,20 @@ Remember to set `sandbox` to `false` before releasing your app to production. If
 Start the SDK instance to observe transactions. </br>
 
 **⚠️ Please Note**
-> This should be called right after `appsFlyer.start()` fires inside `registerSessionReadyListener` — see [start](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/blob/master/Docs/RN_API.md#start). `start()` must not be called standalone; it only resolves correctly once the session-ready callback has fired.
+> This should be called right after `AppsFlyer.start()` fires inside `registerSessionReadyListener` — see [start](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/blob/master/Docs/RN_API.md#start). `start()` must not be called standalone; it only resolves correctly once the session-ready callback has fired.
 >  Calling `startObservingTransactions` activates a listener that automatically observes new billing transactions. This includes new and existing subscriptions and new in app purchases.
 >  The best practice is to activate the listener as early as possible.
 ```javascript
-        import appsFlyer, {
+        import AppsFlyer, {
         AppsFlyerPurchaseConnector,
         AppsFlyerPurchaseConnectorConfig,
         StoreKitVersion,
         } from 'react-native-appsflyer';
 
-        appsFlyer.init(devKey, appId).then(...);
+        AppsFlyer.init(devKey, appId).then(...);
 
-        appsFlyer.registerSessionReadyListener(() => {
-          appsFlyer.start();
+        AppsFlyer.registerSessionReadyListener(() => {
+          AppsFlyer.start();
         });
 
         // StoreKit1 example (default behavior)
@@ -242,7 +242,7 @@ By splitting the callbacks, you can ensure platform-specific responses and tailo
 ### <a id="android---subscription-and-inapps-validation-result-listener"></a>Android - Subscription Validation Result Listener and In Apps Validation Result Listener
 
 ```javascript   
-import appsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
+import AppsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
 
   const handleValidationSuccess = (validationResult) => {
     console.log('>> ValidationSuccess: ', validationResult);
@@ -278,7 +278,7 @@ import appsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
 
 ### <a id="ios-combined-validation-result-listener"></a>iOS Combined Validation Result Listener
 ```javascript
-import appsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
+import AppsFlyer , {AppsFlyerPurchaseConnector} from 'react-native-appsflyer';
 
 const handleOnReceivePurchaseRevenueValidationInfo = (validationInfo, error) => {
     if (error) {
@@ -300,7 +300,7 @@ const handleOnReceivePurchaseRevenueValidationInfo = (validationInfo, error) => 
 
 ## <a id="full-code-example"></a>Full Code Example
 ```javascript
-import appsFlyer, {
+import AppsFlyer, {
   StoreKitVersion,
   AppsFlyerPurchaseConnector,
   AppsFlyerPurchaseConnectorConfig,

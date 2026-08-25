@@ -37,16 +37,9 @@ function withCustomAndroidManifest(config, { preferAppsFlyerBackupRules = false 
 
     if (!preferAppsFlyerBackupRules) {
       // Default: do not touch backup attributes at all
-      if (hasDataExtractionRules || hasFullBackupContent) {
-        console.log(
-          '[AppsFlyerPlugin] App defines backup attributes; leaving them untouched (preferAppsFlyerBackupRules=false)'
-        );
-      } else {
-        console.log(
-          '[AppsFlyerPlugin] App does not define backup attributes; no changes required (preferAppsFlyerBackupRules=false)'
-        );
-      }
-      console.log('[AppsFlyerPlugin] Android manifest modifications completed');
+      console.log(
+        `[AppsFlyerPlugin] Backup attributes ${hasDataExtractionRules || hasFullBackupContent ? 'left untouched' : 'unchanged'} (preferAppsFlyerBackupRules=false)`
+      );
       return cfg;
     }
 

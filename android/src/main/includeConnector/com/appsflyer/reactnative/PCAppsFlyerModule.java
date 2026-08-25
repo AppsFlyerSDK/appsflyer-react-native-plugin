@@ -21,7 +21,6 @@ import static com.appsflyer.reactnative.RNAppsFlyerConstants.*;
 
 public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
 
-    //WeakReference prevents memory leaks by allowing the garbage collector to collect the ReactApplicationContext when it's no longer needed.
     private WeakReference<ReactApplicationContext> reactContext;
     private boolean isPurchaseConnectorModuleEnabled;
     private ConnectorWrapper connectorWrapper;
@@ -187,7 +186,7 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
     private void handleError(String eventName, String result, Throwable error) {
         WritableMap resMap = Arguments.createMap();
         resMap.putString("result", result);
-        resMap.putMap("error", error != null ? errorToMap(error) : null);
+        resMap.putMap("error", error != null ? RNUtil.toWritableMap(throwableToMap(error)) : null);
         sendEvent(eventName, resMap.toString());
     }
 
@@ -200,10 +199,6 @@ public class PCAppsFlyerModule extends ReactContextBaseJavaModule {
         } else {
             Log.d("ReactNativeJS", "Skipping event: " + eventName + " (ReactContext is null or inactive)");
         }
-    }
-
-    private WritableMap errorToMap(Throwable error) {
-        return RNUtil.toWritableMap(this.throwableToMap(error));
     }
 
     private Map<String, Object> throwableToMap(Throwable throwable) {

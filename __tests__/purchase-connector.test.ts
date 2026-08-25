@@ -6,11 +6,7 @@ import { Money } from '../PurchaseConnector/models/money_model';
 import { OfferDetails } from '../PurchaseConnector/models/offer_details';
 import { AutoRenewingPlan } from '../PurchaseConnector/models/auto_renewing_plan';
 
-// index.ts now constructs RNTransport (and reads Platform.OS) eagerly at module load, to build
-// its module-level AppsFlyerSDK singleton -- this file's own NativeModules mock below replaces
-// the entire legacy bridge (including PlatformConstants' TurboModuleRegistry fallback), which
-// broke that eager Platform.OS read. Mock Platform directly so it resolves without depending on
-// the (deliberately minimal) NativeModules mock below.
+// index.ts reads Platform.OS eagerly at module load; the NativeModules mock below is too minimal to satisfy that, so Platform is mocked directly.
 jest.mock('react-native/Libraries/Utilities/Platform', () => ({
   OS: 'ios',
   select: (spec: Record<string, unknown>) => spec.ios ?? spec.default,
@@ -29,16 +25,15 @@ jest.mock('../node_modules/react-native/Libraries/BatchedBridge/NativeModules', 
   },
 }));
 
-// Mock NativeEventEmitter. RN's NativeEventEmitter.js is an ES `export default class` —
-// the mock factory must return the same { __esModule, default } interop shape, or
-// react-native's own barrel re-export (`export {default as NativeEventEmitter} from ...`)
-// resolves to undefined and `new NativeEventEmitter(...)` throws "is not a constructor".
+// Mock must match RN's { __esModule, default } interop shape or the barrel re-export resolves to undefined and `new NativeEventEmitter()` throws.
 jest.mock('react-native/Libraries/EventEmitter/NativeEventEmitter', () => ({
   __esModule: true,
   default: jest.fn().mockImplementation(() => ({
-    addListener: jest.fn().mockReturnValue({
+    // A fresh object per call, not mockReturnValue's shared instance -- so a multi-listener
+    // bug (same subscription handed back for two calls) would fail these tests.
+    addListener: jest.fn().mockImplementation(() => ({
       remove: jest.fn(),
-    }),
+    })),
   })),
 }));
 
@@ -430,7 +425,7 @@ describe('PurchaseConnector Interface', () => {
         logSubscriptions: true,
         logInApps: true,
         sandbox: false,
-        storeKitVersion: 'SK1' // Default value
+        storeKitVersion: 'SK1'
       });
     });
   });
@@ -592,34 +587,46 @@ describe('PurchaseConnector Interface', () => {
       }).toThrow('The callback must be a function');
     });
 
-    test('onSubscriptionValidationResultSuccess should return a function when called with valid callback', () => {
+    // Must return an EmitterSubscription (an object with .remove()), not a bare unsubscribe
+    // function — RN_PurchaseConnector.md's own documented cleanup pattern calls `.remove()`
+    // on this return value, which throws if it's a plain function instead.
+    test('onSubscriptionValidationResultSuccess should return an EmitterSubscription when called with valid callback', () => {
       const callback = jest.fn();
       const result = AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess(callback);
-      expect(typeof result).toBe('function');
+      // Pre-fix, this returned a bare unsubscribe function -- calling it took no args and
+      // returned undefined, so a real EmitterSubscription's zero-arg `.remove()` is what
+      // actually exercises the fix, not just the property's typeof.
+      expect(() => result.remove()).not.toThrow();
     });
 
-    test('onSubscriptionValidationResultFailure should return a function when called with valid callback', () => {
+    test('onSubscriptionValidationResultFailure should return an EmitterSubscription when called with valid callback', () => {
       const callback = jest.fn();
       const result = AppsFlyerPurchaseConnector.onSubscriptionValidationResultFailure(callback);
-      expect(typeof result).toBe('function');
+      expect(() => result.remove()).not.toThrow();
     });
 
-    test('onInAppValidationResultSuccess should return a function when called with valid callback', () => {
+    test('onInAppValidationResultSuccess should return an EmitterSubscription when called with valid callback', () => {
       const callback = jest.fn();
       const result = AppsFlyerPurchaseConnector.onInAppValidationResultSuccess(callback);
-      expect(typeof result).toBe('function');
+      expect(() => result.remove()).not.toThrow();
     });
 
-    test('onInAppValidationResultFailure should return a function when called with valid callback', () => {
+    test('onInAppValidationResultFailure should return an EmitterSubscription when called with valid callback', () => {
       const callback = jest.fn();
       const result = AppsFlyerPurchaseConnector.onInAppValidationResultFailure(callback);
-      expect(typeof result).toBe('function');
+      expect(() => result.remove()).not.toThrow();
     });
 
-    test('OnReceivePurchaseRevenueValidationInfo should return a function when called with valid callback', () => {
+    test('OnReceivePurchaseRevenueValidationInfo should return an EmitterSubscription when called with valid callback', () => {
       const callback = jest.fn();
       const result = AppsFlyerPurchaseConnector.OnReceivePurchaseRevenueValidationInfo(callback);
-      expect(typeof result).toBe('function');
+      expect(() => result.remove()).not.toThrow();
+    });
+
+    test('regression: return value is not directly callable like the pre-fix unsubscribe function', () => {
+      const callback = jest.fn();
+      const result = AppsFlyerPurchaseConnector.onSubscriptionValidationResultSuccess(callback);
+      expect(typeof result).not.toBe('function');
     });
   });
 }); 

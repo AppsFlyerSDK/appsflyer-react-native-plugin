@@ -43,20 +43,20 @@ Pod::Spec.new do |s|
   # AppsFlyerPurchaseConnector
   if defined?($AppsFlyerPurchaseConnector) && ($AppsFlyerPurchaseConnector == true)
     Pod::UI.puts "#{s.name}: Including PurchaseConnector."
-    s.dependency 'PurchaseConnector', '7.0.1'
+    s.dependency 'PurchaseConnector', '7.0.2'
   end
 
   # AppsFlyerFramework (via AppsFlyerRPC)
   if defined?($RNAppsFlyerStrictMode) && ($RNAppsFlyerStrictMode == true)
     Pod::UI.puts "#{s.name}: Using AppsFlyerFramework/Strict mode"
-    s.dependency 'AppsFlyerRPC/Strict', '7.0.12'
+    s.dependency 'AppsFlyerRPC/Strict', '7.0.13'
     s.xcconfig = {'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) AFSDK_NO_IDFA=1' }
   else
     unless defined?($RNAppsFlyerStrictMode)
       Pod::UI.puts "#{s.name}: Using default AppsFlyerFramework. You may require App Tracking Transparency. Not allowed for Kids apps."
       Pod::UI.puts "#{s.name}: You may set variable `$RNAppsFlyerStrictMode=true` in Podfile to use strict mode for kids apps."
     end
-    s.dependency 'AppsFlyerRPC', '7.0.12'
+    s.dependency 'AppsFlyerRPC', '7.0.13'
   end
 
   install_modules_dependencies(s) if respond_to?(:install_modules_dependencies, true)

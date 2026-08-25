@@ -5,11 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * RNAppsFlyerModule routes RPCs to a single-thread lane (6 listener register/unregister calls —
- * unsynchronized handler state) or a pool (everything else). A method missing from
- * LISTENER_LIFECYCLE_METHODS would silently reintroduce that race.
- */
+// RNAppsFlyerModule routes listener register/unregister calls (unsynchronized handler state) to a single-thread lane, everything else to a pool; a method missing from LISTENER_LIFECYCLE_METHODS would reintroduce that race.
 class IsListenerLifecycleCallTest {
 
     @Test
@@ -19,16 +15,20 @@ class IsListenerLifecycleCallTest {
     }
 
     @Test
+    fun `init routes to the listener lane — it reads the same unsynchronized conversionListener field`() {
+        // Regression test: init used to run on the pool lane, racing registerConversionListener on the listener lane with no ordering guarantee — see known-issues-kb.md.
+        assertTrue(isListenerLifecycleCall(request("init")))
+    }
+
+    @Test
     fun `register and unregister session ready listener route to the listener lane`() {
         assertTrue(isListenerLifecycleCall(request("registerSessionReadyListener")))
         assertTrue(isListenerLifecycleCall(request("unregisterSessionReadyListener")))
     }
 
     @Test
-    fun `deep link listener routes to the listener lane under both canonical and remapped names`() {
-        assertTrue(isListenerLifecycleCall(request("registerDeeplinkListener")))
+    fun `deep link listener routes to the listener lane`() {
         assertTrue(isListenerLifecycleCall(request("subscribeForDeepLink")))
-        assertTrue(isListenerLifecycleCall(request("unregisterDeeplinkListener")))
         assertTrue(isListenerLifecycleCall(request("unsubscribeForDeepLink")))
     }
 

@@ -18,29 +18,29 @@ Through a dedicated SDK API: Developers can pass Google's required consent data 
 ### Use CMP to collect consent data
 A CMP compatible with TCF v2.2/2.3 collects DMA consent data and stores it in NSUserDefaults (iOS) and SharedPreferences (Android). To enable the SDK to access this data and include it with every event, follow these steps:
 
-1. Call `appsFlyer.enableTCFDataCollection(true)`
+1. Call `AppsFlyer.enableTCFDataCollection(true)`
 2. `init(devKey, appId)` and register listeners as usual (see [Initialization Flow](RN_API.md#initialization-flow)).
 3. Use the CMP to decide if you need the consent dialog in the current session to acquire the consent data. If you need the consent dialog move to step 4; otherwise move to step 5
 4. Get confirmation from the CMP that the user has made their consent decision and the data is available in NSUserDefaults/SharedPreferences
-5. Call `appsFlyer.start()` from inside `registerSessionReadyListener`'s callback, after the CMP decision is resolved
+5. Call `AppsFlyer.start()` from inside `registerSessionReadyListener`'s callback, after the CMP decision is resolved
 ```javascript
 useEffect(() => {
   // TCF data collection
-  appsFlyer.enableTCFDataCollection(true);
+  AppsFlyer.enableTCFDataCollection(true);
 
-  appsFlyer.init('UxXxXxXxXd', '41*****44').then(
+  AppsFlyer.init('UxXxXxXxXd', '41*****44').then(
     (res) => console.log(res),
     (err) => console.log(err)
   );
-  appsFlyer.enableDebug(true);
+  AppsFlyer.enableDebug(true);
 
-  appsFlyer.registerSessionReadyListener(() => {
+  AppsFlyer.registerSessionReadyListener(() => {
     // CMP Pseudocode
     if (cmpManager.hasConsent()) {
-      appsFlyer.start();
+      AppsFlyer.start();
     } else {
       cmpManager.presentConsentDialog(res => {
-        appsFlyer.start();
+        AppsFlyer.start();
       });
     }
   });
@@ -57,8 +57,8 @@ How to Set Consent Data:
    - If GDPR applies, check whether consent data is already stored.
    - If not stored, show a consent dialog to obtain user consent.
 2. Build a plain consent data object with the relevant parameters (see [Consent Data API](#consent-data-api) below).
-3. Pass the consent data to the SDK using appsFlyer.setConsentData(consentData) inside `registerSessionReadyListener`'s callback, before calling `start()`.
-4. Initialize the SDK with `appsFlyer.init(devKey, appId)` (see [Initialization Flow](RN_API.md#initialization-flow)).
+3. Pass the consent data to the SDK using AppsFlyer.setConsentData(consentData) inside `registerSessionReadyListener`'s callback, before calling `start()`.
+4. Initialize the SDK with `AppsFlyer.init(devKey, appId)` (see [Initialization Flow](RN_API.md#initialization-flow)).
 
 #### Setting Consent Data for Users
 
@@ -66,16 +66,16 @@ How to Set Consent Data:
 
 If GDPR applies to the user, pass a plain object with the user's preferences.
 ```javascript
-import appsFlyer from 'react-native-appsflyer';
+import AppsFlyer from 'react-native-appsflyer';
 
 useEffect(() => {
-    appsFlyer.init('UxXxXxXxXd', '41*****44').then(
+    AppsFlyer.init('UxXxXxXxXd', '41*****44').then(
         res => console.log(res),
         err => console.log(err)
     );
-    appsFlyer.enableDebug(true);
+    AppsFlyer.enableDebug(true);
 
-    appsFlyer.registerSessionReadyListener(() => {
+    AppsFlyer.registerSessionReadyListener(() => {
         // User has given consent
         const consentData = {
             isUserSubjectToGDPR: true,
@@ -85,9 +85,9 @@ useEffect(() => {
         };
 
         // Send consent data to the SDK
-        appsFlyer.setConsentData(consentData);
+        AppsFlyer.setConsentData(consentData);
 
-        appsFlyer.start();
+        AppsFlyer.start();
     });
 }, []);
 ```
@@ -100,8 +100,8 @@ If GDPR does not apply to the user, set `isUserSubjectToGDPR: false` and omit th
 // GDPR does not apply to the user
 const consentData = { isUserSubjectToGDPR: false };
 
-appsFlyer.setConsentData(consentData);
-appsFlyer.start();
+AppsFlyer.setConsentData(consentData);
+AppsFlyer.start();
 ```
 
 ### Consent Data API
@@ -110,7 +110,7 @@ appsFlyer.start();
 plugin's current version.
 
 ```javascript
-appsFlyer.setConsentData({
+AppsFlyer.setConsentData({
     isUserSubjectToGDPR,             // Boolean (required) - whether GDPR applies to the user; no client-side default
     hasConsentForDataUsage,          // Boolean (optional) - Consent for data usage
     hasConsentForAdsPersonalization, // Boolean (optional) - Consent for ads personalization
@@ -120,16 +120,16 @@ appsFlyer.setConsentData({
 //Example Cases:
 
 // Full consent for GDPR user
-appsFlyer.setConsentData({ isUserSubjectToGDPR: true, hasConsentForDataUsage: true, hasConsentForAdsPersonalization: true, hasConsentForAdStorage: true });
+AppsFlyer.setConsentData({ isUserSubjectToGDPR: true, hasConsentForDataUsage: true, hasConsentForAdsPersonalization: true, hasConsentForAdStorage: true });
 
 // No consent for GDPR user
-appsFlyer.setConsentData({ isUserSubjectToGDPR: true, hasConsentForDataUsage: false, hasConsentForAdsPersonalization: false, hasConsentForAdStorage: false });
+AppsFlyer.setConsentData({ isUserSubjectToGDPR: true, hasConsentForDataUsage: false, hasConsentForAdsPersonalization: false, hasConsentForAdStorage: false });
 
 // Non-GDPR user
-appsFlyer.setConsentData({ isUserSubjectToGDPR: false });
+AppsFlyer.setConsentData({ isUserSubjectToGDPR: false });
 
 // Partial consent (only GDPR flag required, other fields optional)
-appsFlyer.setConsentData({ isUserSubjectToGDPR: true });
+AppsFlyer.setConsentData({ isUserSubjectToGDPR: true });
 ```
 
 ### Removed API

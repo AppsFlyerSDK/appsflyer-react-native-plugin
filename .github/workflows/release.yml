@@ -57,7 +57,7 @@ on:
         type: string
       android_plugin_bridge_version:
         description: 'Android af-android-plugin-bridge version (e.g., 6.18.0) — RC only, required alongside android_sdk_version'
-        required: true
+        required: false
         type: string
       base_branch:
         description: 'Base branch to create the release branch from — RC only'
@@ -188,9 +188,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ -z "$VERSION" || -z "$IOS_VER" || -z "$AND_VER" || -z "$BRIDGE_VER" ]]; then
-            echo "Missing required inputs"; exit 1
-          fi
+          for pair in "rn_version:$VERSION" "ios_sdk_version:$IOS_VER" "android_sdk_version:$AND_VER" "android_plugin_bridge_version:$BRIDGE_VER"; do
+            if [[ -z "${pair#*:}" ]]; then
+              echo "Missing required input: ${pair%%:*}"; exit 1
+            fi
+          done
 
           # RN version format: X.Y.Z-rcN (no +build)
           if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+$ ]]; then
@@ -261,9 +263,9 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Create release branch
         id: branch
@@ -554,9 +556,9 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Resolve dry_run across trigger paths
         id: dry-run
@@ -664,7 +666,7 @@ jobs:
           ref: ${{ needs.determine-release-type.outputs.release_type == 'rc' && needs.prepare-branch.outputs.release_branch || '' }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
@@ -806,7 +808,7 @@ jobs:
       - name: Create GitHub Pre-Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.validate-rc.outputs.version }}
+          tag_name: v${{ needs.validate-rc.outputs.version }}
           name: Release Candidate ${{ needs.validate-rc.outputs.version }}
           body_path: release_notes.md
           draft: false
@@ -1158,7 +1160,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "<!here>\n:react::react::react::react::react::react::react::react::react::react::react::react:\n\n${{ needs.validate-rc.outputs.is_dry_run == 'true' && ':test_tube: *[DRY RUN]* ' || '' }}*React Native Release Candidate:*\nreact-native-appsflyer: ${{ needs.validate-rc.outputs.version }} ${{ needs.validate-rc.outputs.is_dry_run == 'true' && 'pipeline completed (not published to npm)' || 'is ready for QA testing' }}.\n\n*Pre-publish checks:*\n${{ steps.legs.outputs.ci_icon }} Lint, Test & Build: ${{ steps.legs.outputs.ci_result }}\n${{ steps.legs.outputs.ios_icon }} RC-E2E iOS: ${{ steps.legs.outputs.e2e_ios_result }}\n${{ steps.legs.outputs.android_icon }} RC-E2E Android: ${{ steps.legs.outputs.e2e_android_result }}\n${{ needs.validate-rc.outputs.is_dry_run != 'true' && format('\n*Testing Instructions:*\n```\nnpm install react-native-appsflyer@{0} --save\n```', needs.validate-rc.outputs.version) || '' }}\n\n*Sources:*\n:github: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}\n:github: Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n${{ needs.validate-rc.outputs.is_dry_run != 'true' && format(':github: Release: https://github.com/{0}/releases/tag/{1}', github.repository, needs.validate-rc.outputs.version) || '' }}\n\n*Changes and fixes:*\n${{ steps.extract-info.outputs.changelog }}\n\n*Linked tickets and issues:*\n${{ steps.jira-tickets.outputs.tickets }}\n\n*Native SDKs:*\n:android: ${{ steps.extract-info.outputs.android_sdk }}\n:gear: ${{ steps.extract-info.outputs.android_plugin_bridge }}\n:apple: ${{ steps.extract-info.outputs.ios_sdk }}\n\n:react::react::react::react::react::react::react::react::react::react::react::react:"
+              "text": "<!here>\n:react::react::react::react::react::react::react::react::react::react::react::react:\n\n${{ needs.validate-rc.outputs.is_dry_run == 'true' && ':test_tube: *[DRY RUN]* ' || '' }}*React Native Release Candidate:*\nreact-native-appsflyer: ${{ needs.validate-rc.outputs.version }} ${{ needs.validate-rc.outputs.is_dry_run == 'true' && 'pipeline completed (not published to npm)' || 'is ready for QA testing' }}.\n\n*Pre-publish checks:*\n${{ steps.legs.outputs.ci_icon }} Lint, Test & Build: ${{ steps.legs.outputs.ci_result }}\n${{ steps.legs.outputs.ios_icon }} RC-E2E iOS: ${{ steps.legs.outputs.e2e_ios_result }}\n${{ steps.legs.outputs.android_icon }} RC-E2E Android: ${{ steps.legs.outputs.e2e_android_result }}\n${{ needs.validate-rc.outputs.is_dry_run != 'true' && format('\n*Testing Instructions:*\n```\nnpm install react-native-appsflyer@{0} --save\n```', needs.validate-rc.outputs.version) || '' }}\n\n*Sources:*\n:github: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}\n:github: Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n${{ needs.validate-rc.outputs.is_dry_run != 'true' && format(':github: Release: https://github.com/{0}/releases/tag/v{1}', github.repository, needs.validate-rc.outputs.version) || '' }}\n\n*Changes and fixes:*\n${{ steps.extract-info.outputs.changelog }}\n\n*Linked tickets and issues:*\n${{ steps.jira-tickets.outputs.tickets }}\n\n*Native SDKs:*\n:android: ${{ steps.extract-info.outputs.android_sdk }}\n:gear: ${{ steps.extract-info.outputs.android_plugin_bridge }}\n:apple: ${{ steps.extract-info.outputs.ios_sdk }}\n\n:react::react::react::react::react::react::react::react::react::react::react::react:"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_HOOK }}
@@ -1192,21 +1194,25 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Extract SDK versions and changelog
         id: extract-info
         env:
           VERSION: ${{ needs.validate-production.outputs.version }}
         run: |
-          # af-android-sdk and af-android-plugin-bridge share one version via the af-android-sdk-bom
-          # platform import now (PR #694 review) — extract it once, both outputs get the same value.
+          # af-android-plugin-bridge is pinned on its own line, independent of the af-android-sdk-bom
+          # platform import (the BOM doesn't always carry a matching plugin-bridge version — see
+          # android/build.gradle's own comment) — extract each version separately.
           ANDROID_SDK_VERSION=$(grep -oP "af-android-sdk-bom:\K[0-9][^'\"]*" android/build.gradle | head -1)
           [[ "$ANDROID_SDK_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::android_sdk version '$ANDROID_SDK_VERSION' is not X.Y.Z"; exit 1; }
           echo "android_sdk=$ANDROID_SDK_VERSION" >> "$GITHUB_OUTPUT"
-          echo "android_plugin_bridge=$ANDROID_SDK_VERSION" >> "$GITHUB_OUTPUT"
+
+          ANDROID_PLUGIN_BRIDGE_VERSION=$(grep -oP "af-android-plugin-bridge:\K[0-9][^'\"]*" android/build.gradle | head -1)
+          [[ "$ANDROID_PLUGIN_BRIDGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::android_plugin_bridge version '$ANDROID_PLUGIN_BRIDGE_VERSION' is not X.Y.Z"; exit 1; }
+          echo "android_plugin_bridge=$ANDROID_PLUGIN_BRIDGE_VERSION" >> "$GITHUB_OUTPUT"
 
           # Extract iOS SDK version from the podspec's plain AppsFlyerRPC line, excluding /Strict
           IOS_SDK_VERSION=$(grep -oP "'AppsFlyerRPC', '\K[^']*" react-native-appsflyer.podspec | head -1)

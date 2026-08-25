@@ -1,11 +1,6 @@
-/**
- * Backward Compatibility Tests
- *
- * These tests verify that changes in this branch don't break existing client code patterns.
- * Focus: Runtime compatibility and type safety.
- */
+// Verifies changes in this branch don't break existing client code patterns (runtime compatibility and type safety).
 
-import appsFlyer, { StoreKitVersion, AFInAppEventType } from '../index';
+import AppsFlyer, { StoreKitVersion, AFInAppEventType } from '../index';
 
 const NativeAppsFlyer = require('../src/NativeAppsFlyer').default;
 
@@ -22,7 +17,7 @@ describe('Backward Compatibility Tests', () => {
         hasConsentForAdsPersonalization: false,
       };
 
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
+      expect(() => AppsFlyer.setConsentData(consent)).not.toThrow();
       expect(NativeAppsFlyer.executeRpc).toHaveBeenCalled();
     });
 
@@ -31,13 +26,10 @@ describe('Backward Compatibility Tests', () => {
         isUserSubjectToGDPR: false,
       };
 
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
+      expect(() => AppsFlyer.setConsentData(consent)).not.toThrow();
     });
 
-    // The `AppsFlyerConsent` convenience constructor class (for building the same plain object)
-    // is no longer exported after the @appsflyer-sdk/js-core-plugin migration -- callers build the plain
-    // object directly instead (see above). Flagged for the index.ts owner as a real, unflagged
-    // public-API removal, same as noted in index.test.js; not re-added here.
+    // AppsFlyerConsent convenience constructor is no longer exported after the js-core-plugin migration; callers build the plain object directly (see above).
   });
 
   describe('StoreKitVersion - Runtime Access', () => {
@@ -68,23 +60,18 @@ describe('Backward Compatibility Tests', () => {
     });
   });
 
-  // The old (name, values, successCallback, errorCallback) callback-style logEvent signature no
-  // longer exists at all -- @appsflyer-sdk/js-core-plugin's logEvent takes a single LogEventParams
-  // object and returns a Promise, full stop. This isn't "callbacks still transparently work" (the
-  // pre-7.0.0 CallbackGuard concern this describe block used to guard) -- the calling convention
-  // itself is gone. Converted to the real new call shape below; the removed convention isn't
-  // re-tested since there's nothing left to assert about it.
+  // The old callback-style logEvent(name, values, successCallback, errorCallback) signature is gone; js-core-plugin's logEvent takes a single params object and returns a Promise.
   describe('logEvent (Promise-only, no callback-style overload)', () => {
     test('logEvent dispatches the RPC and resolves', async () => {
       NativeAppsFlyer.executeRpc.mockResolvedValueOnce(JSON.stringify({ success: true, data: null }));
-      await appsFlyer.logEvent({ eventName: 'af_purchase', eventValues: { af_revenue: 1 } });
+      await AppsFlyer.logEvent({ eventName: 'af_purchase', eventValues: { af_revenue: 1 } });
       expect(NativeAppsFlyer.executeRpc).toHaveBeenCalled();
     });
   });
 
-  describe('7.0.0+ breaking changes (MIGRATION.md) and their @appsflyer-sdk/js-core-plugin equivalents', () => {
+  describe('7.0.0+ breaking changes (MIGRATION.md) and their @AppsFlyer-sdk/js-core-plugin equivalents', () => {
     test('setHost sends {hostPrefixName, hostName} — param reorder/rename', () => {
-      appsFlyer.setHost({ hostPrefixName: 'mycompany', hostName: 'onelink.me' });
+      AppsFlyer.setHost({ hostPrefixName: 'mycompany', hostName: 'onelink.me' });
       expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
         JSON.stringify({
           method: 'setHost',
@@ -94,7 +81,7 @@ describe('Backward Compatibility Tests', () => {
     });
 
     test('validateAndLogInAppPurchase legacy (purchaseInfo, successC, errorC) signature is gone — the {purchase} params-object signature dispatches the RPC instead', () => {
-      appsFlyer.validateAndLogInAppPurchase({
+      AppsFlyer.validateAndLogInAppPurchase({
         purchase: { productId: 'sku', transactionId: 'txn', purchaseType: 'subscription' },
       });
       const [requestJson] = NativeAppsFlyer.executeRpc.mock.calls[0];
@@ -102,20 +89,20 @@ describe('Backward Compatibility Tests', () => {
     });
 
     test('setCollectIMEI is removed', () => {
-      expect(appsFlyer.setCollectIMEI).toBeUndefined();
+      expect(AppsFlyer.setCollectIMEI).toBeUndefined();
     });
 
     test('onAppOpenAttribution / onAttributionFailure / performOnAppAttribution are removed', () => {
-      expect(appsFlyer.onAppOpenAttribution).toBeUndefined();
-      expect(appsFlyer.onAttributionFailure).toBeUndefined();
-      expect(appsFlyer.performOnAppAttribution).toBeUndefined();
+      expect(AppsFlyer.onAppOpenAttribution).toBeUndefined();
+      expect(AppsFlyer.onAttributionFailure).toBeUndefined();
+      expect(AppsFlyer.performOnAppAttribution).toBeUndefined();
     });
 
     test('registerDeepLinkListener still delivers data previously routed through onAppOpenAttribution', async () => {
       const { NativeEventEmitter } = require('react-native');
       const nativeEventEmitter = new NativeEventEmitter(NativeAppsFlyer);
       const callback = jest.fn();
-      await appsFlyer.registerDeepLinkListener({ onDeepLinking: callback });
+      await AppsFlyer.registerDeepLinkListener({ onDeepLinking: callback });
 
       const attributionData = { media_source: 'test', campaign: 'test_campaign' };
       nativeEventEmitter.emit(
@@ -128,9 +115,7 @@ describe('Backward Compatibility Tests', () => {
         })
       );
 
-      // @appsflyer-sdk/js-core-plugin's registerDeepLinkListener normalizes every payload on this
-      // channel as a deep-link result and defaults a missing `status` to 'NOT_FOUND' (dist/appsflyer-sdk.js
-      // normalizeDeepLinkStatus) -- it can't distinguish this legacy attribution-only shape from a real one.
+      // js-core-plugin's registerDeepLinkListener normalizes every payload on this channel as a deep-link result, defaulting a missing `status` to 'NOT_FOUND' — see known-issues-kb.md.
       expect(callback).toHaveBeenCalledWith({ ...attributionData, status: 'NOT_FOUND' });
     });
   });
@@ -150,10 +135,9 @@ describe('Backward Compatibility Tests', () => {
 
   describe('Type Exports - ESLint Compatibility', () => {
     test('All expected exports are available', () => {
-      expect(appsFlyer).toBeDefined();
+      expect(AppsFlyer).toBeDefined();
       expect(StoreKitVersion).toBeDefined();
-      // Note: AppsFlyerPurchaseConnector may not be available if Purchase Connector is disabled
-      // This test verifies the exports exist, not that they're functional
+      // AppsFlyerPurchaseConnector may be unavailable if Purchase Connector is disabled; this only verifies exports exist.
     });
   });
 });

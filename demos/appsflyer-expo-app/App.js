@@ -6,8 +6,7 @@ import * as Clipboard from 'expo-clipboard';
 import AppsFlyer from 'react-native-appsflyer';
 import { APP_ID, DEV_KEY, RPC_CATALOG } from './rpcCatalog';
 
-// Only the methods that apply to this platform — matches how MethodCatalog.swift is iOS-only;
-// here one catalog covers both, filtered by Platform.OS instead of two separate app targets.
+// Filtered by Platform.OS — one shared catalog here instead of MethodCatalog.swift's two iOS-only targets.
 const METHODS = RPC_CATALOG.filter((m) => m.platform === 'both' || m.platform === Platform.OS);
 
 function safeStringify(value) {
@@ -26,8 +25,7 @@ function logColor(text) {
 	return TEXT_SECONDARY;
 }
 
-// Memoized so FlatList's rapid appends during a run don't re-render every
-// already-rendered row — only rows whose own item/props actually changed.
+// Memoized so FlatList's rapid appends during a run don't re-render every already-rendered row.
 const ResultRow = memo(function ResultRow({ item, onSelect }) {
 	return (
 		<Pressable style={styles.row} onPress={() => onSelect(item)}>
@@ -63,11 +61,7 @@ function withTimeout(promise, label) {
 	]);
 }
 
-// start() must be called from inside registerSessionReadyListener's callback (SDK 7's manual
-// startup model) — but that callback is a real native event with no plugin-side fallback, and
-// AppsFlyerLib's registerSessionReadyListener is known to stall indefinitely on some launches
-// (known-issues-kb.md). A timeout fallback that calls start() anyway is what actually fixes the
-// flakiness, vs. just showing a "stuck? background the app" hint. Matches example/src/App.tsx.
+// Timeout fallback for registerSessionReadyListener's known indefinite-stall bug (known-issues-kb.md); matches example/src/App.tsx.
 const SESSION_READY_TIMEOUT_MS = 15000;
 function startWhenSessionReady(onReady) {
 	return new Promise((resolve, reject) => {
@@ -119,27 +113,18 @@ export default function App() {
 			addLog('========== Bootstrap Started ==========');
 			AppsFlyer.enableDebug({ enabled: true });
 
-			if (Platform.OS === 'android') {
-				AppsFlyer.registerDeepLinkListener({});
-			}
+			// registerDeepLinkListener before init, no Platform.OS branch — iOS's one-shot DDL
+			// bug that used to require deferring this call is fixed upstream (bridge-patterns.md §4).
+			AppsFlyer.registerDeepLinkListener({});
 
-			try {
-				await AppsFlyer.init({ devKey: DEV_KEY, appId: APP_ID });
-				addLog('✓ init OK');
-			} catch (error) {
-				addLog(`✗ init FAILED: ${safeStringify(error)}`);
-				return; // devKey/appId never got set natively — session-ready listener would misbehave
-			}
+			// Not awaited: registration below must dispatch synchronously, not after init's
+			// promise settles (bridge-patterns.md §4).
+			AppsFlyer.init({ devKey: DEV_KEY, appId: APP_ID }).then(
+				() => addLog('✓ init OK'),
+				(error) => addLog(`✗ init FAILED: ${safeStringify(error)}`),
+			);
 
-			// Registered after init resolves, not synchronously right after the init() call —
-			// registerSessionReadyListener has a documented native bug that makes it unsafe to call
-			// before init has actually configured the SDK (known-issues-kb.md). registerConversionListener
-			// has no such constraint but is kept alongside it for one readable bootstrap sequence.
 			AppsFlyer.registerConversionListener({});
-
-			if (Platform.OS === 'ios') {
-				AppsFlyer.registerDeepLinkListener({});
-			}
 
 			await startWhenSessionReady((reason) => addLog(`✓ Session ready (${reason})`));
 			if (!cancelled) setSessionReady(true);
@@ -312,9 +297,7 @@ export default function App() {
 				)}
 
 				<Modal visible={!!selected} animationType='slide' onRequestClose={() => setSelected(null)}>
-					{/* Modal renders into its own native root — the outer SafeAreaProvider's insets
-					    don't reliably reach it, so it needs its own provider (react-native-safe-area-context
-					    caveat), not just a SafeAreaView. */}
+					{/* Modal renders into its own native root, so it needs its own SafeAreaProvider, not just a SafeAreaView. */}
 					<SafeAreaProvider>
 						<SafeAreaView style={styles.modal}>
 							<View style={styles.modalHeader}>

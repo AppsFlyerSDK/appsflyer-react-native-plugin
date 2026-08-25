@@ -30,10 +30,10 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android' // Apply Kotlin Android plugin
+apply plugin: 'kotlin-android'
 apply plugin: 'com.facebook.react'
 
-def includeConnector = project.hasProperty('appsflyer.enable_purchase_connector') ? project.property('appsflyer.enable_purchase_connector').toBoolean() : false // Moved outside of android block
+def includeConnector = project.hasProperty('appsflyer.enable_purchase_connector') ? project.property('appsflyer.enable_purchase_connector').toBoolean() : false
 
 android {
     namespace "com.appsflyer.reactnative"
@@ -52,7 +52,7 @@ android {
 
     sourceSets {
         main {
-            java.srcDirs = ['src/main/java', 'src/main/kotlin', 'src/main/common'] // Add Kotlin + shared connector-variant source directories
+            java.srcDirs = ['src/main/java', 'src/main/kotlin', 'src/main/common']
             java.srcDirs += includeConnector ? ['src/main/includeConnector'] : ['src/main/excludeConnector']
         }
     }
@@ -74,7 +74,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions { // Configure Kotlin-specific options
+    kotlinOptions {
         jvmTarget = "17"
     }
 }
@@ -89,11 +89,12 @@ dependencies {
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.2')}"
     if (includeConnector){
-        implementation 'com.appsflyer:purchase-connector:2.2.0'
+        implementation 'com.appsflyer:purchase-connector:2.3.0'
     }
     implementation platform('com.appsflyer:af-android-sdk-bom:7.0.1')
     implementation 'com.appsflyer:af-android-sdk'
-    implementation 'com.appsflyer:af-android-plugin-bridge'
+    // pinned explicitly — af-android-sdk-bom (7.0.1) doesn't carry this version yet
+    implementation 'com.appsflyer:af-android-plugin-bridge:7.0.12'
 
     testImplementation 'junit:junit:4.13.2'
     // android.jar's org.json stub throws/returns null for every method under

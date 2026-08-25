@@ -50,11 +50,12 @@ expo install react-native-appsflyer
 
 Running `expo prebuild` with the plugin installed automatically modifies your `AppDelegate` (both
 the Swift template used by Expo SDK 52+ and the legacy Objective-C template) to wire up deep
-linking and attribution. You do not need to add these calls yourself. The plugin injects:
+linking and attribution. You do not need to add these calls yourself. The plugin injects, all via
+`AppsFlyerAttribution.shared` (one import — `react_native_appsflyer`):
 
-- `AppsFlyerLib.shared().handleLaunchOptions(launchOptions)` in `didFinishLaunchingWithOptions`
-- `AppsFlyerLib.shared().handleOpen(url, options:)` in the `openURL` method
-- `AppsFlyerLib.shared().continue(userActivity, restorationHandler:)` in the `continueUserActivity` method
+- `AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)` in `didFinishLaunchingWithOptions`
+- `AppsFlyerAttribution.shared.handleOpen(url, options:)` in the `openURL` method
+- `AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler:)` in the `continueUserActivity` method
 
 This only works if your `AppDelegate` matches the Expo SDK default template. If the plugin logs a warning during `expo prebuild`, add the three calls above manually.
 

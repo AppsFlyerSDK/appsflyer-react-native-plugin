@@ -3,7 +3,6 @@ import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
 import react_native_appsflyer
-import AppsFlyerLib
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -31,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       launchOptions: launchOptions
     )
 
-    AppsFlyerLib.shared().handleLaunchOptions(launchOptions)
+    AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)
     
     // QA: when launched via `simctl launch ... -deepLinkURL "<url>"`, replay
     // the URL through application(_:open:options:) so the AppsFlyer plugin

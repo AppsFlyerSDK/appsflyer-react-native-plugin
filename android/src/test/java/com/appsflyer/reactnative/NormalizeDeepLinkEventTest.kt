@@ -4,14 +4,7 @@ import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/**
- * Regression test: plugin_bridge's DeepLinkResult reports SHOUTING_CASE enum names
- * ("FOUND"/"NOT_FOUND"/"ERROR", error "TIMEOUT"/"NETWORK"/...) while iOS reports
- * lowerCamelCase ("found"/"notFound"/"failure") plus a free-text error message.
- * `UnifiedDeepLinkData` (index.ts) is typed against iOS's vocabulary — Android's raw event
- * must be normalized to match before it reaches JS, or `res.status`/`res.error` comparisons
- * silently fail on Android only.
- */
+// Regression test: Android's SHOUTING_CASE deep-link status/error must be normalized to iOS's lowerCamelCase vocabulary (index.ts's UnifiedDeepLinkData) before reaching JS.
 class NormalizeDeepLinkEventTest {
 
     @Test

@@ -1,18 +1,4 @@
-/**
- * Wire-contract test: asserts every dispatched RPC request against the params the native RPC
- * layers actually read (fixtures generated from native source by scripts/generate-*-rpc-contract.js,
- * committed so CI needs no native checkout). index.test.js only asserts the plugin against
- * itself; this catches both a missing required param (hard error, mainly iOS) and an extra
- * param native never reads (silent default via Android's opt* accessors).
- *
- * Unlike the pre-migration version of this file, there is no method-name alias table anymore --
- * @appsflyer-sdk/js-core-plugin's rpc-resolver.ts already resolves each call to the real wire method
- * name (e.g. "initialize", not "init") before it ever reaches NativeAppsFlyer.executeRpc, so the
- * `method` field on every captured request IS the name to look up directly in the fixture.
- * There is also no "capture once, reuse for both platforms" step anymore -- RNTransport.platform
- * is fixed per SDK instance at construction, so each platform under test gets its own fresh
- * module instance and its own dispatched requests.
- */
+// Asserts every dispatched RPC request against the params native actually reads (fixtures generated from native source by scripts/generate-*-rpc-contract.js, committed so CI needs no native checkout) — catches both a missing required param and an extra param native silently drops. `method` on each captured request is already the resolved wire name (js-core-plugin's rpc-resolver.ts), so it's looked up directly in the fixture; each platform under test gets its own fresh module instance since RNTransport.platform is fixed at construction.
 
 const iosContract = require('./fixtures/ios-rpc-contract.json');
 const androidContract = require('./fixtures/android-rpc-contract.json');
@@ -26,79 +12,74 @@ function freshAppsFlyerForPlatform(platform) {
 	const { Platform: FreshPlatform } = require('react-native');
 	FreshPlatform.OS = platform;
 	return {
-		appsFlyer: require('../index').default,
+		AppsFlyer: require('../index').default,
 		NativeAppsFlyer: require('../src/NativeAppsFlyer').default,
 	};
 }
 
-// `platforms` reflects intent (this repo's own @platform JSDoc markers, cross-checked against
-// node_modules/@appsflyer-sdk/js-core-plugin/dist/generated/rpc-map.js) -- a method missing where it
-// claims support is a defect this test should surface.
+// `platforms` reflects intent (this repo's @platform JSDoc markers, cross-checked against rpc-map.js) — a method missing where it claims support is a defect this test should surface.
 const CALL_SITES = [
-	{ api: 'init', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.init({ devKey: 'devkey', appId: '123456789' }) },
-	{ api: 'enableDebug', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.enableDebug({ enabled: true }) },
-	{ api: 'start', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.start() },
-	{ api: 'logEvent', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.logEvent({ eventName: 'af_purchase', eventValues: { af_revenue: 1 } }) },
+	{ api: 'init', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.init({ devKey: 'devkey', appId: '123456789' }) },
+	{ api: 'enableDebug', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.enableDebug({ enabled: true }) },
+	{ api: 'start', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.start() },
+	{ api: 'logEvent', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.logEvent({ eventName: 'af_purchase', eventValues: { af_revenue: 1 } }) },
 	{
 		api: 'logAdRevenue',
 		platforms: BOTH,
-		invoke: (appsFlyer) =>
-			appsFlyer.logAdRevenue({
+		invoke: (AppsFlyer) =>
+			AppsFlyer.logAdRevenue({
 				monetizationNetwork: 'admob',
 				currencyIso4217Code: 'USD',
 				revenue: 1.5,
 				mediationNetwork: 'google_admob',
 			}),
 	},
-	{ api: 'logLocation', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.logLocation({ longitude: 1.5, latitude: 2.5 }) },
-	{ api: 'setUserEmail', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setUserEmail({ email: 'a@b.com' }) },
-	{ api: 'setAdditionalData', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setAdditionalData({ customData: { tenant: 'qa' } }) },
-	{ api: 'getAppsFlyerUID', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.getAppsFlyerUID() },
-	{ api: 'getSdkVersion', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.getSdkVersion() },
+	{ api: 'logLocation', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.logLocation({ longitude: 1.5, latitude: 2.5 }) },
+	{ api: 'setUserEmail', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setUserEmail({ email: 'a@b.com' }) },
+	{ api: 'setAdditionalData', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setAdditionalData({ customData: { tenant: 'qa' } }) },
+	{ api: 'getAppsFlyerUID', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.getAppsFlyerUID() },
+	{ api: 'getSdkVersion', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.getSdkVersion() },
 	{
 		api: 'updateServerUninstallToken',
 		platforms: BOTH,
-		// iOS reads deviceToken (via registerUninstall); Android reads token — the resolver picks
-		// the right key per platform now, no more sending both.
-		invoke: (appsFlyer) => appsFlyer.updateServerUninstallToken({ token: 'token-abc' }),
+		// iOS reads deviceToken (via registerUninstall); Android reads token — the resolver picks the right key per platform now.
+		invoke: (AppsFlyer) => AppsFlyer.updateServerUninstallToken({ token: 'token-abc' }),
 	},
-	{ api: 'setCustomerUserId', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setCustomerUserId({ customerId: 'uid-1' }) },
-	{ api: 'stop', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.stop({ shouldStop: true }) },
-	{ api: 'setAppInviteOneLink', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setAppInviteOneLink({ oneLinkId: 'abc1' }) },
+	{ api: 'setCustomerUserId', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setCustomerUserId({ customerId: 'uid-1' }) },
+	{ api: 'stop', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.stop({ shouldStop: true }) },
+	{ api: 'setAppInviteOneLink', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setAppInviteOneLink({ oneLinkId: 'abc1' }) },
 	{
 		api: 'generateInviteLink',
 		platforms: BOTH,
-		invoke: (appsFlyer) =>
-			appsFlyer.generateInviteLink({
+		invoke: (AppsFlyer) =>
+			AppsFlyer.generateInviteLink({
 				parameters: { channel: 'sms', campaign: 'c1', referrerCustomerId: 'cust-1', baseDeepLink: 'https://example.com' },
 			}),
 	},
-	{ api: 'logInvite', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.logInvite({ channel: 'sms', eventParameters: { k: 'v' } }) },
+	{ api: 'logInvite', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.logInvite({ channel: 'sms', eventParameters: { k: 'v' } }) },
 	{
 		api: 'logCrossPromoteImpression',
 		platforms: BOTH,
-		invoke: (appsFlyer) => appsFlyer.logCrossPromoteImpression({ appId: '123', campaign: 'c1', userParams: { k: 'v' } }),
+		invoke: (AppsFlyer) => AppsFlyer.logCrossPromoteImpression({ appId: '123', campaign: 'c1', userParams: { k: 'v' } }),
 	},
 	{
 		api: 'logAndOpenStore',
 		platforms: BOTH,
-		invoke: (appsFlyer) => appsFlyer.logAndOpenStore({ promotedAppId: '123', campaign: 'c1', userParams: { k: 'v' } }),
+		invoke: (AppsFlyer) => AppsFlyer.logAndOpenStore({ promotedAppId: '123', campaign: 'c1', userParams: { k: 'v' } }),
 	},
-	{ api: 'setCurrencyCode', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setCurrencyCode({ currencyCode: 'USD' }) },
-	{ api: 'isSessionReady', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.isSessionReady() },
+	{ api: 'setCurrencyCode', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setCurrencyCode({ currencyCode: 'USD' }) },
+	{ api: 'isSessionReady', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.isSessionReady() },
 	{
 		api: 'unregisterSessionReadyListener',
 		platforms: BOTH,
-		invoke: (appsFlyer) => appsFlyer.unregisterSessionReadyListener(),
+		invoke: (AppsFlyer) => AppsFlyer.unregisterSessionReadyListener(),
 	},
 	{
 		api: 'validateAndLogInAppPurchase',
 		platforms: BOTH,
-		// Android reads the flat purchaseToken/productId/purchaseType trio; iOS reads nested
-		// product/transaction with transactionId instead of purchaseToken — genuinely different
-		// shapes per platform now (no more sending a merged both-platform payload).
-		invoke: (appsFlyer, platform) =>
-			appsFlyer.validateAndLogInAppPurchase({
+		// Android reads flat purchaseToken/productId/purchaseType; iOS reads transactionId instead of purchaseToken — genuinely different shapes per platform.
+		invoke: (AppsFlyer, platform) =>
+			AppsFlyer.validateAndLogInAppPurchase({
 				purchase:
 					platform === ANDROID
 						? { purchaseType: 'oneTimePurchase', productId: 'sku', purchaseToken: 'txn' }
@@ -106,172 +87,165 @@ const CALL_SITES = [
 				additionalParameters: { extra: '1' },
 			}),
 	},
-	{ api: 'anonymizeUser', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.anonymizeUser({ shouldAnonymize: true }) },
-	{ api: 'setOneLinkCustomDomain', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setOneLinkCustomDomain({ domains: ['d.com'] }) },
-	{ api: 'setResolveDeepLinkURLs', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setResolveDeepLinkURLs({ urls: ['u.com'] }) },
+	{ api: 'anonymizeUser', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.anonymizeUser({ shouldAnonymize: true }) },
+	{ api: 'setOneLinkCustomDomain', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setOneLinkCustomDomain({ domains: ['d.com'] }) },
+	{ api: 'setResolveDeepLinkURLs', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setResolveDeepLinkURLs({ urls: ['u.com'] }) },
 	{
 		api: 'setDisableAdvertisingIdentifiers',
 		platforms: BOTH,
-		invoke: (appsFlyer) => appsFlyer.setDisableAdvertisingIdentifiers({ disable: true }),
+		invoke: (AppsFlyer) => AppsFlyer.setDisableAdvertisingIdentifiers({ disable: true }),
 	},
-	{ api: 'setHost', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setHost({ hostPrefixName: 'pre', hostName: 'host.com' }) },
+	{ api: 'setHost', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setHost({ hostPrefixName: 'pre', hostName: 'host.com' }) },
 	{
 		api: 'addPushNotificationDeepLinkPath',
 		platforms: BOTH,
-		invoke: (appsFlyer) => appsFlyer.addPushNotificationDeepLinkPath({ deepLinkPath: ['af', 'link'] }),
+		invoke: (AppsFlyer) => AppsFlyer.addPushNotificationDeepLinkPath({ deepLinkPath: ['af', 'link'] }),
 	},
 	{
 		api: 'setSharingFilterForPartners',
 		platforms: BOTH,
-		invoke: (appsFlyer) => appsFlyer.setSharingFilterForPartners({ partners: ['p1'] }),
+		invoke: (AppsFlyer) => AppsFlyer.setSharingFilterForPartners({ partners: ['p1'] }),
 	},
-	{ api: 'setPartnerData', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setPartnerData({ partnerId: 'p1', data: { k: 'v' } }) },
+	{ api: 'setPartnerData', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setPartnerData({ partnerId: 'p1', data: { k: 'v' } }) },
 	{
 		api: 'appendParametersToDeepLinkingURL',
 		platforms: BOTH,
-		invoke: (appsFlyer) => appsFlyer.appendParametersToDeepLinkingURL({ contains: 'example.com', parameters: { k: 'v' } }),
+		invoke: (AppsFlyer) => AppsFlyer.appendParametersToDeepLinkingURL({ contains: 'example.com', parameters: { k: 'v' } }),
 	},
-	{ api: 'enableTCFDataCollection', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.enableTCFDataCollection({ shouldCollect: true }) },
+	{ api: 'enableTCFDataCollection', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.enableTCFDataCollection({ shouldCollect: true }) },
 	{
 		api: 'setConsentData',
 		platforms: BOTH,
-		invoke: (appsFlyer) =>
-			appsFlyer.setConsentData({
+		invoke: (AppsFlyer) =>
+			AppsFlyer.setConsentData({
 				isUserSubjectToGDPR: true,
 				hasConsentForDataUsage: true,
 				hasConsentForAdsPersonalization: true,
 				hasConsentForAdStorage: true,
 			}),
 	},
-	{ api: 'setMinTimeBetweenSessions', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setMinTimeBetweenSessions({ seconds: 5 }) },
-	{ api: 'setInstallId', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setInstallId({ installId: 'install-1' }) },
-	{ api: 'setDeepLinkTimeout', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setDeepLinkTimeout({ timeout: 3000 }) },
+	{ api: 'setMinTimeBetweenSessions', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setMinTimeBetweenSessions({ seconds: 5 }) },
+	{ api: 'setInstallId', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setInstallId({ installId: 'install-1' }) },
+	{ api: 'setDeepLinkTimeout', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setDeepLinkTimeout({ timeout: 3000 }) },
 	{
 		api: 'enableFacebookDeferredApplinks',
 		platforms: BOTH,
-		invoke: (appsFlyer) => appsFlyer.enableFacebookDeferredApplinks({ isEnabled: true }),
+		invoke: (AppsFlyer) => AppsFlyer.enableFacebookDeferredApplinks({ isEnabled: true }),
 	},
-	{ api: 'setUserPhone', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setUserPhone({ countryCode: '1', phoneNumber: '5551234567' }) },
-	{ api: 'setUserFirstName', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setUserFirstName({ firstName: 'Ada' }) },
-	{ api: 'setUserLastName', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setUserLastName({ lastName: 'Lovelace' }) },
-	{ api: 'setUserFbLoginId', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.setUserFbLoginId({ fbLoginId: '12345' }) },
-	{ api: 'clearUserPii', platforms: BOTH, invoke: (appsFlyer) => appsFlyer.clearUserPii() },
+	{ api: 'setUserPhone', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setUserPhone({ countryCode: '1', phoneNumber: '5551234567' }) },
+	{ api: 'setUserFirstName', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setUserFirstName({ firstName: 'Ada' }) },
+	{ api: 'setUserLastName', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setUserLastName({ lastName: 'Lovelace' }) },
+	{ api: 'setUserFbLoginId', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.setUserFbLoginId({ fbLoginId: '12345' }) },
+	{ api: 'clearUserPii', platforms: BOTH, invoke: (AppsFlyer) => AppsFlyer.clearUserPii() },
 	{
 		api: 'sendPushNotificationData',
-		// Android-only now — iOS's equivalent is the separate handlePushNotification call site below
-		// (see rpc-map.js: sendPushNotificationData.ios is null).
+		// Android-only — iOS's equivalent is the separate handlePushNotification call site below (rpc-map.js: sendPushNotificationData.ios is null).
 		platforms: [ANDROID],
-		invoke: (appsFlyer) => appsFlyer.sendPushNotificationData({ campaign: 'c1', pid: 'firebase', isRetargeting: true }),
+		invoke: (AppsFlyer) => AppsFlyer.sendPushNotificationData({ campaign: 'c1', pid: 'firebase', isRetargeting: true }),
 	},
 	{
 		api: 'handlePushNotification',
 		// iOS-only (rpc-map.js: handlePushNotification.android is null).
 		platforms: [IOS],
-		invoke: (appsFlyer) => appsFlyer.handlePushNotification({ pushPayload: { af: { c: 'x' } } }),
+		invoke: (AppsFlyer) => AppsFlyer.handlePushNotification({ pushPayload: { af: { c: 'x' } } }),
 	},
 	{
 		api: 'registerConversionListener',
 		platforms: BOTH,
-		invoke: (appsFlyer) => appsFlyer.registerConversionListener({ onConversionDataSuccess: jest.fn(), onConversionDataFail: jest.fn() }),
+		invoke: (AppsFlyer) => AppsFlyer.registerConversionListener({ onConversionDataSuccess: jest.fn(), onConversionDataFail: jest.fn() }),
 	},
 	{
 		api: 'unregisterConversionListener',
-		// iOS has no unregisterConversionListener RPC at all (rpc-map.js: ios is null; confirmed
-		// against AFRPCTypedRequests.swift/AFRPCParser.swift registering no such method).
+		// iOS has no unregisterConversionListener RPC at all (rpc-map.js: ios is null; confirmed against native source registering no such method).
 		platforms: [ANDROID],
-		invoke: (appsFlyer) => appsFlyer.unregisterConversionListener(),
+		invoke: (AppsFlyer) => AppsFlyer.unregisterConversionListener(),
 	},
 	{
 		api: 'registerDeepLinkListener',
 		platforms: BOTH,
-		invoke: (appsFlyer) => appsFlyer.registerDeepLinkListener({ onDeepLinking: jest.fn() }),
+		invoke: (AppsFlyer) => AppsFlyer.registerDeepLinkListener({ onDeepLinking: jest.fn() }),
 	},
 	{
 		api: 'registerSessionReadyListener',
 		platforms: BOTH,
-		invoke: (appsFlyer) => appsFlyer.registerSessionReadyListener(jest.fn()),
+		invoke: (AppsFlyer) => AppsFlyer.registerSessionReadyListener(jest.fn()),
 	},
 
 	// iOS-only surface
-	{ api: 'setDisableIDFVCollection', platforms: [IOS], invoke: (appsFlyer) => appsFlyer.setDisableIDFVCollection({ disable: true }) },
-	{ api: 'setDisableCollectASA', platforms: [IOS], invoke: (appsFlyer) => appsFlyer.setDisableCollectASA({ disable: true }) },
+	{ api: 'setDisableIDFVCollection', platforms: [IOS], invoke: (AppsFlyer) => AppsFlyer.setDisableIDFVCollection({ disable: true }) },
+	{ api: 'setDisableCollectASA', platforms: [IOS], invoke: (AppsFlyer) => AppsFlyer.setDisableCollectASA({ disable: true }) },
 	{
 		api: 'setDisableAppleAdsAttribution',
 		platforms: [IOS],
-		invoke: (appsFlyer) => appsFlyer.setDisableAppleAdsAttribution({ disable: true }),
+		invoke: (AppsFlyer) => AppsFlyer.setDisableAppleAdsAttribution({ disable: true }),
 	},
 	{
 		api: 'setUseReceiptValidationSandbox',
 		platforms: [IOS],
-		invoke: (appsFlyer) => appsFlyer.setUseReceiptValidationSandbox({ sandbox: true }),
+		invoke: (AppsFlyer) => AppsFlyer.setUseReceiptValidationSandbox({ sandbox: true }),
 	},
 	{
 		api: 'setUseUninstallSandbox',
 		platforms: [IOS],
-		invoke: (appsFlyer) => appsFlyer.setUseUninstallSandbox({ sandbox: true }),
+		invoke: (AppsFlyer) => AppsFlyer.setUseUninstallSandbox({ sandbox: true }),
 	},
-	{ api: 'setDisableSKAdNetwork', platforms: [IOS], invoke: (appsFlyer) => appsFlyer.setDisableSKAdNetwork({ disable: true }) },
-	{ api: 'setCurrentDeviceLanguage', platforms: [IOS], invoke: (appsFlyer) => appsFlyer.setCurrentDeviceLanguage({ language: 'en' }) },
+	{ api: 'setDisableSKAdNetwork', platforms: [IOS], invoke: (AppsFlyer) => AppsFlyer.setDisableSKAdNetwork({ disable: true }) },
+	{ api: 'setCurrentDeviceLanguage', platforms: [IOS], invoke: (AppsFlyer) => AppsFlyer.setCurrentDeviceLanguage({ language: 'en' }) },
 	{
 		api: 'setShouldCollectDeviceName',
 		platforms: [IOS],
-		invoke: (appsFlyer) => appsFlyer.setShouldCollectDeviceName({ collect: true }),
+		invoke: (AppsFlyer) => AppsFlyer.setShouldCollectDeviceName({ collect: true }),
 	},
 	{
 		api: 'setFacebookDeferredAppLink',
 		platforms: [IOS],
-		invoke: (appsFlyer) => appsFlyer.setFacebookDeferredAppLink({ url: 'https://a.com' }),
+		invoke: (AppsFlyer) => AppsFlyer.setFacebookDeferredAppLink({ url: 'https://a.com' }),
 	},
 	{
 		api: 'continueUserActivity',
 		platforms: [IOS],
-		invoke: (appsFlyer) => appsFlyer.continueUserActivity({ url: 'https://a.com' }),
+		invoke: (AppsFlyer) => AppsFlyer.continueUserActivity({ url: 'https://a.com' }),
 	},
-	{ api: 'handleOpenURL', platforms: [IOS], invoke: (appsFlyer) => appsFlyer.handleOpenURL({ url: 'app://x' }) },
-	{ api: 'handleOpenUrl', platforms: [IOS], invoke: (appsFlyer) => appsFlyer.handleOpenUrl({ url: 'app://x' }) },
-	// NOTE: core's schema marks `launchOptions` optional (HandleLaunchOptionsParams.launchOptions?),
-	// but iOS's real native parser (AFRPCHandleLaunchOptionsRequest, per the fixture) requires it --
-	// a genuine schema/native mismatch this wire-contract test exists to catch. Passing an object
-	// here reflects what a caller must actually do; the schema itself is out of scope to fix in
-	// this test-only pass (flagged as a finding, not silently worked around).
-	{ api: 'handleLaunchOptions', platforms: [IOS], invoke: (appsFlyer) => appsFlyer.handleLaunchOptions({ launchOptions: {} }) },
+	{ api: 'handleOpenURL', platforms: [IOS], invoke: (AppsFlyer) => AppsFlyer.handleOpenURL({ url: 'app://x' }) },
+	{ api: 'handleOpenUrl', platforms: [IOS], invoke: (AppsFlyer) => AppsFlyer.handleOpenUrl({ url: 'app://x' }) },
+	// Schema marks `launchOptions` optional, but iOS's native parser requires it — a genuine schema/native mismatch this test exists to catch (not fixed here).
+	{ api: 'handleLaunchOptions', platforms: [IOS], invoke: (AppsFlyer) => AppsFlyer.handleLaunchOptions({ launchOptions: {} }) },
 
 	// Android-only surface
-	{ api: 'setCollectAndroidID', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.setCollectAndroidID({ isCollect: true }) },
-	{ api: 'setDisableNetworkData', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.setDisableNetworkData({ isDisable: true }) },
+	{ api: 'setCollectAndroidID', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setCollectAndroidID({ isCollect: true }) },
+	{ api: 'setDisableNetworkData', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setDisableNetworkData({ isDisable: true }) },
 	{
 		api: 'unregisterDeeplinkListener',
 		platforms: [ANDROID],
-		invoke: (appsFlyer) => appsFlyer.unregisterDeeplinkListener(),
+		invoke: (AppsFlyer) => AppsFlyer.unregisterDeeplinkListener(),
 	},
-	{ api: 'disableAppSetId', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.disableAppSetId() },
-	{ api: 'getHostName', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.getHostName() },
-	{ api: 'getHostPrefix', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.getHostPrefix() },
-	{ api: 'getOutOfStore', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.getOutOfStore() },
-	{ api: 'getAttributionId', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.getAttributionId() },
-	{ api: 'isStopped', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.isStopped() },
-	{ api: 'isPreInstalledApp', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.isPreInstalledApp() },
-	{ api: 'setOutOfStore', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.setOutOfStore({ sourceName: 'store' }) },
-	{ api: 'setLogLevel', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.setLogLevel({ logLevel: 'debug' }) },
-	{ api: 'setIsUpdate', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.setIsUpdate({ isUpdate: true }) },
-	{ api: 'setAppId', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.setAppId({ appId: 'com.app' }) },
+	{ api: 'disableAppSetId', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.disableAppSetId() },
+	{ api: 'getHostName', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.getHostName() },
+	{ api: 'getHostPrefix', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.getHostPrefix() },
+	{ api: 'getOutOfStore', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.getOutOfStore() },
+	{ api: 'getAttributionId', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.getAttributionId() },
+	{ api: 'isStopped', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.isStopped() },
+	{ api: 'isPreInstalledApp', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.isPreInstalledApp() },
+	{ api: 'setOutOfStore', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setOutOfStore({ sourceName: 'store' }) },
+	{ api: 'setLogLevel', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setLogLevel({ logLevel: 'debug' }) },
+	{ api: 'setIsUpdate', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setIsUpdate({ isUpdate: true }) },
+	{ api: 'setAppId', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setAppId({ appId: 'com.app' }) },
 	{
 		api: 'setPreinstallAttribution',
 		platforms: [ANDROID],
-		invoke: (appsFlyer) => appsFlyer.setPreinstallAttribution({ mediaSource: 'ms', campaign: 'camp', siteId: 'site' }),
+		invoke: (AppsFlyer) => AppsFlyer.setPreinstallAttribution({ mediaSource: 'ms', campaign: 'camp', siteId: 'site' }),
 	},
-	{ api: 'logSession', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.logSession() },
-	{ api: 'onPause', platforms: [ANDROID], invoke: (appsFlyer) => appsFlyer.onPause() },
+	{ api: 'logSession', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.logSession() },
+	{ api: 'onPause', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.onPause() },
 
-	// Both platforms, but a genuinely different wire method + params per platform
-	// (Android keeps shouldTriggerSession; iOS's performOnAppAttributionWithURL doesn't take it).
+	// Same wire method both platforms (iOS renamed to match Android in AppsFlyerRPC 7.0.13), but Android keeps shouldTriggerSession while iOS doesn't take it.
 	{
 		api: 'performDeepLinking',
 		platforms: BOTH,
-		invoke: (appsFlyer, platform) =>
+		invoke: (AppsFlyer, platform) =>
 			platform === ANDROID
-				? appsFlyer.performDeepLinking({ url: 'https://a.com', shouldTriggerSession: true })
-				: appsFlyer.performDeepLinking({ url: 'https://a.com' }),
+				? AppsFlyer.performDeepLinking({ url: 'https://a.com', shouldTriggerSession: true })
+				: AppsFlyer.performDeepLinking({ url: 'https://a.com' }),
 	},
 ];
 
@@ -292,12 +266,12 @@ function hasPath(params, dottedKey) {
 describe('RPC wire contract', () => {
 	describe.each(CALL_SITES)('$api', ({ platforms, invoke }) => {
 		test.each(platforms)('satisfies the %s contract', (platform) => {
-			const { appsFlyer, NativeAppsFlyer: nativeAppsFlyer } = freshAppsFlyerForPlatform(platform);
+			const { AppsFlyer, NativeAppsFlyer: nativeAppsFlyer } = freshAppsFlyerForPlatform(platform);
 			nativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
 			jest.spyOn(console, 'warn').mockImplementation(() => {});
 			jest.spyOn(console, 'error').mockImplementation(() => {});
 
-			invoke(appsFlyer, platform);
+			invoke(AppsFlyer, platform);
 
 			const requests = nativeAppsFlyer.executeRpc.mock.calls.map(([json]) => JSON.parse(json));
 			expect(requests.length).toBeGreaterThan(0);
@@ -324,7 +298,7 @@ describe('RPC wire contract', () => {
 					}
 				}
 
-				// Top-level only — nested paths are validated through their parent key.
+				// Top-level only — nested paths validated through their parent key.
 				const topLevelKnown = new Set(known.map((key) => key.split('.')[0]));
 				for (const key of Object.keys(params)) {
 					if (!topLevelKnown.has(key)) {
@@ -341,23 +315,15 @@ describe('RPC wire contract', () => {
 		});
 	});
 
-	// The pre-migration static source-scan coverage guard (grepping index.ts for callRpc/
-	// callRpcVoid/onceRegistrar call sites) no longer applies -- RPC dispatch now lives entirely
-	// inside @appsflyer-sdk/js-core-plugin's compiled AppsFlyerSDK, not in this repo's own source text.
-	// Re-establishing an equivalent coverage check (e.g. diffing CALL_SITES against
-	// node_modules/@appsflyer-sdk/js-core-plugin/dist/generated/methods.js's RpcMethodName union) is a
-	// real gap worth tracking as a follow-up, not fixed in this test-only pass.
+	// Coverage gap: no automated check that CALL_SITES stays in sync with js-core-plugin's RpcMethodName union — follow-up, not fixed here.
 
-	// Regression guard for finding #6: an 18-digit Facebook ID must reach native at full precision.
-	// Number(fbLoginId) would round "100003456789012345" to ...012350 before serialization, and
-	// JSON.parse-ing the wire text back into a JS Number for inspection would silently reintroduce
-	// the same rounding — so this asserts on the raw wire *text*, not a re-parsed object.
+	// Regression guard for finding #6: Number(fbLoginId) would round an 18-digit Facebook ID; asserts on raw wire text since re-parsing would reintroduce it.
 	test('setUserFbLoginId does not lose precision on an 18-digit ID', () => {
-		const { appsFlyer, NativeAppsFlyer: nativeAppsFlyer } = freshAppsFlyerForPlatform('ios');
+		const { AppsFlyer, NativeAppsFlyer: nativeAppsFlyer } = freshAppsFlyerForPlatform('ios');
 		nativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
 		const eighteenDigitId = '100003456789012345';
-		appsFlyer.setUserFbLoginId({ fbLoginId: eighteenDigitId });
+		AppsFlyer.setUserFbLoginId({ fbLoginId: eighteenDigitId });
 		const [requestJson] = nativeAppsFlyer.executeRpc.mock.calls[0];
-		expect(requestJson).toBe(`{"method":"setUserFbLoginId","params":{"fbLoginId":${eighteenDigitId}}}`);
+		expect(requestJson).toBe(`{"method":"setUserFbLoginId","params":{"fbLoginId":"${eighteenDigitId}"}}`);
 	});
 });

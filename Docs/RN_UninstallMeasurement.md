@@ -34,7 +34,7 @@ Pass the device token to AppsFlyer
 *Example:*
 
 ```javascript
-appsFlyer.updateServerUninstallToken(deviceToken);
+AppsFlyer.updateServerUninstallToken(deviceToken);
 ```
 
 **Note:** On iOS, the token string must be a valid hex-encoded string (even-length hex characters). Passing a raw NSData description or base64 string will cause a native validation error.
@@ -48,7 +48,7 @@ Update Firebase device token so it can be sent to AppsFlyer.
 *Example:*
 
 ```javascript
-appsFlyer.updateServerUninstallToken(newFirebaseToken);
+AppsFlyer.updateServerUninstallToken(newFirebaseToken);
 ```
 
 Read more about Android uninstall measurement: [AppsFlyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)

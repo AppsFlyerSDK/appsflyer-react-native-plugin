@@ -35,7 +35,7 @@ const eventValues = {
   af_revenue: '2',
 };
 
-appsFlyer.logEvent(eventName, eventValues, true)
+AppsFlyer.logEvent(eventName, eventValues, true)
   .then((res) => {
     console.log(res);
   })
@@ -52,5 +52,5 @@ To validate and log in-app purchases, see the comprehensive [In-App Purchase Val
 
 For iOS, remember to set the sandbox flag if testing:
 ```javascript
-appsFlyer.setUseReceiptValidationSandbox(true);
+AppsFlyer.setUseReceiptValidationSandbox(true);
 ```
