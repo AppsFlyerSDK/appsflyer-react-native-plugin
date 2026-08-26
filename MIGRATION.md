@@ -173,7 +173,7 @@ AppsFlyer.registerDeepLinkListener({ onDeepLinking: onDeepLink });
 
 // full teardown (e.g. componentWillUnmount) — Android only, both reject on iOS:
 AppsFlyer.unregisterConversionListener();
-AppsFlyer.unregisterDeeplinkListener();
+AppsFlyer.unregisterDeepLinkListener();
 ```
 
 `onFailure` now receives the failure message as a plain `string`, not a `ConversionData`-shaped

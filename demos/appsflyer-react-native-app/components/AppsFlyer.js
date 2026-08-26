@@ -48,7 +48,7 @@ export function AFInit(onConversionData, onDeepLink) {
 
 export function AFCleanup() {
   //AppsFlyer.unregisterConversionListener();
-  //AppsFlyer.unregisterDeeplinkListener();
+  //AppsFlyer.unregisterDeepLinkListener();
 }
 
 // Sends in-app events to AppsFlyer servers. name is the events name ('simple event') and the values are a JSON ({info: 'fff', size: 5})

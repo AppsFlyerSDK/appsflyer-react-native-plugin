@@ -1,5 +1,5 @@
 ## 7.0.2
- Release date: *TBD*
+ Release date: *2026-08-26*
 
 Upgrading from 6.18.0? See [MIGRATION.md](MIGRATION.md) for the full before/after guide.
 
@@ -22,7 +22,7 @@ See [MIGRATION.md](MIGRATION.md) for full before/after examples for each item be
 
 - **Every method takes one params object** — e.g. `init(devKey, appId)` → `init({devKey, appId})`.
 - **`initSdk(options)` removed** — replaced by `init({devKey, appId})` + explicit `start()`. `isDebug`/`onInstallConversionDataListener`/`onDeepLinkListener`/`manualStart` options removed; use `enableDebug()`, `registerConversionListener()`/`registerDeepLinkListener()`, and `start()` instead. `timeToWaitForATTUserAuthorization` has no replacement — request ATT yourself before `init()`.
-- **`onInstallConversionData`/`onInstallConversionFailure`/`onDeepLink` removed** — use `registerConversionListener()`/`registerDeepLinkListener()` + `unregisterConversionListener()`/`unregisterDeeplinkListener()`.
+- **`onInstallConversionData`/`onInstallConversionFailure`/`onDeepLink` removed** — use `registerConversionListener()`/`registerDeepLinkListener()` + `unregisterConversionListener()`/`unregisterDeepLinkListener()`.
 - **`onAppOpenAttribution`/`onAttributionFailure`/`performOnAppAttribution` removed** — merged into `registerDeepLinkListener`.
 - **`validateAndLogInAppPurchase(purchaseInfo, successC, errorC)` removed** — new signature is `validateAndLogInAppPurchase({purchase, additionalParameters?})`, no callback argument. `AFPurchaseDetails` split into `AFPurchaseDetailsAndroid`/`AFPurchaseDetailsIOS`.
 - **`generateInviteLink`'s `deeplinkPath` removed** — was already a no-op. Every other field now nests under a `parameters` object.

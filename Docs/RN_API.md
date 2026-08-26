@@ -104,7 +104,7 @@ The list of available methods for this plugin is described below.
   - [unregisterConversionListener](#unregisterconversionlistener)
   - [onAppOpenAttribution / onAttributionFailure — removed in 7.0.0](#onappopenattribution--onattributionfailure--removed-in-700)
   - [registerDeepLinkListener](#registerdeeplinklistener)
-  - [unregisterDeeplinkListener](#unregisterdeeplinklistener)
+  - [unregisterDeepLinkListener](#unregisterdeeplinklistener)
   - [registerSessionReadyListener](#registersessionreadylistener)
   - [isSessionReady](#issessionready)
   - [unregisterSessionReadyListener](#unregistersessionreadylistener)
@@ -1880,12 +1880,12 @@ AppsFlyer.init(/*...*/);
 
 The callback receives a `{status, deepLink?, error?}` object (`status` is `'FOUND' | 'NOT_FOUND' | 'ERROR'`) — see `DeepLinkData`.
 
-To stop the underlying native listener, call `unregisterDeeplinkListener()` (Android only — see below).
+To stop the underlying native listener, call `unregisterDeepLinkListener()` (Android only — see below).
 
 ---
 
-### unregisterDeeplinkListener
-`unregisterDeeplinkListener() : Promise<void>`
+### unregisterDeepLinkListener
+`unregisterDeepLinkListener() : Promise<void>`
 
 Stop the native deep-link listener and clear all registered callbacks. Android only. Takes no arguments.
 
@@ -1893,7 +1893,7 @@ Stop the native deep-link listener and clear all registered callbacks. Android o
 
 ```javascript
 if (Platform.OS == 'android') {
-  AppsFlyer.unregisterDeeplinkListener();
+  AppsFlyer.unregisterDeepLinkListener();
 }
 ```
 

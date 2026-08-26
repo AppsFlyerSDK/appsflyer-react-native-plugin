@@ -215,9 +215,9 @@ const CALL_SITES = [
 	{ api: 'setCollectAndroidID', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setCollectAndroidID({ isCollect: true }) },
 	{ api: 'setDisableNetworkData', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setDisableNetworkData({ isDisable: true }) },
 	{
-		api: 'unregisterDeeplinkListener',
+		api: 'unregisterDeepLinkListener',
 		platforms: [ANDROID],
-		invoke: (AppsFlyer) => AppsFlyer.unregisterDeeplinkListener(),
+		invoke: (AppsFlyer) => AppsFlyer.unregisterDeepLinkListener(),
 	},
 	{ api: 'disableAppSetId', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.disableAppSetId() },
 	{ api: 'getHostName', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.getHostName() },
