@@ -72,9 +72,12 @@ jobs:
           cache: 'gradle'
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
+
+      - name: Install plugin dependencies
+        run: npm install
 
       - name: Install example app dependencies
         working-directory: example

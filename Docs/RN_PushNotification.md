@@ -66,37 +66,35 @@ Or with nested structure:
 **Important:** Set up all listeners and push configuration BEFORE initializing the SDK:
 
 ```jsx
-import appsFlyer from 'react-native-appsflyer';
+import AppsFlyer from 'react-native-appsflyer';
 
 // 1. Handle conversions and attribution (BEFORE init)
-appsFlyer.onInstallConversionData((data) => {
-  console.log('Install conversion data:', data);
+AppsFlyer.registerConversionListener({
+  onConversionDataSuccess: (data) => console.log('Install conversion data:', data),
+  onConversionDataFail: (error) => console.error('Conversion data error:', error),
 });
 
 // 2. Handle deep links (BEFORE init)
-appsFlyer.onDeepLink((data) => {
-  console.log('Deep link data:', data);
+AppsFlyer.registerDeepLinkListener({
+  onDeepLinking: (data) => console.log('Deep link data:', data),
 });
 
 // 3. Configure push notification deep link path (BEFORE init)
 // For simple structure: ["af_push_link"]
 // For nested structure: ["data", "appsflyer", "testing", "link"]
-appsFlyer.addPushNotificationDeepLinkPath(
-  ['af_push_link'], // Adjust based on your payload structure
-  (success) => {
-    console.log('Push notification path added successfully:', success);
-  },
-  (error) => {
+AppsFlyer.addPushNotificationDeepLinkPath(['af_push_link']) // Adjust based on your payload structure
+  .then(() => {
+    console.log('Push notification path added successfully');
+  })
+  .catch((error) => {
     console.error('Error adding push notification path:', error);
-  }
-);
+  });
 ```
 
 **Parameters for `addPushNotificationDeepLinkPath`:**
 
 - `path`: Array of keys used to resolve the OneLink from push notification payload
-- `successCallback`: Called when the path is successfully added
-- `errorCallback`: Called if there's an error adding the path
+- **Returns**: Promise that resolves when the path is successfully added, or rejects on error
 
 ### 2. Initialize and Start AppsFlyer SDK
 
@@ -104,21 +102,14 @@ After setting up all listeners and configurations, initialize and start the SDK:
 
 ```jsx
 // Initialize AppsFlyer (AFTER setting up listeners)
-appsFlyer.initSdk({
-  devKey: 'YOUR_DEV_KEY',
-  isDebug: true,
-  appId: 'YOUR_APP_ID', // iOS only
+// `initSdk` was removed in 7.0.0 — use `init({devKey, appId})` instead (see MIGRATION.md).
+AppsFlyer.init({ devKey: 'YOUR_DEV_KEY', appId: 'YOUR_APP_ID' }); // appId is iOS only, harmlessly ignored on Android
+
+// Start AppsFlyer from inside registerSessionReadyListener's callback (see bridge-patterns.md §4)
+AppsFlyer.registerSessionReadyListener(() => {
+  AppsFlyer.start();
 });
-
-// Start AppsFlyer (AFTER init)
-appsFlyer.startSdk();
 ```
-
-**Parameters:**
-
-- `path`: Array of keys used to resolve the deep link from push notification payload
-- `successCallback`: Called when the path is successfully added
-- `errorCallback`: Called if there's an error adding the path
 
 ### 3. Handle Push Notification Data
 
@@ -128,45 +119,39 @@ In your push notification provider callback (where you receive the notification 
 // Example with Firebase messaging
 import messaging from '@react-native-firebase/messaging';
 
+// iOS reads the raw payload; Android reads these explicit campaign fields
+const toAndroidCampaignData = (remoteMessage) => ({
+  campaign: remoteMessage.data?.af?.c,
+  pid: remoteMessage.data?.af?.pid,
+  isRetargeting: remoteMessage.data?.af?.is_retargeting === 'true',
+});
+
 // Background/Quit state messages
 messaging().setBackgroundMessageHandler(async (remoteMessage) => {
   console.log('Background message:', remoteMessage);
 
-  // Send push payload to AppsFlyer
-  appsFlyer.sendPushNotificationData(
-    remoteMessage.data, // The push notification payload
-    (error) => {
-      console.error('Error sending push data to AppsFlyer:', error);
-    }
-  );
+  AppsFlyer.sendPushNotificationData(toAndroidCampaignData(remoteMessage));
 });
 
 // Foreground messages
 messaging().onMessage(async (remoteMessage) => {
   console.log('Foreground message:', remoteMessage);
 
-  // Send push payload to AppsFlyer
-  appsFlyer.sendPushNotificationData(
-    remoteMessage.data,
-    (error) => {
-      console.error('Error sending push data to AppsFlyer:', error);
-    }
-  );
+  AppsFlyer.sendPushNotificationData(toAndroidCampaignData(remoteMessage));
 });
 
 // Handle notification opened from background/quit state
 messaging().onNotificationOpenedApp((remoteMessage) => {
   console.log('Notification opened:', remoteMessage);
 
-  // Send push payload to AppsFlyer
-  appsFlyer.sendPushNotificationData(
-    remoteMessage.data,
-    (error) => {
-      console.error('Error sending push data to AppsFlyer:', error);
-    }
-  );
+  AppsFlyer.sendPushNotificationData(toAndroidCampaignData(remoteMessage));
 })
 ```
+
+**Parameters for `sendPushNotificationData({campaign, pid, isRetargeting?, additionalParameters?})`:**
+
+Android-only — builds an `AFPushData` from these fields; there is no raw-payload argument. Omitting the object
+logs a warning and reports an empty re-engagement. Returns `void` (fire-and-forget).
 
 ## Method 2: JSON Method
 
@@ -216,72 +201,51 @@ The `af` object **must** be at the top level of the `data` object:
 
 ### Implementation Steps
 
-For the JSON Legacy Method, you only need steps 1, 2, and 3 from the OneLink method above, but **skip the `addPushNotificationDeepLinkPath` call**:
-
-```jsx
-// 1. Set up listeners (BEFORE init)
-appsFlyer.onInstallConversionData((data) => {
-  console.log('Install conversion data:', data);
-});
-
-appsFlyer.onDeepLink((data) => {
-  console.log('Deep link data:', data);
-});
-
-// 2. Initialize and start SDK
-appsFlyer.initSdk({
-  devKey: 'YOUR_DEV_KEY',
-  isDebug: true,
-  appId: 'YOUR_APP_ID',
-});
-
-appsFlyer.startSdk();
-
-// 3. Handle push data the same way
-// The SDK will automatically detect the 'af' object in the payload
-```
+For the JSON Legacy Method, follow the same setup as **Method 1** above (see "1. Set Up Listeners and Push Configuration"), but **skip step 1.3** — do not call `addPushNotificationDeepLinkPath`. The SDK will automatically detect the `af` object in the payload without explicit path configuration.
 
 ## Complete Integration Examples
 
+The following example shows the same setup as **Method 1** above, wrapped in a React component using `useEffect`:
+
 ```jsx
 import React, { useEffect } from 'react';
-import appsFlyer from 'react-native-appsflyer';
+import AppsFlyer from 'react-native-appsflyer';
 import messaging from '@react-native-firebase/messaging';
 
 const AppsflyerPushIntegration = () => {
   useEffect(() => {
     // 1. Set up attribution and deep link handlers (BEFORE init)
-    appsFlyer.onInstallConversionData((data) => {
-      console.log('Conversion data:', data);
+    AppsFlyer.registerConversionListener({
+      onConversionDataSuccess: (data) => console.log('Conversion data:', data),
+      onConversionDataFail: (error) => console.error('Conversion data error:', error),
     });
 
-    appsFlyer.onDeepLink((data) => {
-      console.log('Deep link:', data);
+    AppsFlyer.registerDeepLinkListener({
+      onDeepLinking: (data) => console.log('Deep link:', data),
     });
 
     // 2. Configure push notification deep link path (BEFORE init)
-    appsFlyer.addPushNotificationDeepLinkPath(
-      ['af_push_link'], // Adjust based on your payload structure
-      (success) => console.log('Push path configured'),
-      (error) => console.error('Push path error:', error)
-    );
+    AppsFlyer.addPushNotificationDeepLinkPath(['af_push_link']) // Adjust based on your payload structure
+      .then(() => console.log('Push path configured'))
+      .catch((error) => console.error('Push path error:', error));
 
     // 3. Initialize AppsFlyer SDK (AFTER listeners and config)
-    appsFlyer.initSdk({
-      devKey: 'YOUR_DEV_KEY',
-      isDebug: true,
-      appId: 'YOUR_APP_ID',
-    });
+    // `initSdk` was removed in 7.0.0 — use `init({devKey, appId})` instead (see MIGRATION.md).
+    AppsFlyer.init({ devKey: 'YOUR_DEV_KEY', appId: 'YOUR_APP_ID' });
 
-    // 4. Start AppsFlyer (AFTER init)
-    appsFlyer.startSdk();
+    // 4. Start AppsFlyer once the session is ready (see bridge-patterns.md §4)
+    AppsFlyer.registerSessionReadyListener(() => {
+      AppsFlyer.start();
+    });
 
     // 5. Set up push notification handlers
     const handlePushData = (payload) => {
-      appsFlyer.sendPushNotificationData(
-        payload,
-        (error) => console.error('Push data error:', error)
-      );
+      // Android-only; iOS reads the raw payload through its own path
+      AppsFlyer.sendPushNotificationData({
+        campaign: payload?.af?.c,
+        pid: payload?.af?.pid,
+        isRetargeting: payload?.af?.is_retargeting === 'true',
+      });
     };
 
     // Background messages
@@ -359,7 +323,7 @@ Push Notification received af payload = {"c":"campaign_name", "is_retargeting":"
 
 - **Deep links not working**: Verify the key path in `addPushNotificationDeepLinkPath` matches your payload structure
 - **OneLink not detected**: Ensure the OneLink contains required parameters (pid, is_retargeting=true, c)
-- **Payload not processed**: Check that `addPushNotificationDeepLinkPath` is called before `initSdk`
+- **Payload not processed**: Check that `addPushNotificationDeepLinkPath` is called before `init`
 
 **JSON Method:**
 
@@ -370,7 +334,8 @@ Push Notification received af payload = {"c":"campaign_name", "is_retargeting":"
 **General Issues:**
 
 - **Android crashes**: Verify app activity is available when calling `sendPushNotificationData`
-- **Listeners not firing**: Ensure all listeners are set up before calling `initSdk` and `startSdk`
+- **Android re-engagement empty (iOS fine)**: Pass `androidCampaignData` to `sendPushNotificationData` — Android builds the re-engagement from those fields, not from the raw payload
+- **Listeners not firing**: Ensure all listeners are set up before calling `init` and `start`
 - **Duplicate processing**: SDK prevents duplicate processing of the same payload in the same cold launch
 
 ## Resources

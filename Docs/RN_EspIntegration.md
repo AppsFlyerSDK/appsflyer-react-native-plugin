@@ -10,12 +10,6 @@ hidden: false
 
 ESP (Email Service Provider) support allows AppsFlyer to handle deep links that are wrapped by email service providers. When users click links in emails, ESP services often wrap the original URL with their own tracking domains. This can break deep linking functionality. ESP support resolves these wrapped URLs to extract the original deep link.
 
-### How ESP Works:
-1. **Email Campaign**: Your email contains a deep link to your app
-2. **ESP Wrapping**: Email provider wraps your link with their tracking domain
-3. **User Clicks**: User clicks the wrapped link from their email
-4. **ESP Resolution**: AppsFlyer resolves the wrapped URL to get the original link
-5. **Decision**: If original link is a OneLink → continue deep linking; if web URL → open in browser
 
 ## 🚀 Prerequisites
 
@@ -56,31 +50,13 @@ Add associated domains to your `app.json`:
 3. Add **Associated Domains** capability
 4. Add your OneLink domain: `applinks:your-onelink-domain.onelink.me`
 
-### Step 2: Configure Bridging Header
+### Step 2: Configure AppDelegate for Deep Linking
 
-**For Expo Projects or Swift AppDelegate:**
-
-Add AppsFlyer React Native plugin to your bridging header file (e.g., `your-app-name-Bridging-Header.h`):
-
-```objc
-#import <React/RCTBridgeModule.h>
-#import <React/RCTEventEmitter.h>
-#import <React/RCTBridge.h>
-#import <React/RCTRootView.h>
-#import <React/RCTBundleURLProvider.h>
-#import <React/RCTLinkingManager.h>
-
-// Add AppsFlyer React Native plugin
-#import "RNAppsFlyer.h"
-```
-
-**⚠️ Critical Note:** Without adding `RNAppsFlyer.h` to the bridging header, the AppsFlyer SDK won't be accessible from Swift code and deep linking will fail.
-
-### Step 3: Configure AppDelegate for Deep Linking
-
-Ensure your `AppDelegate.swift` includes AppsFlyer attribution handling:
+Forward opened URLs / Universal Links to the AppsFlyer SDK via `AppsFlyerAttribution` from `AppDelegate` (there is no JavaScript API for this — `AppsFlyerLib`/`AppsFlyerAttribution` are already available as transitive dependencies of this plugin, no extra `pod` entry needed). `AppsFlyerAttribution` buffers calls that arrive before `init()` has configured the native SDK (e.g. a cold-start Universal Link) and replays them once it has — see [Deep linking integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup). If your app also uses React Native's own `Linking` module for its own deep-link routing, call both `AppsFlyerAttribution.shared` and `RCTLinkingManager` from the same delegate methods:
 
 ```swift
+import AppsFlyerLib
+import react_native_appsflyer
 import Expo
 import React
 import ReactAppDependencyProvider
@@ -96,6 +72,7 @@ public class AppDelegate: ExpoAppDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
+    AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)
     //...
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -107,7 +84,7 @@ public class AppDelegate: ExpoAppDelegate {
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
-    AppsFlyerAttribution.shared().handleOpen(url, options: options)
+    AppsFlyerAttribution.shared.handleOpen(url, options: options)
     return super.application(app, open: url, options: options) || RCTLinkingManager.application(app, open: url, options: options)
   }
 
@@ -117,17 +94,14 @@ public class AppDelegate: ExpoAppDelegate {
     continue userActivity: NSUserActivity,
     restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
   ) -> Bool {
-    
-    let selector = NSSelectorFromString("continueUserActivity:restorationHandler:")
-    let afAttribution = AppsFlyerAttribution.shared()
-    if afAttribution.responds(to: selector) {
-        _ = afAttribution.perform(selector, with: userActivity, with: restorationHandler)
-    }
+    AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: restorationHandler)
     let result = RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
     return super.application(application, continue: userActivity, restorationHandler: restorationHandler) || result
   }
 }
 ```
+
+See [Deep linking integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup) for the full native pattern (this plugin's Expo config plugin auto-injects the `openURL`/`continueUserActivity` and `handleLaunchOptions` calls above at `expo prebuild` time).
 
 ---
 
@@ -254,27 +228,25 @@ const ESP_DOMAINS = [
 
 ### Step 2: Set Up setResolveDeepLinkURLs
 
-**Configure ESP resolution BEFORE SDK initialization:**
+**Configure ESP resolution right after SDK initialization:**
 
 ```javascript
-import { AppsFlyer } from 'react-native-appsflyer';
+import AppsFlyer from 'react-native-appsflyer';
 
 /**
- * Configure ESP domains for deep link resolution
- * This MUST be called before AppsFlyer SDK initialization
+ * Configure ESP domains for deep link resolution.
+ * Call this after init() — see Step 4 for where it fits in the call order.
  */
 const configureESPDomains = () => {
-  console.log('🔗 Configuring ESP domains:', ESP_DOMAINS);
+  console.log('Configuring ESP domains:', ESP_DOMAINS);
   
-  AppsFlyer.setResolveDeepLinkURLs(
-    ESP_DOMAINS,
-    (result) => {
-      console.log('✅ ESP domains configured successfully:', result);
-    },
-    (error) => {
-      console.error('❌ ESP domain configuration failed:', error);
-    }
-  );
+  AppsFlyer.setResolveDeepLinkURLs(ESP_DOMAINS)
+    .then((result) => {
+      console.log('ESP domains configured successfully:', result);
+    })
+    .catch((error) => {
+      console.error('ESP domain configuration failed:', error);
+    });
 };
 ```
 
@@ -286,12 +258,12 @@ const configureESPDomains = () => {
 /**
  * Main ESP deep link handler
  */
-const handleDeepLink = useCallback((deepLinkData: any) => {
-    console.log('🔗 Deep Link Received:', deepLinkData);
+const handleEspDeepLink = useCallback((deepLinkData: any) => {
+    console.log('Deep Link Received:', deepLinkData);
     
     // Simply stringify and display the entire deep link data
     const formattedData = JSON.stringify(deepLinkData, null, 2);    
-    console.log('📱 Deep Link Data:', formattedData);
+    console.log('Deep Link Data:', formattedData);
     
     let actualDeepLinkData = deepLinkData;
     
@@ -341,8 +313,7 @@ const handleDeepLink = useCallback((deepLinkData: any) => {
                     } else {
                       console.log('[AFSDK] The ESP link is NOT a OneLink link. It will be opened in a browser');
                       console.log('[AFSDK] ESP marks to divert the link to the browser');
-                      console.log('URL to open:', espUrl.toString());                
-                      console.log('📱 Would open in browser:', espUrl.toString());
+                      console.log('URL to open:', espUrl.toString());
                     }
                   } else {
                     console.log('[AFSDK] No host found in the ESP URL');
@@ -366,10 +337,10 @@ const handleDeepLink = useCallback((deepLinkData: any) => {
         }
       } else {
         console.log('[AFSDK] The original_link is not found');
-        console.log('📋 Regular Deep Link Data:', actualDeepLinkData.data);
+        console.log('Regular Deep Link Data:', actualDeepLinkData.data);
       }
     }
-  });
+  }, []);
 ```
 
 ### Step 4: SDK Initialization with ESP
@@ -381,44 +352,46 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 const initializeAppsFlyer = () => {
-  console.log('🚀 Initializing AppsFlyer with ESP support...');
+  console.log('Initializing AppsFlyer with ESP support...');
 
-  // 1. Configure ESP domains FIRST
-  configureESPDomains();
+  // 1. Set up deep link listener — must be registered before init()
+  AppsFlyer.registerDeepLinkListener({ onDeepLinking: handleEspDeepLink });
 
-  // 2. Set up deep link listener
-  AppsFlyer.onDeepLink(handleEspDeepLink);
-
-  // 3. Set up conversion data listener
-  AppsFlyer.onInstallConversionData((res) => {
-    console.log('📊 Conversion Data:', res);
-  });
-
-  AppsFlyer.onInstallConversionFailure((error) => {
-    console.error('❌ Conversion Data Error:', error);
-  });
-
-  // 4. Initialize SDK
+  // 2. Initialize SDK
+  // `initSdk` was removed in 7.0.0 — use `init({devKey, appId})` instead (see MIGRATION.md).
   const devKey = Platform.OS === 'ios' 
     ? "YOUR_IOS_DEV_KEY"
     : "YOUR_ANDROID_DEV_KEY";
 
-  AppsFlyer.initSdk(
-    {
-      devKey: devKey,
-      appId: "YOUR_IOS_APP_ID", // iOS only
-      isDebug: true,
-      onInstallConversionDataListener: true,
-      onDeepLinkListener: true, // ✅ REQUIRED for ESP support
-      timeToWaitForATTUserAuthorization: 15,
-    },
+  AppsFlyer.init({ devKey, appId: "YOUR_IOS_APP_ID" }).then(
     () => {
-      console.log("✅ AppsFlyer SDK initialized successfully!");
+      console.log("AppsFlyer SDK initialized successfully!");
     },
     (err) => {
-      console.error("❌ AppsFlyer SDK initialization error:", err);
+      console.error("AppsFlyer SDK initialization error:", err);
     }
   );
+
+  // 3. Configure ESP domains — after init(), synchronously
+  configureESPDomains();
+
+  // 4. Set up conversion data listener — after init(), synchronously
+  AppsFlyer.registerConversionListener({
+    onConversionDataSuccess: (res) => {
+      console.log('Conversion Data:', res);
+    },
+    onConversionDataFail: (error) => {
+      console.error('Conversion Data Error:', error);
+    },
+  });
+
+  // 5. Start the SDK once the session is ready — the SDK never auto-starts (see RN_API.md#start)
+  AppsFlyer.registerSessionReadyListener(() => {
+    AppsFlyer.start().then(
+      () => console.log('AppsFlyer SDK started!'),
+      (err) => console.error('start failed', err)
+    );
+  });
 };
 
 // Initialize in useEffect
@@ -433,73 +406,25 @@ useEffect(() => {
 
 ### Common Android Issues
 
-**1. Deep links open Google Play instead of app:**
-- Remove `android:autoVerify="true"` from intent filters
-- Test with ADB for direct app opening
-- Ensure app is installed and intent filters are correct
+For general Android configuration issues (manifest merging, package attribute deprecation, autoVerify behavior, backup rules), refer to the [API reference](RN_API.md) and [AppsFlyer Android SDK documentation](https://dev.appsflyer.com/hc/docs/install-android-sdk).
 
-**2. Email deep links redirect to Play Store (Domain Disabled):**
+**ESP-Specific: Domain Verification Issues**
 
-This is a common issue where clicking deep links from emails opens the Play Store instead of your app. This happens when the domain is disabled in Android's app link settings.
+When deep links from emails open the Play Store instead of your app, the domain may be disabled in Android's app link settings.
 
 **Diagnosis:**
 ```bash
-# Check if your app's domain is disabled
 adb shell pm get-app-links com.yourcompany.yourapp
 ```
-
-Look for your domain in the "Selection state" → "Disabled" section.
 
 **Solution:**
 ```bash
-# Enable domain for your app (replace with your actual package name and domain)
+# Enable domain for your app
 adb shell pm set-app-links-user-selection --package com.yourcompany.yourapp --user 0 true your-onelink-domain.onelink.me
 
-# Verify the fix
-adb shell pm get-app-links com.yourcompany.yourapp
-```
-
-**Testing:**
-```bash
-# Test deep link after fix
+# Test the fix
 adb shell am force-stop com.yourcompany.yourapp
 adb shell am start -W -a android.intent.action.VIEW -d "https://your-onelink-domain.onelink.me/test"
-```
-
-**Production Note:** This is a testing solution. For production apps, consider:
-- Domain verification (requires access to domain)
-- User education about setting app as default handler
-- Fallback handling for when app isn't the default handler
-
-**3. Manifest merger conflicts:**
-```xml
-<!-- Add tools namespace and replace directive -->
-<manifest xmlns:tools="http://schemas.android.com/tools">
-  <application android:allowBackup="false" tools:replace="android:allowBackup">
-```
-See [AppsFlyer Android SDK documentation](https://dev.appsflyer.com/hc/docs/install-android-sdk#backup-rules) for more details.
-
-**4. Package attribute deprecated:**
-- Remove `package="com.yourapp"` from AndroidManifest.xml
-- Use `namespace` in build.gradle instead
-
-**5. Build Cache Issues:**
-
-If experiencing persistent build failures, perform a complete clean build:
-```bash
-# Clean everything
-rm -rf node_modules
-rm -rf ios/Pods
-rm -rf android/.gradle
-rm -rf android/app/build
-rm -rf android/build
-
-# Reinstall dependencies
-npm install
-cd ios && pod install && cd ..
-
-# Clean build
-npx expo run:android / ios --clear
 ```
 
 ### Common iOS Issues
@@ -510,7 +435,7 @@ npx expo run:android / ios --clear
 - Test with iOS Simulator using xcrun
 
 **2. Deep links not triggering:**
-- Ensure `onDeepLinkListener: true` in SDK config
+- Ensure `AppsFlyer.registerDeepLinkListener(...)` is registered synchronously before `init()`'s promise settles (see [Initialization Flow](RN_API.md#initialization-flow))
 - Verify ESP domains are configured before SDK init
 
 ---

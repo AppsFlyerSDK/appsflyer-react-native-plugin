@@ -1,11 +1,3 @@
-//
-//  AFTransactionFetcher.swift
-//  RNAppsFlyer
-//
-//  Created by Amit Levy on 03/03/2025.
-//  Copyright © 2025 Facebook. All rights reserved.
-//
-
 import Foundation
 import StoreKit
 
@@ -15,14 +7,9 @@ import PurchaseConnector
 @available(iOS 15.0, *)
 @objc(AFTransactionFetcher)
 @objcMembers public final class AFTransactionFetcher: NSObject {
-    
-    @objc static func requiresMainQueueSetup() -> Bool {
-        return false
-    }
 
     @objc public func fetchTransaction(transactionId: String, completion: @escaping (AFSDKTransactionSK2?) -> Void) {
         guard let transactionIdUInt64 = UInt64(transactionId) else {
-            print("Invalid transaction ID format.")
             completion(nil)
             return
         }
@@ -44,7 +31,6 @@ import PurchaseConnector
                     completion(nil)
                 }
             } catch {
-                print("Error fetching transactions: \(error)")
                 completion(nil)
             }
         }

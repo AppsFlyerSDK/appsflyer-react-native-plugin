@@ -76,9 +76,11 @@ demos/appsflyer-react-native-app/ios/AppsFlyerExample.xcodeproj/project.pbxproj
 # Claude-generated planning/skill docs
 Docs/plans/
 Docs/superpowers/
+specs/
 
 # Test app secrets
 example/.env
+demos/appsflyer-expo-app/.env
 
 # Example app generated artifacts
 example/ios/Podfile.lock
@@ -88,9 +90,15 @@ example/android/app/.cxx/
 example/android/app/debug.keystore
 example/package-lock.json
 
+# Bare RN demo app generated artifacts
+demos/appsflyer-react-native-app/android/app/.cxx/
+
 # Scenario runner reports
 .af-e2e/reports/
 .af-smoke/reports/
 
 # RC smoke synthesized app (created at CI time)
 example_rc_smoke/
+
+.reviews/
+schemas

@@ -13,7 +13,9 @@
     "plugins": [
       [
         "react-native-appsflyer",
-        {"shouldUseStrictMode": false}
+        {
+          "shouldUseStrictMode": false
+        }
       ]
     ],
     "updates": {
@@ -26,7 +28,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.appsflyer.bundleId",
-      "associatedDomains": ["applinks:appsflyer.onelink.me"]
+      "associatedDomains": [
+        "applinks:appsflyer.onelink.me"
+      ],
+      "appleTeamId": "6UQAD4B3U2"
     },
     "android": {
       "adaptiveIcon": {

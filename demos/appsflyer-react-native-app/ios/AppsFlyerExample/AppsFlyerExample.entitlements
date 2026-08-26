@@ -5,6 +5,7 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:af-rn-git.onelink.me</string>
+		<string>applinks:rndemo.onelink.me</string>
 	</array>
 </dict>
 </plist>

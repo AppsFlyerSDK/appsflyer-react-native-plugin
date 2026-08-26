@@ -1,139 +1,118 @@
 # Known issues knowledge base
 
-Issue-based KB derived from real GitHub issues. Reference when debugging user reports, reviewing PRs, or adding new features.
+Issue-based KB derived from real GitHub issues. Reference when debugging user reports, reviewing PRs, or adding new features. Resolved issues are kept only where the root cause explains a non-obvious current constraint — otherwise they're cut once fixed.
 
-## Deep linking (62 issues — #1 category)
+## Bridge architecture: no listener-registration buffer
+
+Both native bridges used to hold `init`/listener-registration RPCs in a JS-side queue until `init` resolved, on the assumption native silently drops early registrations. That assumption was wrong: registration just assigns a delegate/callback on the persistent native SDK singleton, confirmed against native RPC source on both platforms — it's init-order-independent by design. The buffer was removed on both platforms.
+
+**Do not re-add a buffer/gate on either platform** without first confirming an actual native regression. `bridge-patterns.md`, `native-ios.md`, and `native-android.md` all point here instead of re-explaining this.
+
+**Real exception** (native-side effect, not a buffering problem): Android `registerDeepLinkListener`'s pre-init requirement, below.
+
+## Deep linking
 
 ### Listener not firing
-**Issues:** #650, #647, #630, #305, #292
-**Root cause:** `onDeepLink` registered after `initSdk`, or native AppDelegate/MainActivity setup missing.
-**Fix:** Register listeners before `initSdk`. Verify `continueUserActivity`/`openURL` in AppDelegate, intent filters in AndroidManifest.
-**Test:** Killed state → open deep link → verify callback fires within 5s.
+**Root cause:** `onDeepLink`/`registerDeepLinkListener` registered after `init`, or native AppDelegate/MainActivity setup missing.
+**Fix:** Register listeners before `init`. Verify `continueUserActivity`/`openURL` in AppDelegate, intent filters in AndroidManifest.
 
 ### Deferred deep link not working
-**Issues:** #650 (Android), #305 (iOS)
-**Root cause:** Conversion data round-trip is slow or fails. No "completed with no result" callback.
-**Fix:** Use `onInstallConversionData` as fallback. Check `is_first_launch` flag.
+**Root cause:** Conversion data round-trip is slow or fails; no "completed with no result" callback.
+**Fix:** Use `onInstallConversionData` as fallback. Check `is_first_launch`.
 
 ### Inconsistent payload shape
-**Issues:** #292, #242
 **Root cause:** Android returns stringified JSON where iOS returns an object in some versions.
-**Fix:** Always `JSON.parse` if typeof is string. Type definitions should reflect the union.
+**Fix:** Always `JSON.parse` if `typeof` is string. Type definitions should reflect the union.
 
-## iOS build failures (22 issues)
+### Android `registerDeepLinkListener` must be called before `init()` — still true, no native buffering
+**Root cause:** `AFDeepLinkManager`'s `onDeepLinking()`/`onDeepLinkingSuccess()`/`onDeepLinkingError()` guard on `if (listener != null)` with zero buffering — a result arriving while `listener` is still null is dropped permanently. Real constraint, not folklore.
+**Fix:** Register before `init()`, both platforms (canonical order in `bridge-patterns.md`).
+
+### `registerDeepLinkListener` fabricates `status: 'NOT_FOUND'` on payloads with no status field
+**Root cause:** `@appsflyer-sdk/js-core-plugin`'s `normalizeDeepLinkStatus` defaults any unrecognized/missing status to `'NOT_FOUND'`, including legacy `onAppOpenAttribution`-merged payloads that never had a status field.
+**Not fixable from this repo** — real npm dependency, no interception point. Tests assert the dependency's actual behavior (`{...payload, status: 'NOT_FOUND'}`) rather than raw pass-through.
+**Long-term fix:** needs to ship upstream in js-core-plugin.
+
+### Android deferred deep link delivers `status: 'FOUND'` with an always-empty `deepLink: {}`
+**Root cause:** native sends `deepLink.clickEvent.toString()` as real JSON, but js-core-plugin's `normalizeDeepLinkPayload` parses it assuming Java's `Map.toString()` format (`key=value` pairs). JSON has no `=`, so every field fails to parse and the function returns `{}` unconditionally.
+**Why direct/warm-start opens look fine:** apps typically read the Intent URL directly via `Linking` on those paths, never touching this field — fresh install has no Intent URL to fall back on, so it's fully exposed.
+**Not fixable from this repo** — real npm dependency. **Long-term fix:** js-core-plugin needs a `JSON.parse()` branch for the actual `af-android-plugin-bridge` 7.0.12+ wire format.
+
+## iOS build failures
 
 ### Header not found
-**Issues:** #633 (`AppsFlyerConsent.h`), #602 (`AppsFlyerAdRevenueData.h`), #646 (`react_native_appsflyer-Swift.h`)
-**Root cause:** Podspec pins native SDK version; cached pods have stale headers.
-**Fix:** `pod deintegrate && pod install --repo-update`. Match plugin version to compatible native SDK.
+**Root cause:** either stale cached pod headers after a version bump, or mixed Swift/ObjC without the bridging header wired up.
+**Fix:** `pod deintegrate && pod install --repo-update` for stale headers; verify `RNAppsFlyer-Bridging-Header.h` is set in Xcode build settings for the bridging-header case.
 
-### Symbol collision
-**Issues:** #497, #541 (redefinition of `SUCCESS`)
-**Root cause:** Native SDK enum name collides with other libraries.
-**Fix:** Upgrade to plugin version where enum was namespaced.
-
-## Android build failures (13 issues)
+## Android build failures
 
 ### Namespace not specified
-**Issues:** #583, #561
-**Root cause:** AGP 8.0+ requires `namespace` in build.gradle. Plugin pre-6.15.1 lacks it.
-**Fix:** Upgrade plugin to 6.15.1+.
+**Root cause:** AGP 8.0+ requires `namespace` in `build.gradle`.
+**Fix:** upgrade plugin to 6.15.1+.
 
 ### AndroidManifest merge conflicts
-**Issues:** #627, #631
-**Root cause:** Plugin manifest declares `tools:replace` that conflicts with other libraries.
-**Fix:** Add explicit `tools:replace` in app's main AndroidManifest.xml.
+**Root cause:** plugin manifest declares `tools:replace` that conflicts with other libraries.
+**Fix:** add explicit `tools:replace` in the app's main AndroidManifest.xml.
 
-## Native module null / not found (13 issues)
+## Native module null / not found
 
 ### RNAppsFlyer is null
-**Issues:** #587, #401, #174, #333
-**Root cause:** Autolinking not triggered after install, or New Architecture enabled with old plugin version.
-**Fix:** Run `pod install` (iOS) / Gradle sync (Android). For New Architecture: upgrade to 6.15.1+. Restart Metro: `npx react-native start --reset-cache`.
+**Root cause:** autolinking not triggered after install, or New Architecture enabled with an old plugin version.
+**Fix:** `pod install` (iOS) / Gradle sync (Android); upgrade to 6.15.1+ for New Architecture; restart Metro with `--reset-cache`.
 
-## Expo compatibility (18 issues)
-
-### Swift AppDelegate not supported
-**Issues:** #638, #620
-**Root cause:** Config plugin only modifies ObjC AppDelegate. Expo 52+ defaults to Swift.
-**Fix:** Pending upstream fix. Workaround: manual native setup.
+## Expo compatibility
 
 ### Duplicate manifest entries
-**Issues:** #672
-**Root cause:** `withAppsFlyerAndroid.js` not idempotent.
-**Fix:** Use `expo prebuild --clean` (not just `expo prebuild`).
+**Root cause:** `withAppsFlyerAndroid.js` is not idempotent.
+**Fix:** use `expo prebuild --clean`, not plain `expo prebuild`.
 
-## Runtime crashes (18 issues)
+## Runtime crashes
 
 ### Double callback invocation
-**Issues:** #601
-**Root cause:** Native bridge calls JS callback more than once.
-**Fix:** `CallbackGuard` added in 6.17.8 (Android). Every new callback method must use it.
+**Root cause:** native bridge calls the JS callback more than once.
+**Fix:** `CallbackGuard` on Android — every new callback method must use it (legacy bridge only, see `native-android.md`).
 
 ### ConcurrentModificationException
-**Issues:** #447
-**Root cause:** Thread safety issue in native Android SDK.
-**Fix:** Upgrade native SDK to patched version.
+**Root cause:** thread-safety issue in the native Android SDK.
+**Fix:** upgrade native SDK to a patched version.
 
-## Event tracking / logEvent (13 issues)
+### Android session-ready can stall if `init()` runs before the host Activity's first `onResume`
+**Root cause:** `AndroidLifecycleManagerImpl` only replays a missed `onActivityResumed` transition when the context passed to `init()` is literally an `Activity`. `RNAppsFlyerModule.kt` supplies `{ reactApplicationContext.currentActivity ?: reactApplicationContext }` (lazy, fresh per call) to cover the normal case, but if `init()` dispatches before any Activity has resumed, this falls back to `reactApplicationContext` and the stall can still occur.
+**Not expected on RN's normal launch path; no contract test yet for this fallback.**
+
+## Event tracking / logEvent
 
 ### 404 on logEvent
-**Issues:** #491, #390
-**Root cause:** Wrong `appId` on Android (should be package name or omitted, not iOS App Store ID).
-**Fix:** Use `Platform.select()` for `appId`. On Android: omit or use package name.
+**Root cause:** wrong `appId` on Android (should be package name or omitted, not the iOS App Store ID).
+**Fix:** `Platform.select()` for `appId`; omit or use package name on Android.
 
 ### "no devKey" error
-**Issues:** #645
-**Root cause:** `logEvent` called before `initSdk` completes.
-**Fix:** Await `initSdk` resolution before calling `logEvent`.
+**Root cause:** `logEvent` called before `init` completes.
+**Fix:** await `init` resolution before calling `logEvent`.
 
-### logEvent callback never fires on Android (CallbackGuard WeakReference)
-**Issues:** discovered in E2E testing (2026-05-12)
-**Root cause:** `CallbackGuard` (added in 6.17.8) wraps `Callback` in `WeakReference<Callback>`. All other methods invoke callbacks synchronously before the `@ReactMethod` returns, so the strong reference on the call stack keeps them alive. `logEvent` is the only method where the callback fires asynchronously — `AppsFlyerRequestListener.onSuccess()` runs on a background thread ~2s later after the HTTP round-trip. By then, GC has collected the weakly-referenced `Callback`.
-**Symptoms:** Native SDK sends events successfully (200 OK in logcat), but JS success/error callbacks are silently swallowed. No error logged.
-**Fix:** Use the Promise-based API (`logEvent(name, values)` without callbacks → returns Promise) which uses `Promise` instead of `Callback`. `Promise` is held strongly by the bridge and is not affected.
-**Long-term fix:** `CallbackGuard` should use a strong reference for async callbacks, or `logEvent` should keep a strong reference alongside the `WeakReference`.
+### logEvent callback never fires on Android (legacy `CallbackGuard`)
+**Root cause:** `CallbackGuard` wraps `Callback` in a `WeakReference`. Every other method invokes its callback synchronously (keeping it alive via the call stack), but `logEvent`'s callback fires ~2s later on a background thread after GC has already collected it.
+**Fix:** use the Promise-based `logEvent` API — Promises are held strongly by the bridge and unaffected.
 
-## Privacy / ATT / compliance (20 issues)
+## Privacy / ATT / compliance
 
 ### ITMS-91064 App Store rejection
-**Issues:** #673
-**Root cause:** `static_framework = true` places PrivacyInfo.xcprivacy where Apple's tooling doesn't scan.
-**Fix:** Use dynamic linking (`static_framework = false`).
+**Root cause:** `static_framework = true` places `PrivacyInfo.xcprivacy` where Apple's tooling doesn't scan it.
+**Fix:** use dynamic linking (`static_framework = false`).
 
 ### ATT popup not showing
-**Issues:** #328, #619
-**Root cause:** `waitForATTUserAuthorization` must be set before `start()`. User must be prompted first.
-**Fix:** Call `requestTrackingAuthorization` before `initSdk`, set timeout value.
+**Root cause:** ATT authorization must be requested and resolved before `start()`.
+**Fix:** call `requestTrackingAuthorization` before `init`, with a timeout.
 
 ### Android AD_ID permission
-**Issues:** #593, #562
 **Root cause:** Google Play requires explicit `AD_ID` permission declaration.
-**Fix:** Add `<uses-permission android:name="com.google.android.gms.permission.AD_ID"/>` to app manifest.
+**Fix:** add `<uses-permission android:name="com.google.android.gms.permission.AD_ID"/>` to the app manifest.
 
-## TypeScript types (11 issues)
+## RN version compatibility
 
-### Types don't match runtime
-**Issues:** #670, #575, #475, #194
-**Root cause:** `index.d.ts` is hand-maintained and drifts from actual native output.
-**Fix:** Verify types against native output on both platforms. Use `patch-package` as user workaround.
-
-## RN version compatibility (13 issues)
-
-### podspecPath / config.js invalid
-**Issues:** #458, #421, #403, #395
-**Root cause:** RN 0.68+ changed `react-native.config.js` schema.
-**Fix:** Upgrade plugin to version matching RN version.
-
-### NativeEventEmitter warning
-**Issues:** #335
-**Root cause:** RN 0.65+ requires `addListener`/`removeListeners` on native modules.
-**Fix:** Upgrade to plugin version with stub methods.
-
-### Event callbacks silent with local path dependency (file:..)
-**Issues:** SO#79083213, discovered during E2E 2026-05-12
-**Root cause:** When the plugin is referenced via `"file:.."` in `package.json` (local development), both the plugin root and the example app get their own `node_modules/react-native`. The plugin's `index.js` creates a `NativeEventEmitter` from its copy, while the app runtime uses the example's copy — two separate event bus instances. All event callbacks (`onDeepLink`, `onInstallConversionData`, `onAppOpenAttribution`) silently fail because listeners register on bus A while native emits on bus B.
-**Fix:** In the example/demo app's `metro.config.js`, add `extraNodeModules` to force all `react-native` imports to resolve from the example's `node_modules`, and `blockList` to prevent Metro from resolving the parent's copy:
+### Event callbacks silent with local path dependency (`file:..`)
+**Root cause:** with a `"file:.."` dependency, the plugin and the app get separate `node_modules/react-native` copies — `src/rn-transport.ts` builds its `NativeEventEmitter` from one copy while the app runtime uses the other, so listeners register on one event bus while native emits on the other.
+**Fix:** in the app's `metro.config.js`, force `react-native`/`react` to resolve from the app's own `node_modules` via `extraNodeModules`, and `blockList` the plugin's copies:
 ```js
 extraNodeModules: {
   'react-native': path.resolve(__dirname, 'node_modules/react-native'),
@@ -144,4 +123,4 @@ blockList: [
   new RegExp(path.resolve(pluginRoot, 'node_modules/react').replace(/[/\\]/g, '[/\\\\]') + '[/\\\\].*'),
 ],
 ```
-**Note:** This only affects local development. npm consumers have a single `react-native` instance and are unaffected.
+Only affects local development — npm consumers have a single `react-native` instance.

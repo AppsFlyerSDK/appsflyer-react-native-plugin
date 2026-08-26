@@ -1,48 +1,16 @@
-import { isJsxText } from 'typescript';
+// NativeEventEmitter: use RN's own manual mock — bare automocking breaks constructibility in RN 0.76+.
+jest.mock('../node_modules/react-native/Libraries/EventEmitter/NativeEventEmitter', () =>
+	require('../node_modules/react-native/Libraries/EventEmitter/__mocks__/NativeEventEmitter')
+);
 
-jest.mock('../node_modules/react-native/Libraries/BatchedBridge/NativeModules', () => {
-	return {
-		RNAppsFlyer: {
-			initSdkWithPromise: jest.fn(),
-			initSdkWithCallBack: jest.fn(),
-			stop: jest.fn(),
-			logEvent: jest.fn(),
-			logEventWithPromise: jest.fn(),
-			logLocation: jest.fn(),
-			setUserEmails: jest.fn(),
-			setAdditionalData: jest.fn(),
-			getAppsFlyerUID: jest.fn(),
-			updateServerUninstallToken: jest.fn(),
-			setCustomerUserId: jest.fn(),
-			setPartnerData: jest.fn(),
-			setSharingFilterForPartners: jest.fn(),
-			setCurrentDeviceLanguage: jest.fn(),
-			sendPushNotificationData: jest.fn(),
-			appendParametersToDeepLinkingURL: jest.fn(),
-			setDisableNetworkData: jest.fn(),
-			performOnDeepLinking: jest.fn(),
-			startSdk: jest.fn(),
-			disableIDFVCollection: jest.fn(),
-			logAdRevenue: jest.fn(),
-			anonymizeUser: jest.fn(),
-			setCurrencyCode: jest.fn(),
-			setOneLinkCustomDomains: jest.fn(),
-			setAppInviteOneLinkID: jest.fn(),
-			generateInviteLink: jest.fn(),
-			disableCollectASA: jest.fn(),
-			setUseReceiptValidationSandbox: jest.fn(),
-			disableSKAD: jest.fn(),
-			setCollectIMEI: jest.fn(),
-			setCollectAndroidID: jest.fn(),
-			disableAppSetId: jest.fn(),
-			validateAndLogInAppPurchaseV2: jest.fn(),
-			setResolveDeepLinkURLs: jest.fn(),
-			performOnAppAttribution: jest.fn(),
-			disableAdvertisingIdentifier: jest.fn(),
-			enableTCFDataCollection: jest.fn(),
-			setConsentData: jest.fn(),
-			validateAndLogInAppPurchase: jest.fn(),
-		},
-	};
-});
-jest.mock('../node_modules/react-native/Libraries/EventEmitter/NativeEventEmitter');
+// TurboModule spec mock — every RPC call in index.js flows through executeRpc.
+jest.mock('../src/NativeAppsFlyer', () => ({
+	__esModule: true,
+	default: {
+		executeRpc: jest.fn(() =>
+			Promise.resolve(JSON.stringify({ success: true, data: null }))
+		),
+		addListener: jest.fn(),
+		removeListeners: jest.fn(),
+	},
+}));

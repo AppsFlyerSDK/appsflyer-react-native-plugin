@@ -36,6 +36,18 @@ public class MainActivity extends ReactActivity {
  }
 ```
 
+**Cold-start deep links**: The native SDK inspects the launch Intent only after `init()` completes. For cold-start deep links (app not running when link is clicked), re-deliver them via `Linking.getInitialURL()` and `AppsFlyer.performDeepLinking()` inside `init().then()`:
+
+```javascript
+AppsFlyer.init({ devKey, appId })
+  .then(async () => {
+    const url = await Linking.getInitialURL();
+    if (url) {
+      await AppsFlyer.performDeepLinking({ url, shouldTriggerSession: true });
+    }
+  });
+```
+
 ### App Links
 First, you need to generate SHA256 fingerprint, then add the following intent-filter to the relevant activity in your app’s manifest:
 ```xml
@@ -49,9 +61,11 @@ First, you need to generate SHA256 fingerprint, then add the following intent-fi
         android:scheme="https" />
 </intent-filter>
 ```
-For more on App Links check out the guide [here](https://dev.appsflyer.com/hc/docs/dl_android_init_setup#procedures-for-android-app-links).
+See the [guide](https://dev.appsflyer.com/hc/docs/dl_android_init_setup#procedures-for-android-app-links) for App Links setup.
 
 ### URI Scheme
+A URI scheme is a URL that leads users directly to the mobile app. When an app user enters a URI scheme in a browser address bar or clicks on a link based on a URI scheme, the app launches and the user is deep-linked.
+
 In your app’s manifest add the following intent-filter to your relevant activity:
 ```xml 
 <intent-filter>
@@ -64,30 +78,44 @@ In your app’s manifest add the following intent-filter to your relevant activi
         android:scheme="afshopapp" />
 </intent-filter>
 ```
-For more on URI Scheme check out the guide [here](https://dev.appsflyer.com/hc/docs/dl_android_init_setup#procedures-for-uri-scheme).
+For URI Scheme setup, see the [guide](https://dev.appsflyer.com/hc/docs/dl_android_init_setup#procedures-for-uri-scheme).
 
 ##  iOS Deeplink Setup
-In order to record retargeting and use the onAppOpenAttribution/UDL callbacks in iOS,  the developer needs to pass the User Activity / URL to our SDK, via the following methods in the **AppDelegate.m** file:
+In order to record retargeting and use the `registerDeepLinkListener`/UDL callback in iOS (`onAppOpenAttribution` was removed in 7.0.0 and merged into `onDeepLink`, which was later renamed to `registerDeepLinkListener` — see MIGRATION.md), the app needs to forward opened URLs / Universal Links / cold-start launch options to the native SDK. This is done entirely in your app's native **AppDelegate** — there is no JavaScript API for this (`handleOpenURL`/`handleOpenUrl`/`continueUserActivity`/`handleLaunchOptions` are not exposed by this plugin's JS surface):
 
-```objectivec
-#import <RNAppsFlyer.h>
-// Deep linking
-// Open URI-scheme for iOS 9 and above
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary *) options {
-  [[AppsFlyerAttribution shared] handleOpenUrl:url options:options];
-    return YES;
-}
-// Open URI-scheme for iOS 8 and below
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
-  [[AppsFlyerAttribution shared] handleOpenUrl:url sourceApplication:sourceApplication annotation:annotation];
-  return YES;
-}
+```swift
+import react_native_appsflyer
+
 // Open Universal Links
-- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nullable))restorationHandler {
-    [[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
-    return YES;
+func application(
+  _ application: UIApplication,
+  continue userActivity: NSUserActivity,
+  restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
+) -> Bool {
+  AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: nil)
+  return true
+}
+
+func application(
+  _ app: UIApplication,
+  open url: URL,
+  options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+) -> Bool {
+  AppsFlyerAttribution.shared.handleOpen(url, options: options)
+  return true
+}
+
+func application(_ application: UIApplication,
+                  didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+  AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)
+  // ... rest of your launch setup ...
+  return true
 }
 ```
+
+Route all three calls through `AppsFlyerAttribution.shared` (exported by `react_native_appsflyer`), not `AppsFlyerLib.shared()` directly — one import covers all three AppDelegate hooks. `continueUserActivity`/`handleOpen` also buffer: a cold-start Universal Link reaches these AppDelegate callbacks before RN's JS thread has run `init()`, i.e. before `AppsFlyerLib` has a devKey/appId — calling it directly at that point can misfire the same way an early `registerDeepLinkListener` call does (see `known-issues-kb.md`). `AppsFlyerAttribution` buffers those two calls and replays them once `start()`'s native RPC succeeds; `handleLaunchOptions` has no such hazard and always forwards immediately.
+
+**Expo apps**: the `openURL`/`continueUserActivity` and `handleLaunchOptions` forwarding above is auto-injected into your generated AppDelegate by this plugin's config plugin at `expo prebuild` time (see [Expo Deep Link Integration](/Docs/RN_ExpoDeepLinkIntegration.md)) — you don't need to add it by hand for either ObjC or Swift AppDelegate templates.
 
 ### Universal Links
 Universal Links link between an iOS mobile app and an associate website/domain, such as AppsFlyer’s OneLink domain (xxx.onelink.me). To do so, it is required to:
@@ -108,12 +136,9 @@ Universal Links link between an iOS mobile app and an associate website/domain, 
 </plist>
 ```
 
-For more on Universal Links check out the guide [here](https://dev.appsflyer.com/hc/docs/dl_ios_init_setup#procedures-for-ios-universal-links).
+For more on Universal Links, check the [guide](https://dev.appsflyer.com/hc/docs/dl_ios_init_setup#procedures-for-ios-universal-links).
 
 ### URI Scheme
-A URI scheme is a URL that leads users directly to the mobile app.
-When an app user enters a URI scheme in a browser address bar box, or clicks on a link based on a URI scheme, the app launches and the user is deep-linked.
-
 To configure it you will have to:
 
 1. Add a unique url identifier in the URL types entry in the app's `info.plist`
@@ -142,4 +167,4 @@ example of a URL scheme configuration in the `info.plist`:
 </plist>
 ```
 
-For more on URI Scheme check out the guide [here](https://dev.appsflyer.com/hc/docs/dl_ios_init_setup#procedures-for-uri-scheme).
+For URI Scheme configuration, see the [guide](https://dev.appsflyer.com/hc/docs/dl_ios_init_setup#procedures-for-uri-scheme).

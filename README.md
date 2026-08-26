@@ -12,9 +12,9 @@ To do so, please follow [this article](https://support.appsflyer.com/hc/en-us/ar
 
 ### <a id="plugin-build-for"> This plugin is built for
 
-- Android AppsFlyer SDK **v6.18.0**
-- iOS AppsFlyer SDK **v6.18.0**
-- Minimum tested with React-Native **v0.62.0** (older versions might be supported)
+- Android AppsFlyer SDK (`af-android-sdk`) **v7.0.1** via `af-android-plugin-bridge` **v7.0.12**
+- iOS AppsFlyer SDK **v7.0.2** via `AppsFlyerRPC` **v7.0.13**
+- Requires React Native **>=0.76.0 with the New Architecture (TurboModules) enabled** — apps not yet on the New Architecture must stay on the `6.x` line of this plugin. See [MIGRATION.md](MIGRATION.md).
 
 ## <a id="release-updates"> Release Updates
 - Starting with version `6.18.0`, Android Purchase Connector: Updated to purchase-connector:2.2.0 with Billing Library 8 support, apps using Billing Library 7 APIs directly must migrate
@@ -25,7 +25,7 @@ To do so, please follow [this article](https://support.appsflyer.com/hc/en-us/ar
     - `PurchaseRevenueDataSource.purchaseRevenueAdditionalParametersForProducts()` function has been replaced with `additionalParameters` object
     - `PurchaseRevenueDataSourceStoreKit2.purchaseRevenueAdditionalParametersStoreKit2ForProducts()` function has been replaced with `additionalParameters` object
 
-- Starting with version `6.16.2`, `AppsFlyerConsent.forGDPRUser` and `AppsFlyerConsent.forNonGDPRUser` have been **deprecated**. Use the new `AppsFlyerConsent` constructor instead. See [Deprecation Notice](/Docs/RN_CMP.md#deprecation-notice).
+- Starting with version `6.16.2`, `AppsFlyerConsent.forGDPRUser` and `AppsFlyerConsent.forNonGDPRUser` were **deprecated**; as of `7.0.0` the entire `AppsFlyerConsent` class is **removed** — `setConsentData` now takes a plain object directly. See [Removed API](/Docs/RN_CMP.md#removed-api).
 
 - Starting with version `6.15.1`, upgraded to targetSDKVersion 34, Java 17, and Gradle 8.7 in [AppsFlyer Android SDK v6.15.1](https://support.appsflyer.com/hc/en-us/articles/115001256006-AppsFlyer-Android-SDK-release-notes).
 

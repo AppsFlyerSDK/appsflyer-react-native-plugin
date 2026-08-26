@@ -256,9 +256,15 @@ android_collect_logs() {
 
   # Strategy 2: Always also append logcat output. AppsFlyer SDK native logs
   # (HTTP response codes, etc.) reach logcat regardless of the Dart-print
-  # routing, and the count_matches checks need them. Limit to the recent tail
-  # so CI does not spend a minute dumping the whole emulator buffer every phase.
-  adb logcat -d -t "$tail_lines" 2>&1 | grep -E "${LOG_TAG}|AppsFlyer|response code:|preparing data:" >> "$log_file" || true
+  # routing, and the count_matches checks need them. Filter first, then tail —
+  # `-t N` on the raw stream truncates the noisy emulator/system log BEFORE the
+  # grep runs, which on a long phase (420s cold-launch wait) can push early
+  # [AF_QA] lines out of the window entirely even though they're still in the
+  # ring buffer (confirmed: a plain unfiltered dump still had them). Tailing
+  # the already-filtered output keeps the "don't spend a minute dumping
+  # everything" intent without discarding real matches.
+  # Crash tags added so a mid-phase process death leaves a stack trace in the saved log, not just the runner's own inference.
+  adb logcat -d 2>&1 | grep -E "${LOG_TAG}|AppsFlyer|response code:|preparing data:|AndroidRuntime|FATAL EXCEPTION|ActivityManager|lowmemorykiller" | tail -n "$tail_lines" >> "$log_file" || true
 }
 
 android_background_app() {
@@ -345,6 +351,12 @@ ios_get_pid() {
     grep "$PACKAGE_NAME" | awk '{print $1}' | head -1
 }
 
+ios_is_alive() {
+  local pid
+  pid=$(ios_get_pid)
+  [[ -n "$pid" && "$pid" != "-" ]]
+}
+
 ios_collect_logs() {
   local log_file="$1"
 
@@ -356,11 +368,17 @@ ios_collect_logs() {
   # Strategy 1: Read the app's af_qa_logs.txt from the simulator filesystem.
   # This file is the source of truth for [AF_QA] markers because the IOSink
   # in af_qa_logger.dart guarantees every line is appended.
-  local sim_data_dir
-  sim_data_dir="$HOME/Library/Developer/CoreSimulator/Devices/${IOS_UDID}/data"
-  if [[ -d "$sim_data_dir" ]]; then
+  #
+  # Resolve via `simctl get_app_container`, not a bare `find` over
+  # Containers/Data/Application: every fresh install gets a new container
+  # UUID, orphaned containers from past runs pile up on disk, and `find |
+  # head -1` can return one of those instead of the current install —
+  # silently validating against a stale, frozen log.
+  local qa_container
+  qa_container=$(xcrun simctl get_app_container "$IOS_UDID" "$PACKAGE_NAME" data 2>/dev/null || true)
+  if [[ -n "$qa_container" && -d "$qa_container" ]]; then
     local qa_log
-    qa_log=$(find "$sim_data_dir/Containers/Data/Application" -name "af_qa_logs.txt" -maxdepth 4 2>/dev/null | head -1)
+    qa_log=$(find "$qa_container" -name "af_qa_logs.txt" -maxdepth 4 2>/dev/null | head -1)
     if [[ -n "$qa_log" && -f "$qa_log" ]]; then
       log_debug "Found iOS QA log file: $qa_log"
       cat "$qa_log" >> "$log_file"
@@ -435,6 +453,10 @@ platform_trigger_deeplink() {
   if [[ "$PLATFORM" == "android" ]]; then android_trigger_deeplink "$1"; else ios_trigger_deeplink "$1"; fi
 }
 
+platform_is_alive() {
+  if [[ "$PLATFORM" == "android" ]]; then android_is_alive; else ios_is_alive; fi
+}
+
 # Print the device-side af_qa_logs.txt to stdout (best effort, empty on miss).
 # Used by `wait_for_qa_marker` to poll mid-phase without reshuffling the full
 # log-collection pipeline.
@@ -447,15 +469,18 @@ platform_peek_qa_log() {
     return 0
   fi
   ios_ensure_udid
-  local sim_data_dir
-  sim_data_dir="$HOME/Library/Developer/CoreSimulator/Devices/${IOS_UDID}/data"
-  [[ -d "$sim_data_dir" ]] || return 0
-  local qa_log
-  qa_log=$(find "$sim_data_dir/Containers/Data/Application" \
-    -name "af_qa_logs.txt" -maxdepth 4 2>/dev/null | head -1)
-  if [[ -n "$qa_log" && -f "$qa_log" ]]; then
-    cat "$qa_log" 2>/dev/null || true
-    return 0
+  # Same container-resolution fix as ios_collect_logs Strategy 1 above: pin
+  # to the currently-installed app's data container instead of `find`-ing
+  # across every container on disk, which can return a stale one.
+  local qa_container
+  qa_container=$(xcrun simctl get_app_container "$IOS_UDID" "$PACKAGE_NAME" data 2>/dev/null || true)
+  if [[ -n "$qa_container" && -d "$qa_container" ]]; then
+    local qa_log
+    qa_log=$(find "$qa_container" -name "af_qa_logs.txt" -maxdepth 4 2>/dev/null | head -1)
+    if [[ -n "$qa_log" && -f "$qa_log" ]]; then
+      cat "$qa_log" 2>/dev/null || true
+      return 0
+    fi
   fi
   local peek_predicate="messageType == default || messageType == info || messageType == debug"
   if [[ -n "$IOS_LAST_PID" ]]; then
@@ -488,6 +513,17 @@ wait_for_qa_marker() {
     if platform_peek_qa_log | grep -qF -- "$marker" 2>/dev/null; then
       log_info "Marker observed after ${elapsed}s"
       return 0
+    fi
+
+    # Give the process a moment to register with launchctl/pidof after
+    # `platform_launch` before trusting an is_alive check — otherwise a
+    # perfectly healthy just-launched app reads as "crashed" on the first
+    # poll. Once past the grace period, a dead process before the marker
+    # ever showed up means it crashed on launch — stop burning the full
+    # timeout waiting for a marker that will never appear.
+    if (( elapsed >= interval )) && ! platform_is_alive; then
+      log_fail "App process died after ${elapsed}s, before marker was observed — aborting wait early"
+      return 1
     fi
 
     remaining=$(( timeout_sec - elapsed ))
@@ -551,9 +587,19 @@ build_app() {
     return 1
   fi
   log_step "Building app"
-  log_info "Running: $BUILD_CMD"
+  # build_cmd (from the test plan) embeds $IOS_SIMULATOR_UDID inside a
+  # single-quoted xcodebuild destination string. Single quotes suppress
+  # variable expansion structurally — exporting the var before eval doesn't
+  # help, since eval re-parses the whole string as new shell syntax. Replace
+  # the literal placeholder text instead, same as the {{UDID}} substitution
+  # pre_actions already does below.
+  local resolved_build_cmd="$BUILD_CMD"
+  if [[ "$PLATFORM" == "ios" ]]; then
+    resolved_build_cmd="${resolved_build_cmd//\$IOS_SIMULATOR_UDID/$IOS_UDID}"
+  fi
+  log_info "Running: $resolved_build_cmd"
   if ! $DRY_RUN; then
-    (eval "$BUILD_CMD")
+    (eval "$resolved_build_cmd")
   fi
 }
 
@@ -661,10 +707,11 @@ validate_check() {
 run_phase() {
   local phase_json="$1"
 
-  local phase_id phase_name requires_fresh scenario_ref wait_sec
+  local phase_id phase_name requires_fresh requires_identity_reset scenario_ref wait_sec
   phase_id=$(echo "$phase_json" | jq -r '.id')
   phase_name=$(echo "$phase_json" | jq -r '.name')
   requires_fresh=$(echo "$phase_json" | jq -r '.requires_fresh_install // false')
+  requires_identity_reset=$(echo "$phase_json" | jq -r '.requires_device_identity_reset // false')
   scenario_ref=$(echo "$phase_json" | jq -r '.scenario_ref // "N/A"')
   wait_sec=$(echo "$phase_json" | jq -r '.wait_after_launch_sec // 25')
   local wait_trigger_sec
@@ -704,6 +751,19 @@ run_phase() {
       new_id=$(cat /proc/sys/kernel/random/uuid 2>/dev/null | tr -d '-' | head -c 16 || date +%s%N | head -c 16)
       adb shell settings put secure android_id "$new_id" 2>/dev/null || true
       log_info "Reset android_id to $new_id for fresh-install attribution"
+    elif [[ "$requires_identity_reset" == "true" ]]; then
+      # `simctl privacy reset all` only clears permission grants — it does not touch the
+      # Keychain, and AppsFlyer's SDK persists its device UID there specifically so it
+      # survives uninstall/reinstall (anti-reinstall-fraud design). Without a full erase,
+      # is_first_launch keeps coming back false. Erase wipes the whole simulator (including
+      # Keychain) but keeps the same UDID, so IOS_UDID stays valid for the rest of the run.
+      # Only set requires_device_identity_reset on phases that actually assert
+      # is_first_launch — erase+reboot is expensive, skip it everywhere else.
+      xcrun simctl shutdown "$IOS_UDID" 2>/dev/null || true
+      xcrun simctl erase "$IOS_UDID"
+      xcrun simctl boot "$IOS_UDID"
+      xcrun simctl bootstatus "$IOS_UDID" -b
+      log_info "Erased simulator (Keychain included) for fresh-install attribution"
     else
       xcrun simctl privacy "$IOS_UDID" reset all 2>/dev/null || true
       log_info "Reset simulator privacy settings for fresh-install attribution"
@@ -725,8 +785,13 @@ run_phase() {
     platform_launch
     # Poll the QA log for the auto-run-complete marker rather than always
     # sleeping the full ceiling. Use a slower interval here because each ADB
-    # `run-as cat` is costly on GitHub's emulator.
-    wait_for_qa_marker "[AF_QA][AUTO_APIS] --- Auto run complete ---" "$wait_sec" 10
+    # `run-as cat` is costly on GitHub's emulator. A non-zero return means the
+    # app crashed before the marker showed up — log collection and checks
+    # below still run so the crash logs/screenshot are captured for triage,
+    # but there's no point pretending the app is still there for pre-actions.
+    if ! wait_for_qa_marker "[AF_QA][AUTO_APIS] --- Auto run complete ---" "$wait_sec" 10; then
+      log_warn "Continuing to log collection to capture crash evidence"
+    fi
   fi
 
   # Pre-actions (deep link phases: background the app, etc.)
@@ -794,6 +859,12 @@ run_phase() {
       log_info "Waiting ${wait_trigger_sec}s for deep link to propagate..."
       sleep "$wait_trigger_sec"
     fi
+  fi
+
+  # Continuation phases skip the launch/deep-link wait above, so an event's HTTP round-trip may still be in flight here. ponytail: flat 5s, upgrade to a marker wait if a phase needs longer.
+  if [[ "$requires_fresh" != "true" && -z "$deep_link_url" ]]; then
+    log_info "Settling 5s for async HTTP responses before log collection..."
+    sleep 5
   fi
 
   # Collect logs
@@ -945,7 +1016,10 @@ main() {
   local run_end
   run_end=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
   local start_epoch end_epoch duration_sec
-  start_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$RUN_START" +%s 2>/dev/null || date -d "$RUN_START" +%s 2>/dev/null || echo "0")
+  # RUN_START is UTC (built with `date -u`); -u here is required on macOS's
+  # `date -j -f`, which otherwise parses the "Z"-suffixed string as local
+  # time and skews duration_sec by the local UTC offset.
+  start_epoch=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$RUN_START" +%s 2>/dev/null || date -u -d "$RUN_START" +%s 2>/dev/null || echo "0")
   end_epoch=$(date +%s)
   duration_sec=$(( end_epoch - start_epoch ))
 

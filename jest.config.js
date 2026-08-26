@@ -9,7 +9,6 @@ module.exports = {
   preset: 'react-native',
   transform: {
     ...jsWithBabelPreset.transform,
-    '^.+\\.js$': '<rootDir>/node_modules/react-native/jest/preprocessor.js',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   modulePathIgnorePatterns: ['<rootDir>/demos/'],

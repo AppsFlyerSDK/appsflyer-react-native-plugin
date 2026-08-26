@@ -34,16 +34,16 @@
       "checks": [
         {
           "id": "sdk_started",
-          "description": "startSDK was called",
+          "description": "start was called",
           "type": "log_contains",
-          "pattern": "[AF_QA][startSDK] result:",
+          "pattern": "[AF_QA][start] result:",
           "fail_action": "abort"
         },
         {
           "id": "is_first_launch_true",
-          "description": "onInstallConversionData fires with is_first_launch=true",
+          "description": "registerConversionListener fires with is_first_launch=true",
           "type": "log_contains",
-          "pattern": "[AF_QA][CALLBACK][onInstallConversionData]",
+          "pattern": "[AF_QA][CALLBACK][registerConversionListener]",
           "payload_check": {"field": "is_first_launch", "expected": "true"},
           "fail_action": "abort"
         },
@@ -65,7 +65,7 @@
           "id": "get_sdk_version",
           "description": "getSDKVersion returns a value",
           "type": "log_contains",
-          "pattern": "[AF_QA][getSDKVersion] result:",
+          "pattern": "[AF_QA][getSdkVersion] result:",
           "fail_action": "fail"
         },
         {
@@ -106,16 +106,16 @@
         },
         {
           "id": "on_deep_linking_callback",
-          "description": "onDeepLinking fires (NOT_FOUND expected on clean launch)",
+          "description": "onDeepLinking fires (NOT_FOUND expected on clean launch) — iOS always invokes this callback on cold launch even with no deep link; Android's SDK only invokes it when an actual deep link is present, so this warns instead of fails on Android",
           "type": "log_contains",
           "pattern": "[AF_QA][CALLBACK][onDeepLinking]",
-          "fail_action": "fail"
+          "fail_action": "warn"
         },
         {
           "id": "no_fatal_errors",
           "description": "No fatal exceptions or SDK errors in logs",
           "type": "absent",
-          "patterns": ["Fatal Exception", "FATAL", "[AF_QA][startSDK] error:", "response code:4", "response code:5"],
+          "patterns": ["Fatal Exception", "FATAL", "[AF_QA][start] error:", "response code:4", "response code:5"],
           "fail_action": "fail"
         }
       ]
@@ -293,6 +293,7 @@
       "scenario_ref": "E2E-005",
       "description": "Fresh install. Verify setCustomerUserId, setCurrencyCode, setAdditionalData propagate correctly. Identity-check event receives HTTP 200. is_first_launch=true still fires.",
       "requires_fresh_install": true,
+      "requires_device_identity_reset": true,
       "wait_after_launch_sec": 420,
       "checks": [
         {
@@ -326,9 +327,9 @@
         },
         {
           "id": "is_first_launch_true",
-          "description": "onInstallConversionData still fires with is_first_launch=true",
+          "description": "registerConversionListener still fires with is_first_launch=true",
           "type": "log_contains",
-          "pattern": "[AF_QA][CALLBACK][onInstallConversionData]",
+          "pattern": "[AF_QA][CALLBACK][registerConversionListener]",
           "payload_check": {"field": "is_first_launch", "expected": "true"},
           "fail_action": "fail"
         },
@@ -352,9 +353,19 @@
       "checks": [
         {
           "id": "stop_true",
-          "description": "stop(true) readback present",
+          "description": "stop(true) resolves null — the void-RPC success value on both platforms",
           "type": "log_contains",
-          "pattern": "[AF_QA][stop] result: true",
+          "pattern": "[AF_QA][stop(true)] result: null",
+          "fail_action": "fail"
+        },
+        {
+          "id": "stop_no_error_payload",
+          "description": "Neither stop call forwarded an RPC error through its single callback",
+          "type": "absent",
+          "patterns": [
+            "[AF_QA][stop(true)] result: {\"code\"",
+            "[AF_QA][stop(false)] result: {\"code\""
+          ],
           "fail_action": "fail"
         },
         {
@@ -366,9 +377,9 @@
         },
         {
           "id": "stop_false",
-          "description": "stop(false) readback present",
+          "description": "stop(false) resolves null — the void-RPC success value on both platforms",
           "type": "log_contains",
-          "pattern": "[AF_QA][stop] result: false",
+          "pattern": "[AF_QA][stop(false)] result: null",
           "fail_action": "fail"
         },
         {

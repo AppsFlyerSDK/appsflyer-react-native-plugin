@@ -8,59 +8,41 @@ hidden: false
 
 ## Getting started
 
-![alt text](https://massets.appsflyer.com/wp-content/uploads/2018/03/21101417/app-installed-Recovered.png)
+**Prerequisite:** see [Expo Installation](RN_ExpoInstallation.md) for the React Native / Expo SDK version requirements.
 
-## Deep Linking Types
-
-1. **Deferred Deep Linking** - Serving personalized content to new or former users, directly after the installation.
-2. **Direct Deep Linking** - Directly serving personalized content to existing users, which already have the mobile app installed.
-
-**Unified deep linking (UDL)** - an API which enables you to send new and existing users to a specific in-app activity as soon as the app is opened.
-
-For more info please check out the [OneLink™ Deep Linking Guide](https://support.appsflyer.com/hc/en-us/articles/208874366-OneLink-Deep-Linking-Guide#Intro) and [developer guide](https://dev.appsflyer.com/hc/docs/dl_getting_started).
+See [Deep Linking Integration](RN_DeepLinkIntegrate.md) for concepts — this doc covers Expo-specific wiring only.
 
 ## Implementation for Expo
 
-1. In order to use AppsFlyer's deeplinks you need to configure intent filters/scheme/associatedDomains as described in [Expo's guide](https://docs.expo.dev/guides/linking/#universal-links-on-ios).
+1. **App.json configuration:** Configure intent filters, URI scheme, and associated domains as described in [Expo's guide](https://docs.expo.dev/guides/linking/#universal-links-on-ios). See the Full app.json example below.
 
-2. **For Android apps:** You need to add `setIntent()` inside the `onNewIntent` method like described [here](https://dev.appsflyer.com/hc/docs/rn_deeplinkintegrate#android-deeplink-setup). This plugin is NOT adding this code out the box, so you need to implement it **manually or with [custom config plugin](https://docs.expo.dev/modules/config-plugin-and-native-module-tutorial/#4-creating-a-new-config-plugin)**
+2. **iOS AppDelegate wiring:** The Expo config plugin automatically injects the required AppsFlyer deep-link handlers into your app's AppDelegate at `expo prebuild` time. For both ObjC and Swift templates, it adds:
+   - `AppsFlyerAttribution.shared.handleOpen(url:options:)` into `openURL`
+   - `AppsFlyerAttribution.shared.continueUserActivity(userActivity:restorationHandler:)` into `continueUserActivity` (forwarding the real `restorationHandler`)
+   - `AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)` into `didFinishLaunchingWithOptions`
 
-## Full app.json example
+   All three route through `AppsFlyerAttribution.shared`, not `AppsFlyerLib.shared()` directly — one import (`react_native_appsflyer`) covers the whole AppDelegate. See [Deep Linking Integration](RN_DeepLinkIntegrate.md#ios-deeplink-setup) for why `openURL`/`continueUserActivity` buffer (calls that arrive before `start()` has succeeded natively); `handleLaunchOptions` has no such hazard and forwards immediately.
+   
+   See [Expo Installation](RN_ExpoInstallation.md) for full details.
+
+3. **Android deep-link handling:** You must add `setIntent()` inside the `onNewIntent` method as described [here](https://dev.appsflyer.com/hc/docs/rn_deeplinkintegrate#android-deeplink-setup). This plugin does not add this code automatically, so implement it **manually or with a [custom config plugin](https://docs.expo.dev/modules/config-plugin-and-native-module-tutorial/#4-creating-a-new-config-plugin)**.
+
+## Deep linking configuration
+
+The following app.json snippet shows the deep-linking-specific configuration. For the full list of plugin configuration options, see [Expo Installation](RN_ExpoInstallation.md).
 
 ```json
 {
   "expo": {
-    "name": "expoAppsFlyer",
-    "slug": "expoAppsFlyer",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/atom.png",
     "plugins": [
-      [
-        "react-native-appsflyer",
-        { "shouldUseStrictMode": true } // <<-- only for strict mode
-      ]
+      "react-native-appsflyer"
     ],
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": ["**/*"],
-    "scheme": "my-own-scheme", // <<-- uri scheme as configured on AF dashboard
+    "scheme": "my-own-scheme",
     "ios": {
-      "supportsTablet": true,
       "bundleIdentifier": "com.appsflyer.expoaftest",
-      "associatedDomains": ["applinks:expotest.onelink.me"] // <<-- important in order to use universal links
+      "associatedDomains": ["applinks:expotest.onelink.me"]
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      },
       "package": "com.af.expotest",
       "intentFilters": [
         {
@@ -68,8 +50,8 @@ For more info please check out the [OneLink™ Deep Linking Guide](https://suppo
           "data": [
             {
               "scheme": "https",
-              "host": "expotest.onelink.me", // <<-- important for android App Links
-              "pathPrefix": "/DvWi" // <<-- set your onelink template id
+              "host": "expotest.onelink.me",
+              "pathPrefix": "/DvWi"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]
@@ -78,15 +60,12 @@ For more info please check out the [OneLink™ Deep Linking Guide](https://suppo
           "action": "VIEW",
           "data": [
             {
-              "scheme": "my-own-scheme" // <<-- uri scheme as configured on AF dashboard
+              "scheme": "my-own-scheme"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     }
   }
 }

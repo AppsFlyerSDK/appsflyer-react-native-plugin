@@ -12,15 +12,28 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10" // Kotlin plugin
+        classpath 'com.android.tools.build:gradle:9.2.1'
+    }
+
+    // ponytail: AGP 9.2.1 still drags in these three CVE-flagged transitive versions
+    // unchanged (nothing else in the buildscript classpath forces a newer one) — force
+    // patched versions directly instead of chasing a Gradle-wrapper-wide AGP major bump.
+    configurations.classpath {
+        resolutionStrategy {
+            force 'org.bouncycastle:bcprov-jdk18on:1.81.1'
+            force 'org.bouncycastle:bcpkix-jdk18on:1.81.1'
+            force 'org.bouncycastle:bcutil-jdk18on:1.81.1'
+            force 'org.jdom:jdom2:2.0.6.1'
+            force 'org.bitbucket.b_c:jose4j:0.9.6'
+        }
     }
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android' // Apply Kotlin Android plugin
+apply plugin: 'kotlin-android'
+apply plugin: 'com.facebook.react'
 
-def includeConnector = project.hasProperty('appsflyer.enable_purchase_connector') ? project.property('appsflyer.enable_purchase_connector').toBoolean() : false // Moved outside of android block
+def includeConnector = project.hasProperty('appsflyer.enable_purchase_connector') ? project.property('appsflyer.enable_purchase_connector').toBoolean() : false
 
 android {
     namespace "com.appsflyer.reactnative"
@@ -30,10 +43,8 @@ android {
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 21)
         targetSdkVersion safeExtGet('targetSdkVersion', 34)
-        versionCode 1
-        versionName "1.0"
         ndk {
-            abiFilters "armeabi-v7a", "x86"
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
 
         buildConfigField 'boolean', 'INCLUDE_CONNECTOR', includeConnector.toString()
@@ -41,7 +52,7 @@ android {
 
     sourceSets {
         main {
-            java.srcDirs = ['src/main/java', 'src/main/kotlin'] // Add Kotlin source directory
+            java.srcDirs = ['src/main/java', 'src/main/kotlin', 'src/main/common']
             java.srcDirs += includeConnector ? ['src/main/includeConnector'] : ['src/main/excludeConnector']
         }
     }
@@ -52,12 +63,18 @@ android {
     testOptions {
         unitTests.includeAndroidResources = true
         unitTests.returnDefaultValues = true
+        // ponytail: no unit tests remain now that RpcInitGate.kt is gone (bridge module is a pure
+        // passthrough); avoid Gradle 8+ failing the build on an empty test source set. Add tests
+        // back here (and drop this) if real branching logic returns to this module.
+        unitTests.all {
+            it.failOnNoDiscoveredTests = false
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions { // Configure Kotlin-specific options
+    kotlinOptions {
         jvmTarget = "17"
     }
 }
@@ -68,11 +85,20 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10" // Add Kotlin standard library
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:${safeExtGet('kotlin_stdlib_version', '2.4.10')}"
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
-    api "com.appsflyer:af-android-sdk:${safeExtGet('appsflyerVersion', '6.18.0')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.2')}"
     if (includeConnector){
-        implementation 'com.appsflyer:purchase-connector:2.2.0'
+        implementation 'com.appsflyer:purchase-connector:2.3.0'
     }
+    implementation platform('com.appsflyer:af-android-sdk-bom:7.0.1')
+    implementation 'com.appsflyer:af-android-sdk'
+    // pinned explicitly — af-android-sdk-bom (7.0.1) doesn't carry this version yet
+    implementation 'com.appsflyer:af-android-plugin-bridge:7.0.12'
+
+    testImplementation 'junit:junit:4.13.2'
+    // android.jar's org.json stub throws/returns null for every method under
+    // testOptions.unitTests.returnDefaultValues — pull in the real implementation so
+    // JSON-based logic (e.g. RNAppsFlyerModule's event normalization) is actually exercised.
+    testImplementation 'org.json:json:20231013'
 }

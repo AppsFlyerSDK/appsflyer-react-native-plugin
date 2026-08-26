@@ -5,61 +5,49 @@ paths:
 
 # Native iOS bridge rules
 
-Scope: `ios/` directory — `RNAppsFlyer.h`, `RNAppsFlyer.m`, `PCAppsFlyer.h`, `PCAppsFlyer.m`, `AppsFlyerAttribution.h/.m`.
+Scope: `ios/` — `RNAppsFlyer.mm`, `RNAppsFlyer.h`, `RNAppsFlyerImpl.swift`, `AppsFlyerAttribution.swift`, `RNAppsFlyer-Bridging-Header.h`. `PCAppsFlyer.h/.m` (purchase connector) is legacy, out of scope.
 
-## 1. Module structure
+## Module structure
 
-- `RNAppsFlyer` extends `RCTEventEmitter` (not `RCTBridgeModule` directly) — this enables `sendEventWithName:body:`
-- Conforms to `AppsFlyerLibDelegate` and `AppsFlyerDeepLinkDelegate`
-- Registered via `RCT_EXPORT_MODULE()` with no custom name
+- `RNAppsFlyer.mm` — thin ObjC++ TurboModule shim, delegates to `RNAppsFlyerImpl.swift`
+- `RNAppsFlyerImpl.swift` — RPC dispatch into `AppsFlyerRPCBridge`, event-channel wiring
+- `AppsFlyerRPC` is a real CocoaPods dependency (podspec), not vendored
+- No `RCTEventEmitter` — events go through the TurboModule's `NativeEventEmitter` channel
 
-## 2. Method export naming
+## Single entry point
 
-| JS call | ObjC selector |
-|---------|--------------|
-| `initSdkWithCallBack(options, success, error)` | `initSdkWithCallBack:successCallback:errorCallback:` |
-| `initSdkWithPromise(options)` | `initSdkWithPromise:initSdkWithPromiseWithResolver:rejecter:` |
-| `logEvent(name, values, success, error)` | `logEvent:eventValues:successCallback:errorCallback:` |
-| `getAppsFlyerUID(callback)` | `getAppsFlyerUID:` |
+One exported method: `executeRpc(requestJson: String) -> Promise<String>`. Never add per-capability `RCT_EXPORT_METHOD`s — add new capabilities in the native `AppsFlyerRPCBridge` handler instead.
 
-Follow the existing naming convention when adding new methods. Promise variants use `RCT_EXPORT_METHOD` with `resolver:(RCTPromiseResolveBlock)` and `rejecter:(RCTPromiseRejectBlock)`.
+## Threading
 
-## 3. Threading
+- Wrap every `AppsFlyerRPCBridge.shared.executeJson`/`setEventHandler` call in `Task { @MainActor in ... }` — the bridge is `@MainActor`-isolated; `executeRpc` runs off-main by default, so a synchronous call is a compile error. Don't use `MainActor.assumeIsolated` — it traps off-main.
+- The bridge's own `RPCQueue` serializes RPC order internally regardless of caller thread, so the `Task` hop doesn't affect ordering.
+- Event emissions to JS must go through the TurboModule event emitter, not `performSelectorOnMainThread`.
 
-- Delegate callbacks use `performSelectorOnMainThread:withObject:waitUntilDone:NO` to dispatch to main thread before emitting JS events
-- `logCrossPromotionAndOpenStore` uses `dispatch_async(dispatch_get_main_queue(), ...)` for UI operations
-- All event emissions to JS must happen on the main thread
+## Listener registration — no buffer
 
-## 4. IDFA strict mode
+`RNAppsFlyerImpl.swift` dispatches every RPC (including `init` and listener registration) immediately, in submission order — native is init-order-independent by design. Don't add a registration buffer without confirming an actual native regression first (see `known-issues-kb.md`).
 
-`#ifndef AFSDK_NO_IDFA` guards ATT-related code. The podspec supports `$RNAppsFlyerStrictMode` which uses `AppsFlyerFramework/AppsFlyerFrameworkStrict` — this excludes IDFA access entirely.
+## `AppsFlyerAttribution` bridge-ready gate
 
-When adding ATT or IDFA-dependent code, always wrap in `#ifndef AFSDK_NO_IDFA`.
+`AppsFlyerAttribution.swift` buffers AppDelegate-level `continueUserActivity`/`handleOpen(url:options:)` calls (cold-start Universal Link / custom-scheme open) until `RNAppsFlyerImpl` flips `AppsFlyerAttribution.shared.bridgeReady = true` — which happens once the `start` RPC (not `init`) resolves. Without this, the OS can call into AppDelegate before JS has run `init`/`start`, resolving against an unconfigured host or losing the click with nobody listening. `handleLaunchOptions` has no such dependency and passes straight through.
 
-## 5. Version constant
+App-side AppDelegates (and the Expo plugin's injected template) must call `AppsFlyerAttribution.shared`, never `AppsFlyerLib.shared()` directly, for `continueUserActivity`/`handleOpen`/`handleLaunchOptions`.
 
-`kAppsFlyerPluginVersion` in `RNAppsFlyer.h` — must be updated on every release. This is separate from the podspec version and package.json version (see release-versioning.md).
+`requestJson.method` arrives already resolved to the platform wire name (e.g. `"initialize"`, `"registerDeeplinkListener"`) — `@appsflyer-sdk/js-core-plugin` resolves it in JS before the call reaches native. Any method-name comparison in this file must match the resolved name, not the canonical JS name.
 
-## 6. Podspec dependency
+## IDFA / strict mode
 
-`react-native-appsflyer.podspec` pins the native SDK version via `s.dependency 'AppsFlyerFramework'`. Header-not-found errors (#633, #602, #646) are almost always caused by:
-- Stale pod cache (fix: `pod deintegrate && pod install --repo-update`)
-- Podfile.lock pinning a different native SDK version than the podspec expects
-- Strict mode missing headers (`AppsFlyerFrameworkStrict` has different headers)
+`#ifndef AFSDK_NO_IDFA` guards ATT-related code. `$RNAppsFlyerStrictMode` pulls `AppsFlyerFrameworkStrict`, which excludes IDFA entirely — wrap new ATT-dependent code in `#ifndef AFSDK_NO_IDFA`.
 
-## 7. Event names
+## Version constant
 
-`supportedEvents` returns a fixed array. Adding a new event type requires:
-1. Add to the `supportedEvents` array in `RNAppsFlyer.m`
-2. Add matching event name constant on Android
-3. Add listener registration method in `index.js`
-4. Add type in `index.d.ts`
+`kAppsFlyerPluginVersion` in `RNAppsFlyer.h` — keep in sync with the other 2 version locations (see `release-versioning.md`).
 
-## 8. Common iOS build failures from issues
+## Podspec
 
-| Symptom | Root cause | Fix |
-|---------|-----------|-----|
-| `react_native_appsflyer-Swift.h not found` (#646) | Mixed Swift/ObjC without bridging header | Check Xcode build settings for Swift bridging |
-| `AppsFlyerConsent.h not found` (#633) | Native SDK version mismatch | Match plugin version to compatible native SDK |
-| `Redefinition of SUCCESS` (#497, #541) | Enum collision with other libs | Update to plugin version where enum was namespaced |
-| `unsupported Swift architecture` (#656) | Release build architecture mismatch | Check `EXCLUDED_ARCHS` build settings |
+`s.dependency 'AppsFlyerRPC', '7.0.13'` (real CocoaPods coordinate; `Strict` variant used when `$RNAppsFlyerStrictMode` is set). No vendored framework files.
+
+## Common build issues
+
+Header-not-found / symbol-collision issues — see `known-issues-kb.md`'s "iOS build failures" section.

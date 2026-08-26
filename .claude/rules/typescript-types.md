@@ -1,56 +1,23 @@
 ---
 paths:
-  - "index.d.ts"
-  - "**/*.d.ts"
+  - "index.ts"
 ---
 
-# TypeScript type definitions
+# TypeScript type conventions
 
-Scope: `index.d.ts` and any `.d.ts` files in the repo.
+Scope: the `PurchaseConnector`/`RNTransport` types hand-maintained in `index.ts` (see root `CLAUDE.md` — no separate `index.d.ts`/`index.js`). Core RPC method types are owned by `@appsflyer-sdk/js-core-plugin`, re-exported via `export *` — not maintained here. Drift history: `known-issues-kb.md` → "Types don't match runtime".
 
-## 1. Hand-maintained, not generated
+## Rules
 
-`index.d.ts` is manually maintained — not generated from source. It declares the module via `declare module "react-native-appsflyer"`. This means types can (and do) drift from actual runtime behavior.
+1. **No `any` for known shapes.** Use `Record<string, unknown>` for genuinely dynamic data, not `any`.
+2. **Platform-conditional types**: where iOS and Android return different shapes, document both in JSDoc (`@platform ios`/`@platform android`); use a union type if the difference is structural.
+3. **Deprecation**: mark with `@deprecated` JSDoc, keep the signature working at runtime until removal (see `release-versioning.md` §4).
+4. **New exports**: every named export needs a matching type — there's no separate step, they're the same declaration.
 
-## 2. Chronic drift problem
+## Validation
 
-This is a recurring source of issues (#670, #575, #475, #218, #194):
-- Types say one shape, native returns another
-- `any` fallback types defeat TypeScript's purpose
-- Deep link data shape differs between iOS and Android, but types assume a single shape
-
-**When changing any JS API or native return value, update `index.d.ts` in the same PR.**
-
-## 3. Type conventions
-
-```typescript
-// Callback overload + Promise overload pattern
-export function initSdk(options: InitSdkOptions, successC?: SuccessCB, errorC?: ErrorCB): Promise<string>;
-
-// Event listener registration — returns cleanup function
-export function onDeepLink(callback: (data: UnifiedDeepLinkData) => void): () => void;
-
-// Enum-like frozen objects
-export const AFPurchaseType: { SUBSCRIPTION: string; ONE_TIME_PURCHASE: string };
-```
-
-## 4. Rules for modifying types
-
-1. **Match runtime**: types must reflect what native actually returns, not what the docs say it should return. Test on both platforms before updating.
-2. **No `any` for known shapes**: if the native return type is known, type it. Use `Record<string, unknown>` for truly dynamic data, not `any`.
-3. **Platform-conditional types**: where iOS and Android return different shapes, document both in JSDoc. Use union types if the difference is structural.
-4. **Deprecation**: mark deprecated methods with `@deprecated` JSDoc tag. Keep the type signature for backward compatibility until removal.
-5. **New exports**: every named export from `index.js` needs a matching type in `index.d.ts`. Missing types = broken TypeScript consumers.
-
-## 5. Stale header
-
-The file header says "Sync with v5.1.1" — this is misleading (last real sync was long ago). Do not rely on this header for version tracking.
-
-## 6. Validation approach
-
-After changing types:
 ```bash
-npx tsc --noEmit  # catches type errors in PurchaseConnector TS files
+npx tsc --noEmit  # type-checks index.ts + PurchaseConnector TS files
 ```
 
-For `index.d.ts` specifically, manual review against the JS implementation is required — `tsc` doesn't validate `.d.ts` against `.js`.
+`tsc` doesn't validate that a type matches actual runtime output — cross-check against `specs/001-turbomodule-rpc-bridge/data-model.md` §Method Catalog and test on both platforms.

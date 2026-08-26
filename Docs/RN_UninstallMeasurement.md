@@ -27,8 +27,6 @@ AppsFlyer enables you to measure app uninstalls. To handle notifications it requ
 }
 ```
 
-Read more about Uninstall Measurement: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)
-
 ### Second method
 
 Pass the device token to AppsFlyer
@@ -36,21 +34,21 @@ Pass the device token to AppsFlyer
 *Example:*
 
 ```javascript
-appsFlyer.updateServerUninstallToken(deviceToken, (success) => {
-  //...
-});
+AppsFlyer.updateServerUninstallToken({ token: deviceToken });
 ```
 
-## Measure app uninstalls Android
+**Note:** On iOS, the token string must be a valid hex-encoded string (even-length hex characters). Passing a raw NSData description or base64 string will cause a native validation error.
 
-Update Firebase device token so it can be sent to AppsFlyer
+For sandbox uninstall-token registration, also see `setUseUninstallSandbox()` in the [API reference](RN_API.md).
+
+## Android
+
+Update Firebase device token so it can be sent to AppsFlyer.
 
 *Example:*
 
 ```javascript
-appsFlyer.updateServerUninstallToken(newFirebaseToken, (success) => {
-  //...
-});
+AppsFlyer.updateServerUninstallToken({ token: newFirebaseToken });
 ```
 
-Read more about Android  Uninstall Measurement: [Appsflyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)
+Read more about Android uninstall measurement: [AppsFlyer SDK support site](https://support.appsflyer.com/hc/en-us/articles/208004986-Android-Uninstall-Tracking)

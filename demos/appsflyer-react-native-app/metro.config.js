@@ -6,25 +6,40 @@
  */
 
 const path = require('path');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 
-const localPackagePaths = [
-  path.resolve(__dirname, '../../'), // Path to `react-native-appsflyer`
-];
+const pluginRoot = path.resolve(__dirname, '../../'); // `react-native-appsflyer`
+const localPackagePaths = [pluginRoot];
 
-module.exports = {
-  transformer: {
-    getTransformOptions: async () => ({
-      transform: {
-        experimentalImportSupport: false,
-        inlineRequires: true,
-      },
-    }),
-  },
+// Escape a fixed local dir (never user input) into a blockList RegExp matching
+// it and everything under it. No nested quantifiers, so no ReDoS surface —
+// escapeRegExp + a single trailing `.*` can't backtrack catastrophically.
+const escapeRegExp = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const blockDir = dir => new RegExp(`^${escapeRegExp(dir)}[/\\\\].*`);
+
+/**
+ * @type {import('@react-native/metro-config').MetroConfig}
+ */
+const config = {
   resolver: {
     nodeModulesPaths: [path.resolve(__dirname, 'node_modules'), ...localPackagePaths],
     extraNodeModules: {
-      'react-native-appsflyer': path.resolve(__dirname, '../../'),
+      // Force a single copy of react-native / react. With the plugin linked via
+      // `file:../../`, the plugin root ships its own (older) react-native, so the
+      // plugin's NativeEventEmitter would otherwise bind to a second event bus and
+      // registerDeepLinkListener / registerConversionListener callbacks would silently never fire
+      // (SO#79083213). Local dev only — npm consumers have a single copy.
+      'react-native': path.resolve(__dirname, 'node_modules/react-native'),
+      react: path.resolve(__dirname, 'node_modules/react'),
+      'react-native-appsflyer': pluginRoot,
     },
+    // Stop Metro from resolving the plugin root's own react-native / react copies.
+    blockList: [
+      blockDir(path.resolve(pluginRoot, 'node_modules/react-native')),
+      blockDir(path.resolve(pluginRoot, 'node_modules/react')),
+    ],
   },
   watchFolders: [...localPackagePaths],
 };
+
+module.exports = mergeConfig(getDefaultConfig(__dirname), config);

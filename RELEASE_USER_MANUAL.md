@@ -43,6 +43,7 @@ release.yml (RC) ── lint-test-build.yml ───┐
 | `rn_version` | Yes | `6.18.0-rc1` | Plugin version. Must match `X.Y.Z-rcN` format for RC. |
 | `ios_sdk_version` | No | `6.18.0` | iOS native AppsFlyer SDK version to pin — RC only. |
 | `android_sdk_version` | No | `6.18.0` | Android native AppsFlyer SDK version to pin — RC only. |
+| `android_plugin_bridge_version` | No | `6.18.0` | Android `af-android-plugin-bridge` version to pin — RC only, required alongside `android_sdk_version` (enforced at RC-validation time, not by the form). |
 | `base_branch` | No | `development` | Branch to cut the release from (default: `development`). |
 | `pc_version` | No | `6.15.2` | PurchaseConnector iOS version override. Leave empty to auto-fetch latest from GitHub. |
 | `skip_unit` | No | `false` | Skip Jest + ESLint inside Lint, Test & Build. |
@@ -61,7 +62,7 @@ Once triggered, the pipeline runs these stages in order:
 3. **Create release branch** -- creates `releases/X.Y.Z-rcN` from `base_branch` with version bumps in:
    - `package.json` (version field; `react-native-appsflyer.podspec` reads from this)
    - `android/build.gradle` (Android SDK fallback version)
-   - `android/.../RNAppsFlyerConstants.java` (PLUGIN_VERSION)
+   - `android/.../RNAppsFlyerConstants.kt` (PLUGIN_VERSION)
    - `ios/RNAppsFlyer.h` (kAppsFlyerPluginVersion)
    - `README.md` (SDK version badges)
    - `CHANGELOG.md` (new entry prepended)
@@ -89,8 +90,9 @@ If the RC fails QA: fix the issue on `development`, then cut a new RC with an in
 When the `pass QA ready for deploy` label is applied:
 
 1. `promote-release.yml` triggers automatically.
-2. It verifies `rc-smoke/npm` passed, then strips the `-rcN` suffix from all version files on the release branch and commits.
-3. **You must manually merge the PR to master.** The bot cannot merge (org policy).
+2. It verifies `rc-smoke/npm` passed, then strips the `-rcN` suffix from all version files on the release branch — including rewriting the `CHANGELOG.md` entry heading to the production version — and commits.
+3. It blocks the promotion if the `CHANGELOG.md` entry still has the auto-generated `TODO: Add specific changes before merging` placeholder — fill in real release notes and re-apply the label to retry.
+4. **You must manually merge the PR to master.** The bot cannot merge (org policy).
 
 ## 5. Production publish
 
@@ -123,6 +125,10 @@ Check the `rc-smoke.yml` run logs and the `.af-e2e/reports` artifacts. Common ca
 ### Promote blocked: "rc-smoke/npm is missing"
 
 The smoke workflow hasn't finished or wasn't triggered. Run `rc-smoke.yml` manually with the RC version and release branch, wait for it to pass, then re-apply the `pass QA ready for deploy` label.
+
+### Promote blocked: CHANGELOG still has the TODO placeholder
+
+The RC workflow auto-generates the `CHANGELOG.md` entry with `TODO: Add specific changes before merging`. Edit the entry on the release branch with real release notes, commit, then re-apply the `pass QA ready for deploy` label to retry.
 
 ### npm publish succeeded but PR/Slack failed
 
@@ -165,7 +171,7 @@ These files contain version strings. The RC and promote workflows update them au
 | `package.json` | `"version"` | RC workflow |
 | `react-native-appsflyer.podspec` | `s.version` (reads from package.json) | Indirect |
 | `android/build.gradle` | `appsflyerVersion` fallback | RC workflow |
-| `android/.../RNAppsFlyerConstants.java` | `PLUGIN_VERSION` | RC workflow |
+| `android/.../RNAppsFlyerConstants.kt` | `PLUGIN_VERSION` | RC workflow |
 | `ios/RNAppsFlyer.h` | `kAppsFlyerPluginVersion` | RC workflow |
 | `README.md` | SDK version badges | RC workflow |
-| `CHANGELOG.md` | Release entry | RC workflow |
+| `CHANGELOG.md` | Release entry | RC workflow (new entry); Promote workflow (rewrites heading to strip `-rcN`) |

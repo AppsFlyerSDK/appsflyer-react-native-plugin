@@ -1,11 +1,8 @@
-/**
- * Backward Compatibility Tests
- * 
- * These tests verify that changes in this branch don't break existing client code patterns.
- * Focus: Runtime compatibility and type safety.
- */
+// Verifies changes in this branch don't break existing client code patterns (runtime compatibility and type safety).
 
-import appsFlyer, { AppsFlyerConsent, StoreKitVersion } from '../index';
+import AppsFlyer, { StoreKitVersion, AFInAppEventType } from '../index';
+
+const NativeAppsFlyer = require('../src/NativeAppsFlyer').default;
 
 describe('Backward Compatibility Tests', () => {
   afterEach(() => {
@@ -13,46 +10,26 @@ describe('Backward Compatibility Tests', () => {
   });
 
   describe('setConsentData - Runtime Compatibility', () => {
-    test('setConsentData accepts AppsFlyerConsentType-like plain object at runtime', () => {
-      // Simulate old code using plain object (AppsFlyerConsentType shape)
+    test('setConsentData accepts a plain SetConsentDataParams object at runtime', () => {
       const consent = {
         isUserSubjectToGDPR: true,
         hasConsentForDataUsage: true,
-        hasConsentForAdsPersonalization: false
+        hasConsentForAdsPersonalization: false,
       };
-      
-      // Should not throw - native code accepts ReadableMap/NSDictionary
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
-      expect(require('../node_modules/react-native/Libraries/BatchedBridge/NativeModules').RNAppsFlyer.setConsentData).toHaveBeenCalled();
-    });
 
-    test('setConsentData accepts AppsFlyerConsent class instance', () => {
-      // New code using AppsFlyerConsent class
-      const consent = new AppsFlyerConsent(true, true, false, true);
-      
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
-      expect(require('../node_modules/react-native/Libraries/BatchedBridge/NativeModules').RNAppsFlyer.setConsentData).toHaveBeenCalled();
+      expect(() => AppsFlyer.setConsentData(consent)).not.toThrow();
+      expect(NativeAppsFlyer.executeRpc).toHaveBeenCalled();
     });
 
     test('setConsentData accepts minimal consent object (non-GDPR)', () => {
-      // Minimal object for non-GDPR user
       const consent = {
-        isUserSubjectToGDPR: false
+        isUserSubjectToGDPR: false,
       };
-      
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
+
+      expect(() => AppsFlyer.setConsentData(consent)).not.toThrow();
     });
 
-    test('setConsentData accepts AppsFlyerConsent with all optional fields', () => {
-      const consent = new AppsFlyerConsent(
-        true,  // isUserSubjectToGDPR
-        true,  // hasConsentForDataUsage
-        false, // hasConsentForAdsPersonalization
-        true   // hasConsentForAdStorage
-      );
-      
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
-    });
+    // AppsFlyerConsent convenience constructor is no longer exported after the js-core-plugin migration; callers build the plain object directly (see above).
   });
 
   describe('StoreKitVersion - Runtime Access', () => {
@@ -68,9 +45,9 @@ describe('Backward Compatibility Tests', () => {
         logSubscriptions: true,
         logInApps: true,
         sandbox: false,
-        storeKitVersion: StoreKitVersion.SK1
+        storeKitVersion: StoreKitVersion.SK1,
       };
-      
+
       expect(config.storeKitVersion).toBe('SK1');
       expect(config.storeKitVersion).toBe(StoreKitVersion.SK1);
     });
@@ -83,64 +60,84 @@ describe('Backward Compatibility Tests', () => {
     });
   });
 
-  describe('AppsFlyerConsent - Deprecated Static Methods', () => {
-    test('AppsFlyerConsent.forGDPRUser still works at runtime', () => {
-      const consent = AppsFlyerConsent.forGDPRUser(true, false);
-      
-      expect(consent).toBeInstanceOf(AppsFlyerConsent);
-      expect(consent.isUserSubjectToGDPR).toBe(true);
-      expect(consent.hasConsentForDataUsage).toBe(true);
-      expect(consent.hasConsentForAdsPersonalization).toBe(false);
-      
-      // Should work with setConsentData
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
-    });
-
-    test('AppsFlyerConsent.forNonGDPRUser still works at runtime', () => {
-      const consent = AppsFlyerConsent.forNonGDPRUser();
-      
-      expect(consent).toBeInstanceOf(AppsFlyerConsent);
-      expect(consent.isUserSubjectToGDPR).toBe(false);
-      
-      // Should work with setConsentData
-      expect(() => appsFlyer.setConsentData(consent)).not.toThrow();
+  // The old callback-style logEvent(name, values, successCallback, errorCallback) signature is gone; js-core-plugin's logEvent takes a single params object and returns a Promise.
+  describe('logEvent (Promise-only, no callback-style overload)', () => {
+    test('logEvent dispatches the RPC and resolves', async () => {
+      NativeAppsFlyer.executeRpc.mockResolvedValueOnce(JSON.stringify({ success: true, data: null }));
+      await AppsFlyer.logEvent({ eventName: 'af_purchase', eventValues: { af_revenue: 1 } });
+      expect(NativeAppsFlyer.executeRpc).toHaveBeenCalled();
     });
   });
 
-  describe('Callback Behavior - Android CallbackGuard (Transparent)', () => {
-    test('Callbacks still work with initSdk', () => {
-      const successCallback = jest.fn();
-      const errorCallback = jest.fn();
-      
-      const options = {
-        devKey: 'test',
-        appId: '123',
-        isDebug: true
-      };
-      
-      appsFlyer.initSdk(options, successCallback, errorCallback);
-      
-      // CallbackGuard should be transparent - callbacks should still be callable
-      expect(require('../node_modules/react-native/Libraries/BatchedBridge/NativeModules').RNAppsFlyer.initSdkWithCallBack).toHaveBeenCalled();
+  describe('7.0.0+ breaking changes (MIGRATION.md) and their @AppsFlyer-sdk/js-core-plugin equivalents', () => {
+    test('setHost sends {hostPrefixName, hostName} — param reorder/rename', () => {
+      AppsFlyer.setHost({ hostPrefixName: 'mycompany', hostName: 'onelink.me' });
+      expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledWith(
+        JSON.stringify({
+          method: 'setHost',
+          params: { hostPrefixName: 'mycompany', hostName: 'onelink.me' },
+        })
+      );
     });
 
-    test('Callbacks still work with logEvent', () => {
-      const successCallback = jest.fn();
-      const errorCallback = jest.fn();
-      
-      appsFlyer.logEvent('test_event', {}, successCallback, errorCallback);
-      
-      expect(require('../node_modules/react-native/Libraries/BatchedBridge/NativeModules').RNAppsFlyer.logEvent).toHaveBeenCalled();
+    test('validateAndLogInAppPurchase legacy (purchaseInfo, successC, errorC) signature is gone — the {purchase} params-object signature dispatches the RPC instead', () => {
+      AppsFlyer.validateAndLogInAppPurchase({
+        purchase: { productId: 'sku', transactionId: 'txn', purchaseType: 'subscription' },
+      });
+      const [requestJson] = NativeAppsFlyer.executeRpc.mock.calls[0];
+      expect(JSON.parse(requestJson).method).toBe('validateAndLogInAppPurchase');
+    });
+
+    test('setCollectIMEI is removed', () => {
+      expect(AppsFlyer.setCollectIMEI).toBeUndefined();
+    });
+
+    test('onAppOpenAttribution / onAttributionFailure / performOnAppAttribution are removed', () => {
+      expect(AppsFlyer.onAppOpenAttribution).toBeUndefined();
+      expect(AppsFlyer.onAttributionFailure).toBeUndefined();
+      expect(AppsFlyer.performOnAppAttribution).toBeUndefined();
+    });
+
+    test('registerDeepLinkListener still delivers data previously routed through onAppOpenAttribution', async () => {
+      const { NativeEventEmitter } = require('react-native');
+      const nativeEventEmitter = new NativeEventEmitter(NativeAppsFlyer);
+      const callback = jest.fn();
+      await AppsFlyer.registerDeepLinkListener({ onDeepLinking: callback });
+
+      const attributionData = { media_source: 'test', campaign: 'test_campaign' };
+      nativeEventEmitter.emit(
+        'RNAppsFlyer_rpcEvent',
+        JSON.stringify({
+          event: 'onDeepLinkReceived',
+          data: attributionData,
+          timestamp: 0,
+          origin: 'ios',
+        })
+      );
+
+      // js-core-plugin's registerDeepLinkListener normalizes every payload on this channel as a deep-link result, defaulting a missing `status` to 'NOT_FOUND' — see known-issues-kb.md.
+      expect(callback).toHaveBeenCalledWith({ ...attributionData, status: 'NOT_FOUND' });
+    });
+  });
+
+  describe('AFInAppEventType (internal-mechanism change, MIGRATION.md)', () => {
+    test('is exported from the package and carries the pre-7.0.0 getConstants() values', () => {
+      expect(AFInAppEventType).toBeDefined();
+      expect(AFInAppEventType.PURCHASE).toBe('af_purchase');
+      expect(AFInAppEventType.ACHIEVEMENT_UNLOCKED).toBe('af_achievement_unlocked');
+      expect(AFInAppEventType.LEVEL_ACHIEVED).toBe('af_level_achieved');
+    });
+
+    test('is frozen — cannot be mutated at runtime', () => {
+      expect(Object.isFrozen(AFInAppEventType)).toBe(true);
     });
   });
 
   describe('Type Exports - ESLint Compatibility', () => {
     test('All expected exports are available', () => {
-      expect(appsFlyer).toBeDefined();
+      expect(AppsFlyer).toBeDefined();
       expect(StoreKitVersion).toBeDefined();
-      // Note: AppsFlyerPurchaseConnector may not be available if Purchase Connector is disabled
-      // This test verifies the exports exist, not that they're functional
+      // AppsFlyerPurchaseConnector may be unavailable if Purchase Connector is disabled; this only verifies exports exist.
     });
   });
 });
-

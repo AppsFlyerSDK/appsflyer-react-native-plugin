@@ -34,16 +34,16 @@
       "checks": [
         {
           "id": "sdk_started",
-          "description": "startSDK returns a result",
+          "description": "start returns a result",
           "type": "log_contains",
-          "pattern": "[AF_QA][startSDK] result:",
+          "pattern": "[AF_QA][start] result:",
           "fail_action": "abort"
         },
         {
           "id": "conversion_data",
-          "description": "onInstallConversionData callback fires",
+          "description": "registerConversionListener callback fires",
           "type": "log_contains",
-          "pattern": "[AF_QA][CALLBACK][onInstallConversionData]",
+          "pattern": "[AF_QA][CALLBACK][registerConversionListener]",
           "fail_action": "fail"
         },
         {
@@ -139,9 +139,9 @@
       "checks": [
         {
           "id": "sdk_started",
-          "description": "startSDK returns a result on fresh install",
+          "description": "start returns a result on fresh install",
           "type": "log_contains",
-          "pattern": "[AF_QA][startSDK] result:",
+          "pattern": "[AF_QA][start] result:",
           "fail_action": "abort"
         },
         {

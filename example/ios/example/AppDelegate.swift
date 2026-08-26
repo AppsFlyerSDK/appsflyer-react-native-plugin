@@ -30,6 +30,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       launchOptions: launchOptions
     )
 
+    AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)
+    
     // QA: when launched via `simctl launch ... -deepLinkURL "<url>"`, replay
     // the URL through application(_:open:options:) so the AppsFlyer plugin
     // sees it as a real custom-scheme open. Bypasses the iOS 17/18
@@ -64,7 +66,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
     NSLog("[AF_QA][DEEPLINK_NATIVE] openURL received: %@", url.absoluteString)
-    AppsFlyerAttribution.shared().handleOpen(url, options: options)
+    AppsFlyerAttribution.shared.handleOpen(url, options: options)
     return true
   }
 
@@ -74,7 +76,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     restorationHandler: @escaping ([Any]?) -> Void
   ) -> Bool {
     NSLog("[AF_QA][DEEPLINK_NATIVE] continueUserActivity: %@", userActivity.webpageURL?.absoluteString ?? "nil")
-    AppsFlyerAttribution.shared().continue(userActivity, restorationHandler: restorationHandler)
+    AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: restorationHandler)
     return true
   }
 }

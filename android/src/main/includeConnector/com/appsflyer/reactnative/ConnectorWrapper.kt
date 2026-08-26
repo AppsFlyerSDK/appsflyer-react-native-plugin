@@ -9,27 +9,14 @@ import com.appsflyer.internal.models.SubscriptionPurchase
 import com.appsflyer.internal.models.SubscriptionValidationResult
 import com.appsflyer.internal.models.ValidationFailureData
 
-/**
- * A connector class that wraps the Android purchase connector client.
- *
- * This class uses the Builder pattern to configure the Android purchase connector client.
- * It implements the [PurchaseClient] interface required by the appsflyer_sdk and translates
- * the various callbacks and responses between the two interfaces.
- *
- * @property context The application context.
- * @property logSubs If true, subscription transactions will be logged.
- * @property logInApps If true, in-app purchase transactions will be logged.
- * @property sandbox If true, the purchase client will be in sandbox mode.
- * @property subsListener The listener for subscription purchase validation results.
- * @property inAppListener The listener for in-app purchase validation Result.
- */
+/** Wraps [PurchaseClient]'s Builder-configured client, translating its callbacks/data sources to plain maps for the RN bridge. */
 class ConnectorWrapper(
     context: Context,
     logSubs: Boolean,
     logInApps: Boolean,
     sandbox: Boolean,
-    subsListener: MappedValidationResultListener,
-    inAppListener: MappedValidationResultListener,
+    subsListener: PurchaseClient.ValidationResultListener<Map<String, Any>>,
+    inAppListener: PurchaseClient.ValidationResultListener<Map<String, Any>>,
 ) :
     PurchaseClient {
     private var subscriptionDataSource: Map<String, Any> = mapOf()
@@ -62,41 +49,18 @@ class ConnectorWrapper(
             .setInAppPurchaseEventDataSource(PurchaseClient.InAppPurchaseEventDataSource { _ -> inAppDataSource })
             .build()
 
-    /**
-     * Starts observing all incoming transactions from the play store.
-     */
     override fun startObservingTransactions() = connector.startObservingTransactions()
 
-    /**
-     * Stops observing all incoming transactions from the play store.
-     */
     override fun stopObservingTransactions() = connector.stopObservingTransactions()
 
-    /**
-     * Sets the data source for subscription purchase events.
-     * This allows adding additional parameters to subscription purchase events.
-     *
-     * @param dataSource A map of additional parameters for subscription purchases
-     */
     fun setSubscriptionPurchaseEventDataSource(dataSource: Map<String, Any>) {
         subscriptionDataSource = dataSource
     }
 
-    /**
-     * Sets the data source for in-app purchase events.
-     * This allows adding additional parameters to in-app purchase events.
-     *
-     * @param dataSource A map of additional parameters for in-app purchases
-     */
     fun setInAppPurchaseEventDataSource(dataSource: Map<String, Any>) {
         inAppDataSource = dataSource
     }
-    
-    /**
-     * Converts [SubscriptionPurchase] to a Json map, which then is delivered to SDK's method response.
-     *
-     * @return A map representing this SubscriptionPurchase.
-     */
+
     private fun SubscriptionPurchase.toJsonMap(): Map<String, Any?> {
         return mapOf(
             "acknowledgementState" to acknowledgementState,
@@ -111,29 +75,17 @@ class ConnectorWrapper(
             "startTime" to startTime,
             "subscribeWithGoogleInfo" to subscribeWithGoogleInfo?.toJsonMap(),
             "subscriptionState" to subscriptionState,
-            "testPurchase" to testPurchase?.toJsonMap()
+            "testPurchase" to testPurchase?.let { emptyMap<String, Any?>() }
         )
     }
 
     private fun CanceledStateContext.toJsonMap(): Map<String, Any?> {
         return mapOf(
-            "developerInitiatedCancellation" to developerInitiatedCancellation?.toJsonMap(),
-            "replacementCancellation" to replacementCancellation?.toJsonMap(),
-            "systemInitiatedCancellation" to systemInitiatedCancellation?.toJsonMap(),
+            "developerInitiatedCancellation" to developerInitiatedCancellation?.let { emptyMap<String, Any?>() },
+            "replacementCancellation" to replacementCancellation?.let { emptyMap<String, Any?>() },
+            "systemInitiatedCancellation" to systemInitiatedCancellation?.let { emptyMap<String, Any?>() },
             "userInitiatedCancellation" to userInitiatedCancellation?.toJsonMap()
         )
-    }
-
-    private fun DeveloperInitiatedCancellation.toJsonMap(): Map<String, Any?> {
-        return mapOf()
-    }
-
-    private fun ReplacementCancellation.toJsonMap(): Map<String, Any?> {
-        return mapOf()
-    }
-
-    private fun SystemInitiatedCancellation.toJsonMap(): Map<String, Any?> {
-        return mapOf()
     }
 
     private fun UserInitiatedCancellation.toJsonMap(): Map<String, Any?> {
@@ -223,10 +175,6 @@ class ConnectorWrapper(
         )
     }
 
-    fun TestPurchase.toJsonMap(): Map<String, Any?> {
-        return mapOf()
-    }
-
     private fun ProductPurchase.toJsonMap(): Map<String, Any?> {
         return mapOf(
             "kind" to kind,
@@ -246,11 +194,6 @@ class ConnectorWrapper(
         )
     }
 
-    /**
-     * Converts [InAppPurchaseValidationResult] into a map of objects so that the Object can be passed to Flutter using a method channel
-     *
-     * @return A map representing this InAppPurchaseValidationResult.
-     */
     private fun InAppPurchaseValidationResult.toJsonMap(): Map<String, Any?> {
         return mapOf(
             "success" to success,

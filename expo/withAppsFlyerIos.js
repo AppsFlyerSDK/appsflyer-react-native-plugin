@@ -1,39 +1,25 @@
-const { withAppDelegate, withDangerousMod, withXcodeProject, WarningAggregator } = require('@expo/config-plugins');
+const { withAppDelegate, withDangerousMod, WarningAggregator } = require('@expo/config-plugins');
 const { mergeContents } = require('@expo/config-plugins/build/utils/generateCode');
-const { getAppDelegate } = require('@expo/config-plugins/build/ios/Paths');
 const fs = require('fs');
 const path = require('path');
 
-function getBridgingHeaderPathFromXcode(project) {
-  const buildConfigs = project.pbxXCBuildConfigurationSection();
-
-  for (const key in buildConfigs) {
-    const config = buildConfigs[key];
-    if (
-      typeof config === 'object' &&
-      config.buildSettings &&
-      config.buildSettings['SWIFT_OBJC_BRIDGING_HEADER']
-    ) {
-      const bridgingHeaderPath = config.buildSettings[
-        'SWIFT_OBJC_BRIDGING_HEADER'
-      ].replace(/"/g, '');
-
-      return bridgingHeaderPath;
-    }
-  }
-
-  return null;
-}
-
 function modifyObjcAppDelegate(appDelegate) {
-  const RNAPPSFLYER_IMPORT = `#import <RNAppsFlyer.h>\n`;
+  const RNAPPSFLYER_IMPORT = `#import <react_native_appsflyer/react_native_appsflyer-Swift.h>\n`;
+  const RNAPPSFLYER_DID_FINISH_LAUNCHING_IDENTIFIER = `- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions`;
   const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER = `- (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {`;
   const RNAPPSFLYER_OPENURL_IDENTIFIER = `- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {`;
+  const RNAPPSFLYER_DID_FINISH_LAUNCHING_CODE = `[[AppsFlyerAttribution shared] handleLaunchOptions:launchOptions];\n`;
   const RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE = `[[AppsFlyerAttribution shared] continueUserActivity:userActivity restorationHandler:restorationHandler];\n`;
-  const RNAPPSFLYER_OPENURL_CODE = `[[AppsFlyerAttribution shared] handleOpenUrl:url options:options];\n`;
+  const RNAPPSFLYER_OPENURL_CODE = `[[AppsFlyerAttribution shared] handleOpen:url options:options];\n`;
 
   if (!appDelegate.includes(RNAPPSFLYER_IMPORT)) {
     appDelegate = RNAPPSFLYER_IMPORT + appDelegate;
+  }
+  if (appDelegate.includes(RNAPPSFLYER_DID_FINISH_LAUNCHING_IDENTIFIER) && !appDelegate.includes(RNAPPSFLYER_DID_FINISH_LAUNCHING_CODE)) {
+    const openBraceIndex = appDelegate.indexOf('{', appDelegate.indexOf(RNAPPSFLYER_DID_FINISH_LAUNCHING_IDENTIFIER));
+    appDelegate = appDelegate.slice(0, openBraceIndex + 1) + `\n${RNAPPSFLYER_DID_FINISH_LAUNCHING_CODE}` + appDelegate.slice(openBraceIndex + 1);
+  } else {
+    WarningAggregator.addWarningIOS('withAppsFlyerAppDelegate', "Failed to detect didFinishLaunchingWithOptions in AppDelegate or AppsFlyer's delegate method already exists");
   }
   if (appDelegate.includes(RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER) && !appDelegate.includes(RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE)) {
     const block = RNAPPSFLYER_CONTINUE_USER_ACTIVITY_IDENTIFIER + '\n' + RNAPPSFLYER_CONTINUE_USER_ACTIVITY_CODE;
@@ -51,19 +37,38 @@ function modifyObjcAppDelegate(appDelegate) {
 }
 
 function modifySwiftAppDelegate(appDelegateContents) {
+  const SWIFT_BRIDGE_IMPORT = 'import react_native_appsflyer';
+
+  const SWIFT_DID_FINISH_LAUNCHING_IDENTIFIER = `  public override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+  ) -> Bool {`;
+  const RNAPPSFLYER_SWIFT_DID_FINISH_LAUNCHING_CODE = 'AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)';
+
   const SWIFT_OPENURL_IDENTIFIER = `  public override func application(
     _ app: UIApplication,
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {`;
-  const RNAPPSFLYER_SWIFT_OPENURL_CODE = 'AppsFlyerAttribution.shared().handleOpen(url, options: options)';
+  const RNAPPSFLYER_SWIFT_OPENURL_CODE = 'AppsFlyerAttribution.shared.handleOpen(url, options: options)';
 
   const SWIFT_CONTINUE_USER_ACTIVITY_IDENTIFIER = `  public override func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
     restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
   ) -> Bool {`;
-  const RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE = 'AppsFlyerAttribution.shared().continue(userActivity, restorationHandler: nil)';
+  // AppsFlyer's restorationHandler is `([Any]?) -> Void`, not `([UIUserActivityRestoring]?) -> Void` —
+  // passing ours directly is a type mismatch Swift reports as "ambiguous". AppsFlyer only needs
+  // userActivity to extract the OneLink URL, so pass nil; the real restorationHandler goes to RCTLinkingManager below.
+  const RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE = 'AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: nil)';
+
+  if (!appDelegateContents.includes(SWIFT_BRIDGE_IMPORT)) {
+    appDelegateContents = `${SWIFT_BRIDGE_IMPORT}\n${appDelegateContents}`;
+  }
+
+  if (appDelegateContents.includes(SWIFT_DID_FINISH_LAUNCHING_IDENTIFIER) && !appDelegateContents.includes(RNAPPSFLYER_SWIFT_DID_FINISH_LAUNCHING_CODE)) {
+    appDelegateContents = appDelegateContents.replace(SWIFT_DID_FINISH_LAUNCHING_IDENTIFIER, `${SWIFT_DID_FINISH_LAUNCHING_IDENTIFIER}\n    ${RNAPPSFLYER_SWIFT_DID_FINISH_LAUNCHING_CODE}`);
+  }
 
   if (appDelegateContents.includes(SWIFT_OPENURL_IDENTIFIER) && !appDelegateContents.includes(RNAPPSFLYER_SWIFT_OPENURL_CODE)) {
     appDelegateContents = appDelegateContents.replace(SWIFT_OPENURL_IDENTIFIER, `${SWIFT_OPENURL_IDENTIFIER}\n    ${RNAPPSFLYER_SWIFT_OPENURL_CODE}`);
@@ -73,18 +78,28 @@ function modifySwiftAppDelegate(appDelegateContents) {
     appDelegateContents = appDelegateContents.replace(SWIFT_CONTINUE_USER_ACTIVITY_IDENTIFIER, `${SWIFT_CONTINUE_USER_ACTIVITY_IDENTIFIER}\n    ${RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE}`);
   }
 
-  if (!appDelegateContents.includes(RNAPPSFLYER_SWIFT_OPENURL_CODE) || !appDelegateContents.includes(RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE)) {
+  if (
+    !appDelegateContents.includes(RNAPPSFLYER_SWIFT_DID_FINISH_LAUNCHING_CODE) ||
+    !appDelegateContents.includes(RNAPPSFLYER_SWIFT_OPENURL_CODE) ||
+    !appDelegateContents.includes(RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE)
+  ) {
     WarningAggregator.addWarningIOS(
       'withAppsFlyerAppDelegate',
 `
 Automatic Swift AppDelegate modification failed.
 Please add AppsFlyer integration manually:
 
-1. Add this to your openURL method:
-  AppsFlyerAttribution.shared().handleOpen(url, options: options)
+1. Add this import:
+  import react_native_appsflyer
 
-2. Add this to your continueUserActivity method:
-  AppsFlyerAttribution.shared().continue(userActivity, restorationHandler: nil)
+2. Add this to your didFinishLaunchingWithOptions method:
+  AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)
+
+3. Add this to your openURL method:
+  AppsFlyerAttribution.shared.handleOpen(url, options: options)
+
+4. Add this to your continueUserActivity method:
+  AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: nil)
 
 Supported format: Expo SDK default template
 `
@@ -108,50 +123,6 @@ function withAppsFlyerAppDelegate(config) {
     return config;
   });
 }
-
-const withIosBridgingHeader = (config) => {
-  return withXcodeProject(config, (action) => {
-    const projectRoot = action.modRequest.projectRoot;
-    const appDelegate = getAppDelegate(projectRoot);
-
-    if (appDelegate.language === 'swift') {
-      const bridgingHeaderPath = getBridgingHeaderPathFromXcode(
-        action.modResults,
-      );
-
-      const bridgingHeaderFilePath = path.join(
-        action.modRequest.platformProjectRoot,
-        bridgingHeaderPath,
-      );
-
-      if (fs.existsSync(bridgingHeaderFilePath)) {
-        let content = fs.readFileSync(bridgingHeaderFilePath, 'utf8');
-        const appsFlyerImport = '#import <RNAppsFlyer.h>';
-
-        if (!content.includes(appsFlyerImport)) {
-          content += `${appsFlyerImport}\n`;
-          fs.writeFileSync(bridgingHeaderFilePath, content);
-        }
-
-        return action;
-      }
-
-      WarningAggregator.addWarningIOS(
-        'withIosBridgingHeader',
-`
-Failed to detect ${bridgingHeaderPath} file. Please add AppsFlyer integration manually:
-#import <RNAppsFlyer.h>
-
-Supported format: Expo SDK default template
-`
-      );
-
-      return action; 
-    }
-
-    return action;
-  });
-};
 
 function withPodfile(config, shouldUseStrictMode, shouldUsePurchaseConnector) {
   return withDangerousMod(config, [
@@ -212,7 +183,6 @@ module.exports = function withAppsFlyerIos(config, {
   shouldUsePurchaseConnector = false 
 } = {}) {
   config = withPodfile(config, shouldUseStrictMode, shouldUsePurchaseConnector);
-  config = withIosBridgingHeader(config);
   config = withAppsFlyerAppDelegate(config);
   return config;
 };

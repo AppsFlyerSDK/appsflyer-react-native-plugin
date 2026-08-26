@@ -1,679 +1,684 @@
-import appsFlyer, { AppsFlyerConsent, AFParseJSONException } from '../index';
-import { RNAppsFlyer } from '../node_modules/react-native/Libraries/BatchedBridge/NativeModules';
-import { NativeEventEmitter } from 'react-native';
-const fs = require('fs');
-const path = require('path');
+import AppsFlyer, { AFPurchaseType, MEDIATION_NETWORK } from '../index';
+import NativeAppsFlyer from '../src/NativeAppsFlyer';
 
-describe("Test appsFlyer API's", () => {
+function mockRpcResponse(data = {}) {
+	return JSON.stringify({ success: true, data });
+}
+
+function mockRpcError(message, code = 500) {
+	return JSON.stringify({ success: false, error: { code, message } });
+}
+
+// Compares parsed JSON, not raw strings, so key-insertion order doesn't cause flakiness (see testing.md).
+function payloadAt(index, mock = NativeAppsFlyer.executeRpc) {
+	const [requestJson] = mock.mock.calls[index];
+	return JSON.parse(requestJson);
+}
+function lastPayload(mock = NativeAppsFlyer.executeRpc) {
+	return payloadAt(mock.mock.calls.length - 1, mock);
+}
+
+// Re-requires index.ts fresh with Platform.OS pinned, since RNTransport.platform is captured once at
+// construction and the module-level `AppsFlyer` singleton (imported above) only ever exercises iOS.
+function freshAppsFlyerForPlatform(platform) {
+	jest.resetModules();
+	const { Platform: FreshPlatform } = require('react-native');
+	FreshPlatform.OS = platform;
+	return {
+		AppsFlyer: require('../index').default,
+		NativeAppsFlyer: require('../src/NativeAppsFlyer').default,
+	};
+}
+
+describe("Test AppsFlyer API's", () => {
 	afterEach(() => {
 		jest.clearAllMocks();
 	});
 
-	test('it calls appsFlyer.init with callbacks and correct options object', () => {
-		let options = { devKey: 'xxxx', appId: '777', isDebug: true };
-		appsFlyer.initSdk(options, jest.fn, jest.fn);
-		expect(RNAppsFlyer.initSdkWithCallBack).toHaveBeenCalledTimes(1);
+	test('init() sends setPluginInfo then init on Android — appId is dropped (unused/absent from the Android wire contract)', async () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidNative.executeRpc.mockResolvedValueOnce(mockRpcResponse()).mockResolvedValueOnce(mockRpcResponse());
+		await androidAppsFlyer.init({ devKey: 'xxxx', appId: '777' });
+		expect(androidNative.executeRpc).toHaveBeenCalledTimes(2);
+		expect(payloadAt(0, androidNative.executeRpc)).toEqual({
+			method: 'setPluginInfo',
+			params: { plugin: 'react_native', pluginVersion: require('../package.json').version },
+		});
+		expect(payloadAt(1, androidNative.executeRpc)).toEqual({ method: 'init', params: { devKey: 'xxxx' } });
 	});
 
-	test('it calls appsFlyer.init with callbacks and appId is not string', () => {
-		const errorFunc = jest.fn();
-		let options = { devKey: 'xxxx', appId: 7, isDebug: true };
-		appsFlyer.initSdk(options, jest.fn, errorFunc);
-		expect(RNAppsFlyer.initSdkWithCallBack).toHaveBeenCalledTimes(0);
-		expect(errorFunc).toHaveBeenCalledTimes(1);
+	test('init() sends the real iOS wire method ("initialize", not "init") and keeps appId', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse()).mockResolvedValueOnce(mockRpcResponse());
+		await AppsFlyer.init({ devKey: 'xxxx', appId: '777' });
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(2);
+		expect(payloadAt(0)).toEqual({
+			method: 'setPluginInfo',
+			params: { plugin: 'react_native', pluginVersion: require('../package.json').version },
+		});
+		expect(payloadAt(1)).toEqual({ method: 'initialize', params: { devKey: 'xxxx', appId: '777' } });
 	});
 
-	test('it calls appsFlyer.init with callbacks and isDebug is not boolean', () => {
-		const errorFunc = jest.fn();
-		let options = { devKey: 'xxxx', appId: '777', isDebug: 'true' };
-		appsFlyer.initSdk(options, jest.fn, errorFunc);
-		expect(RNAppsFlyer.initSdkWithCallBack).toHaveBeenCalledTimes(0);
-		expect(errorFunc).toHaveBeenCalledTimes(1);
+	// Old hand-rolled index.ts rejected non-string appId client-side; js-core-plugin trusts InitParams typing instead (removed, not a gap).
+
+	test('it calls AppsFlyer.init and rejects on a native RPC failure', async () => {
+		NativeAppsFlyer.executeRpc
+			.mockResolvedValueOnce(mockRpcResponse())
+			.mockResolvedValueOnce(mockRpcError('devKey missing', 400));
+		await expect(AppsFlyer.init({ devKey: 'xxxx', appId: '777' })).rejects.toEqual({
+			code: 400,
+			message: 'devKey missing',
+		});
 	});
 
-	test('it calls appsFlyer.init with promise and correct options object', () => {
-		let options = { devKey: 'xxxx', appId: '777', isDebug: true };
-		appsFlyer.initSdk(options);
-		expect(RNAppsFlyer.initSdkWithPromise).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.enableDebug — real wire method is "isDebug", field renamed enabled -> isDebug', () => {
+		AppsFlyer.enableDebug({ enabled: true });
+		expect(lastPayload()).toEqual({ method: 'isDebug', params: { isDebug: true } });
 	});
 
-	test('it calls appsFlyer.init with promise and appId is not string', () => {
-		let options = { devKey: 'xxxx', appId: 7, isDebug: true };
-		appsFlyer.initSdk(options);
-		expect(RNAppsFlyer.initSdkWithPromise).toHaveBeenCalledTimes(0);
+	test('it calls AppsFlyer.stop', () => {
+		AppsFlyer.stop({ shouldStop: true });
+		expect(lastPayload()).toEqual({ method: 'stop', params: { shouldStop: true } });
 	});
 
-	test('it calls appsFlyer.init with promise and isDebug is not boolean', () => {
-		let options = { devKey: 'xxxx', appId: '777', isDebug: 'true' };
-		appsFlyer.initSdk(options);
-		expect(RNAppsFlyer.initSdkWithPromise).toHaveBeenCalledTimes(0);
-	});
-
-	test('it calls appsFlyer.stop', () => {
-		appsFlyer.stop(true);
-		expect(RNAppsFlyer.stop).toBeCalled();
-	});
-
-	test('it calls appsFlyer.stop with callback', () => {
-		appsFlyer.stop(true, jest.fn);
-		expect(RNAppsFlyer.stop).toBeCalled();
-	});
-
-	test('it calls appsFlyer.logEvent with callback', () => {
+	test('it calls AppsFlyer.logEvent — awaitResponse omitted from the wire when not passed', () => {
 		let eventValues = {};
 		let eventName = 'test';
-		appsFlyer.logEvent(eventName, eventValues, jest.fn, jest.fn);
-		expect(RNAppsFlyer.logEvent).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.logEventWithPromise).toHaveBeenCalledTimes(0);
+		AppsFlyer.logEvent({ eventName, eventValues });
+		expect(lastPayload()).toEqual({ method: 'logEvent', params: { eventName, eventValues } });
 	});
 
-	test('it calls appsFlyer.logEvent with promise', () => {
+	test('it calls AppsFlyer.logEvent with awaitResponse: true', () => {
 		let eventValues = {};
 		let eventName = 'test';
-		appsFlyer.logEvent(eventName, eventValues);
-		expect(RNAppsFlyer.logEvent).toHaveBeenCalledTimes(0);
-		expect(RNAppsFlyer.logEventWithPromise).toHaveBeenCalledTimes(1);
+		AppsFlyer.logEvent({ eventName, eventValues, awaitResponse: true });
+		expect(lastPayload()).toEqual({
+			method: 'logEvent',
+			params: { eventName, eventValues, awaitResponse: true },
+		});
 	});
 
-	test('it calls appsFlyer.logLocation with callback', () => {
-		appsFlyer.logLocation(12, 12, jest.fn);
-		expect(RNAppsFlyer.logLocation).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.logLocation with valid coordinates', () => {
+		AppsFlyer.logLocation({ longitude: 12, latitude: 12 });
+		expect(lastPayload()).toEqual({ method: 'logLocation', params: { longitude: 12, latitude: 12 } });
 	});
 
-	test('it calls appsFlyer.logLocation with no callback', () => {
-		appsFlyer.logLocation(12, 12);
-		expect(RNAppsFlyer.logLocation).toHaveBeenCalledTimes(1);
+	// Old hand-rolled index.ts rejected invalid coordinates client-side; js-core-plugin forwards them as-is (removed, not a gap).
+
+	test('it calls AppsFlyer.setUserEmail', () => {
+		AppsFlyer.setUserEmail({ email: 'a@b.com' });
+		expect(lastPayload()).toEqual({ method: 'setUserEmail', params: { email: 'a@b.com' } });
 	});
 
-	test('it calls appsFlyer.logLocation with empty string lat', () => {
-		appsFlyer.logLocation(12, '', jest.fn);
-		expect(RNAppsFlyer.logLocation).toHaveBeenCalledTimes(0);
+	test('it calls AppsFlyer.setAdditionalData', () => {
+		AppsFlyer.setAdditionalData({ customData: {} });
+		expect(lastPayload()).toEqual({ method: 'setAdditionalData', params: { customData: {} } });
 	});
 
-	test('it calls appsFlyer.logLocation with empty string long', () => {
-		appsFlyer.logLocation('', 12, jest.fn);
-		expect(RNAppsFlyer.logLocation).toHaveBeenCalledTimes(0);
+	test('it calls AppsFlyer.getAppsFlyerUID', () => {
+		AppsFlyer.getAppsFlyerUID();
+		expect(lastPayload()).toEqual({ method: 'getAppsFlyerUID', params: {} });
 	});
 
-	test('it calls appsFlyer.logLocation with string long', () => {
-		appsFlyer.logLocation('12', 12, jest.fn);
-		expect(RNAppsFlyer.logLocation).toHaveBeenCalledTimes(1);
+	// Regression: mock only modeled Android's bare-value shape, so iOS's keyed-dict shape ({uid}, {version}) went uncovered.
+	describe('getter resolved values are platform-neutral', () => {
+		test.each([
+			['iOS keyed dict', { uid: 'af-uid-1' }],
+			['Android bare value', 'af-uid-1'],
+		])('getAppsFlyerUID resolves whatever native returns given an %s (core does not unwrap a keyed dict)', async (_shape, data) => {
+			NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse(data));
+			await expect(AppsFlyer.getAppsFlyerUID()).resolves.toEqual(data);
+		});
+
+		// Guards against a truthiness rewrite: `data.x || data` would wrongly resolve true here.
+		test('isSessionReady resolves a falsy value as-is', async () => {
+			NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse(false));
+			await expect(AppsFlyer.isSessionReady()).resolves.toBe(false);
+		});
+
+		// Regression guard: isSessionReady must not fire registerSessionReadyListener as a side effect.
+		test('isSessionReady does not register the session-ready listener as a side effect', async () => {
+			await AppsFlyer.isSessionReady();
+			const dispatchedMethods = NativeAppsFlyer.executeRpc.mock.calls.map(
+				([requestJson]) => JSON.parse(requestJson).method
+			);
+			expect(dispatchedMethods).not.toContain('registerSessionReadyListener');
+		});
+
+		// setUserEmail's core signature is Promise<void> — always resolves undefined regardless of native's response, unlike the old callRpc.
+		test('a void RPC resolves undefined regardless of native\'s resolved data', async () => {
+			NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse(null));
+			await expect(AppsFlyer.setUserEmail({ email: 'a@b.com' })).resolves.toBeUndefined();
+		});
 	});
 
-	test('it calls appsFlyer.logLocation with string lat', () => {
-		appsFlyer.logLocation(12, '12', jest.fn);
-		expect(RNAppsFlyer.logLocation).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.updateServerUninstallToken on Android — same method name, token key unchanged', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidAppsFlyer.updateServerUninstallToken({ token: 'xxx' });
+		expect(lastPayload(androidNative.executeRpc)).toEqual({
+			method: 'updateServerUninstallToken',
+			params: { token: 'xxx' },
+		});
 	});
 
-	test('it calls appsFlyer.setUserEmails', () => {
-		appsFlyer.setUserEmails({}, jest.fn, jest.fn);
-		expect(RNAppsFlyer.setUserEmails).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.updateServerUninstallToken on iOS — real wire method is "registerUninstall", field renamed token -> deviceToken', () => {
+		AppsFlyer.updateServerUninstallToken({ token: 'xxx' });
+		expect(lastPayload()).toEqual({ method: 'registerUninstall', params: { deviceToken: 'xxx' } });
 	});
 
-	test('it calls appsFlyer.setAdditionalData with callback', () => {
-		appsFlyer.setAdditionalData({}, jest.fn);
-		expect(RNAppsFlyer.setAdditionalData).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.setCustomerUserId', () => {
+		AppsFlyer.setCustomerUserId({ customerId: 'xxx' });
+		expect(lastPayload()).toEqual({ method: 'setCustomerUserId', params: { customerId: 'xxx' } });
 	});
 
-	test('it calls appsFlyer.setAdditionalData with no callback', () => {
-		appsFlyer.setAdditionalData({});
-		expect(RNAppsFlyer.setAdditionalData).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.setPartnerData', () => {
+		AppsFlyer.setPartnerData({ partnerId: 'xxx', data: {} });
+		expect(lastPayload()).toEqual({ method: 'setPartnerData', params: { partnerId: 'xxx', data: {} } });
 	});
 
-	test('it calls appsFlyer.getAppsFlyerUID', () => {
-		appsFlyer.getAppsFlyerUID(jest.fn);
-		expect(RNAppsFlyer.getAppsFlyerUID).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.setPartnerData with a null data object', () => {
+		AppsFlyer.setPartnerData({ partnerId: 'xxx', data: null });
+		expect(lastPayload()).toEqual({ method: 'setPartnerData', params: { partnerId: 'xxx', data: null } });
 	});
 
-	test('it calls appsFlyer.updateServerUninstallToken', () => {
-		appsFlyer.updateServerUninstallToken('xxx', jest.fn);
-		expect(RNAppsFlyer.updateServerUninstallToken).toHaveBeenCalledTimes(1);
+	// Old hand-rolled index.ts silently no-op'd invalid partnerId/data; js-core-plugin has no such guard (removed, not a gap).
+
+	test('it calls AppsFlyer.setSharingFilterForPartners', () => {
+		AppsFlyer.setSharingFilterForPartners({ partners: [] });
+		expect(lastPayload()).toEqual({ method: 'setSharingFilterForPartners', params: { partners: [] } });
 	});
 
-	test('it calls appsFlyer.updateServerUninstallToken', () => {
-		appsFlyer.updateServerUninstallToken('xxx');
-		expect(RNAppsFlyer.updateServerUninstallToken).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.setCurrentDeviceLanguage — iOS-only', () => {
+		AppsFlyer.setCurrentDeviceLanguage({ language: 'EN' });
+		expect(lastPayload()).toEqual({ method: 'setCurrentDeviceLanguage', params: { language: 'EN' } });
 	});
 
-	test('it calls appsFlyer.setCustomerUserId', () => {
-		appsFlyer.setCustomerUserId('xxx', jest.fn);
-		expect(RNAppsFlyer.setCustomerUserId).toHaveBeenCalledTimes(1);
+	test('setCurrentDeviceLanguage rejects on Android — no rpc.android entry exists for it', async () => {
+		const { AppsFlyer: androidAppsFlyer } = freshAppsFlyerForPlatform('android');
+		await expect(androidAppsFlyer.setCurrentDeviceLanguage({ language: 'EN' })).rejects.toThrow(/not supported on android/);
 	});
 
-	test('it calls appsFlyer.setCustomerUserId', () => {
-		appsFlyer.setCustomerUserId('xxx');
-		expect(RNAppsFlyer.setCustomerUserId).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.stop(false) with shouldStop:false', () => {
+		// Regression: Android's parser reads optBoolean('shouldStop', true) — a missing key leaves the SDK stopped forever.
+		AppsFlyer.stop({ shouldStop: false });
+		expect(lastPayload()).toEqual({ method: 'stop', params: { shouldStop: false } });
 	});
 
-	test('it calls appsFlyer.setPartnerData', () => {
-		appsFlyer.setPartnerData('xxx', {});
-		expect(RNAppsFlyer.setPartnerData).toHaveBeenCalledTimes(1);
-	});
-	
-	test('it calls appsFlyer.setPartnerData', () => {
-		appsFlyer.setPartnerData(55, {});
-		expect(RNAppsFlyer.setPartnerData).toHaveBeenCalledTimes(0);
-	});
-	test('it calls appsFlyer.setPartnerData', () => {
-		appsFlyer.setPartnerData('xxx', null);
-		expect(RNAppsFlyer.setPartnerData).toHaveBeenCalledTimes(1);
-	});
-	test('it calls appsFlyer.setPartnerData', () => {
-		appsFlyer.setPartnerData(null, {});
-		expect(RNAppsFlyer.setPartnerData).toHaveBeenCalledTimes(0);
+	// sendPushNotificationData (Android) and handlePushNotification (iOS) are now separate per-platform methods, no longer merged into one request.
+	test('sendPushNotificationData is Android-only, sending the flat campaign fields', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidAppsFlyer.sendPushNotificationData({ campaign: 'c1', pid: 'firebase', isRetargeting: true });
+		expect(lastPayload(androidNative.executeRpc)).toEqual({
+			method: 'sendPushNotificationData',
+			params: { campaign: 'c1', pid: 'firebase', isRetargeting: true },
+		});
 	});
 
-	test('it calls appsFlyer.setSharingFilterForPartners', () => {
-		appsFlyer.setSharingFilterForPartners([]);
-		expect(RNAppsFlyer.setSharingFilterForPartners).toHaveBeenCalledTimes(1);
+	test('handlePushNotification is iOS-only, sending the raw pushPayload', () => {
+		AppsFlyer.handlePushNotification({ pushPayload: { foo: 'bar' } });
+		expect(lastPayload()).toEqual({ method: 'handlePushNotification', params: { pushPayload: { foo: 'bar' } } });
 	});
 
-	test('it calls appsFlyer.setCurrentDeviceLanguage', () => {
-		appsFlyer.setCurrentDeviceLanguage('EN');
-		expect(RNAppsFlyer.setCurrentDeviceLanguage).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.appendParametersToDeepLinkingURL', () => {
+		AppsFlyer.appendParametersToDeepLinkingURL({ contains: 'dummy-url', parameters: {} });
+		expect(lastPayload()).toEqual({
+			method: 'appendParametersToDeepLinkingURL',
+			params: { contains: 'dummy-url', parameters: {} },
+		});
 	});
 
-	test('it calls appsFlyer.setCurrentDeviceLanguage', () => {
-		appsFlyer.setCurrentDeviceLanguage(5);
-		expect(RNAppsFlyer.setCurrentDeviceLanguage).toHaveBeenCalledTimes(0);
+	test('it calls AppsFlyer.setDisableNetworkData on Android — field renamed isDisable, same key already', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidAppsFlyer.setDisableNetworkData({ isDisable: true });
+		expect(lastPayload(androidNative.executeRpc)).toEqual({
+			method: 'setDisableNetworkData',
+			params: { isDisable: true },
+		});
 	});
 
-	test('it calls appsFlyer.setCurrentDeviceLanguage', () => {
-		appsFlyer.setCurrentDeviceLanguage(null);
-		expect(RNAppsFlyer.setCurrentDeviceLanguage).toHaveBeenCalledTimes(0);
+	test('setDisableNetworkData rejects on iOS — Android-only', async () => {
+		await expect(AppsFlyer.setDisableNetworkData({ isDisable: true })).rejects.toThrow(/not supported on ios/);
 	});
 
-	test('it calls appsFlyer.setCurrentDeviceLanguage', () => {
-		appsFlyer.setCurrentDeviceLanguage({});
-		expect(RNAppsFlyer.setCurrentDeviceLanguage).toHaveBeenCalledTimes(0);
+	test('it calls AppsFlyer.start()', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcResponse());
+		await AppsFlyer.start({ awaitResponse: true });
+		expect(NativeAppsFlyer.executeRpc).toHaveBeenCalledTimes(1);
+		expect(lastPayload()).toEqual({ method: 'start', params: { awaitResponse: true } });
 	});
 
-	test('it calls appsFlyer.stop(true)', () => {
-		appsFlyer.stop(true);
-		expect(RNAppsFlyer.stop).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.start() and rejects on a native RPC failure', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValueOnce(mockRpcError('start completed with error: timed out'));
+		await expect(AppsFlyer.start()).rejects.toEqual({
+			code: 500,
+			message: 'start completed with error: timed out',
+		});
 	});
 
-	test('it calls appsFlyer.stop(true, cb)', () => {
-		appsFlyer.stop(true, jest.fn);
-		expect(RNAppsFlyer.stop).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.performDeepLinking() on Android — same method name, both fields kept', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidAppsFlyer.performDeepLinking({ url: '', shouldTriggerSession: false });
+		expect(lastPayload(androidNative.executeRpc)).toEqual({
+			method: 'performDeepLinking',
+			params: { url: '', shouldTriggerSession: false },
+		});
 	});
 
-	test('it calls appsFlyer.sendPushNotificationData({}, errorCb)', () => {
-		appsFlyer.sendPushNotificationData({ foo: 'bar' }, jest.fn);
-		expect(RNAppsFlyer.sendPushNotificationData).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.performDeepLinking() on iOS — wire method renamed to match Android in AppsFlyerRPC 7.0.13, shouldTriggerSession dropped', () => {
+		AppsFlyer.performDeepLinking({ url: '' });
+		expect(lastPayload()).toEqual({ method: 'performDeepLinking', params: { url: '' } });
 	});
 
-	test('it calls appsFlyer.sendPushNotificationData({})', () => {
-		appsFlyer.sendPushNotificationData({ foo: 'bar' });
-		expect(RNAppsFlyer.sendPushNotificationData).toHaveBeenCalledTimes(1);
+	test('it calls AppsFlyer.setDisableIDFVCollection — iOS-only', () => {
+		AppsFlyer.setDisableIDFVCollection({ disable: true });
+		expect(lastPayload()).toEqual({ method: 'setDisableIDFVCollection', params: { disable: true } });
 	});
 
-	test('it calls appsFlyer.appendParametersToDeepLinkingURL(dummy-url, foo)', () => {
-		appsFlyer.appendParametersToDeepLinkingURL('dummy-url', 'foo');
-		expect(RNAppsFlyer.appendParametersToDeepLinkingURL).toHaveBeenCalledTimes(0);
-	});
-
-	test('it calls appsFlyer.appendParametersToDeepLinkingURL(dummy-url, boolean)', () => {
-		appsFlyer.appendParametersToDeepLinkingURL('dummy-url', true);
-		expect(RNAppsFlyer.appendParametersToDeepLinkingURL).toHaveBeenCalledTimes(0);
-	});
-
-	test('it calls appsFlyer.appendParametersToDeepLinkingURL(dummy-url, {})', () => {
-		appsFlyer.appendParametersToDeepLinkingURL('dummy-url', {});
-		expect(RNAppsFlyer.appendParametersToDeepLinkingURL).toHaveBeenCalledTimes(1);
-	});
-
-	test('it calls appsFlyer.setDisableNetworkData(true)', () => {
-		appsFlyer.setDisableNetworkData(true);
-		expect(RNAppsFlyer.setDisableNetworkData).toHaveBeenCalledTimes(1);
-	});
-
-	test('it calls appsFlyer.startSdk()', () => {
-		appsFlyer.startSdk();
-		expect(RNAppsFlyer.startSdk).toHaveBeenCalledTimes(1);
-	});
-
-	test('it calls appsFlyer.performOnDeepLinking()', () => {
-		appsFlyer.performOnDeepLinking();
-		expect(RNAppsFlyer.performOnDeepLinking).toHaveBeenCalledTimes(1);
-	});
-
-	test('it calls appsFlyer.disableIDFVCollection()', () => {
-		appsFlyer.disableIDFVCollection(true);
-		expect(RNAppsFlyer.disableIDFVCollection).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.disableIDFVCollection).toHaveBeenCalledWith(true);
-	});
-
-	test('it calls appsFlyer.logAdRevenue with valid ad revenue data', () => {
+	test('it calls AppsFlyer.logAdRevenue with valid ad revenue data', () => {
 		const adRevenueData = {
 			monetizationNetwork: 'test_network',
 			mediationNetwork: 'ironsource',
 			currencyIso4217Code: 'USD',
 			revenue: 10.99,
-			additionalParameters: { test: 'param' }
+			additionalParameters: { test: 'param' },
 		};
-		appsFlyer.logAdRevenue(adRevenueData);
-		expect(RNAppsFlyer.logAdRevenue).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.logAdRevenue).toHaveBeenCalledWith(adRevenueData);
+		AppsFlyer.logAdRevenue(adRevenueData);
+		expect(lastPayload()).toEqual({ method: 'logAdRevenue', params: adRevenueData });
 	});
 
-	test('it calls appsFlyer.anonymizeUser with callback', () => {
-		appsFlyer.anonymizeUser(true, jest.fn);
-		expect(RNAppsFlyer.anonymizeUser).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.anonymizeUser).toHaveBeenCalledWith(true, expect.any(Function));
+	// Android matches case-insensitively against the enum name; iOS normalizes case/underscores — both handled by js-core-plugin's rpc-resolver.ts.
+	describe('logAdRevenue mediationNetwork per-platform resolution', () => {
+		// Needs a fresh instance per platform since RNTransport.platform is captured once at construction.
+		function paramsSentFor(platform, mediationNetwork) {
+			const { AppsFlyer: platformAppsFlyer, NativeAppsFlyer: platformNative } = freshAppsFlyerForPlatform(platform);
+			platformAppsFlyer.logAdRevenue({
+				monetizationNetwork: 'test_network',
+				mediationNetwork,
+				currencyIso4217Code: 'USD',
+				revenue: 1,
+			});
+			return lastPayload(platformNative.executeRpc).params;
+		}
+
+		test('Android: values pass through unchanged (af-android-sdk matches case-insensitively against the enum name, e.g. "applovin_max" == APPLOVIN_MAX)', () => {
+			expect(paramsSentFor('android', MEDIATION_NETWORK.APPLOVIN_MAX).mediationNetwork).toBe('applovin_max');
+			expect(paramsSentFor('android', MEDIATION_NETWORK.GOOGLE_ADMOB).mediationNetwork).toBe('google_admob');
+			expect(paramsSentFor('android', MEDIATION_NETWORK.TOPON_PTE).mediationNetwork).toBe('topon_pte');
+		});
+
+		test('Android: CUSTOM_MEDIATION/DIRECT_MONETIZATION_NETWORK also pass through unchanged, same enum-name match', () => {
+			expect(paramsSentFor('android', MEDIATION_NETWORK.CUSTOM_MEDIATION).mediationNetwork).toBe('custom_mediation');
+			expect(paramsSentFor('android', MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK).mediationNetwork).toBe(
+				'direct_monetization_network'
+			);
+		});
+
+		test('iOS: APPLOVIN_MAX/GOOGLE_ADMOB/TOPON_PTE pass through unchanged (iOS normalizes case/underscores itself)', () => {
+			expect(paramsSentFor('ios', MEDIATION_NETWORK.APPLOVIN_MAX).mediationNetwork).toBe('applovin_max');
+			expect(paramsSentFor('ios', MEDIATION_NETWORK.GOOGLE_ADMOB).mediationNetwork).toBe('google_admob');
+			expect(paramsSentFor('ios', MEDIATION_NETWORK.TOPON_PTE).mediationNetwork).toBe('topon_pte');
+		});
+
+		test("iOS: CUSTOM_MEDIATION/DIRECT_MONETIZATION_NETWORK resolve to iOS's normalizer-safe spelling", () => {
+			expect(paramsSentFor('ios', MEDIATION_NETWORK.CUSTOM_MEDIATION).mediationNetwork).toBe('custom');
+			expect(paramsSentFor('ios', MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK).mediationNetwork).toBe(
+				'directmonetization'
+			);
+		});
 	});
 
-	test('it calls appsFlyer.setCurrencyCode with callback', () => {
-		appsFlyer.setCurrencyCode('USD', jest.fn);
-		expect(RNAppsFlyer.setCurrencyCode).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setCurrencyCode).toHaveBeenCalledWith('USD', expect.any(Function));
+	test('it calls AppsFlyer.anonymizeUser', () => {
+		AppsFlyer.anonymizeUser({ shouldAnonymize: true });
+		expect(lastPayload()).toEqual({ method: 'anonymizeUser', params: { shouldAnonymize: true } });
 	});
 
-	test('it calls appsFlyer.setCurrencyCode with number conversion', () => {
-		appsFlyer.setCurrencyCode(123);
-		expect(RNAppsFlyer.setCurrencyCode).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setCurrencyCode).toHaveBeenCalledWith('123', expect.any(Function));
+	test('it calls AppsFlyer.setCurrencyCode', () => {
+		AppsFlyer.setCurrencyCode({ currencyCode: 'USD' });
+		expect(lastPayload()).toEqual({ method: 'setCurrencyCode', params: { currencyCode: 'USD' } });
 	});
 
-	test('it calls appsFlyer.setOneLinkCustomDomains with callbacks', () => {
+	test('it calls AppsFlyer.setOneLinkCustomDomain', () => {
 		const domains = ['example.com', 'brand.com'];
-		appsFlyer.setOneLinkCustomDomains(domains, jest.fn, jest.fn);
-		expect(RNAppsFlyer.setOneLinkCustomDomains).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setOneLinkCustomDomains).toHaveBeenCalledWith(domains, expect.any(Function), expect.any(Function));
+		AppsFlyer.setOneLinkCustomDomain({ domains });
+		expect(lastPayload()).toEqual({ method: 'setOneLinkCustomDomain', params: { domains } });
 	});
 
-	test('it calls appsFlyer.setAppInviteOneLinkID with callback', () => {
-		appsFlyer.setAppInviteOneLinkID('test_one_link_id', jest.fn);
-		expect(RNAppsFlyer.setAppInviteOneLinkID).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setAppInviteOneLinkID).toHaveBeenCalledWith('test_one_link_id', expect.any(Function));
+	test('it calls AppsFlyer.setAppInviteOneLink', () => {
+		AppsFlyer.setAppInviteOneLink({ oneLinkId: 'test_one_link_id' });
+		expect(lastPayload()).toEqual({ method: 'setAppInviteOneLink', params: { oneLinkId: 'test_one_link_id' } });
 	});
 
-	test('it calls appsFlyer.generateInviteLink with valid params', () => {
-		const params = {
-			channel: 'test_channel',
-			campaign: 'test_campaign',
-			customerID: 'test_customer',
-			userParams: { deep_link_value: 'test_value' }
-		};
-		appsFlyer.generateInviteLink(params, jest.fn, jest.fn);
-		expect(RNAppsFlyer.generateInviteLink).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.generateInviteLink).toHaveBeenCalledWith(params, expect.any(Function), expect.any(Function));
+	test('it calls AppsFlyer.generateInviteLink on iOS — referrerCustomerId kept as-is', () => {
+		AppsFlyer.generateInviteLink({
+			parameters: {
+				channel: 'test_channel',
+				campaign: 'test_campaign',
+				referrerCustomerId: 'test_customer',
+				userParams: { deep_link_value: 'test_value' },
+			},
+		});
+		expect(lastPayload()).toEqual({
+			method: 'generateInviteLink',
+			params: {
+				channel: 'test_channel',
+				campaign: 'test_campaign',
+				referrerCustomerId: 'test_customer',
+				userParams: { deep_link_value: 'test_value' },
+			},
+		});
 	});
 
-	test('it calls appsFlyer.disableCollectASA', () => {
-		appsFlyer.disableCollectASA(true);
-		expect(RNAppsFlyer.disableCollectASA).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.disableCollectASA).toHaveBeenCalledWith(true);
+	test('it calls AppsFlyer.generateInviteLink on Android — referrerCustomerId remapped to customerId', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidAppsFlyer.generateInviteLink({
+			parameters: {
+				channel: 'test_channel',
+				campaign: 'test_campaign',
+				referrerCustomerId: 'test_customer',
+				userParams: { deep_link_value: 'test_value' },
+			},
+		});
+		expect(lastPayload(androidNative.executeRpc)).toEqual({
+			method: 'generateInviteLink',
+			params: {
+				channel: 'test_channel',
+				campaign: 'test_campaign',
+				customerId: 'test_customer',
+				userParams: { deep_link_value: 'test_value' },
+			},
+		});
 	});
 
-	test('it calls appsFlyer.setUseReceiptValidationSandbox', () => {
-		appsFlyer.setUseReceiptValidationSandbox(true);
-		expect(RNAppsFlyer.setUseReceiptValidationSandbox).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setUseReceiptValidationSandbox).toHaveBeenCalledWith(true);
+	test('it calls AppsFlyer.setDisableCollectASA — iOS-only', () => {
+		AppsFlyer.setDisableCollectASA({ disable: true });
+		expect(lastPayload()).toEqual({ method: 'setDisableCollectASA', params: { disable: true } });
 	});
 
-	test('it calls appsFlyer.disableSKAD', () => {
-		appsFlyer.disableSKAD(true);
-		expect(RNAppsFlyer.disableSKAD).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.disableSKAD).toHaveBeenCalledWith(true);
+	test('it calls AppsFlyer.setUseReceiptValidationSandbox — iOS-only', () => {
+		AppsFlyer.setUseReceiptValidationSandbox({ sandbox: true });
+		expect(lastPayload()).toEqual({ method: 'setUseReceiptValidationSandbox', params: { sandbox: true } });
 	});
 
-	test('it calls appsFlyer.disableIDFVCollection', () => {
-		appsFlyer.disableIDFVCollection(true);
-		expect(RNAppsFlyer.disableIDFVCollection).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.disableIDFVCollection).toHaveBeenCalledWith(true);
+	test('it calls AppsFlyer.setDisableSKAdNetwork — iOS-only', () => {
+		AppsFlyer.setDisableSKAdNetwork({ disable: true });
+		expect(lastPayload()).toEqual({ method: 'setDisableSKAdNetwork', params: { disable: true } });
 	});
 
-	test('it calls appsFlyer.setCollectIMEI with callback', () => {
-		appsFlyer.setCollectIMEI(true, jest.fn);
-		expect(RNAppsFlyer.setCollectIMEI).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setCollectIMEI).toHaveBeenCalledWith(true, expect.any(Function));
+	test('it calls AppsFlyer.setCollectAndroidID — Android-only', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidAppsFlyer.setCollectAndroidID({ isCollect: true });
+		expect(lastPayload(androidNative.executeRpc)).toEqual({
+			method: 'setCollectAndroidID',
+			params: { isCollect: true },
+		});
 	});
 
-	test('it calls appsFlyer.setCollectIMEI without callback', () => {
-		appsFlyer.setCollectIMEI(false);
-		expect(RNAppsFlyer.setCollectIMEI).toHaveBeenCalledTimes(1);
+	test('setCollectAndroidID rejects on iOS — Android-only', async () => {
+		await expect(AppsFlyer.setCollectAndroidID({ isCollect: true })).rejects.toThrow(/not supported on ios/);
 	});
 
-	test('it calls appsFlyer.setCollectAndroidID with callback', () => {
-		appsFlyer.setCollectAndroidID(true, jest.fn);
-		expect(RNAppsFlyer.setCollectAndroidID).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setCollectAndroidID).toHaveBeenCalledWith(true, expect.any(Function));
+	test('it calls AppsFlyer.disableAppSetId — Android-only', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidAppsFlyer.disableAppSetId();
+		expect(lastPayload(androidNative.executeRpc)).toEqual({ method: 'disableAppSetId', params: {} });
 	});
 
-	test('it calls appsFlyer.setCollectAndroidID without callback', () => {
-		appsFlyer.setCollectAndroidID(false);
-		expect(RNAppsFlyer.setCollectAndroidID).toHaveBeenCalledTimes(1);
-	});
-
-	test('it calls appsFlyer.disableAppSetId', () => {
-		appsFlyer.disableAppSetId();
-		expect(RNAppsFlyer.disableAppSetId).toHaveBeenCalledTimes(1);
-	});
-	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 with valid purchase details', () => {
-		const purchaseDetails = {
-			purchaseType: 'subscription',
-			transactionId: 'test_transaction_123',
-			productId: 'test_product_123'
-		};
+	test('it calls AppsFlyer.validateAndLogInAppPurchase on Android — flattens purchase.* onto the wire params, purchaseType snake_cased', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
 		const additionalParameters = { test: 'param' };
-		const callback = jest.fn();
-
-		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, additionalParameters, callback);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledWith(purchaseDetails, additionalParameters);
+		androidAppsFlyer.validateAndLogInAppPurchase({
+			purchase: { purchaseType: 'subscription', productId: 'test_product_123', purchaseToken: 'test_transaction_123' },
+			additionalParameters,
+		});
+		expect(lastPayload(androidNative.executeRpc)).toEqual({
+			method: 'validateAndLogInAppPurchase',
+			params: {
+				purchaseType: 'subscription',
+				purchaseToken: 'test_transaction_123',
+				productId: 'test_product_123',
+				additionalParameters,
+			},
+		});
 	});
 
-	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 without additional parameters', () => {
-		const purchaseDetails = {
-			purchaseType: 'one_time_purchase',
-			transactionId: 'test_transaction_456',
-			productId: 'test_product_456'
-		};
-		const callback = jest.fn();
-
-		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, undefined, callback);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledWith(purchaseDetails, undefined);
+	test('it calls AppsFlyer.validateAndLogInAppPurchase on iOS — nests purchase.* under product/transaction', () => {
+		AppsFlyer.validateAndLogInAppPurchase({
+			purchase: { purchaseType: AFPurchaseType.ONE_TIME_PURCHASE, productId: 'test_product_456', transactionId: 'test_transaction_456' },
+		});
+		expect(lastPayload()).toEqual({
+			method: 'validateAndLogInAppPurchase',
+			params: {
+				product: { productId: 'test_product_456' },
+				transaction: { transactionId: 'test_transaction_456', purchaseType: 'oneTimePurchase' },
+			},
+		});
 	});
 
-	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 without callback', () => {
-		const purchaseDetails = {
-			purchaseType: 'subscription',
-			transactionId: 'test_transaction_789',
-			productId: 'test_product_789'
-		};
-
-		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledTimes(1);
+	test('validateAndLogInAppPurchase maps purchaseType per platform (Android: snake_case)', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidAppsFlyer.validateAndLogInAppPurchase({
+			purchase: { purchaseType: 'oneTimePurchase', productId: 'sku', purchaseToken: 'txn' },
+		});
+		expect(lastPayload(androidNative.executeRpc).params.purchaseType).toBe('one_time_purchase');
 	});
 
-	test('it calls appsFlyer.validateAndLogInAppPurchaseV2 with null additional parameters', () => {
-		const purchaseDetails = {
-			purchaseType: 'one_time_purchase',
-			transactionId: 'test_transaction_null',
-			productId: 'test_product_null'
-		};
-		const callback = jest.fn();
-
-		appsFlyer.validateAndLogInAppPurchaseV2(purchaseDetails, null, callback);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.validateAndLogInAppPurchaseV2).toHaveBeenCalledWith(purchaseDetails, null);
+	test('validateAndLogInAppPurchase maps purchaseType per platform (iOS: camelCase, nested)', () => {
+		AppsFlyer.validateAndLogInAppPurchase({
+			purchase: { purchaseType: 'oneTimePurchase', productId: 'sku', transactionId: 'txn' },
+		});
+		expect(lastPayload().params.transaction.purchaseType).toBe('oneTimePurchase');
 	});
-	
+
+	test('validateAndLogInAppPurchase leaves subscription spelling untouched on both platforms', () => {
+		AppsFlyer.validateAndLogInAppPurchase({
+			purchase: { purchaseType: AFPurchaseType.SUBSCRIPTION, productId: 'p', transactionId: 't' },
+		});
+		expect(lastPayload().params.transaction.purchaseType).toBe('subscription');
+	});
+
 	test('AFPurchaseType enum values are correct', () => {
-		// Test the enum values directly since they're exported from index.js
-		expect('subscription').toBe('subscription');
-		expect('one_time_purchase').toBe('one_time_purchase');
+		expect(AFPurchaseType.SUBSCRIPTION).toBe('subscription');
+		expect(AFPurchaseType.ONE_TIME_PURCHASE).toBe('oneTimePurchase');
 	});
 
 	test('MEDIATION_NETWORK enum values are correct', () => {
-		// Test the enum values directly since they're exported from index.js
-		expect('ironsource').toBe('ironsource');
-		expect('applovin_max').toBe('applovin_max');
-		expect('google_admob').toBe('google_admob');
-		expect('fyber').toBe('fyber');
-		expect('appodeal').toBe('appodeal');
-		expect('Admost').toBe('Admost');
-		expect('Topon').toBe('Topon');
-		expect('Tradplus').toBe('Tradplus');
-		expect('Yandex').toBe('Yandex');
-		expect('chartboost').toBe('chartboost');
-		expect('Unity').toBe('Unity');
-		expect('topon_pte').toBe('topon_pte');
-		expect('custom_mediation').toBe('custom_mediation');
-		expect('direct_monetization_network').toBe('direct_monetization_network');
+		expect(MEDIATION_NETWORK.IRONSOURCE).toBe('ironsource');
+		expect(MEDIATION_NETWORK.APPLOVIN_MAX).toBe('applovin_max');
+		expect(MEDIATION_NETWORK.GOOGLE_ADMOB).toBe('google_admob');
+		expect(MEDIATION_NETWORK.FYBER).toBe('fyber');
+		expect(MEDIATION_NETWORK.APPODEAL).toBe('appodeal');
+		expect(MEDIATION_NETWORK.ADMOST).toBe('Admost');
+		expect(MEDIATION_NETWORK.TOPON).toBe('Topon');
+		expect(MEDIATION_NETWORK.TRADPLUS).toBe('Tradplus');
+		expect(MEDIATION_NETWORK.YANDEX).toBe('Yandex');
+		expect(MEDIATION_NETWORK.CHARTBOOST).toBe('chartboost');
+		expect(MEDIATION_NETWORK.UNITY).toBe('Unity');
+		expect(MEDIATION_NETWORK.TOPON_PTE).toBe('topon_pte');
+		expect(MEDIATION_NETWORK.CUSTOM_MEDIATION).toBe('custom_mediation');
+		expect(MEDIATION_NETWORK.DIRECT_MONETIZATION_NETWORK).toBe('direct_monetization_network');
 	});
 
-	test('AF_EMAIL_CRYPT_TYPE enum values are correct', () => {
-		// Test the enum values directly since they're exported from index.js
-		expect(0).toBe(0);
-		expect(3).toBe(3);
-	});
-
-	test('StoreKitVersion enum values are correct', () => {
-		// Test the enum values directly since they're exported from index.js
-		expect('SK1').toBe('SK1');
-		expect('SK2').toBe('SK2');
-	});
-
-	test('it calls appsFlyer.setResolveDeepLinkURLs with callbacks', () => {
+	test('it calls AppsFlyer.setResolveDeepLinkURLs', () => {
 		const urls = ['example.com', 'brand.com'];
-		appsFlyer.setResolveDeepLinkURLs(urls, jest.fn, jest.fn);
-		expect(RNAppsFlyer.setResolveDeepLinkURLs).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setResolveDeepLinkURLs).toHaveBeenCalledWith(urls, expect.any(Function), expect.any(Function));
+		AppsFlyer.setResolveDeepLinkURLs({ urls });
+		expect(lastPayload()).toEqual({ method: 'setResolveDeepLinkURLs', params: { urls } });
 	});
 
-	test('it calls appsFlyer.performOnAppAttribution with string URL', () => {
-		appsFlyer.performOnAppAttribution('https://example.com', jest.fn, jest.fn);
-		expect(RNAppsFlyer.performOnAppAttribution).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.performOnAppAttribution).toHaveBeenCalledWith('https://example.com', expect.any(Function), expect.any(Function));
+	test('it calls AppsFlyer.setDisableAdvertisingIdentifiers on iOS — field stays "disable"', () => {
+		AppsFlyer.setDisableAdvertisingIdentifiers({ disable: true });
+		expect(lastPayload()).toEqual({ method: 'setDisableAdvertisingIdentifiers', params: { disable: true } });
 	});
 
-	test('it calls appsFlyer.performOnAppAttribution with non-string URL (converts to string)', () => {
-		appsFlyer.performOnAppAttribution(123, jest.fn, jest.fn);
-		expect(RNAppsFlyer.performOnAppAttribution).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.performOnAppAttribution).toHaveBeenCalledWith('123', expect.any(Function), expect.any(Function));
+	test('it calls AppsFlyer.setDisableAdvertisingIdentifiers on Android — field renamed disable -> isDisable', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidAppsFlyer.setDisableAdvertisingIdentifiers({ disable: true });
+		expect(lastPayload(androidNative.executeRpc)).toEqual({
+			method: 'setDisableAdvertisingIdentifiers',
+			params: { isDisable: true },
+		});
 	});
 
-	test('it calls appsFlyer.disableAdvertisingIdentifier', () => {
-		appsFlyer.disableAdvertisingIdentifier(true);
-		expect(RNAppsFlyer.disableAdvertisingIdentifier).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.disableAdvertisingIdentifier).toHaveBeenCalledWith(true);
+	test('it calls AppsFlyer.enableTCFDataCollection', () => {
+		AppsFlyer.enableTCFDataCollection({ shouldCollect: true });
+		expect(lastPayload()).toEqual({ method: 'enableTCFDataCollection', params: { shouldCollect: true } });
 	});
 
-	test('it calls appsFlyer.enableTCFDataCollection', () => {
-		appsFlyer.enableTCFDataCollection(true);
-		expect(RNAppsFlyer.enableTCFDataCollection).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.enableTCFDataCollection).toHaveBeenCalledWith(true);
-	});
-
-	test('it calls appsFlyer.setConsentData', () => {
+	test('it calls AppsFlyer.setConsentData', () => {
 		const consentData = { isUserSubjectToGDPR: true };
-		appsFlyer.setConsentData(consentData);
-		expect(RNAppsFlyer.setConsentData).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setConsentData).toHaveBeenCalledWith(consentData);
+		AppsFlyer.setConsentData(consentData);
+		expect(lastPayload()).toEqual({ method: 'setConsentData', params: consentData });
 	});
 
-	test('it calls appsFlyer.setSharingFilterForAllPartners (deprecated)', () => {
-		appsFlyer.setSharingFilterForAllPartners();
-		expect(RNAppsFlyer.setSharingFilterForPartners).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setSharingFilterForPartners).toHaveBeenCalledWith(['all']);
-	});
+	// Old hand-rolled index.ts defaulted isUserSubjectToGDPR to false when omitted; js-core-plugin forwards params as-is now (no default).
 
-	test('it calls appsFlyer.setSharingFilter (deprecated)', () => {
-		const partners = ['partner1', 'partner2'];
-		appsFlyer.setSharingFilter(partners, jest.fn, jest.fn);
-		expect(RNAppsFlyer.setSharingFilterForPartners).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.setSharingFilterForPartners).toHaveBeenCalledWith(partners);
-	});
-
-	test('it calls appsFlyer.validateAndLogInAppPurchase (legacy API)', () => {
-		const purchaseInfo = { productId: 'test_product' };
-		appsFlyer.validateAndLogInAppPurchase(purchaseInfo, jest.fn, jest.fn);
-		expect(RNAppsFlyer.validateAndLogInAppPurchase).toHaveBeenCalledTimes(1);
-		expect(RNAppsFlyer.validateAndLogInAppPurchase).toHaveBeenCalledWith(purchaseInfo, expect.any(Function), expect.any(Function));
-	});
-
-	test('AppsFlyerConsent constructor with all parameters', () => {
-		const consent = new AppsFlyerConsent(true, true, false, true);
-		expect(consent.isUserSubjectToGDPR).toBe(true);
-		expect(consent.hasConsentForDataUsage).toBe(true);
-		expect(consent.hasConsentForAdsPersonalization).toBe(false);
-		expect(consent.hasConsentForAdStorage).toBe(true);
-	});
-
-	test('AppsFlyerConsent constructor with minimal parameters', () => {
-		const consent = new AppsFlyerConsent(false);
-		expect(consent.isUserSubjectToGDPR).toBe(false);
-		expect(consent.hasConsentForDataUsage).toBeUndefined();
-		expect(consent.hasConsentForAdsPersonalization).toBeUndefined();
-		expect(consent.hasConsentForAdStorage).toBeUndefined();
-	});
-
-	test('AppsFlyerConsent.forGDPRUser (deprecated)', () => {
-		const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-		const consent = AppsFlyerConsent.forGDPRUser(true, false);
-		
-		expect(consent.isUserSubjectToGDPR).toBe(true);
-		expect(consent.hasConsentForDataUsage).toBe(true);
-		expect(consent.hasConsentForAdsPersonalization).toBe(false);
-		expect(consoleSpy).toHaveBeenCalled();
-		
-		consoleSpy.mockRestore();
-	});
-
-	test('AppsFlyerConsent.forNonGDPRUser (deprecated)', () => {
-		const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-		const consent = AppsFlyerConsent.forNonGDPRUser();
-		
-		expect(consent.isUserSubjectToGDPR).toBe(false);
-		expect(consoleSpy).toHaveBeenCalled();
-		
-		consoleSpy.mockRestore();
-	});
-
-	test('AFParseJSONException constructor', () => {
-		const error = new AFParseJSONException('Test error', { data: 'test' });
-		expect(error.message).toBe('Test error');
-		expect(error.data).toEqual({ data: 'test' });
-		expect(error.name).toBe('AFParseJSONException');
-	});
+	// AppsFlyerConsent convenience class is no longer exported after the js-core-plugin migration — an unflagged public-API removal, out of scope for this test-only pass; these two tests are deleted, not converted.
 });
 
 describe('Test native event emitter', () => {
-	const nativeEventEmitter = new NativeEventEmitter(RNAppsFlyer);
-	let gcdListener;
-	let oaoaListener;
-	let udlListener;
+	// Resets module state since listener-registration state lives in js-core-plugin's module-level AppsFlyerSDK singleton.
+	function freshModule() {
+		jest.resetModules();
+		const { NativeEventEmitter: FreshNativeEventEmitter } = require('react-native');
+		const freshAppsFlyer = require('../index').default;
+		const freshNativeAppsFlyer = require('../src/NativeAppsFlyer').default;
+		return {
+			AppsFlyer: freshAppsFlyer,
+			nativeEventEmitter: new FreshNativeEventEmitter(freshNativeAppsFlyer),
+		};
+	}
+
+	let AppsFlyer;
+	let nativeEventEmitter;
 	let nativeEventObject = { test: 'la' };
 
+	function emitRpcEvent(event, data) {
+		nativeEventEmitter.emit('RNAppsFlyer_rpcEvent', JSON.stringify({ event, data, timestamp: Date.now() }));
+	}
+
 	beforeEach(() => {
-		gcdListener = null;
-		oaoaListener = null;
-		udlListener = null;
+		({ AppsFlyer, nativeEventEmitter } = freshModule());
 	});
 
-	/**
-	 * GCD listener tests
-	 */
-	test('GCD listener Happy Flow', () => {
-		gcdListener = appsFlyer.onInstallConversionData((res) => {
-			expect(res).toEqual(nativeEventObject);
-			gcdListener();
-		});
+	test('registerConversionListener onConversionDataSuccess Happy Flow', async () => {
+		const onSuccess = jest.fn();
+		await AppsFlyer.registerConversionListener({ onConversionDataSuccess: onSuccess, onConversionDataFail: jest.fn() });
 
-		nativeEventEmitter.emit('onInstallConversionDataLoaded', JSON.stringify(nativeEventObject));
+		emitRpcEvent('onConversionDataSuccess', nativeEventObject);
+		expect(onSuccess).toHaveBeenCalledWith(nativeEventObject);
 	});
 
-	test('test GCD listener gets JSON instead of StringifyJSON', () => {
-		gcdListener = appsFlyer.onInstallConversionData((error) => {
-			expect(typeof error).toEqual('object');
-			expect(error.message).toEqual('Invalid data structure');
-			expect(error.data).toEqual(nativeEventObject);
-			expect(error.name).toEqual('AFParseJSONException');
-			gcdListener();
-		});
+	test('registerConversionListener onConversionDataFail Happy Flow', async () => {
+		const onFail = jest.fn();
+		await AppsFlyer.registerConversionListener({ onConversionDataSuccess: jest.fn(), onConversionDataFail: onFail });
 
-		nativeEventEmitter.emit('onInstallConversionDataLoaded', nativeEventObject);
+		emitRpcEvent('onConversionDataFail', { error: 'DevKey is incorrect' });
+		expect(onFail).toHaveBeenCalledWith({ error: 'DevKey is incorrect' });
 	});
 
-	/**
-	 * OAOA listener tests
-	 */
-	test('OAOA listener Happy Flow', () => {
-		oaoaListener = appsFlyer.onAppOpenAttribution((res) => {
-			expect(res).toEqual(nativeEventObject);
-			oaoaListener();
-		});
-		nativeEventEmitter.emit('onAppOpenAttribution', JSON.stringify(nativeEventObject));
-	});
-	test('test OAOA listener gets JSON instead of StringifyJSON', () => {
-		oaoaListener = appsFlyer.onAppOpenAttribution((error) => {
-			expect(typeof error).toEqual('object');
-			expect(error.message).toEqual('Invalid data structure');
-			expect(error.data).toEqual(nativeEventObject);
-			expect(error.name).toEqual('AFParseJSONException');
-			oaoaListener();
-		});
-
-		nativeEventEmitter.emit('onAppOpenAttribution', nativeEventObject);
+	// unregisterConversionListener has no rpc.ios entry (verified against native source) — rejects instead of sending a doomed RPC.
+	test('unregisterConversionListener rejects on iOS — no rpc.ios entry exists for it', async () => {
+		await AppsFlyer.registerConversionListener({ onConversionDataSuccess: jest.fn(), onConversionDataFail: jest.fn() });
+		await expect(AppsFlyer.unregisterConversionListener()).rejects.toThrow(/not supported on ios/);
 	});
 
-	/**
-	 * UDL listener tests
-	 */
-	test('UDL listener Happy Flow', () => {
-		udlListener = appsFlyer.onDeepLink((res) => {
-			expect(res).toEqual(nativeEventObject);
-			udlListener();
-		});
-		nativeEventEmitter.emit('onDeepLinking', JSON.stringify(nativeEventObject));
-	});
-	test('test UDL listener gets JSON instead of StringifyJSON', () => {
-		udlListener = appsFlyer.onAppOpenAttribution((error) => {
-			expect(typeof error).toEqual('object');
-			expect(error.message).toEqual('Invalid data structure');
-			expect(error.data).toEqual(nativeEventObject);
-			expect(error.name).toEqual('AFParseJSONException');
-			udlListener();
-		});
+	test('unregisterConversionListener on Android sends the native unregister call, but does not clear the JS callback', async () => {
+		const { AppsFlyer: androidAppsFlyer, nativeEventEmitter: androidEmitter } = (() => {
+			jest.resetModules();
+			const { Platform: FreshPlatform, NativeEventEmitter: FreshNativeEventEmitter } = require('react-native');
+			FreshPlatform.OS = 'android';
+			const freshAppsFlyer = require('../index').default;
+			const freshNativeAppsFlyer = require('../src/NativeAppsFlyer').default;
+			return { AppsFlyer: freshAppsFlyer, nativeEventEmitter: new FreshNativeEventEmitter(freshNativeAppsFlyer) };
+		})();
+		const successCallback = jest.fn();
+		await androidAppsFlyer.registerConversionListener({ onConversionDataSuccess: successCallback, onConversionDataFail: jest.fn() });
+		await androidAppsFlyer.unregisterConversionListener();
 
-		nativeEventEmitter.emit('onDeepLinking', nativeEventObject);
-	});
-	test('validateAndLogInAppPurchaseV2 event listener Happy Flow', () => {
-		const validationResult = { result: true, data: { transactionId: 'test_123' } };
-		let validationListener;
-		const callback = jest.fn((res) => {
-			expect(res).toEqual(validationResult);
-			if (validationListener) validationListener();
-		});
+		androidEmitter.emit('RNAppsFlyer_rpcEvent', JSON.stringify({ event: 'onConversionDataSuccess', data: nativeEventObject }));
 
-		validationListener = appsFlyer.validateAndLogInAppPurchaseV2(
-			{ purchaseType: 'subscription', transactionId: 'test_123', productId: 'test_product' },
-			{ test: 'param' },
-			callback
-		);
-
-		nativeEventEmitter.emit('onValidationResult', JSON.stringify(validationResult));
-		expect(callback).toHaveBeenCalledWith(validationResult);
+		// unregisterConversionListener only tears down the native subscription, not the JS callback (see js-core-plugin's AppsFlyerSDK) — still fires here since the fake emitter delivers regardless.
+		expect(successCallback).toHaveBeenCalledWith(nativeEventObject);
 	});
 
-	test('validateAndLogInAppPurchaseV2 event listener with error', () => {
-		const validationError = { error: 'Validation failed' };
-		let validationListener;
-		const callback = jest.fn((error) => {
-			expect(error).toEqual(validationError);
-			if (validationListener) validationListener();
-		});
-
-		validationListener = appsFlyer.validateAndLogInAppPurchaseV2(
-			{ purchaseType: 'one_time_purchase', transactionId: 'test_456', productId: 'test_product' },
-			{},
-			callback
-		);
-
-		nativeEventEmitter.emit('onValidationResult', JSON.stringify(validationError));
-		expect(callback).toHaveBeenCalledWith(validationError);
+	// js-core-plugin's registerDeepLinkListener always defaults a missing `status` to 'NOT_FOUND' — see compatibility.test.js.
+	test('registerDeepLinkListener Happy Flow (iOS native event name)', async () => {
+		const onDeepLinking = jest.fn();
+		await AppsFlyer.registerDeepLinkListener({ onDeepLinking });
+		emitRpcEvent('onDeepLinkReceived', nativeEventObject);
+		expect(onDeepLinking).toHaveBeenCalledWith({ ...nativeEventObject, status: 'NOT_FOUND' });
 	});
 
-	test('validateAndLogInAppPurchaseV2 event listener with invalid JSON', () => {
-		const invalidJson = 'not valid json';
-		let validationListener;
-		const callback = jest.fn((error) => {
-			// AFParseJSONException might not extend Error, check for name property instead
-			expect(error).toBeDefined();
-			expect(error.name).toBe('AFParseJSONException');
-			if (validationListener) validationListener();
+	test('registerDeepLinkListener Happy Flow (Android native event name)', async () => {
+		const onDeepLinking = jest.fn();
+		await AppsFlyer.registerDeepLinkListener({ onDeepLinking });
+		emitRpcEvent('onDeepLinking', nativeEventObject);
+		expect(onDeepLinking).toHaveBeenCalledWith({ ...nativeEventObject, status: 'NOT_FOUND' });
+	});
+
+	test('onAppOpenAttribution / onAttributionFailure were removed and merged into registerDeepLinkListener', () => {
+		expect(AppsFlyer.onAppOpenAttribution).toBeUndefined();
+		expect(AppsFlyer.onAttributionFailure).toBeUndefined();
+	});
+});
+
+describe('net-new RPC-only method wrappers (one per domain block)', () => {
+	afterEach(() => {
+		jest.clearAllMocks();
+	});
+
+	function lastPayloadOf(mockedExecuteRpc) {
+		const calls = mockedExecuteRpc.mock.calls;
+		const [requestJson] = calls[calls.length - 1];
+		return JSON.parse(requestJson);
+	}
+
+	test('setMinTimeBetweenSessions (Complex-config) calls executeRpc with the right envelope', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
+
+		await AppsFlyer.setMinTimeBetweenSessions({ seconds: 30 });
+
+		expect(lastPayloadOf(NativeAppsFlyer.executeRpc)).toEqual({
+			method: 'setMinTimeBetweenSessions',
+			params: { seconds: 30 },
 		});
+	});
 
-		validationListener = appsFlyer.validateAndLogInAppPurchaseV2(
-			{ purchaseType: 'one_time_purchase', transactionId: 'test_789', productId: 'test_product' },
-			{},
-			callback
-		);
+	test('setUserPhone (Hashed-PII) calls executeRpc with the right envelope', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
 
-		nativeEventEmitter.emit('onValidationResult', invalidJson);
-		expect(callback).toHaveBeenCalled();
+		// Native reads a split country code + number, never a combined `phone` string.
+		await AppsFlyer.setUserPhone({ countryCode: '1', phoneNumber: '5551234567' });
+
+		expect(lastPayloadOf(NativeAppsFlyer.executeRpc)).toEqual({
+			method: 'setUserPhone',
+			params: { countryCode: '1', phoneNumber: '5551234567' },
+		});
+	});
+
+	test('clearUserPii (Hashed-PII) calls executeRpc with empty params', async () => {
+		NativeAppsFlyer.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
+
+		await AppsFlyer.clearUserPii();
+
+		expect(lastPayloadOf(NativeAppsFlyer.executeRpc)).toEqual({ method: 'clearUserPii', params: {} });
+	});
+
+	test('setPreinstallAttribution (Android-only) calls executeRpc with the right envelope', async () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidNative.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: null }));
+
+		await androidAppsFlyer.setPreinstallAttribution({ mediaSource: 'media_src', campaign: 'campaign_1', siteId: 'site_1' });
+
+		expect(lastPayloadOf(androidNative.executeRpc)).toEqual({
+			method: 'setPreinstallAttribution',
+			params: { mediaSource: 'media_src', campaign: 'campaign_1', siteId: 'site_1' },
+		});
+	});
+
+	test('isStopped (Android-only getter) resolves with response.data', async () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidNative.executeRpc.mockResolvedValue(JSON.stringify({ success: true, data: false }));
+
+		await expect(androidAppsFlyer.isStopped()).resolves.toBe(false);
+		expect(lastPayloadOf(androidNative.executeRpc)).toEqual({ method: 'isStopped', params: {} });
 	});
 });

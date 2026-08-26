@@ -96,9 +96,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Compute production version
         id: compute-version
@@ -127,6 +127,7 @@ jobs:
       - name: Strip -rcN from all version files
         env:
           VERSION: ${{ steps.compute-version.outputs.version }}
+          CURRENT_VERSION: ${{ steps.compute-version.outputs.current_version }}
         run: |
           set -euo pipefail
           echo "Updating all version files to production version: $VERSION"
@@ -143,11 +144,30 @@ jobs:
             echo "iOS:" && grep "kAppsFlyerPluginVersion" "$IOS_FILE"
           fi
 
-          # 3. android/.../RNAppsFlyerConstants.java — PLUGIN_VERSION
-          ANDROID_FILE="android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java"
+          # 3. android/.../RNAppsFlyerConstants.kt — PLUGIN_VERSION
+          ANDROID_FILE="android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.kt"
           if [ -f "$ANDROID_FILE" ]; then
             sed -i "s/PLUGIN_VERSION = \"[^\"]*\"/PLUGIN_VERSION = \"$VERSION\"/" "$ANDROID_FILE"
             echo "Android:" && grep "PLUGIN_VERSION" "$ANDROID_FILE"
+          else
+            echo "::error::Android plugin version file not found: $ANDROID_FILE" >&2
+            exit 1
+          fi
+
+          # 4. CHANGELOG.md — heading still reads the RC version (e.g. "## 6.18.0-rc3");
+          #    rewrite it to the production version being promoted.
+          if grep -q "^## $CURRENT_VERSION\$" CHANGELOG.md; then
+            sed -i "s/^## $CURRENT_VERSION\$/## $VERSION/" CHANGELOG.md
+            echo "CHANGELOG.md:" && grep "^## $VERSION\$" CHANGELOG.md
+          else
+            echo "::error::CHANGELOG.md has no '## $CURRENT_VERSION' heading to promote" >&2
+            exit 1
+          fi
+
+          # Block promotion if the entry was never filled in after RC generation.
+          if grep -q "TODO: Add specific changes before merging" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md still has the auto-generated TODO placeholder — fill in real release notes before promoting to production" >&2
+            exit 1
           fi
 
       - name: Commit and push version changes
@@ -162,7 +182,7 @@ jobs:
 
           if [[ -n $(git status -s) ]]; then
             git add package.json react-native-appsflyer.podspec ios/RNAppsFlyer.h \
-              android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.java
+              android/src/main/java/com/appsflyer/reactnative/RNAppsFlyerConstants.kt CHANGELOG.md
             git commit -m "chore: prepare production release $VERSION (from $CURRENT_VERSION)"
             git push
             echo "Pushed version update to release branch"
@@ -210,7 +230,7 @@ jobs:
               body: `## Ready for Production Release\n\n` +
                 `The release branch has been updated:\n` +
                 `- **Version:** \`${version}\` (removed -rc suffix)\n` +
-                `- **All version files updated** (package.json, RNAppsFlyer.h, RNAppsFlyerConstants.java)\n\n` +
+                `- **All version files updated** (package.json, RNAppsFlyer.h, RNAppsFlyerConstants.kt)\n\n` +
                 `### Next Steps\n` +
                 `1. **Review the changes** in this PR\n` +
                 `2. **Merge this PR** when ready\n` +

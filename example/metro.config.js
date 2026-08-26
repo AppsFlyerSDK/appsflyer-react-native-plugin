@@ -3,6 +3,9 @@ const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 
 const pluginRoot = path.resolve(__dirname, '..');
 
+const escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const blockDir = dir => new RegExp(`^${escapeRegExp(dir)}[/\\\\].*`);
+
 /**
  * Metro configuration
  * https://reactnative.dev/docs/metro
@@ -21,12 +24,8 @@ const config = {
       react: path.resolve(__dirname, 'node_modules/react'),
     },
     blockList: [
-      new RegExp(
-        path.resolve(pluginRoot, 'node_modules/react-native').replace(/[/\\]/g, '[/\\\\]') + '[/\\\\].*',
-      ),
-      new RegExp(
-        path.resolve(pluginRoot, 'node_modules/react').replace(/[/\\]/g, '[/\\\\]') + '[/\\\\].*',
-      ),
+      blockDir(path.resolve(pluginRoot, 'node_modules/react-native')),
+      blockDir(path.resolve(pluginRoot, 'node_modules/react')),
     ],
   },
 };
