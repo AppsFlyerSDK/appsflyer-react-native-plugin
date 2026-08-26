@@ -102,7 +102,7 @@ export const RPC_CATALOG = [
 	{ name: 'start', group: 'Start', platform: 'both', run: () => AppsFlyer.start() },
 	{ name: 'unregisterSessionReadyListener', group: 'Listener', platform: 'both', run: () => AppsFlyer.unregisterSessionReadyListener() },
 	{ name: 'unregisterConversionListener', group: 'Listener', platform: 'android', run: () => AppsFlyer.unregisterConversionListener() },
-	{ name: 'unregisterDeeplinkListener', group: 'Listener', platform: 'android', run: () => AppsFlyer.unregisterDeeplinkListener() },
+	{ name: 'unregisterDeepLinkListener', group: 'Listener', platform: 'android', run: () => AppsFlyer.unregisterDeepLinkListener() },
 
 	{ name: 'logEvent', group: 'Event', platform: 'both', run: () => AppsFlyer.logEvent({ eventName: 'test_event', eventValues: { key: 'value' }, awaitResponse: true }) },
 

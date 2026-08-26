@@ -47,7 +47,7 @@
     "react-native": ">=0.76.0"
   },
   "dependencies": {
-    "@appsflyer-sdk/js-core-plugin": "7.0.14"
+    "@appsflyer-sdk/js-core-plugin": "7.0.15"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.26.9",
