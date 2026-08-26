@@ -1,5 +1,5 @@
 ## 7.0.2
- Release date: *TBD*
+ Release date: *2026-08-26*
 
 Upgrading from 6.18.0? See [MIGRATION.md](MIGRATION.md) for the full before/after guide.
 
