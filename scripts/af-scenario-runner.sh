@@ -547,7 +547,10 @@ run_phase_command() {
 
   log_info "${label}: ${command}"
   set +e
-  output=$(eval "$command" 2>&1)
+  # </dev/null: this runs inside the pre_actions `while read ... done < <(...)` loop, and a
+  # stdin-reading command here (e.g. `adb shell`) would inherit that loop's fd0 and drain it,
+  # silently starving `read` of the remaining pre_action lines (e.g. the following `sleep`).
+  output=$(eval "$command" 2>&1 </dev/null)
   status=$?
   set -e
 
