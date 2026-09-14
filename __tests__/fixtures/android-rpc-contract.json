@@ -382,6 +382,36 @@
         }
       }
     },
+    "setAndroidIdData": {
+      "parser": "parseSetAndroidIdDataRequest",
+      "params": {
+        "androidId": {
+          "accessor": "optString",
+          "required": false,
+          "default": ""
+        }
+      }
+    },
+    "setImeiData": {
+      "parser": "parseSetImeiDataRequest",
+      "params": {
+        "imei": {
+          "accessor": "optString",
+          "required": false,
+          "default": ""
+        }
+      }
+    },
+    "setOaidData": {
+      "parser": "parseSetOaidDataRequest",
+      "params": {
+        "oaid": {
+          "accessor": "optString",
+          "required": false,
+          "default": ""
+        }
+      }
+    },
     "setDisableAdvertisingIdentifiers": {
       "parser": "parseSetDisableAdvertisingIdentifiersRequest",
       "params": {

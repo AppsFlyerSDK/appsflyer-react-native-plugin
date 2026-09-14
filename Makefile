@@ -34,19 +34,28 @@ _VERBOSE_FLAG := $(if $(VERBOSE),--verbose,)
 .PHONY: build-ios
 build-ios:
 	@echo "Building iOS example app..."
+	@udid="$(IOS_SIMULATOR_UDID)"; \
+	if [ -z "$$udid" ]; then \
+	  udid=$$(xcrun simctl list devices booted 2>/dev/null | grep -oE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' | head -1); \
+	fi; \
+	if [ -z "$$udid" ]; then \
+	  udid=$$(xcrun simctl list devices available 2>/dev/null | grep -E 'iPhone' | grep -oE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' | head -1); \
+	  if [ -z "$$udid" ]; then echo "error: no available iPhone simulator" >&2; exit 1; fi; \
+	  echo "No booted iOS simulator; booting $$udid"; \
+	  xcrun simctl boot "$$udid"; \
+	  xcrun simctl bootstatus "$$udid" -b; \
+	fi; \
 	cd example/ios && xcodebuild build \
 		-workspace example.xcworkspace \
 		-scheme example \
 		-configuration Debug \
-		-destination 'platform=iOS Simulator,id=$(IOS_SIMULATOR_UDID)' \
+		-destination "platform=iOS Simulator,id=$$udid" \
 		-derivedDataPath build \
 		| tail -3
 
 .PHONY: e2e-ios
 e2e-ios:
-	@test -n "$(IOS_SIMULATOR_UDID)" || { echo "Error: no booted iOS simulator found. Boot one first."; exit 1; }
-	IOS_SIMULATOR_UDID=$(IOS_SIMULATOR_UDID) /bin/bash $(RUNNER) \
-		--platform ios --plan $(PLAN) $(_PHASE_FLAG) $(_VERBOSE_FLAG)
+	/bin/bash $(RUNNER) --platform ios --plan $(PLAN) $(_PHASE_FLAG) $(_VERBOSE_FLAG)
 
 .PHONY: e2e-ios-build
 e2e-ios-build: build-ios e2e-ios
@@ -60,9 +69,7 @@ build-android:
 
 .PHONY: e2e-android
 e2e-android:
-	@test -n "$(ANDROID_SERIAL)" || { echo "Error: no Android device/emulator found. Start one first."; exit 1; }
-	ANDROID_SERIAL=$(ANDROID_SERIAL) /bin/bash $(RUNNER) \
-		--platform android --plan $(PLAN) $(_PHASE_FLAG) $(_VERBOSE_FLAG)
+	/bin/bash $(RUNNER) --platform android --plan $(PLAN) $(_PHASE_FLAG) $(_VERBOSE_FLAG)
 
 .PHONY: e2e-android-build
 e2e-android-build: build-android e2e-android

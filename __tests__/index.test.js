@@ -416,6 +416,45 @@ describe("Test AppsFlyer API's", () => {
 		await expect(AppsFlyer.setCollectAndroidID({ isCollect: true })).rejects.toThrow(/not supported on ios/);
 	});
 
+	test('it calls AppsFlyer.setAndroidIdData — Android-only', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidAppsFlyer.setAndroidIdData({ androidId: 'android-id' });
+		expect(lastPayload(androidNative.executeRpc)).toEqual({
+			method: 'setAndroidIdData',
+			params: { androidId: 'android-id' },
+		});
+	});
+
+	test('setAndroidIdData rejects on iOS — Android-only', async () => {
+		await expect(AppsFlyer.setAndroidIdData({ androidId: 'android-id' })).rejects.toThrow(/not supported on ios/);
+	});
+
+	test('it calls AppsFlyer.setImeiData — Android-only', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidAppsFlyer.setImeiData({ imei: 'imei' });
+		expect(lastPayload(androidNative.executeRpc)).toEqual({
+			method: 'setImeiData',
+			params: { imei: 'imei' },
+		});
+	});
+
+	test('setImeiData rejects on iOS — Android-only', async () => {
+		await expect(AppsFlyer.setImeiData({ imei: 'imei' })).rejects.toThrow(/not supported on ios/);
+	});
+
+	test('it calls AppsFlyer.setOaidData — Android-only', () => {
+		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
+		androidAppsFlyer.setOaidData({ oaid: 'oaid' });
+		expect(lastPayload(androidNative.executeRpc)).toEqual({
+			method: 'setOaidData',
+			params: { oaid: 'oaid' },
+		});
+	});
+
+	test('setOaidData rejects on iOS — Android-only', async () => {
+		await expect(AppsFlyer.setOaidData({ oaid: 'oaid' })).rejects.toThrow(/not supported on ios/);
+	});
+
 	test('it calls AppsFlyer.disableAppSetId — Android-only', () => {
 		const { AppsFlyer: androidAppsFlyer, NativeAppsFlyer: androidNative } = freshAppsFlyerForPlatform('android');
 		androidAppsFlyer.disableAppSetId();

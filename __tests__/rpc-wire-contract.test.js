@@ -213,6 +213,9 @@ const CALL_SITES = [
 
 	// Android-only surface
 	{ api: 'setCollectAndroidID', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setCollectAndroidID({ isCollect: true }) },
+	{ api: 'setAndroidIdData', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setAndroidIdData({ androidId: 'android-id' }) },
+	{ api: 'setImeiData', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setImeiData({ imei: 'imei' }) },
+	{ api: 'setOaidData', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setOaidData({ oaid: 'oaid' }) },
 	{ api: 'setDisableNetworkData', platforms: [ANDROID], invoke: (AppsFlyer) => AppsFlyer.setDisableNetworkData({ isDisable: true }) },
 	{
 		api: 'unregisterDeepLinkListener',

@@ -27,7 +27,7 @@ on:
   workflow_dispatch:
     inputs:
       rc_version:
-        description: 'RC version to smoke, e.g. 6.18.0-rc1 (must exist on npm)'
+        description: 'RC version to smoke, e.g. 6.18.0-rc1 or 7.0.2-v2 (must exist on npm)'
         required: true
         type: string
       release_branch:
@@ -117,8 +117,8 @@ jobs:
           # published. Dry runs naturally fail the visibility poll below and
           # emit a skipped check-run.
           VERSION=$(node -p "require('./package.json').version")
-          if [[ ! "$VERSION" =~ -rc[0-9]+$ ]]; then
-            echo "package.json version is not an RC ($VERSION); skipping."
+          if [[ ! "$VERSION" =~ -(rc|v)[0-9]+$ ]]; then
+            echo "package.json version is not an RC or -vN tag ($VERSION); skipping."
             echo "should_run=false" >> "$GITHUB_OUTPUT"
             echo "skip_reason=not_rc_version" >> "$GITHUB_OUTPUT"
             echo "rc_version=$VERSION" >> "$GITHUB_OUTPUT"
