@@ -1,3 +1,10 @@
+## 7.0.2-v2
+ Release date: *2026-09-14*
+
+- React Native >> `@appsflyer-sdk/js-core-plugin` 7.1.0
+- React Native >> Android `af-android-plugin-bridge` 7.0.13
+- React Native >> Added Android ID setters `setAndroidIdData`, `setImeiData`, and `setOaidData`
+
 ## 7.0.2
  Release date: *2026-08-26*
 
