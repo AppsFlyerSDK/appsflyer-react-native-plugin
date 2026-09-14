@@ -19,8 +19,8 @@
 #
 # Requirements:
 #   - bash 4+, jq
-#   - Android: ADB in PATH, emulator booted
-#   - iOS: Xcode CLI tools, simulator booted
+#   - Android: ADB in PATH (boots the first AVD if none is running)
+#   - iOS: Xcode CLI tools (boots an iPhone simulator if none is running)
 #
 # The script is agent-agnostic: any AI coding assistant (Cursor, Claude Code,
 # GitHub Copilot, Windsurf) or a human can invoke it from a terminal.
@@ -187,7 +187,59 @@ PHASE_RESULTS="[]"
 # --- Android ---
 
 android_get_device() {
-  adb devices | grep -w "device" | head -1 | awk '{print $1}'
+  adb devices 2>/dev/null | awk '/[[:space:]]device$/{print $1; exit}'
+}
+
+android_emulator_bin() {
+  if command -v emulator >/dev/null 2>&1; then
+    command -v emulator
+    return
+  fi
+  local sdk
+  for sdk in "${ANDROID_HOME:-}" "${ANDROID_SDK_ROOT:-}" "$HOME/Library/Android/sdk"; do
+    if [[ -n "$sdk" && -x "$sdk/emulator/emulator" ]]; then
+      echo "$sdk/emulator/emulator"
+      return
+    fi
+  done
+  return 1
+}
+
+android_ensure_device() {
+  local device
+  device=$(android_get_device || true)
+  if [[ -n "$device" ]]; then
+    log_info "Android device: $device"
+    return 0
+  fi
+
+  local emu avd
+  emu=$(android_emulator_bin) || {
+    log_fail "No Android device and no emulator binary (set ANDROID_HOME or put emulator on PATH)"
+    exit 1
+  }
+  avd="${ANDROID_AVD:-$("$emu" -list-avds 2>/dev/null | head -1)}"
+  if [[ -z "$avd" ]]; then
+    log_fail "No Android AVD found. Create one in Android Studio or: avdmanager create avd"
+    exit 1
+  fi
+
+  log_info "No Android device; booting AVD $avd"
+  "$emu" -avd "$avd" -no-snapshot-save -no-audio >/dev/null 2>&1 &
+  local emu_pid=$! i boot
+  for i in $(seq 1 90); do
+    device=$(android_get_device || true)
+    boot=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
+    if [[ -n "$device" && "$boot" == "1" ]]; then
+      log_info "Android device: $device"
+      return 0
+    fi
+    sleep 2
+  done
+  log_fail "Timed out waiting for AVD $avd to finish booting"
+  pkill -P "$emu_pid" 2>/dev/null || true
+  kill "$emu_pid" 2>/dev/null || true
+  exit 1
 }
 
 android_is_installed() {
@@ -294,15 +346,28 @@ ios_get_booted_udid() {
     jq -r '[.devices[][] | select(.state == "Booted")] | first | .udid // empty'
 }
 
+ios_pick_available_udid() {
+  xcrun simctl list devices available -j 2>/dev/null | jq -r '
+    [.devices[][] | select(.isAvailable == true and (.name | startswith("iPhone")))] | first | .udid // empty
+  '
+}
+
 ios_ensure_udid() {
+  if [[ -n "$IOS_UDID" ]]; then
+    return 0
+  fi
+  IOS_UDID=$(ios_get_booted_udid)
   if [[ -z "$IOS_UDID" ]]; then
-    IOS_UDID=$(ios_get_booted_udid)
+    IOS_UDID=$(ios_pick_available_udid)
     if [[ -z "$IOS_UDID" ]]; then
-      log_fail "No booted iOS simulator found. Boot one with: xcrun simctl boot <UDID>"
+      log_fail "No iPhone simulator available. Create one in Xcode."
       exit 1
     fi
-    log_info "Using simulator: $IOS_UDID"
+    log_info "No booted iOS simulator; booting $IOS_UDID"
+    xcrun simctl boot "$IOS_UDID"
+    xcrun simctl bootstatus "$IOS_UDID" -b
   fi
+  log_info "Using simulator: $IOS_UDID"
 }
 
 ios_is_installed() {
@@ -637,9 +702,9 @@ validate_check() {
         payload_field=$(echo "$check_json" | jq -r '.payload_check.field // empty')
         if [[ -n "$payload_field" ]]; then
           payload_expected=$(echo "$check_json" | jq -r '.payload_check.expected')
-          if echo "$match" | grep -q "${payload_field}.*${payload_expected}" 2>/dev/null || \
-             echo "$match" | grep -q "\"${payload_field}\":.*${payload_expected}" 2>/dev/null || \
-             echo "$match" | grep -q "${payload_field}=${payload_expected}" 2>/dev/null || \
+          if echo "$match" | grep -q "${payload_field}=${payload_expected}" 2>/dev/null || \
+             echo "$match" | grep -q "\"${payload_field}\":${payload_expected}" 2>/dev/null || \
+             echo "$match" | grep -q "\"${payload_field}\": ${payload_expected}" 2>/dev/null || \
              echo "$match" | grep -q "${payload_field}: ${payload_expected}" 2>/dev/null; then
             jq -n --arg evidence "$(echo "$match" | tr -d '\000-\037' | head -c 500)" \
               '{status: "PASS", evidence: $evidence}'
@@ -960,13 +1025,7 @@ main() {
     fi
   else
     if [[ "$PLATFORM" == "android" ]]; then
-      local device
-      device=$(android_get_device)
-      if [[ -z "$device" ]]; then
-        log_fail "No Android device/emulator found. Start one with: emulator -avd <name>"
-        exit 1
-      fi
-      log_info "Android device: $device"
+      android_ensure_device
     elif [[ "$PLATFORM" == "ios" ]]; then
       ios_ensure_udid
     fi
