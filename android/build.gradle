@@ -85,7 +85,8 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:${safeExtGet('kotlin_stdlib_version', '2.4.10')}"
+    // Default to the Kotlin plugin's version: a newer stdlib can't be read by an older compiler.
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:${safeExtGet('kotlin_stdlib_version', kotlin.coreLibrariesVersion)}"
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.2')}"
     if (includeConnector){
