@@ -75,8 +75,10 @@ The AppsFlyer SDK includes built-in backup rules in its Android manifest to ensu
 
 **Opt-in Behavior** (`preferAppsFlyerBackupRules: true`):
 - If your app defines backup rules, they will be removed to let AppsFlyer SDK's built-in rules take precedence
+- Matching entries in the `<application>` tag's `tools:replace` are removed too, so no stale entry is left behind
 - This ensures AppsFlyer SDK's backup rules are used, which may improve install/reinstall detection accuracy
 - Use this flag if you want AppsFlyer SDK to manage backup rules for you
+- List `react-native-appsflyer` **before** any plugin that adds backup attributes (for example `expo-secure-store`) — see [Plugin order](#plugin-order)
 
 **When to use `preferAppsFlyerBackupRules: true`:**
 - You want AppsFlyer SDK to handle backup rules automatically
@@ -97,6 +99,17 @@ The AppsFlyer SDK includes built-in backup rules in its Android manifest to ensu
     ]
   }
 }
+```
+
+#### Plugin order
+
+Expo applies manifest changes in the reverse order of the `plugins` array. A plugin listed later runs first. If `react-native-appsflyer` is listed after the plugin that adds the backup attributes, its change runs first and finds nothing to remove. `preferAppsFlyerBackupRules` then does nothing and prints no warning.
+
+```json
+"plugins": [
+  ["react-native-appsflyer", { "preferAppsFlyerBackupRules": true }],
+  "expo-secure-store"
+]
 ```
 
 ### Handling dataExtractionRules Conflict
