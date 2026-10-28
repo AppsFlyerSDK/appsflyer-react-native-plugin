@@ -30,7 +30,10 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+// AGP 9 registers the `kotlin` extension itself; applying kotlin-android on top collides with it.
+if (project.extensions.findByName('kotlin') == null) {
+    apply plugin: 'kotlin-android'
+}
 apply plugin: 'com.facebook.react'
 
 def includeConnector = project.hasProperty('appsflyer.enable_purchase_connector') ? project.property('appsflyer.enable_purchase_connector').toBoolean() : false
