@@ -47,14 +47,33 @@ function withCustomAndroidManifest(config, { preferAppsFlyerBackupRules = false 
     if (hasDataExtractionRules || hasFullBackupContent) {
       // Remove conflicting attributes from app's manifest
       // This allows AppsFlyer SDK's built-in backup rules to be used instead.
+      const removedKeys = [];
+
       if (hasDataExtractionRules) {
         delete appAttrs['android:dataExtractionRules'];
+        removedKeys.push('android:dataExtractionRules');
         console.log('[AppsFlyerPlugin] Removed android:dataExtractionRules to use AppsFlyer SDK rules');
       }
 
       if (hasFullBackupContent) {
         delete appAttrs['android:fullBackupContent'];
+        removedKeys.push('android:fullBackupContent');
         console.log('[AppsFlyerPlugin] Removed android:fullBackupContent to use AppsFlyer SDK rules');
+      }
+
+      // Another plugin (e.g. expo-secure-store) may have listed these in tools:replace; a stale entry fails the manifest merge.
+      if (appAttrs['tools:replace']) {
+        const entries = appAttrs['tools:replace'].split(',').map((s) => s.trim()).filter(Boolean);
+        const kept = entries.filter((s) => !removedKeys.includes(s));
+
+        if (kept.length !== entries.length) {
+          if (kept.length > 0) {
+            appAttrs['tools:replace'] = kept.join(', ');
+          } else {
+            delete appAttrs['tools:replace'];
+          }
+          console.log('[AppsFlyerPlugin] Cleaned stale tools:replace entries for removed backup attributes');
+        }
       }
     }
 
