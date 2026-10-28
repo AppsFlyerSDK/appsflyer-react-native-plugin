@@ -22,6 +22,8 @@ paths:
 | `compatibility.test.js` | Backward compat for consent, StoreKit, callbacks |
 | `linting.test.js` | ESLint validation of source files |
 | `purchase-connector.test.ts` | PurchaseConnector models + interface (legacy bridge, unchanged) |
+| `expo-app-delegate.test.js` | Expo config plugin: Swift AppDelegate patching against SDK 54/57/58 fixtures (`__tests__/fixtures/app-delegates/`) |
+| `expo-android-backup-rules.test.js` | Expo config plugin: stale `tools:replace` cleanup when `preferAppsFlyerBackupRules` is set |
 
 ## Mock-and-verify pattern
 
@@ -64,4 +66,4 @@ Don't assert constants equal themselves — a test must be able to fail if the i
 
 ## Known coverage gaps
 
-Native-level iOS XCTest / Android JUnit for the RPC handlers, Expo config plugin tests, and live-device quickstart scenarios (killed-state deep link, full parity) are not yet covered.
+Native-level iOS XCTest / Android JUnit for the RPC handlers and live-device quickstart scenarios (killed-state deep link, full parity) are not yet covered.
