@@ -62,6 +62,33 @@ function modifySwiftAppDelegate(appDelegateContents) {
   // userActivity to extract the OneLink URL, so pass nil; the real restorationHandler goes to RCTLinkingManager below.
   const RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE = 'AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: nil)';
 
+  // SDK 58's scene-based template inherits these handlers instead of declaring them.
+  // Expo forwards scene events to AppDelegate, so keep forwarding to its subscribers.
+  const appDelegateClass = /class AppDelegate: ExpoAppDelegate[^\n{]*\{/;
+  const hasOpenURL = /func\s+application\s*\(\s*_\s+\w+\s*:\s*UIApplication\s*,\s*open\s+\w+\s*:\s*URL/;
+  const hasContinueUserActivity = /func\s+application\s*\(\s*_\s+\w+\s*:\s*UIApplication\s*,\s*continue\s+\w+\s*:\s*NSUserActivity/;
+
+  if (appDelegateClass.test(appDelegateContents)) {
+    const missingHandlers = [];
+    if (!hasOpenURL.test(appDelegateContents) && !appDelegateContents.includes(RNAPPSFLYER_SWIFT_OPENURL_CODE)) {
+      missingHandlers.push(`${SWIFT_OPENURL_IDENTIFIER}
+    ${RNAPPSFLYER_SWIFT_OPENURL_CODE}
+    return super.application(app, open: url, options: options)
+  }`);
+    }
+    if (!hasContinueUserActivity.test(appDelegateContents) && !appDelegateContents.includes(RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE)) {
+      missingHandlers.push(`${SWIFT_CONTINUE_USER_ACTIVITY_IDENTIFIER}
+    ${RNAPPSFLYER_SWIFT_CONTINUE_USER_ACTIVITY_CODE}
+    return super.application(application, continue: userActivity, restorationHandler: restorationHandler)
+  }`);
+    }
+    if (missingHandlers.length > 0) {
+      appDelegateContents = appDelegateContents.replace(appDelegateClass, (declaration) =>
+        `${declaration}\n${missingHandlers.join('\n\n')}\n`
+      );
+    }
+  }
+
   if (!appDelegateContents.includes(SWIFT_BRIDGE_IMPORT)) {
     appDelegateContents = `${SWIFT_BRIDGE_IMPORT}\n${appDelegateContents}`;
   }
