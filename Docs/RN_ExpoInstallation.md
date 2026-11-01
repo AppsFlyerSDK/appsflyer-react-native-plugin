@@ -36,7 +36,7 @@ expo install react-native-appsflyer
 ...
 ```
 
-4. ___optional___ If you want SKAdNetwork postbacks sent to AppsFlyer, add `NSAdvertisingAttributionReportEndpoint` to the `infoPlist` of your `app.json`:
+4. ___optional___ (iOS only) If you want SKAdNetwork postbacks sent to AppsFlyer, add `NSAdvertisingAttributionReportEndpoint` under the top-level `expo` object in `app.json`. The plugin does **not** set this key for you. Merge carefully if `NSAdvertisingAttributionReportEndpoint` is already present — this value overwrites it:
 ```
 "ios": {
   "infoPlist": {
@@ -45,32 +45,28 @@ expo install react-native-appsflyer
 }
 ```
 
-5. ___optional___ If you are developing a kids app and you wish to use our strict mode, you should add `"shouldUseStrictMode": true` as followed:
-```
-...
-"plugins": [
-      [
-        "react-native-appsflyer",{"shouldUseStrictMode": true}
-      ]
-    ],
-...
-```
 ### Automatic iOS AppDelegate integration
 
 Running `expo prebuild` with the plugin installed automatically modifies your `AppDelegate` (both
-the Swift template used by Expo SDK 52+ and the legacy Objective-C template) to wire up deep
+the Swift templates used by Expo SDK 54, 57, and 58, and the legacy Objective-C template) to wire up deep
 linking and attribution. You do not need to add these calls yourself. The plugin injects, all via
-`AppsFlyerAttribution.shared` (one import — `react_native_appsflyer`):
+`AppsFlyerAttribution.shared` (one import: `react_native_appsflyer`):
 
 - `AppsFlyerAttribution.shared.handleLaunchOptions(launchOptions)` in `didFinishLaunchingWithOptions`
-- `AppsFlyerAttribution.shared.handleOpen(url, options:)` in the `openURL` method
-- `AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler:)` in the `continueUserActivity` method
+- `AppsFlyerAttribution.shared.handleOpen(url, options: options)` in the `openURL` method
+- `AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: nil)` in the `continueUserActivity` method
 
-This only works if your `AppDelegate` matches the Expo SDK default template. If the plugin logs a warning during `expo prebuild`, add the three calls above manually.
+On Expo SDK 54 and 57, the plugin adds these calls to the methods that already exist.
+On Expo SDK 58, the template can omit `openURL` and `continueUserActivity`.
+Then the plugin creates those overrides, calls `super`, and adds the AppsFlyer calls.
+
+This works only if your `AppDelegate` matches the Expo SDK default template.
+If the plugin can't add all three calls, it logs a warning during `expo prebuild`.
+Add the three calls above by hand when you see that warning.
 
 To verify the injection landed, after `expo prebuild --clean`:
 ```bash
-grep -n "AppsFlyerLib" ios/*/AppDelegate.swift   # or AppDelegate.m/.mm for the ObjC template
+grep -n "AppsFlyerAttribution" ios/*/AppDelegate.swift   # expect 3 calls; or AppDelegate.m/.mm for ObjC
 ```
 
 ### Backup Rules Configuration (Android)
@@ -80,7 +76,7 @@ The AppsFlyer SDK includes built-in backup rules in its Android manifest to ensu
 **Default Behavior** (`preferAppsFlyerBackupRules: false` or omitted):
 - Your app's `android:dataExtractionRules` and `android:fullBackupContent` attributes are left untouched
 - You maintain full control over your app's backup policy
-- No manifest merge conflicts occur
+- If your app or another plugin (for example `expo-secure-store`) sets these attributes, the merge with the AppsFlyer SDK manifest can conflict; set `preferAppsFlyerBackupRules: true` to resolve it
 
 **Opt-in Behavior** (`preferAppsFlyerBackupRules: true`):
 - If your app defines backup rules, they will be removed to let AppsFlyer SDK's built-in rules take precedence
@@ -88,11 +84,6 @@ The AppsFlyer SDK includes built-in backup rules in its Android manifest to ensu
 - This ensures AppsFlyer SDK's backup rules are used, which may improve install/reinstall detection accuracy
 - Use this flag if you want AppsFlyer SDK to manage backup rules for you
 - List `react-native-appsflyer` **before** any plugin that adds backup attributes (for example `expo-secure-store`) — see [Plugin order](#plugin-order)
-
-**When to use `preferAppsFlyerBackupRules: true`:**
-- You want AppsFlyer SDK to handle backup rules automatically
-- You're experiencing issues with install/reinstall detection that may be related to backup rules
-- You don't have specific backup requirements for your app
 
 **Example configuration:**
 ```json
@@ -112,7 +103,7 @@ The AppsFlyer SDK includes built-in backup rules in its Android manifest to ensu
 
 #### Plugin order
 
-Expo applies manifest changes in the reverse order of the `plugins` array. A plugin listed later runs first. If `react-native-appsflyer` is listed after the plugin that adds the backup attributes, its change runs first and finds nothing to remove. `preferAppsFlyerBackupRules` then does nothing and prints no warning.
+Expo applies manifest changes in the reverse order of the `plugins` array. A plugin listed later runs first. If `react-native-appsflyer` is listed after the plugin that adds the backup attributes, its change runs first and finds nothing to remove. `preferAppsFlyerBackupRules` then warns via Expo's `WarningAggregator`.
 
 ```json
 "plugins": [
@@ -120,10 +111,6 @@ Expo applies manifest changes in the reverse order of the `plugins` array. A plu
   "expo-secure-store"
 ]
 ```
-
-### Handling dataExtractionRules Conflict
-
-This conflict is now handled automatically — see the `preferAppsFlyerBackupRules` option in the Backup Rules Configuration section above.
 
 ## The AD_ID permission for android apps
 In v6.8.0 of the AppsFlyer SDK, we added the normal permission com.google.android.gms.permission.AD_ID to the SDK's AndroidManifest, 
