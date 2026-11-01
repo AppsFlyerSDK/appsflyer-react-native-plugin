@@ -401,7 +401,6 @@
   ],
 
   "report": {
-    "output_dir": ".af-e2e/reports",
-    "format": "json"
+    "output_dir": ".af-e2e/reports"
   }
 }
