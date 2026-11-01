@@ -63,8 +63,8 @@ Both native bridges used to hold `init`/listener-registration RPCs in a JS-side 
 ## Expo compatibility
 
 ### Stale `tools:replace` after `preferAppsFlyerBackupRules`
-**Root cause:** another config plugin lists the backup attributes in `tools:replace`; deleting the attributes leaves that entry naming attributes that no longer exist. The PR that fixed this reports a manifest-merge failure; not reproduced, only the stale entry was. `expo-secure-store` 58.0.2 alone does not write `tools:replace`.
-**Fix:** `withAppsFlyerAndroid.js` now removes the stale names (7.0.4+). `react-native-appsflyer` must be listed before the other plugin in `app.json`, since Expo runs mods in reverse order. `withAppsFlyerAndroid.js` itself is idempotent; it never appends entries.
+**Root cause:** another config plugin lists the backup attributes in `tools:replace`; deleting the attributes leaves that entry naming attributes that no longer exist. [#706](https://github.com/AppsFlyerSDK/appsflyer-react-native-plugin/issues/706) reports a manifest-merge failure; not reproduced, only the stale entry was. `expo-secure-store` 58.0.2 alone does not write `tools:replace`.
+**Fix:** `withAppsFlyerAndroid.js` now removes the stale names (unreleased, fixed on the 7.0.4 branch). `react-native-appsflyer` must be listed before the other plugin in `app.json`, since Expo runs mods in reverse order. `withAppsFlyerAndroid.js` itself is idempotent; it never appends entries.
 
 ## Runtime crashes
 
