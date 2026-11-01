@@ -30,7 +30,10 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+// AGP 9 registers the `kotlin` extension itself; applying kotlin-android on top collides with it.
+if (project.extensions.findByName('kotlin') == null) {
+    apply plugin: 'kotlin-android'
+}
 apply plugin: 'com.facebook.react'
 
 def includeConnector = project.hasProperty('appsflyer.enable_purchase_connector') ? project.property('appsflyer.enable_purchase_connector').toBoolean() : false
@@ -39,6 +42,10 @@ android {
     namespace "com.appsflyer.reactnative"
     compileSdkVersion safeExtGet('compileSdkVersion', 34)
     buildToolsVersion safeExtGet('buildToolsVersion', '34.0.0')
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 21)
@@ -74,8 +81,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "17"
+}
+
+// AGP 9: android.kotlinOptions unsupported; top-level works for both topologies.
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
@@ -85,7 +96,6 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:${safeExtGet('kotlin_stdlib_version', '2.4.10')}"
     implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     implementation "com.android.installreferrer:installreferrer:${safeExtGet('installReferrerVersion', '2.2')}"
     if (includeConnector){

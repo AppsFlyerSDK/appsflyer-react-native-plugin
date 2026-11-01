@@ -200,7 +200,6 @@
   ],
 
   "report": {
-    "output_dir": ".af-smoke/reports",
-    "format": "json"
+    "output_dir": ".af-smoke/reports"
   }
 }

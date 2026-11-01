@@ -17,9 +17,8 @@ SHELL := /bin/bash
 RUNNER := scripts/af-scenario-runner.sh
 PLAN := .af-e2e/test-plan.json
 
-# Override these or set as env vars
+# Override or set as an env var
 IOS_SIMULATOR_UDID ?= $(shell xcrun simctl list devices booted 2>/dev/null | grep -oE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' | head -1)
-ANDROID_SERIAL ?= $(shell adb devices 2>/dev/null | awk 'NR==2 && /device$$/{print $$1}')
 
 # Optional: run a single phase
 PHASE ?=
@@ -35,9 +34,6 @@ _VERBOSE_FLAG := $(if $(VERBOSE),--verbose,)
 build-ios:
 	@echo "Building iOS example app..."
 	@udid="$(IOS_SIMULATOR_UDID)"; \
-	if [ -z "$$udid" ]; then \
-	  udid=$$(xcrun simctl list devices booted 2>/dev/null | grep -oE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' | head -1); \
-	fi; \
 	if [ -z "$$udid" ]; then \
 	  udid=$$(xcrun simctl list devices available 2>/dev/null | grep -E 'iPhone' | grep -oE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' | head -1); \
 	  if [ -z "$$udid" ]; then echo "error: no available iPhone simulator" >&2; exit 1; fi; \
