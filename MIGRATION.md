@@ -8,8 +8,8 @@ return an `EmitterSubscription` instead of a bare unsubscribe function — see
 [details below](#purchaseconnector-listeners-now-return-emittersubscription).
 
 Check `package.json`'s `version` for exactly what you're on — this guide covers the whole 7.0.x
-line (currently `7.0.2`, native SDK `AppsFlyerRPC` 7.0.13 on iOS / `af-android-sdk` 7.0.1 +
-`af-android-plugin-bridge` 7.0.12 on Android).
+line (currently `7.0.2-v2`, native SDK `AppsFlyerRPC` 7.0.13 on iOS / `af-android-sdk` 7.0.1 +
+`af-android-plugin-bridge` 7.0.13 on Android).
 
 - [Prerequisite](#prerequisite)
 - [Checklist](#checklist)
@@ -32,7 +32,7 @@ critical/security fixes for 6 months from the first 7.0.x release.
 
 ## Checklist
 
-1. Enable New Architecture, bump to `^7.0.2`, reinstall native deps.
+1. Enable New Architecture, bump to `7.0.2-v2`, reinstall native deps.
 2. Fix every call site listed in the [full API change reference](#full-api-change-reference).
 3. Replace `initSdk(...)` with the `init` + `start` flow, including moving
    `registerDeepLinkListener` to *before* `init()`.
@@ -132,7 +132,7 @@ placeholder.
 | `setAdditionalData(data, cb?)` | `setAdditionalData({customData})` | Callback → Promise | |
 | `setAppInviteOneLinkID(oneLinkID, cb?)` | `setAppInviteOneLink({oneLinkId})` | Renamed + Callback → Promise | |
 | `setCollectAndroidID(isCollect, cb?)` | `setCollectAndroidID({isCollect})` | Callback → Promise | Android only |
-| `setCollectIMEI(...)` | — | Removed, no replacement | IMEI collection is obsolete |
+| `setCollectIMEI(...)` | — | Removed | Opt-out has no RPC equivalent. To send IMEI yourself, use `setImeiData({imei})`. |
 | `setCurrencyCode(code, cb?)` | `setCurrencyCode({currencyCode})` | Callback → Promise | |
 | `setCustomerUserId(uid, cb?)` | `setCustomerUserId({customerId})` | Callback → Promise | |
 | `setDisableNetworkData(disable, cb?)` | `setDisableNetworkData({isDisable})` | Callback → Promise; param rename only | Android only |
@@ -153,6 +153,9 @@ placeholder.
 | — | `setUserLastName({lastName})` | Net-new | Hashed-PII setter |
 | — | `setUserFbLoginId({fbLoginId})` | Net-new | Hashed-PII setter; `fbLoginId` accepts `string \| number` — Facebook login IDs run 15-18 digits, past JS's 53-bit safe-integer range, so pass a string for IDs near that limit (no big-integer transform happens on your behalf) |
 | — | `clearUserPii()` | Net-new | Clears every PII field set via `setUserEmail`/`setUserPhone`/`setUserFirstName`/`setUserLastName`/`setUserFbLoginId` |
+| — | `setAndroidIdData({androidId})` | Net-new | Android only (added in 7.0.2-v2) |
+| — | `setImeiData({imei})` | Net-new | Android only (added in 7.0.2-v2) |
+| — | `setOaidData({oaid})` | Net-new | Android only (added in 7.0.2-v2) |
 
 ## Details on selected changes
 

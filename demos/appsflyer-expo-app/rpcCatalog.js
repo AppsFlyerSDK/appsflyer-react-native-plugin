@@ -81,6 +81,9 @@ export const RPC_CATALOG = [
 
 	// Android-only
 	{ name: 'setCollectAndroidID', group: 'Android', platform: 'android', run: () => AppsFlyer.setCollectAndroidID({ isCollect: true }) },
+	{ name: 'setAndroidIdData', group: 'Android', platform: 'android', run: () => AppsFlyer.setAndroidIdData({ androidId: 'android-id-value' }) },
+	{ name: 'setImeiData', group: 'Android', platform: 'android', run: () => AppsFlyer.setImeiData({ imei: 'imei-value' }) },
+	{ name: 'setOaidData', group: 'Android', platform: 'android', run: () => AppsFlyer.setOaidData({ oaid: 'oaid-value' }) },
 	{ name: 'getHostName', group: 'Android', platform: 'android', run: () => AppsFlyer.getHostName() },
 	{ name: 'getHostPrefix', group: 'Android', platform: 'android', run: () => AppsFlyer.getHostPrefix() },
 	{ name: 'getOutOfStore', group: 'Android', platform: 'android', run: () => AppsFlyer.getOutOfStore() },

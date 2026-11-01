@@ -40,7 +40,7 @@ release.yml (RC) ── lint-test-build.yml ───┐
 | Input | Required | Example | Description |
 |-------|----------|---------|-------------|
 | `release_type` | Yes | `rc` | Release type (`rc` or `production`). |
-| `rn_version` | Yes | `6.18.0-rc1` | Plugin version. Must match `X.Y.Z-rcN` format for RC. |
+| `rn_version` | Yes | `6.18.0-rc1` | Plugin version. RC: must match `X.Y.Z-rcN`. Production: `X.Y.Z` or `X.Y.Z-vN` (e.g. `7.0.2-v2`). |
 | `ios_sdk_version` | No | `6.18.0` | iOS native AppsFlyer SDK version to pin — RC only. |
 | `android_sdk_version` | No | `6.18.0` | Android native AppsFlyer SDK version to pin — RC only. |
 | `android_plugin_bridge_version` | No | `6.18.0` | Android `af-android-plugin-bridge` version to pin — RC only, required alongside `android_sdk_version` (enforced at RC-validation time, not by the form). |
@@ -102,6 +102,17 @@ When the PR merges to master:
 2. It publishes to npm with the `latest` tag.
 3. Creates a GitHub release (not pre-release).
 4. Notifies Slack.
+
+### Out-of-band or republish production release (-vN)
+
+When republishing a fix where the base version is already on npm (e.g. `7.0.2-v2`):
+
+1. Ensure `master` has `package.json` at `X.Y.Z-vN` with `CHANGELOG.md` updated.
+2. In GitHub Actions, select the **Release** workflow.
+3. Click **Run workflow** and set:
+   - `release_type`: `production`
+   - `rn_version`: `X.Y.Z-vN` (e.g. `7.0.2-v2`)
+   - `dry_run`: `false` (or `true` to test first)
 
 ## 6. Post-release verification
 

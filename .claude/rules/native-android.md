@@ -46,7 +46,7 @@ Emitted via `reactApplicationContext.emitDeviceEvent("RNAppsFlyer_rpcEvent", pay
 
 ## Build setup
 
-`android/build.gradle` pins `af-android-plugin-bridge:7.0.12` explicitly — `af-android-sdk-bom:7.0.1` doesn't carry a matching version. `namespace` is declared for AGP 8.0+. `minSdkVersion` defaults to 21 — verify `plugin_bridge`'s own `minSdkVersion` is ≤21 before release.
+`android/build.gradle` pins `af-android-plugin-bridge:7.0.13` explicitly — `af-android-sdk-bom:7.0.1` doesn't carry a matching version. `namespace` is declared for AGP 8.0+. `minSdkVersion` defaults to 21 — verify `plugin_bridge`'s own `minSdkVersion` is ≤21 before release.
 
 `AppsFlyerRpcHandler`'s constructor takes `contextProvider: () -> Context`, not `context: Context` — a named-arg call using `context =` fails to compile. `RNAppsFlyerModule.kt` passes `contextProvider = { reactApplicationContext.currentActivity ?: reactApplicationContext }`, invoked fresh on every call (not cached), so `init()` can backfill a missed `onActivityResumed` transition instead of stalling session-ready.
 
