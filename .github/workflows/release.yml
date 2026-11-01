@@ -286,7 +286,7 @@ jobs:
           VERSION: ${{ needs.validate-rc.outputs.version }}
         run: |
           echo "Setting package.json version to $VERSION"
-          npm version "$VERSION" --no-git-tag-version
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
           grep '"version"' package.json
 
       - name: Update Android native deps in build.gradle
