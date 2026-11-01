@@ -101,7 +101,7 @@ dependencies {
     if (includeConnector){
         implementation 'com.appsflyer:purchase-connector:2.3.0'
     }
-    implementation platform('com.appsflyer:af-android-sdk-bom:7.0.1')
+    implementation platform('com.appsflyer:af-android-sdk-bom:7.0.4')
     implementation 'com.appsflyer:af-android-sdk'
     // pinned explicitly — af-android-sdk-bom (7.0.1) doesn't carry this version yet
     implementation 'com.appsflyer:af-android-plugin-bridge:7.0.13'
