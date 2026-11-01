@@ -7,15 +7,6 @@
 - iOS SDK 7.0.41
 - TODO: Add specific changes before merging
 
-## 7.0.4-rc1
- Release date: *2026-11-01*
-
-### Changes
-- Android SDK 7.0.4
-- Android Plugin Bridge 7.0.13
-- iOS SDK 7.0.41
-- TODO: Add specific changes before merging
-
 ## 7.0.2-v2
  Release date: *2026-09-14*
 
