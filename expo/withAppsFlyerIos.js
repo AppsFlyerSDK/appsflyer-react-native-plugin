@@ -64,10 +64,9 @@ function modifySwiftAppDelegate(appDelegateContents) {
 
   // SDK 58's scene-based template inherits these handlers instead of declaring them.
   // Expo forwards scene events to AppDelegate, so keep forwarding to its subscribers.
-  const appDelegateClass = /class AppDelegate: ExpoAppDelegate[^\n{]*\{/;
+  const appDelegateClass = /class\s+AppDelegate\s*:\s*ExpoAppDelegate\b[^{]*\{/;
   const hasOpenURL = /func\s+application\s*\(\s*_\s+\w+\s*:\s*UIApplication\s*,\s*open\s+\w+\s*:\s*URL/;
   const hasContinueUserActivity = /func\s+application\s*\(\s*_\s+\w+\s*:\s*UIApplication\s*,\s*continue\s+\w+\s*:\s*NSUserActivity/;
-
   if (appDelegateClass.test(appDelegateContents)) {
     const missingHandlers = [];
     if (!hasOpenURL.test(appDelegateContents) && !appDelegateContents.includes(RNAPPSFLYER_SWIFT_OPENURL_CODE)) {
@@ -128,7 +127,7 @@ Please add AppsFlyer integration manually:
 4. Add this to your continueUserActivity method:
   AppsFlyerAttribution.shared.continueUserActivity(userActivity, restorationHandler: nil)
 
-Supported format: Expo SDK default template
+Supported formats: Expo SDK 54/57/58 default AppDelegate templates. Custom formatting may need these manual steps.
 `
     );
   }
