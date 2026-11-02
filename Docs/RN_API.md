@@ -67,6 +67,9 @@ The list of available methods for this plugin is described below.
   - [enableFacebookDeferredApplinks](#enablefacebookdeferredapplinks)
 - [Android Only APIs](#android-only-apis)
   - [setCollectAndroidID](#setcollectandroidid)
+  - [setAndroidIdData](#setandroididdata)
+  - [setImeiData](#setimeidata)
+  - [setOaidData](#setoaiddata)
   - [setCollectIMEI — removed in 7.0.0](#setcollectimei--removed-in-700)
   - [setDisableNetworkData `setDisableNetworkData(isDisable)`](#setdisablenetworkdata-setdisablenetworkdataisdisable)
   - [performDeepLinking](#performdeeplinking)
@@ -1199,10 +1202,68 @@ if (Platform.OS == 'android') {
 
 ---
 
+### setAndroidIdData
+`setAndroidIdData(params) : Promise<void>`
+
+Explicitly send the Android ID to AppsFlyer. Call before `start()`.
+
+| parameter | type   | description        |
+| --------- | ------ | ------------------ |
+| androidId | string | Android ID to send |
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'android') {
+  AppsFlyer.setAndroidIdData({ androidId: 'android-id-value' });
+}
+```
+
+---
+
+### setImeiData
+`setImeiData(params) : Promise<void>`
+
+Explicitly send the device IMEI to AppsFlyer. Call before `start()`.
+This is the manual-IMEI setter; `setCollectIMEI` was removed in 7.0.0.
+
+| parameter | type   | description  |
+| --------- | ------ | ------------ |
+| imei      | string | IMEI to send |
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'android') {
+  AppsFlyer.setImeiData({ imei: 'imei-value' });
+}
+```
+
+---
+
+### setOaidData
+`setOaidData(params) : Promise<void>`
+
+Explicitly send the device OAID to AppsFlyer. Call before `start()`.
+
+| parameter | type   | description  |
+| --------- | ------ | ------------ |
+| oaid      | string | OAID to send |
+
+*Example:*
+
+```javascript
+if (Platform.OS == 'android') {
+  AppsFlyer.setOaidData({ oaid: 'oaid-value' });
+}
+```
+
+---
+
 ### setCollectIMEI — removed in 7.0.0
 
-Android IMEI-collection opt-out has no RPC equivalent and is **removed** with no adapter
-(IMEI collection has also been phased out at the OS level on modern Android versions). See
+Android IMEI-collection opt-out has no RPC equivalent and is **removed**.
+To pass IMEI yourself, use [setImeiData](#setimeidata). See
 [MIGRATION.md](../MIGRATION.md#full-api-change-reference).
 
 ### setDisableNetworkData

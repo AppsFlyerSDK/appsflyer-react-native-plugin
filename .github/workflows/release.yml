@@ -44,7 +44,7 @@ on:
           - rc
           - production
       rn_version:
-        description: 'Plugin version (e.g., 6.18.0-rc1 for RC, 6.18.0 for production)'
+        description: 'Plugin version (e.g., 6.18.0-rc1 for RC, 6.18.0 or 7.0.2-v2 for production)'
         required: true
         type: string
       ios_sdk_version:
@@ -610,12 +610,12 @@ jobs:
             echo "Extracted version from package.json: $VERSION"
           fi
 
-          # Validate version format (X.Y.Z, no -rc suffix for production)
-          if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          # Validate version format (X.Y.Z or X.Y.Z-vN; no -rc suffix for production)
+          if [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-v[0-9]+)?$ ]]; then
             echo "Valid production version format: $VERSION"
             echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           else
-            echo "::error::Invalid production version format: $VERSION (expected X.Y.Z)"
+            echo "::error::Invalid production version format: $VERSION (expected X.Y.Z or X.Y.Z-vN)"
             exit 1
           fi
 
@@ -728,7 +728,7 @@ jobs:
           if [[ "$TAG" == "rc" ]]; then
             npm publish --tag rc --provenance
           else
-            npm publish --provenance
+            npm publish --tag latest --provenance
           fi
           echo "Published $VERSION to npm"
 
@@ -1242,7 +1242,8 @@ jobs:
           CI_JIRA_DOMAIN: ${{ secrets.CI_JIRA_DOMAIN }}
         run: |
           set +e
-          JIRA_FIX_VERSION="React Native SDK v$VERSION"
+          BASE_VERSION="${VERSION%%-v*}"
+          JIRA_FIX_VERSION="React Native SDK v$BASE_VERSION"
 
           echo "Looking for Jira tickets with fix version: $JIRA_FIX_VERSION"
 

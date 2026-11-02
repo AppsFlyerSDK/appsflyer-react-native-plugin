@@ -12,4 +12,4 @@ NS_ASSUME_NONNULL_END
 
 // TODO: dead code — no caller anywhere in ios/ (setPluginInfo's version comes from
 // package.json via index.ts instead). Candidate for removal; see release-versioning.md §1.
-static NSString *const kAppsFlyerPluginVersion = @"7.0.2";
+static NSString *const kAppsFlyerPluginVersion      = @"7.0.4";

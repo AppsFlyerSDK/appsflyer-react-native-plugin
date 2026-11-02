@@ -5,20 +5,25 @@ const fs = require('fs');
 const path = require('path');
 
 const packageVersion = require('../package.json').version;
+const unsuffixedVersion = (packageVersion.match(/^(\d+\.\d+\.\d+)/) || [])[1];
 
-test('ios/RNAppsFlyer.h kAppsFlyerPluginVersion matches package.json version', () => {
+function expectNativeVersion(actual) {
+	expect([packageVersion, unsuffixedVersion]).toContain(actual);
+}
+
+test('ios/RNAppsFlyer.h kAppsFlyerPluginVersion matches package.json version or unsuffixed X.Y.Z', () => {
 	const iosFile = fs.readFileSync(path.join(__dirname, '..', 'ios', 'RNAppsFlyer.h'), 'utf8');
 	const match = iosFile.match(/kAppsFlyerPluginVersion\s*=\s*@"([^"]+)"/);
 	expect(match).not.toBeNull();
-	expect(match[1]).toBe(packageVersion);
+	expectNativeVersion(match[1]);
 });
 
-test('RNAppsFlyerConstants.kt PLUGIN_VERSION matches package.json version', () => {
+test('RNAppsFlyerConstants.kt PLUGIN_VERSION matches package.json version or unsuffixed X.Y.Z', () => {
 	const androidFile = fs.readFileSync(
 		path.join(__dirname, '..', 'android', 'src', 'main', 'java', 'com', 'appsflyer', 'reactnative', 'RNAppsFlyerConstants.kt'),
 		'utf8'
 	);
 	const match = androidFile.match(/PLUGIN_VERSION\s*=\s*"([^"]+)"/);
 	expect(match).not.toBeNull();
-	expect(match[1]).toBe(packageVersion);
+	expectNativeVersion(match[1]);
 });

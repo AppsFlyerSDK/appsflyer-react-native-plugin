@@ -1,3 +1,23 @@
+## 7.0.4
+ Release date: *2026-11-01*
+
+### Changes
+- React Native >> iOS native SDK 7.0.4 (`AppsFlyerRPC` 7.0.41); Android `af-android-sdk` 7.0.4 + `af-android-plugin-bridge` 7.0.13
+- React Native >> iOS `PurchaseConnector` pod 7.0.4
+- React Native >> Android Gradle Plugin 9 support: `jvmTarget` moved to the top-level `kotlin { compilerOptions }` block, `kotlin-android` is applied only when AGP doesn't already register the Kotlin extension, and the explicit `kotlin-stdlib` dependency was dropped (the Kotlin plugin adds a matching one)
+- React Native >> Fix Android builds failing on `BuildConfig.INCLUDE_CONNECTOR` when the host app disables `buildConfig` (the AGP 9 default)
+- React Native >> Expo config plugin: support the Expo SDK 58 scene-based `AppDelegate` — open-URL and universal-link (`continueUserActivity`) events are now forwarded to `AppsFlyerAttribution.shared`
+- React Native >> Expo config plugin: accept extra whitespace around the `ExpoAppDelegate` superclass when patching `AppDelegate.swift`
+- React Native >> Expo config plugin: `preferAppsFlyerBackupRules` now removes stale `android:dataExtractionRules` / `android:fullBackupContent` entries from `tools:replace`, which previously failed the manifest merge, and warns during `expo prebuild` when another plugin adds the backup attributes after AppsFlyer's runs
+- React Native >> Docs: Expo plugin ordering for `preferAppsFlyerBackupRules`, and an optional `NSAdvertisingAttributionReportEndpoint` step
+
+## 7.0.2-v2
+ Release date: *2026-09-14*
+
+- React Native >> `@appsflyer-sdk/js-core-plugin` 7.1.0
+- React Native >> Android `af-android-plugin-bridge` 7.0.13
+- React Native >> Added Android ID setters `setAndroidIdData`, `setImeiData`, and `setOaidData`
+
 ## 7.0.2
  Release date: *2026-08-26*
 

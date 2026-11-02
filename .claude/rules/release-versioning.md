@@ -65,7 +65,7 @@ Deprecated methods must keep working at runtime. Add a backward-compat test in `
 
 ## Tag convention
 
-All tags use the `v` prefix (`v6.18.0`, `v7.0.2`, ...). `release.yml` tags every production release (`v$VERSION`) and every RC (`v$VERSION-rcN`).
+All tags use the `v` prefix (`v6.18.0`, `v7.0.2`, `v7.0.2-v2`, ...). `release.yml` accepts `X.Y.Z-rcN` on the RC path, and `X.Y.Z` or `X.Y.Z-vN` on production. GitHub tags are always `v$VERSION` (so `7.0.2-v2` becomes `v7.0.2-v2`). `-vN` is part of the version identity and is not stripped on promote.
 
 ## Native SDK dependency update
 

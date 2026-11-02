@@ -1,9 +1,9 @@
-const { withGradleProperties, withAndroidManifest } = require('@expo/config-plugins');
+const { withGradleProperties, withAndroidManifest, WarningAggregator } = require('@expo/config-plugins');
 
 function addPurchaseConnectorFlag(config) {
   return withGradleProperties(config, (cfg) => {
     const props = cfg.modResults ?? [];
-   const exists = props.some((p) => p.key === 'appsflyer.enable_purchase_connector');
+    const exists = props.some((p) => p.key === 'appsflyer.enable_purchase_connector');
     if (!exists) {
       props.push({ type: 'property', key: 'appsflyer.enable_purchase_connector', value: 'true' });
     } else {
@@ -13,8 +13,7 @@ function addPurchaseConnectorFlag(config) {
   });
 }
 
-// Opt-in backup rules handling
-function withCustomAndroidManifest(config, { preferAppsFlyerBackupRules = false } = {}) {
+function withCustomAndroidManifest(config) {
   return withAndroidManifest(config, async (cfg) => {
     const androidManifest = cfg.modResults;
     const manifest = androidManifest.manifest;
@@ -24,45 +23,44 @@ function withCustomAndroidManifest(config, { preferAppsFlyerBackupRules = false 
       return cfg;
     }
 
-    // Ensure xmlns:tools is present in the <manifest> tag
     if (!manifest.$['xmlns:tools']) {
       manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
     }
 
-    const application = manifest.application[0];
-    const appAttrs = application.$ || {};
+    const appAttrs = manifest.application[0].$ || {};
+    const backupKeys = ['android:dataExtractionRules', 'android:fullBackupContent'];
+    const present = backupKeys.filter((key) => appAttrs[key] !== undefined);
 
-    const hasDataExtractionRules = appAttrs['android:dataExtractionRules'] !== undefined;
-    const hasFullBackupContent = appAttrs['android:fullBackupContent'] !== undefined;
-
-    if (!preferAppsFlyerBackupRules) {
-      // Default: do not touch backup attributes at all
-      console.log(
-        `[AppsFlyerPlugin] Backup attributes ${hasDataExtractionRules || hasFullBackupContent ? 'left untouched' : 'unchanged'} (preferAppsFlyerBackupRules=false)`
-      );
-      return cfg;
+    for (const key of present) {
+      delete appAttrs[key];
+      console.log(`[AppsFlyerPlugin] Removed ${key} to use AppsFlyer SDK rules`);
     }
 
-    // preferAppsFlyerBackupRules === true
-    if (hasDataExtractionRules || hasFullBackupContent) {
-      // Remove conflicting attributes from app's manifest
-      // This allows AppsFlyer SDK's built-in backup rules to be used instead.
-      if (hasDataExtractionRules) {
-        delete appAttrs['android:dataExtractionRules'];
-        console.log('[AppsFlyerPlugin] Removed android:dataExtractionRules to use AppsFlyer SDK rules');
+    // Another plugin (e.g. expo-secure-store) may have listed these in tools:replace; a stale entry fails the manifest merge.
+    if (appAttrs['tools:replace']) {
+      const entries = appAttrs['tools:replace'].split(',').map((s) => s.trim()).filter(Boolean);
+      const kept = entries.filter((s) => !backupKeys.includes(s));
+      if (kept.length !== entries.length) {
+        if (kept.length > 0) {
+          appAttrs['tools:replace'] = kept.join(', ');
+        } else {
+          delete appAttrs['tools:replace'];
+        }
+        console.log('[AppsFlyerPlugin] Cleaned stale backup entries from tools:replace');
       }
+    }
 
-      if (hasFullBackupContent) {
-        delete appAttrs['android:fullBackupContent'];
-        console.log('[AppsFlyerPlugin] Removed android:fullBackupContent to use AppsFlyer SDK rules');
-      }
+    if (!present.length) {
+      WarningAggregator.addWarningAndroid(
+        'withAppsFlyerAndroid',
+        'preferAppsFlyerBackupRules is set but no backup attributes were found; if another plugin adds them, list react-native-appsflyer before it in "plugins".'
+      );
     }
 
     return cfg;
   });
 }
 
-// Main plugin export
 module.exports = function withAppsFlyerAndroid(
   config,
   {
@@ -73,8 +71,8 @@ module.exports = function withAppsFlyerAndroid(
   if (shouldUsePurchaseConnector) {
     config = addPurchaseConnectorFlag(config);
   }
-
-  config = withCustomAndroidManifest(config, { preferAppsFlyerBackupRules });
-
+  if (preferAppsFlyerBackupRules) {
+    config = withCustomAndroidManifest(config);
+  }
   return config;
 };
