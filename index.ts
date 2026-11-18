@@ -16,7 +16,7 @@ import {
 export * from "@appsflyer-sdk/js-core-plugin";
 
 // 7.0.0+ has no legacy-bridge fallback — fail fast on Old Architecture instead of a confusing native crash later; skipped under Jest (no RN globals).
-if (typeof jest === "undefined") {
+if (typeof (globalThis as { jest?: unknown }).jest === "undefined") {
   const isNewArchitectureEnabled =
     (globalThis as any).RN$Bridgeless === true ||
     (globalThis as any).__turboModuleProxy != null;
