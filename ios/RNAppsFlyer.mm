@@ -2,6 +2,13 @@
 
 #if __has_include("react_native_appsflyer-Swift.h")
 #import "react_native_appsflyer-Swift.h"
+#elif defined(SWIFT_PACKAGE)
+// SwiftPM puts the generated header on no include path, and Objective-C++ cannot import
+// the Swift module, so declare the API it exports. A Jest test keeps the two in sync.
+@interface RNAppsFlyerImpl : NSObject
+- (instancetype)initWithEventEmitter:(void (^)(NSString *))eventEmitter;
+- (void)executeRpc:(NSString *)requestJson resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+@end
 #else
 #import <react_native_appsflyer/react_native_appsflyer-Swift.h>
 #endif

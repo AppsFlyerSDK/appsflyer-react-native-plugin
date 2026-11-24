@@ -12,4 +12,8 @@ module.exports = {
       },
     },
   },
+  // React Native 0.87 reads the SwiftPM plugin only from here; later versions read package.json's swiftpmConfig.
+  spm: {
+    autolinkingPlugin: './spm/autolinking-plugin.js',
+  },
 };

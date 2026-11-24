@@ -1,4 +1,4 @@
-const { withAppDelegate, withDangerousMod, WarningAggregator } = require('@expo/config-plugins');
+const { withAppDelegate, withDangerousMod, withPodfileProperties, WarningAggregator } = require('@expo/config-plugins');
 const { mergeContents } = require('@expo/config-plugins/build/utils/generateCode');
 const fs = require('fs');
 const path = require('path');
@@ -155,7 +155,16 @@ function withPodfile(config, shouldUseStrictMode, shouldUsePurchaseConnector) {
     'ios',
     async (config) => {
       const filePath = path.join(config.modRequest.platformProjectRoot, 'Podfile');
-      const contents = fs.readFileSync(filePath, 'utf-8');
+      let contents;
+      try {
+        contents = fs.readFileSync(filePath, 'utf-8');
+      } catch (error) {
+        // A SwiftPM-only app has no Podfile; it reads the variant from Podfile.properties.json.
+        if (error.code === 'ENOENT') {
+          return config;
+        }
+        throw error;
+      }
 
       let mergedContents = { contents, didMerge: true };
 
@@ -204,11 +213,21 @@ function withPodfile(config, shouldUseStrictMode, shouldUsePurchaseConnector) {
   ]);
 }
 
+// SwiftPM apps never evaluate the Podfile; spm/autolinking-plugin.js reads the variant from here instead.
+function withAppsFlyerPodfileProperties(config, shouldUseStrictMode, shouldUsePurchaseConnector) {
+  return withPodfileProperties(config, (config) => {
+    config.modResults['appsflyer.purchaseConnector'] = String(shouldUsePurchaseConnector);
+    config.modResults['appsflyer.strictMode'] = String(shouldUseStrictMode);
+    return config;
+  });
+}
+
 module.exports = function withAppsFlyerIos(config, { 
   shouldUseStrictMode = false, 
   shouldUsePurchaseConnector = false 
 } = {}) {
   config = withPodfile(config, shouldUseStrictMode, shouldUsePurchaseConnector);
+  config = withAppsFlyerPodfileProperties(config, shouldUseStrictMode, shouldUsePurchaseConnector);
   config = withAppsFlyerAppDelegate(config);
   return config;
 };
