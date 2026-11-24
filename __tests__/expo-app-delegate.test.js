@@ -5,6 +5,7 @@ const path = require('path');
 jest.mock('@expo/config-plugins', () => ({
   withAppDelegate: jest.fn((config, action) => action(config)),
   withDangerousMod: jest.fn((config) => config),
+  withPodfileProperties: jest.fn((config) => config),
   WarningAggregator: { addWarningIOS: jest.fn() },
 }));
 

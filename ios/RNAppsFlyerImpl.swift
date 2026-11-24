@@ -1,5 +1,10 @@
 import Foundation
 import AppsFlyerRPC
+// SwiftPM only: this target has no Objective-C half to supply RCTPromiseResolveBlock, and
+// importing React under CocoaPods makes it precompile the React module, which fails.
+#if SWIFT_PACKAGE
+import React
+#endif
 
 /// RPC dispatch and event-channel logic behind the RNAppsFlyer TurboModule adapter.
 @objc(RNAppsFlyerImpl)

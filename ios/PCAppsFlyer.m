@@ -13,6 +13,9 @@ static NSString *const TAG = @"[AppsFlyer_PurchaseConnector] ";
 #elif __has_include(<react_native_appsflyer-Swift.h>)
 // Fallback to legacy import path (for older CocoaPods configurations)
 #import <react_native_appsflyer-Swift.h>
+#elif defined(SWIFT_PACKAGE)
+// SwiftPM puts the generated header on no include path, but passes the Swift module's map.
+@import react_native_appsflyer;
 #else
 #warning "react_native_appsflyer Swift header not found"
 #endif

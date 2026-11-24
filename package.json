@@ -43,6 +43,9 @@
       "javaPackageName": "com.appsflyer.reactnative"
     }
   },
+  "swiftpmConfig": {
+    "autolinkingPlugin": "./spm/autolinking-plugin.js"
+  },
   "peerDependencies": {
     "react-native": ">=0.76.0"
   },
